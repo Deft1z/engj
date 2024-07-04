@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.RUserRoleMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.RUserRole" id="RUserRoleMap">
+        <result property="rUserRoleId" column="r_user_role_id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+</mapper>
+

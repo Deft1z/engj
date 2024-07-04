@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BDictItemMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.BDictItem" id="BDictItemMap">
+        <result property="dictItemId" column="dict_item_id" jdbcType="INTEGER"/>
+        <result property="dictId" column="dict_id" jdbcType="INTEGER"/>
+        <result property="label" column="label" jdbcType="VARCHAR"/>
+        <result property="value" column="value" jdbcType="VARCHAR"/>
+        <result property="sort" column="sort" jdbcType="INTEGER"/>
+    </resultMap>
+
+</mapper>
+

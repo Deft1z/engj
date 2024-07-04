@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.SFileMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.SFile" id="SFileMap">
+        <result property="fileId" column="file_id" jdbcType="INTEGER"/>
+        <result property="referType" column="refer_type" jdbcType="VARCHAR"/>
+        <result property="referId" column="refer_id" jdbcType="INTEGER"/>
+        <result property="filepath" column="filepath" jdbcType="VARCHAR"/>
+        <result property="extension" column="extension" jdbcType="VARCHAR"/>
+        <result property="md5" column="md5" jdbcType="VARCHAR"/>
+        <result property="visitCountRecent" column="visit_count_recent" jdbcType="INTEGER"/>
+        <result property="visitTimeLast" column="visit_time_last" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+</mapper>
+

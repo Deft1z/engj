@@ -1,0 +1,46 @@
+# idea 文件排除
+
+.idea
+*.iml
+**/.idea
+**/*.iml
+
+# Java 编译文件排除
+
+*.class
+**/*.class
+
+*.log
+**/*.log
+
+# 苹果系统文件排除
+
+.DS_Store
+**/.DS_store
+
+.AppleDouble
+**/.AppleDouble
+
+.LSOverride
+**/.LSOverride
+
+# 包文件排除
+
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven 中间文件排除
+
+target
+**/target
+
+.mvn
+**/.mvn
+
+pom.xml.*
+**/pom.xml.*

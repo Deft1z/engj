@@ -1,0 +1,6 @@
+mysql:
+  host: 172.18.26.102
+  port: 3306
+  dbname: ntcrm_test
+  username: ntcrmTest
+  password: ntcrmT@1113

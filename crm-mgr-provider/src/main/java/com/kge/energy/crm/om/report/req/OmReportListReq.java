@@ -1,0 +1,20 @@
+package com.kge.energy.crm.om.report.req;
+
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+/**
+ * 获取运维报告列表请求体
+ *
+ * @author wangjihua
+ */
+@Data
+@Accessors(chain = true)
+public class OmReportListReq {
+
+    /**
+     * 操作员
+     */
+    private String operator;
+
+}

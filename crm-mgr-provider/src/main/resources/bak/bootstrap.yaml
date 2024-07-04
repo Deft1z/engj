@@ -1,0 +1,21 @@
+spring:
+  profiles:
+    active: dev
+
+  application:
+    name: CrmMgrProvider
+
+  cloud:
+    nacos:
+      config:
+        server-addr: ${nacos.url:172.18.26.113:8848}
+        username: ${nacos.username:nacos}
+        password: ${nacos.password:nacos}
+        namespace: ${spring.profiles.active}_energy
+        group: energy
+        file-extension: yaml
+  config:
+    import:
+      - nacos:common-config.yaml?refreshEnabled=true
+      - nacos:CrmMgrProvider.yaml?refreshEnabled=true
+      - nacos:external-config.yaml?refreshEnabled=true

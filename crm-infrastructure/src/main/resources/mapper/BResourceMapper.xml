@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BResourceMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.BResource" id="BResourceMap">
+        <result property="resourceId" column="resource_id" jdbcType="INTEGER"/>
+        <result property="parentResourceId" column="parent_resource_id" jdbcType="INTEGER"/>
+        <result property="referResourceId" column="refer_resource_id" jdbcType="INTEGER"/>
+        <result property="level" column="level" jdbcType="INTEGER"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="displayName" column="display_name" jdbcType="VARCHAR"/>
+        <result property="sort" column="sort" jdbcType="INTEGER"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+</mapper>
+
