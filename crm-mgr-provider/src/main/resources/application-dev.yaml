@@ -4,3 +4,11 @@ mysql:
   dbname: ntcrm_test
   username: ntcrmTest
   password: ntcrmT@1113
+
+spring:
+  data:
+    redis:
+      host: 172.18.26.112
+      port: 6379
+      password: iot
+      database: 11
