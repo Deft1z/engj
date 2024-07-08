@@ -1,14 +1,11 @@
-package com.kge.energy.crm.om.report.service;
+package com.kge.energy.crm.user.login.service;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.crypto.digest.MD5;
-import com.kge.energy.crm.common.execption.BadException;
-import com.kge.energy.crm.common.net.ResponseCode;
-import com.kge.energy.crm.om.report.req.OmReportListReq;
-import com.kge.energy.crm.om.report.resp.OmReportListResp;
 import com.kge.energy.crm.repository.dao.OmReportDao;
 import com.kge.energy.crm.repository.entity.OmReport;
 import com.kge.energy.crm.repository.entityext.param.OmReportListParam;
+import com.kge.energy.crm.user.login.req.UserLoginReq;
+import com.kge.energy.crm.user.login.resp.UserLoginResp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,22 +14,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 运维报告服务层
- * @author wangjihua
+ * 用户登录服务层
+ * @author zqy
  */
 @Service
 @RequiredArgsConstructor
-public class OmReportService {
+public class UserLoginService {
 
     private final OmReportDao omReportDao;
 
     /**
      * 方法注释
      */
-    public List<OmReportListResp> list(OmReportListReq req) {
+    public List<UserLoginResp> list(UserLoginReq req) {
 
         OmReportListParam param = new OmReportListParam()
-                .setOperator(req.getOperator());
+                .setOperator(req.getPass());
 
         List<OmReport> list = omReportDao.getList(param);
 
@@ -41,9 +38,9 @@ public class OmReportService {
         }
 
          return list.stream()
-                .map(item -> new OmReportListResp()
-                        .setFormId(item.getFormId())
-                        .setOperator(item.getOperator())
+                .map(item -> new UserLoginResp()
+                        .setUserId(item.getFormId())
+                        .setMsg(item.getOperator())
                 ).collect(Collectors.toList());
     }
 }

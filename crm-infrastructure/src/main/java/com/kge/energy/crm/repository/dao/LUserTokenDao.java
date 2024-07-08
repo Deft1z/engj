@@ -1,11 +1,16 @@
 package com.kge.energy.crm.repository.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.mapper.LUserTokenMapper;
 import com.kge.energy.crm.repository.entity.LUserToken;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import java.util.Objects;
 
 /**
  * 用户令牌(LUserToken)表数据库访问层
@@ -16,5 +21,15 @@ public class LUserTokenDao extends ServiceImpl<LUserTokenMapper, LUserToken> {
 
     private final LUserTokenMapper mapper;
 
+    public LUserToken FindByUid(Integer userId) {
+        if (Objects.equals(userId, 0)) {
+            return null;
+        }
+
+        LambdaQueryWrapper<LUserToken> wrapper = Wrappers.<LUserToken>lambdaQuery()
+                .eq(LUserToken::getUserId,userId);
+
+        return mapper.selectOne(wrapper);
+    }
 }
 
