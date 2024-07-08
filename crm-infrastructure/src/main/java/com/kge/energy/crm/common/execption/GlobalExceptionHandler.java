@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
             Exception.class
     })
     public <T> CommonResponse<T> handleConstraintViolationException(Exception e) {
-        return errorResult(ResponseCode.UUNKNOWN, e);
+        return errorResult(ResponseCode.UNKNOWN, e);
     }
 
     public <T> CommonResponse<T> errorResult(ResponseCode responseCode, Exception e) {

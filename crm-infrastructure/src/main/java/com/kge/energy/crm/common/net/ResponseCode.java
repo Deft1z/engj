@@ -26,7 +26,7 @@ public enum ResponseCode implements Serializable {
 
     DB_FAIL(6, "数据库错误", "messagebox"),
 
-    UUNKNOWN(7, "未知错误", "messagebox"),
+    UNKNOWN(7, "未知错误", "messagebox"),
 
     Exist(8, "参数已存在", "message"),
 
@@ -38,7 +38,7 @@ public enum ResponseCode implements Serializable {
 
     DB_DELETE_FAIL(12, "删除失败", "message"),
 
-    DB_SELETE_FAIL(13, "数据库取数失败", "message"),
+    DB_SELECT_FAIL(13, "数据库取数失败", "message"),
 
     CONV_FAIL(14, "数据类型转换失败", "message"),
 
