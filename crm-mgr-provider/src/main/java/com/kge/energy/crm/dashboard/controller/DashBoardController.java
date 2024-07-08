@@ -74,7 +74,6 @@ public class DashBoardController {
         return CommonResponse.suc(BeanUtil.copyToList(dashBoardService.getOrderContractList(param), OrderContractResp.class, CopyOptions.create().setFieldMapping(mapping)));
     }
 
-
     /**
      * 查询用户转化情况
      */
