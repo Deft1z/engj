@@ -68,7 +68,6 @@ public class DashBoardController {
         return CommonResponse.suc(BeanUtil.copyToList(dashBoardService.getOrderContract(param), OrderContractResp.class, CopyOptions.create().setFieldMapping(mapping)));
     }
 
-
     // 查询用户转化情况
     @PostMapping("/chart/userBackMrg/UserChart")
     public CommonResponse<UserTransResp> getUserTransChart(@RequestBody DashBoardReq req) {

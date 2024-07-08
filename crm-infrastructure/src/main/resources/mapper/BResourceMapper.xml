@@ -19,5 +19,23 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <select id="findPermission" resultType="com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult">
+        select a.resource_id,
+               a.parent_resource_id,
+               a.name,
+               a.level,
+               b.auth_read,
+               b.auth_write,
+               b.auth_delete,
+               b.auth_audit
+        from b_resource a
+                 JOIN r_role_resource b ON b.resource_id = a.resource_id
+                 JOIN r_user_role c ON c.role_id = b.role_id
+        where a.name in
+            <foreach collection="urls" open="(" close=")" item="item" separator=",">
+                #{item}
+            </foreach>
+          AND c.user_id = #{userId}
+    </select>
 </mapper>
 
