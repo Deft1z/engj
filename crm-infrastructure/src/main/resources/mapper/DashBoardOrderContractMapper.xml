@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.DashBoardOrderContractMapper">
+
+    <select id="selectList" resultType="com.kge.energy.crm.repository.entity.DashBoardOrderContract">
+        select
+            date_list.date,
+            `order`.num as order_num,
+            contract.num as contract_num
+        from (
+            select *
+            from (values
+                <foreach item="item" collection="dateList" separator=", ">
+                    row(#{item})
+                </foreach>
+            ) t(date)
+        ) date_list
+
+        <!-- 查找工单 -->
+        left join (
+            select
+                date_format(create_time, '%Y-%m') as date,
+                count(*) as num
+            from wf_form
+            where
+                date_format(create_time, '%Y-%m') between date_format(#{startTime}, '%Y-%m') and date_format(#{endTime} , '%Y-%m')
+                and flag = 1
+
+                <!-- 按公司查找 -->
+                <if test="orgId != null and orgId > 0">
+                    and current_org_id = #{orgId}
+                </if>
+
+                <!-- 按区域查找 -->
+                <if test="area != null and area != ''">
+                    <bind name="area" value="'%' + area + '%'"/>
+                    and content->'$.area' like #{area}
+                </if>
+            group by date_format(create_time, '%Y-%m')
+        ) `order` on `order`.date = date_list.date
+
+        <!-- 查找合同 -->
+        left join (
+            select
+                date_format(ssc.create_time, '%Y-%m') as date,
+                count(*) as num
+            from sc_service_contract ssc
+            <if test="area != null and area != ''">
+                join wf_form wf ON ssc.form_id = wf.form_id
+            </if>
+            where
+                date_format(ssc.create_time, '%Y-%m') between date_format(#{startTime}, '%Y-%m') and date_format(#{endTime} , '%Y-%m')
+                and ssc.flag = 1
+
+                <!-- 按公司查找 -->
+                <if test="orgId != null and orgId > 0">
+                    and ssc.service_unit = #{orgId}
+                </if>
+
+                <!-- 按区域查找 -->
+                <if test="area != null and area != ''">
+                    <!-- 模糊查询bind只需要在最开始加一次，后面就不需要再加了 -->
+                    and wf.content->'$.area' like #{area}
+                </if>
+            group by date_format(ssc.create_time, '%Y-%m')
+        ) contract on contract.date = date_list.date
+    </select>
+</mapper>
+

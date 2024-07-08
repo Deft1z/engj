@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.DashBoardComplainTypeStatisticMapper">
+
+    <select id="selectOne" resultType="com.kge.energy.crm.repository.entity.DashBoardComplainTypeStatistic">
+        select
+            count(if(subject LIKE '%进度慢%', 1, null)) as slow_num,
+            count(if(subject LIKE '%质量差%', 1, null)) as bad_quality_num,
+            count(if(subject LIKE '%态度恶劣%', 1, null)) as bad_attitude,
+            count(*) as total
+        from w_complain
+        where
+            flag = 1
+            and create_time between #{startTime} and #{endTime}
+    </select>
+</mapper>
+
