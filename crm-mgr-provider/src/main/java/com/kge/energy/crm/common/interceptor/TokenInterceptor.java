@@ -34,7 +34,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
-    @Resource
     private final StringRedisTemplate stringRedisTemplate;
 
     private final BResourceService bResourceService;
