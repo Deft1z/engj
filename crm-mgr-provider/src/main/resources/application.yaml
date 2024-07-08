@@ -38,5 +38,16 @@ decorator:
       logging: custom
       custom-appender-class: com.p6spy.engine.spy.appender.StdoutLogger
 
+wechat:
+  appId: "wx00c47c0f09ea4612"
+  appSecret: "ee6576d61d20ba65286739ea977a6096"
+  orderStatusChangeTemplate": "C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE"
+  agencyOrderTemplate: "TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU"
+  feebackTemplate: "Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74"
+  wxUrl": "http://api.weixin.qq.com"
+  version": "developer"
+  agencyOrderPage: "pages/user/order/order"
+
+
 logging:
   config: classpath:config/logback.xml
