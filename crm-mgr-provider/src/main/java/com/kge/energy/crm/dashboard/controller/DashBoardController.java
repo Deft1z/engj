@@ -7,9 +7,9 @@ import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.dashboard.req.DashBoardReq;
 import com.kge.energy.crm.dashboard.resp.*;
 import com.kge.energy.crm.dashboard.service.DashBoardService;
-import com.kge.energy.crm.repository.entity.DashBoardComplainRank;
-import com.kge.energy.crm.repository.entity.DashBoardComplainTypeStatistic;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
+import com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank;
+import com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +28,9 @@ public class DashBoardController {
 
     private final DashBoardService dashBoardService;
 
-    // 查询统计上半部分
+    /**
+     * 查询统计上半部分
+     */
     @PostMapping("/externalBack/aggregateData/dashboardData")
     public CommonResponse<StatisticResp1> getStatistic1(@RequestBody DashBoardReq req) {
         StatisticResp1 resp = new StatisticResp1();
@@ -36,7 +38,9 @@ public class DashBoardController {
         return CommonResponse.suc(resp);
     }
 
-    // 查询统计下半部分
+    /**
+     * 查询统计下半部分
+     */
     @PostMapping("/workMgrBack/contractBack/showOderContractNum")
     public CommonResponse<StatisticResp2> getStatistic2(@RequestBody DashBoardReq req) {
         StatisticResp2 resp = new StatisticResp2();
@@ -50,7 +54,9 @@ public class DashBoardController {
         return CommonResponse.suc(resp);
     }
 
-    // 查询工单合同数量变化
+    /**
+     * 查询工单合同数量变化
+     */
     @PostMapping("/chart/contractBack/contractOrderChart")
     public CommonResponse<List<OrderContractResp>> getOrderContractChart(@RequestBody DashBoardReq req) {
 
@@ -65,11 +71,13 @@ public class DashBoardController {
             case 3 -> param.setArea(req.getArea());
         }
 
-        return CommonResponse.suc(BeanUtil.copyToList(dashBoardService.getOrderContract(param), OrderContractResp.class, CopyOptions.create().setFieldMapping(mapping)));
+        return CommonResponse.suc(BeanUtil.copyToList(dashBoardService.getOrderContractList(param), OrderContractResp.class, CopyOptions.create().setFieldMapping(mapping)));
     }
 
 
-    // 查询用户转化情况
+    /**
+     * 查询用户转化情况
+     */
     @PostMapping("/chart/userBackMrg/UserChart")
     public CommonResponse<UserTransResp> getUserTransChart(@RequestBody DashBoardReq req) {
         UserTransResp resp = new UserTransResp();
@@ -82,7 +90,9 @@ public class DashBoardController {
         return CommonResponse.suc(resp);
     }
 
-    // 查询公司评价分布
+    /**
+     * 查询公司评价分布
+     */
     @PostMapping("/chart/contractBack/evaluateChart")
     public CommonResponse<EvaluateListResp> getEvaluateChart() {
         EvaluateListResp resp = new EvaluateListResp();
@@ -97,16 +107,20 @@ public class DashBoardController {
         return CommonResponse.suc(resp);
     }
 
-    // 查询投诉类型占比
+    /**
+     * 查询投诉类型占比
+     */
     @PostMapping("/chart/complainBack/complainPerChart")
     public CommonResponse<DashBoardComplainTypeStatistic> getComplainPieChart(@RequestBody DashBoardReq req) {
         return CommonResponse.suc(dashBoardService.getComplainTypeStatistic(transDateTime(req)));
     }
 
-    // 查询投诉单位排名
+    /**
+     * 查询投诉单位排名
+     */
     @PostMapping("/chart/complainBack/complainRankChart")
     public CommonResponse<List<DashBoardComplainRank>> getComplainRank(@RequestBody DashBoardReq req) {
-        return CommonResponse.suc(dashBoardService.getComplainRank(transDateTime(req)));
+        return CommonResponse.suc(dashBoardService.getComplainRankList(transDateTime(req)));
     }
 
     private DashBoardParam transDateTime(DashBoardReq req) {

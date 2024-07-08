@@ -1,4 +1,4 @@
-package com.kge.energy.crm.repository.entity;
+package com.kge.energy.crm.repository.entityext.result;
 
 import lombok.Data;
 
