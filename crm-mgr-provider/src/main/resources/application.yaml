@@ -2,6 +2,9 @@ spring:
   profiles:
     active: @profileActive@
 
+  application:
+    name: CrmMgrProvider
+
   main:
     allow-circular-references: true
     allow-bean-definition-overriding: true
@@ -51,3 +54,10 @@ wechat:
 
 logging:
   config: classpath:config/logback.xml
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: flag
+      logic-delete-value: -1
+      logic-not-delete-value: 1
