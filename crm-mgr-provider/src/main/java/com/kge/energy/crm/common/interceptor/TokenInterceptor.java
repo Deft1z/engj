@@ -22,10 +22,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author wangjihua
@@ -99,11 +96,13 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
         // 匹配权限
         boolean pass = switch (optSign) {
-            case "load" -> permissionResult.getAuthRead();
-            case "insert", "update", "upsert", "import", "confirm", "enable", "add" -> permissionResult.getAuthWrite();
-            case "delete", "batchDelete", "hardDelete", "batchHardDelete", "del" -> permissionResult.getAuthDelete();
-            case "audit" -> permissionResult.getAuthAudit();
-            default -> permissionResult.getAuthRead();
+            case "load" -> Optional.ofNullable(permissionResult.getAuthRead()).orElse(Boolean.TRUE);
+            case "insert", "update", "upsert", "import", "confirm", "enable", "add" ->
+                    Optional.ofNullable(permissionResult.getAuthWrite()).orElse(Boolean.TRUE);
+            case "delete", "batchDelete", "hardDelete", "batchHardDelete", "del" ->
+                    Optional.ofNullable(permissionResult.getAuthDelete()).orElse(Boolean.TRUE);
+            case "audit" -> Optional.ofNullable(permissionResult.getAuthAudit()).orElse(Boolean.TRUE);
+            default -> Optional.ofNullable(permissionResult.getAuthRead()).orElse(Boolean.TRUE);
         };
 
         if (!pass) {
@@ -136,7 +135,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         UserInfoDto userInfoDto = new UserInfoDto();
         userInfoDto.setUserId(Long.valueOf(user.getUserId()))
                 .setUserName(user.getName())
-                .setRealname(user.getRealname()) ;
+                .setRealname(user.getRealname());
         userInfoDto.setMobile(userInfoDto.getMobile())
                 .setOpenId(userInfoDto.getOpenId())
                 .setType(userInfoDto.getType());
