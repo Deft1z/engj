@@ -26,13 +26,15 @@ public class WorkOrderListParam extends PageReq {
 
         private String name;
 
-        private Integer status;
+        private String status;
 
         private LocalDateTime starttime;
 
         private LocalDateTime endtime;
 
         private String onlyMe;
+
+        private String businessName;
 
     }
 }

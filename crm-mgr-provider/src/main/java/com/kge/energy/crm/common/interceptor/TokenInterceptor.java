@@ -50,6 +50,9 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
 
         String uid = stringRedisTemplate.opsForValue().get(tokenFront + authToken);
+        if (StrUtil.isBlank(uid)) {
+            throw new BadException(ResponseCode.TOKEN_FAIL);
+        }
         Integer userId = Integer.valueOf(uid);
 
         handlePermission(request, userId);

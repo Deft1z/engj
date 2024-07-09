@@ -40,7 +40,25 @@
         a.flag,
         a.remark,
         e.`realname`,
-        d.`name` AS org_name
+        d.`name` AS org_name,
+        <choose>
+            <when test="userInfo.roleId != null and userInfo.roleId == 2">
+                (CASE a.`status` = '处理中' OR a.`status` = '已处理' WHEN TRUE THEN '已处理' ELSE ( CASE a.`status` =
+                '已终止' WHEN TRUE THEN '已终止' ELSE '待处理' END ) END) AS user_status
+            </when>
+            <when test="userInfo.roleId != null and userInfo.roleId == 3">
+                (CASE (a.`status` = '处理中' AND a.`sub_status` = '待处理') WHEN TRUE THEN '待处理' ELSE ( CASE
+                a.`status` = '已终止' WHEN TRUE THEN '已终止' ELSE '已处理' END ) END) AS user_status
+            </when>
+            <when test="userInfo.roleId != null and userInfo.roleId == 5">
+                (CASE a.`sub_status` = '待处理' WHEN TRUE THEN '待处理' ELSE ( CASE a.`status` = '已终止' WHEN TRUE THEN
+                '已终止' ELSE '已处理' END ) END) AS user_status
+            </when>
+            <otherwise>
+                (CASE a.`sub_status` = '待处理' WHEN TRUE THEN '待处理' ELSE ( CASE a.`status` = '已终止' WHEN TRUE THEN
+                '已终止' ELSE '已处理' END ) END) AS user_status
+            </otherwise>
+        </choose>
         from wf_form a
         LEFT JOIN wf_form_flow b ON b.form_id = a.form_id AND b.create_user_id = #{userInfo.userId}
         LEFT JOIN wf_form_flow g ON g.form_id = a.form_id AND g.action_type = '已回复'
@@ -49,15 +67,38 @@
         LEFT JOIN b_user e ON e.user_id = g.user_id
         LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
         <where>
-            <if test="listParam.searchMap.status != null and listParam.searchMap.status == 5">
-                a.sub_status = #{listParam.searchMap.status}
+            a.flag != -1
+            <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleId == 5">
+                and a.sub_status = #{listParam.searchMap.status}
+            </if>
+            <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+                and (a.content->> "$.code" like CONCAT('%',#{listParam.searchMap.name},'%')
+                OR a.content->> "$.businessName" like CONCAT('%',#{listParam.searchMap.name},'%') )
+            </if>
+            <if test="listParam.searchMap.starttime != null and listParam.searchMap.endtime != null">
+                and a.modify_time >= #{listParam.searchMap.starttime}
+                AND a.modify_time &lt;= #{listParam.searchMap.endtime}
+            </if>
+            <if test="listParam.searchMap.businessName != null and listParam.searchMap.businessName != ''">
+                and a.content->>"$.businessName" like CONCAT('%',#{listParam.searchMap.businessName},'%')
+            </if>
+            <if test="listParam.searchMap.onlyMe != null and listParam.searchMap.onlyMe != ''">
+                and b.create_user_id = #{userInfo.userId}
+            </if>
+            <if test="userInfo.roleId != null and userInfo.roleId == 3 and userInfo.organizationList.size > 0">
+                and a.current_org_id = #{userInfo.organizationList[0].id}
+            </if>
+            <if test="userInfo.roleId != null and userInfo.roleId == 5">
+                a.create_user_id = #{userInfo.userId}
             </if>
         </where>
+        group by
+        a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.flag,a.remark,
+        e.`realname`, d.`name`, `user_status`
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleId != 5">
+            having user_status = #{listParam.searchMap.status}
+        </if>
+        order by a.time_submit DESC
     </select>
-
-
-    <!--    <otherwise>-->
-    <!--        user_status = #{workOrderListParam.searchMap.status}-->
-    <!--    </otherwise>-->
 </mapper>
 

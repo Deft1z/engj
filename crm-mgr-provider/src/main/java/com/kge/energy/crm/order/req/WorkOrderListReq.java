@@ -1,5 +1,6 @@
 package com.kge.energy.crm.order.req;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kge.energy.crm.common.page.PageReq;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,13 +27,17 @@ public class WorkOrderListReq extends PageReq {
 
         private String name;
 
-        private Integer status;
+        private String status;
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime starttime;
 
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime endtime;
 
         private String onlyMe;
+
+        private String businessName;
 
     }
 }
