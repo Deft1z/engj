@@ -1,14 +1,15 @@
 package com.kge.energy.crm.repository.dao;
 
 
+import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.kge.energy.crm.repository.mapper.BUserMapper;
-import com.kge.energy.crm.repository.entity.BUser;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
+import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.repository.entity.BUser;
+import com.kge.energy.crm.repository.mapper.BUserMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.Objects;
 
@@ -28,17 +29,15 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         }
 
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
-                .eq(BUser::getOpenId,openId).eq(BUser::getFlag,1);
+                .eq(BUser::getOpenId, openId).eq(BUser::getFlag, 1);
 
         return mapper.selectOne(wrapper);
     }
 
 
-
-
-
-
-
-
+    public UserInfoDto findUserInfoDto(Integer userId) {
+        Assert.notNull(userId, "userId must not be null");
+        return mapper.findUserInfoDto(userId);
+    }
 }
 

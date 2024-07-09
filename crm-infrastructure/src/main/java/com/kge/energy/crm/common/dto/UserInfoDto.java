@@ -5,8 +5,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 /**
  * 用户信息上下文
+ *
  * @author wangjihua
  */
 @Data
@@ -27,5 +30,31 @@ public class UserInfoDto extends CommonUserInfoDto {
     /**
      * 微信小程序openid
      */
-    private String openId;
+    private String wxOpenId;
+
+    /**
+     * 角色ID
+     */
+    private Integer roleId;
+
+    /**
+     * 角色名称
+     */
+    private String roleName;
+
+    /**
+     * 组织列表
+     */
+    private List<Organization> organizationList;
+
+    @Data
+    @Accessors(chain = true)
+    public static class Organization {
+
+        private Integer id;
+
+        private String name;
+
+        private String authCode;
+    }
 }

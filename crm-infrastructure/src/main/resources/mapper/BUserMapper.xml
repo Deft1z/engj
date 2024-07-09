@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kge.energy.crm.repository.mapper.BUserMapper">
-
     <resultMap type="com.kge.energy.crm.repository.entity.BUser" id="BUserMap">
         <result property="userId" column="user_id" jdbcType="INTEGER"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
@@ -21,5 +20,20 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <select id="findUserInfoDto" resultType="com.kge.energy.crm.common.dto.UserInfoDto">
+        select a.user_id userId,
+               a.name    userName,
+               a.realname,
+               a.type,
+               a.mobile,
+               a.open_id wxOpenId,
+               c.role_id roleId,
+               c.name AS roleName
+        from b_user a
+                 JOIN r_user_role b ON b.user_id = a.user_id
+                 JOIN b_role c ON c.role_id = b.role_id
+        where a.flag = 1
+          AND a.user_id = #{userId}
+    </select>
 </mapper>
 

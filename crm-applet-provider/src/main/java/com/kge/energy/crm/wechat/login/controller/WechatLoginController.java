@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 /**
  * 用户登录接口
+ *
  * @author zqy
  */
 @RestController
@@ -27,7 +26,7 @@ public class WechatLoginController {
      * 用户登录
      */
     @PostMapping("/login")
-    public CommonResponse<List<WechatLoginResp>> login(@RequestBody WechatLoginReq req) {
+    public CommonResponse<WechatLoginResp> login(@RequestBody WechatLoginReq req) {
         return CommonResponse.suc(wechatLoginService.login(req));
     }
 }

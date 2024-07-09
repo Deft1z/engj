@@ -10,17 +10,13 @@ import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult;
 import com.kge.energy.crm.resource.service.BResourceService;
 import com.kge.energy.crm.user.service.BUserService;
-import com.kge.platform.framework.common.util.ThreadLocalUtils;
 import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
 
@@ -132,13 +128,10 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }
 
-        UserInfoDto userInfoDto = new UserInfoDto();
-        userInfoDto.setUserId(Long.valueOf(user.getUserId()))
-                .setUserName(user.getName())
-                .setRealname(user.getRealname());
-        userInfoDto.setMobile(userInfoDto.getMobile())
-                .setOpenId(userInfoDto.getOpenId())
-                .setType(userInfoDto.getType());
+        UserInfoDto userInfoDto = bUserService.findUserInfoDto(user);
+        if (ObjUtil.isNull(userInfoDto)) {
+            throw new BadException(ResponseCode.TOKEN_FAIL);
+        }
 
         UserInfoContextUtils.putUserInfo(userInfoDto);
     }
