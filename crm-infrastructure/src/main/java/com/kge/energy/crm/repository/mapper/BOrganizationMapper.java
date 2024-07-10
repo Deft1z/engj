@@ -12,5 +12,7 @@ import java.util.List;
 public interface BOrganizationMapper extends BaseMapper<BOrganization> {
 
     List<UserInfoDto.Organization> findUserInfoDtoOrOrgs(Integer userId);
+
+    BOrganization getOrgByUserId(Integer userId);
 }
 

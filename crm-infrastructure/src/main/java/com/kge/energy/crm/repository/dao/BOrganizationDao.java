@@ -25,5 +25,12 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
 
         return mapper.findUserInfoDtoOrOrgs(userId);
     }
+
+    public BOrganization getOrgByUserId(Integer userId) {
+
+        Assert.notNull(userId, "userId must not be null");
+
+        return mapper.getOrgByUserId(userId);
+    }
 }
 

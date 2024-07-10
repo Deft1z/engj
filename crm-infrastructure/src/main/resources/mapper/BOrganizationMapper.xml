@@ -30,5 +30,14 @@
                  LEFT JOIN b_organization b ON b.organization_id = a.organization_id
         where a.user_id = #{userId}
     </select>
+
+    <select id="getOrgByUserId" resultMap="BOrganizationMap">
+        select a.*
+        from b_organization a
+                 LEFT JOIN r_user_tenant b ON b.organization_id = a.organization_id
+                 LEFT JOIN b_user c ON c.user_id = b.user_id
+        where c.flag = 1
+          and c.user_id = #{userId}
+    </select>
 </mapper>
 
