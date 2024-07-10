@@ -1,11 +1,14 @@
 package com.kge.energy.crm.repository.dao;
 
-import com.kge.energy.crm.repository.mapper.ScServiceContractMapper;
-import com.kge.energy.crm.repository.entity.ScServiceContract;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
+import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.ScServiceContract;
+import com.kge.energy.crm.repository.entityext.result.ContractResult;
+import com.kge.energy.crm.repository.mapper.ScServiceContractMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * sc_service_contract 服务合同(ScServiceContract)表数据库访问层
@@ -16,5 +19,11 @@ public class ScServiceContractDao extends ServiceImpl<ScServiceContractMapper, S
 
     private final ScServiceContractMapper mapper;
 
+    public List<ContractResult> form(Integer formId) {
+
+        Assert.notNull(formId);
+
+        return mapper.form(formId);
+    }
 }
 

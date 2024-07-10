@@ -52,5 +52,10 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         Assert.notNull(organizationId, "organizationId must not be null");
         return mapper.getUserByRoleAndOrgId(roleId, organizationId);
     }
+
+    public List<BUser> findUserByCurrentOrgId(Integer currentOrgId) {
+        Assert.notNull(currentOrgId, "currentOrgId must not be null");
+        return mapper.findUserByCurrentOrgId(currentOrgId);
+    }
 }
 

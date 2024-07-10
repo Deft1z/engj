@@ -18,5 +18,7 @@ public interface BUserMapper extends BaseMapper<BUser> {
     List<RoleUserResult> getUserByRoleAndOrgId(@Param("roleId") Integer roleId, @Param("organizationId") Integer organizationId);
 
     List<RoleUserResult> getUserByRoleId(@Param("roleId") Integer roleId);
+
+    List<BUser> findUserByCurrentOrgId(Integer orgId);
 }
 

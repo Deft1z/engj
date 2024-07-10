@@ -1,4 +1,4 @@
-package com.kge.energy.crm.wechat.login.property;
+package com.kge.energy.crm.external.wechat.property;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,7 +23,9 @@ public class WechatProperties {
     private String feebackTemplate;
 
     private String wxUrl;
+    
     private String version;
+
     private String agencyOrderPage;
 }
 

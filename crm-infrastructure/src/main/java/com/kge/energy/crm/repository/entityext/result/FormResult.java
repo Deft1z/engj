@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class FormModelResult {
+public class FormResult {
 
     private Integer formId;
     private Integer formTypeId;
