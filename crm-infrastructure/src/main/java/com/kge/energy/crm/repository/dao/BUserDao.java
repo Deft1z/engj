@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BUser;
+import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.repository.mapper.BUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -38,6 +40,22 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
     public UserInfoDto findUserInfoDto(Integer userId) {
         Assert.notNull(userId, "userId must not be null");
         return mapper.findUserInfoDto(userId);
+    }
+
+    public List<RoleUserResult> getUserByRoleId(Integer roleId) {
+        Assert.notNull(roleId, "roleId must not be null");
+        return mapper.getUserByRoleId(roleId);
+    }
+
+    public List<RoleUserResult> getUserByRoleAndOrgId(Integer roleId, Integer organizationId) {
+        Assert.notNull(roleId, "roleId must not be null");
+        Assert.notNull(organizationId, "organizationId must not be null");
+        return mapper.getUserByRoleAndOrgId(roleId, organizationId);
+    }
+
+    public List<BUser> findUserByCurrentOrgId(Integer currentOrgId) {
+        Assert.notNull(currentOrgId, "currentOrgId must not be null");
+        return mapper.findUserByCurrentOrgId(currentOrgId);
     }
 }
 

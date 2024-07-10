@@ -35,5 +35,39 @@
         where a.flag = 1
           AND a.user_id = #{userId}
     </select>
+
+    <select id="getUserByRoleAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
+        select b.`name` AS username, b.realname, b.open_id, a.user_id
+        from r_user_role a
+                 LEFT JOIN b_user b ON b.user_id = a.user_id
+                 LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
+        where b.flag = 1
+          and a.role_id = #{roleId}
+          AND c.organization_id = #{organizationId}
+    </select>
+
+    <select id="getUserByRoleId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
+        select b.`name` AS username, b.realname, b.open_id, a.user_id
+        from r_user_role a
+                 LEFT JOIN b_user b ON b.user_id = a.user_id
+        where b.flag = 1
+          and a.role_id = #{roleId}
+    </select>
+
+    <select id="findUserByCurrentOrgId" resultMap="BUserMap">
+        select a.open_id,
+               a.type,
+               a.user_id,
+               a.`name`,
+               a.mobile,
+               a.remark,
+               a.realname,
+               a.address,
+               a.company
+        from b_user a
+                 LEFT JOIN r_user_tenant b ON b.user_id = a.user_id
+        where a.flag != -1
+          AND b.organization_id = #{orgId}
+    </select>
 </mapper>
 

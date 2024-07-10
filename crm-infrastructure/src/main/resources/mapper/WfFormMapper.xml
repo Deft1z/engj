@@ -21,7 +21,7 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <select id="findList" resultType="com.kge.energy.crm.repository.entityext.result.FormModelResult">
+    <select id="findList" resultType="com.kge.energy.crm.repository.entityext.result.FormResult">
         select a.content ->> "$.businessName" AS business_name,
         a.content ->> "$.area" AS area,
         a.content ->> "$.companyName" AS company_name,
@@ -99,6 +99,19 @@
             having user_status = #{listParam.searchMap.status}
         </if>
         order by a.time_submit DESC
+    </select>
+
+    <select id="getFlowByFormId" resultType="com.kge.energy.crm.repository.entityext.result.FlowResult">
+        select form_flow_id,
+               form_id,
+               DATE_FORMAT(time_action, '%Y-%m-%d %T') AS time_action,
+               user_id,
+               action_type,
+               action_content,
+               status,
+               `sub_status`
+        from wf_form_flow
+        where form_id = #{formId}
     </select>
 </mapper>
 
