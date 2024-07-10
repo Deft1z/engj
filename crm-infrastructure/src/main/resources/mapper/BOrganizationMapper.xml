@@ -39,5 +39,12 @@
         where c.flag = 1
           and c.user_id = #{userId}
     </select>
+
+    <select id="getOrgDictList" resultType="com.kge.energy.crm.repository.entityext.result.OrgDictResult">
+        select name AS label, organization_id AS value
+        from b_organization
+        where flag != -1
+          and parameter ->> "$.serviceType" != 0
+    </select>
 </mapper>
 
