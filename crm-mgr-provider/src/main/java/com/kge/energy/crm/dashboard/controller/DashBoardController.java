@@ -7,11 +7,11 @@ import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.dashboard.req.DashBoardReq;
 import com.kge.energy.crm.dashboard.resp.*;
 import com.kge.energy.crm.dashboard.service.DashBoardService;
+import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,12 +29,19 @@ public class DashBoardController {
     private final DashBoardService dashBoardService;
 
     /**
+     * 查询公司列表
+     */
+    @PostMapping("/workMgrBack/contractBack/getAllCompany")
+    public CommonResponse<List<BOrganization>> getCompanyList() {
+        return CommonResponse.suc(dashBoardService.getCompanyList());
+    }
+
+    /**
      * 查询统计上半部分
      */
     @PostMapping("/externalBack/aggregateData/dashboardData")
     public CommonResponse<StatisticResp1> getStatistic1(@RequestBody DashBoardReq req) {
-        StatisticResp1 resp = new StatisticResp1();
-        BeanUtils.copyProperties(dashBoardService.getStatistic(transDateTime(req)), resp);
+        StatisticResp1 resp = BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), StatisticResp1.class);
         return CommonResponse.suc(resp);
     }
 
@@ -59,7 +66,6 @@ public class DashBoardController {
      */
     @PostMapping("/chart/contractBack/contractOrderChart")
     public CommonResponse<List<OrderContractResp>> getOrderContractChart(@RequestBody DashBoardReq req) {
-
         HashMap<String, String> mapping = new HashMap<>();
         mapping.put("date", "timeStr");
 

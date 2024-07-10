@@ -1,24 +1,22 @@
-package com.kge.energy.crm.om.report.req;
+package com.kge.energy.crm.external.ecc.req;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-@AllArgsConstructor
 @NoArgsConstructor
 public class EccReq {
     /**
      * 页码
      */
-    private Integer pageNo;
+    private int pageNo;
 
     /**
-     * 一页页记录大小
+     * 分页大小
      */
-    private Integer pageSize;
+    private int pageSize;
 
     /**
      * 筛选条件

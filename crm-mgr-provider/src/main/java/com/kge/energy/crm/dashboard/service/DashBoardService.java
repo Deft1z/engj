@@ -3,7 +3,9 @@ package com.kge.energy.crm.dashboard.service;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.DashBoardDao;
+import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,11 @@ import java.util.stream.Collectors;
 public class DashBoardService {
 
     private final DashBoardDao dao;
+    private final BOrganizationDao orgDao;
+
+    public List<BOrganization> getCompanyList() {
+        return orgDao.list();
+    }
 
     public DashBoardStatistic getStatistic(DashBoardParam param) {
         return dao.getStatistic(param);

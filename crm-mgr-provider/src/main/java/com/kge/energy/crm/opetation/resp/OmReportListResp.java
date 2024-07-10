@@ -1,4 +1,4 @@
-package com.kge.energy.crm.om.report.req;
+package com.kge.energy.crm.opetation.resp;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -10,11 +10,9 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class OmReportListReq {
+public class OmReportListResp {
 
-    /**
-     * 操作员
-     */
+    private Integer formId;
+
     private String operator;
-
 }

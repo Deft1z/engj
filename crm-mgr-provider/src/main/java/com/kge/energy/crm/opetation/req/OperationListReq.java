@@ -1,23 +1,23 @@
-package com.kge.energy.crm.om.report.req;
+package com.kge.energy.crm.opetation.req;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class ResModel {
+public class OperationListReq {
     /**
      * 电话
      */
-    private int Code;
+    private String phone;
 
     /**
      * 页码
      */
-    private String Msg;
+    private int pageNo;
 
     /**
-     * 详细数据
+     * 分页大小
      */
-    private DataModel Data;
+    private int pageSize;
 }

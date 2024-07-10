@@ -1,6 +1,5 @@
 package com.kge.energy.crm.dashboard.req;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data

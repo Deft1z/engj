@@ -1,17 +1,17 @@
-package com.kge.energy.crm.om.report.req;
+package com.kge.energy.crm.external.ecc.resp;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class ImageModel {
+public class EccAttachment {
     /**
      * 合同名字
      */
-    private String Url;
+    private String url;
     /**
      * 合同甲方名称
      */
-    private String Type;
+    private String type;
 }
