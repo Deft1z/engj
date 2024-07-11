@@ -1,11 +1,12 @@
 package com.kge.energy.crm.repository.dao;
 
-import com.kge.energy.crm.repository.mapper.RUserTenantMapper;
-import com.kge.energy.crm.repository.entity.RUserTenant;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.RUserTenant;
+import com.kge.energy.crm.repository.mapper.RUserTenantMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * 用户租户关系(RUserTenant)表数据库访问层
@@ -16,5 +17,12 @@ public class RUserTenantDao extends ServiceImpl<RUserTenantMapper, RUserTenant> 
 
     private final RUserTenantMapper mapper;
 
+    public RUserTenant findTenantByUid(Integer userId) {
+
+        LambdaQueryWrapper<RUserTenant> wrapper = Wrappers.<RUserTenant>lambdaQuery()
+                .eq(RUserTenant::getUserId, userId);
+
+        return mapper.selectOne(wrapper);
+    }
 }
 

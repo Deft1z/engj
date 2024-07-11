@@ -12,6 +12,3 @@ spring:
       port: 6379
       password: iot
       database: 11
-
-redis:
-  tokenfront: ntcrm_test_token_
