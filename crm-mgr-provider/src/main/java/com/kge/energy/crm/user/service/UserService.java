@@ -1,6 +1,7 @@
 package com.kge.energy.crm.user.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
@@ -24,6 +25,7 @@ import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.user.req.RoleUserReq;
 import com.kge.energy.crm.user.req.UserLoginReq;
 import com.kge.energy.crm.user.req.UserSaltReq;
+import com.kge.energy.crm.user.resp.CurrentUserInfoResp;
 import com.kge.energy.crm.user.resp.RoleUserResp;
 import com.kge.energy.crm.user.resp.UserLoginResp;
 import lombok.RequiredArgsConstructor;
@@ -122,5 +124,34 @@ public class UserService {
                 .setTenantId(rUserTenant.getOrganizationId())
                 .setAuthToken(authToken)
                 .setMsg("login success");
+    }
+
+    public CurrentUserInfoResp currentUserInfo() {
+
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+
+        if (ObjUtil.isNull(userInfoDto)) {
+            throw new BadException(ResponseCode.TOKEN_FAIL);
+        }
+
+        if (CollectionUtil.isEmpty(userInfoDto.getOrganizationList())) {
+            throw new BadException("找不到用户对应的租户ID");
+        }
+
+        List<CurrentUserInfoResp.OrganizationListBean> orgs = userInfoDto.getOrganizationList()
+                .stream()
+                .map(item -> new CurrentUserInfoResp.OrganizationListBean()
+                        .setId(item.getId())
+                        .setName(item.getName())
+                        .setAuthCode(item.getAuthCode())
+                ).toList();
+
+        return new CurrentUserInfoResp()
+                .setUserId(Math.toIntExact(userInfoDto.getUserId()))
+                .setUserName(userInfoDto.getUserName())
+                .setUserName(userInfoDto.getUserName())
+                .setRoleId(userInfoDto.getRoleId())
+                .setRoleName(userInfoDto.getRoleName())
+                .setOrganizationList(orgs);
     }
 }

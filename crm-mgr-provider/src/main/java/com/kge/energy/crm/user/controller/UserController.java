@@ -4,6 +4,7 @@ import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.user.req.RoleUserReq;
 import com.kge.energy.crm.user.req.UserLoginReq;
 import com.kge.energy.crm.user.req.UserSaltReq;
+import com.kge.energy.crm.user.resp.CurrentUserInfoResp;
 import com.kge.energy.crm.user.resp.RoleUserResp;
 import com.kge.energy.crm.user.resp.UserLoginResp;
 import com.kge.energy.crm.user.service.UserService;
@@ -49,6 +50,14 @@ public class UserController {
     @PostMapping("/base/user/login")
     public CommonResponse<UserLoginResp> userLogin(@Validated @RequestBody UserLoginReq req) {
         return CommonResponse.suc(userService.userLogin(req));
+    }
+
+    /**
+     * 获取用户信息
+     */
+    @PostMapping("/baseDataBack/userBackMrg/currentUserInfo")
+    public CommonResponse<CurrentUserInfoResp> currentUserInfo() {
+        return CommonResponse.suc(userService.currentUserInfo());
     }
 
 }
