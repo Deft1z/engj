@@ -2,8 +2,10 @@ package com.kge.energy.crm.user.controller;
 
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.user.req.RoleUserReq;
+import com.kge.energy.crm.user.req.UserLoginReq;
 import com.kge.energy.crm.user.req.UserSaltReq;
 import com.kge.energy.crm.user.resp.RoleUserResp;
+import com.kge.energy.crm.user.resp.UserLoginResp;
 import com.kge.energy.crm.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -39,6 +41,14 @@ public class UserController {
     @PostMapping("/base/user/salt")
     public CommonResponse<String> userSalt(@Validated @RequestBody UserSaltReq req) {
         return CommonResponse.suc(userService.userSalt(req));
+    }
+
+    /**
+     * PC端账号密码登录
+     */
+    @PostMapping("/base/user/login")
+    public CommonResponse<UserLoginResp> userLogin(@Validated @RequestBody UserLoginReq req) {
+        return CommonResponse.suc(userService.userLogin(req));
     }
 
 }

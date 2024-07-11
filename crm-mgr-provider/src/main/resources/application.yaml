@@ -67,3 +67,4 @@ auth:
     redis-front: ntcrm_test_token_
     token-white-list:
       - /base/user/salt
+      - /base/user/login

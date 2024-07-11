@@ -2,26 +2,37 @@ package com.kge.energy.crm.user.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.crypto.digest.MD5;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.execption.BadException;
+import com.kge.energy.crm.common.net.ResponseCode;
+import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.RoleIdEnums;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BUserDao;
+import com.kge.energy.crm.repository.dao.RUserTenantDao;
 import com.kge.energy.crm.repository.dao.SSystemConfigDao;
 import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entity.BUser;
+import com.kge.energy.crm.repository.entity.RUserTenant;
 import com.kge.energy.crm.repository.entity.SSystemConfig;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.user.req.RoleUserReq;
+import com.kge.energy.crm.user.req.UserLoginReq;
 import com.kge.energy.crm.user.req.UserSaltReq;
 import com.kge.energy.crm.user.resp.RoleUserResp;
+import com.kge.energy.crm.user.resp.UserLoginResp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wangjihua
@@ -36,6 +47,12 @@ public class UserService {
     private final BOrganizationDao bOrganizationDao;
 
     private final SSystemConfigDao sSystemConfigDao;
+
+    private final RUserTenantDao rUserTenantDao;
+
+    private final AuthProperties authProperties;
+
+    private final StringRedisTemplate stringRedisTemplate;
 
     public BUser getBUserById(int id) {
         return bUserDao.getById(id);
@@ -83,5 +100,27 @@ public class UserService {
         SSystemConfig sSystemConfig = sSystemConfigDao.findByName("SALTBASE");
 
         return MD5.create().digestHex(req.getName() + sSystemConfig.getConfig());
+    }
+
+    public UserLoginResp userLogin(UserLoginReq req) {
+
+        BUser bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
+
+        if (ObjUtil.isNull(bUser)) {
+            throw new BadException(ResponseCode.SHOULD_LOGIN);
+        }
+
+        // 获取uid关联的租户
+        RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
+        String authToken = IdUtil.fastSimpleUUID();
+
+        stringRedisTemplate.opsForValue()
+                .set(authProperties.getToken().getRedisFront() + authToken, String.valueOf(bUser.getUserId()), 120, TimeUnit.HOURS);
+
+        return new UserLoginResp()
+                .setUserId(bUser.getUserId())
+                .setTenantId(rUserTenant.getOrganizationId())
+                .setAuthToken(authToken)
+                .setMsg("login success");
     }
 }

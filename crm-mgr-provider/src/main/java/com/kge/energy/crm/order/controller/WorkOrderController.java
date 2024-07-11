@@ -1,6 +1,5 @@
 package com.kge.energy.crm.order.controller;
 
-import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
@@ -34,7 +33,6 @@ public class WorkOrderController {
      * 工单列表
      */
     @PostMapping("/order")
-    @ConvertToGoFormats
     public CommonResponse<PageResp<FormResp>> list(@Validated @RequestBody WorkOrderListReq req) {
         return CommonResponse.suc(workOrderService.list(req));
     }
