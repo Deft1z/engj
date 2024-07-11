@@ -13,14 +13,8 @@ import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.RoleIdEnums;
-import com.kge.energy.crm.repository.dao.BOrganizationDao;
-import com.kge.energy.crm.repository.dao.BUserDao;
-import com.kge.energy.crm.repository.dao.RUserTenantDao;
-import com.kge.energy.crm.repository.dao.SSystemConfigDao;
-import com.kge.energy.crm.repository.entity.BOrganization;
-import com.kge.energy.crm.repository.entity.BUser;
-import com.kge.energy.crm.repository.entity.RUserTenant;
-import com.kge.energy.crm.repository.entity.SSystemConfig;
+import com.kge.energy.crm.repository.dao.*;
+import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.user.req.RoleUserReq;
 import com.kge.energy.crm.user.req.UserLoginReq;
@@ -33,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +48,8 @@ public class UserService {
     private final RUserTenantDao rUserTenantDao;
 
     private final AuthProperties authProperties;
+
+    private final LUserTokenDao lUserTokenDao;
 
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -115,9 +112,26 @@ public class UserService {
         // 获取uid关联的租户
         RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
         String authToken = IdUtil.fastSimpleUUID();
+        LocalDateTime expiredTime = LocalDateTime.now().plusHours(121);
 
         stringRedisTemplate.opsForValue()
-                .set(authProperties.getToken().getRedisFront() + authToken, String.valueOf(bUser.getUserId()), 120, TimeUnit.HOURS);
+                .set(authProperties.getToken().getRedisFront() + authToken, String.valueOf(bUser.getUserId()), 121, TimeUnit.HOURS);
+
+        LUserToken lUserToken = lUserTokenDao.findByUid(bUser.getUserId());
+
+        if (ObjUtil.isNotNull(lUserToken) && ObjUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
+            stringRedisTemplate.delete(authProperties.getToken().getRedisFront() + lUserToken.getLoginToken());
+            lUserToken.setLoginToken(authToken)
+                    .setLoginExpiredTime(expiredTime);
+            lUserTokenDao.updateById(lUserToken);
+        } else {
+
+            lUserTokenDao.save(new LUserToken()
+                    .setUserId(bUser.getUserId())
+                    .setLoginExpiredTime(expiredTime)
+                    .setLoginToken(authToken)
+            );
+        }
 
         return new UserLoginResp()
                 .setUserId(bUser.getUserId())
