@@ -22,5 +22,9 @@ public class BResourceDao extends ServiceImpl<BResourceMapper, BResource> {
     public List<ResourcePermissionResult> findPermission(Integer userId, List<String> urls) {
         return mapper.findPermission(userId, urls);
     }
+
+    public List<ResourcePermissionResult> findMenu(Integer userId) {
+        return mapper.findMenu(userId);
+    }
 }
 

@@ -22,4 +22,8 @@ public class BResourceService {
         return bResourceDao.findPermission(userId, urls);
     }
 
+    public List<ResourcePermissionResult> FindMenu(Integer userId) {
+        return bResourceDao.findMenu(userId);
+    }
+
 }
