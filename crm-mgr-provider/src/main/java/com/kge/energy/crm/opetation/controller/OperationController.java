@@ -14,9 +14,8 @@ import com.kge.energy.crm.opetation.resp.OperationDetailResp;
 import com.kge.energy.crm.opetation.service.OperationService;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.Resource;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
@@ -84,5 +83,13 @@ public class OperationController {
                         .map(res -> BeanUtil.copyProperties(res, OperationDetailResp.class))
                         .orElse(new OperationDetailResp())
         );
+    }
+
+    /**
+     * 查看附件
+     */
+    @GetMapping("/omBack/file/test/{*filePath}")
+    public Resource getFile(@PathVariable("filePath") String filePath) {
+        return eccService.getFile(filePath);
     }
 }
