@@ -79,7 +79,7 @@ public class WechatLoginService {
     public String genToken(BUser bUser) {
         String authToken = "";
 
-        LUserToken lUserToken = lUserTokenDao.FindByUid(bUser.getUserId());
+        LUserToken lUserToken = lUserTokenDao.findByUid(bUser.getUserId());
         if (lUserToken == null || lUserToken.getUserTokenId() == 0) {
             //新增token
             LUserToken lUserTokenNew = new LUserToken().setLoginToken(authToken)
