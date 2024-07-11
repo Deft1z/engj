@@ -1,5 +1,6 @@
 package com.kge.energy.crm.order.controller;
 
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
@@ -32,6 +33,7 @@ public class WorkOrderController {
     /**
      * 工单列表
      */
+    @ConvertToGoFormats
     @PostMapping("/order")
     public CommonResponse<PageResp<FormResp>> list(@Validated @RequestBody WorkOrderListReq req) {
         return CommonResponse.suc(workOrderService.list(req));
@@ -41,6 +43,7 @@ public class WorkOrderController {
     /**
      * 通过工单ID获取工单流程
      */
+    @ConvertToGoFormats
     @PostMapping("/getFlowByFormId")
     public CommonResponse<List<FlowResp>> getFlowByFormId(@Validated @RequestBody GetFlowByFormIdReq req) {
         return CommonResponse.suc(workOrderService.getFlowByFormId(req));
@@ -49,6 +52,7 @@ public class WorkOrderController {
     /**
      * 分派工单 终止工单 处理工单
      */
+    @ConvertToGoFormats
     @PostMapping("/workOrderUpdate")
     public CommonResponse<Integer> workOrderUpdate(WorkOrdeUpdateReq req) {
         return CommonResponse.suc(workOrderService.workOrderUpdate(req));

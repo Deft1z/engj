@@ -1,5 +1,6 @@
 package com.kge.energy.crm.org.controller;
 
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.org.resp.OrgDictResp;
 import com.kge.energy.crm.org.service.OrgService;
@@ -23,6 +24,7 @@ public class OrgController {
     /**
      * 获取组织字典
      */
+    @ConvertToGoFormats
     @PostMapping("/getOrgDictList")
     public CommonResponse<List<OrgDictResp>> getOrgDictList() {
 

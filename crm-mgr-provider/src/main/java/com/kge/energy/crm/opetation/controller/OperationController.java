@@ -1,6 +1,7 @@
 package com.kge.energy.crm.opetation.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.external.ecc.req.Condition;
 import com.kge.energy.crm.external.ecc.req.EccReq;
@@ -37,6 +38,7 @@ public class OperationController {
     /**
      * 查询运维记录列表
      */
+    @ConvertToGoFormats
     @PostMapping("/external/getRecord")
     public CommonResponse<Object> getList(@RequestBody OperationListReq req) throws NoSuchAlgorithmException {
 
@@ -75,6 +77,7 @@ public class OperationController {
     /**
      * 查询运维记录详情
      */
+    @ConvertToGoFormats
     @PostMapping("/omBack/report/back")
     public CommonResponse<OperationDetailResp> getDetail(@RequestBody OperationDetailReq req) {
         OperationParam param = BeanUtil.copyProperties(req, OperationParam.class);

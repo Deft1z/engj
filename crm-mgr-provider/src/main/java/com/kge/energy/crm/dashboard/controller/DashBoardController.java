@@ -3,6 +3,7 @@ package com.kge.energy.crm.dashboard.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.dashboard.req.DashBoardReq;
 import com.kge.energy.crm.dashboard.resp.*;
@@ -31,6 +32,7 @@ public class DashBoardController {
     /**
      * 查询公司列表
      */
+    @ConvertToGoFormats
     @PostMapping("/workMgrBack/contractBack/getAllCompany")
     public CommonResponse<List<BOrganization>> getCompanyList() {
         return CommonResponse.suc(dashBoardService.getCompanyList());
@@ -39,6 +41,7 @@ public class DashBoardController {
     /**
      * 查询统计上半部分
      */
+    @ConvertToGoFormats
     @PostMapping("/externalBack/aggregateData/dashboardData")
     public CommonResponse<StatisticResp1> getStatistic1(@RequestBody DashBoardReq req) {
         StatisticResp1 resp = BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), StatisticResp1.class);
@@ -48,6 +51,7 @@ public class DashBoardController {
     /**
      * 查询统计下半部分
      */
+    @ConvertToGoFormats
     @PostMapping("/workMgrBack/contractBack/showOderContractNum")
     public CommonResponse<StatisticResp2> getStatistic2(@RequestBody DashBoardReq req) {
         StatisticResp2 resp = new StatisticResp2();
@@ -64,6 +68,7 @@ public class DashBoardController {
     /**
      * 查询工单合同数量变化
      */
+    @ConvertToGoFormats
     @PostMapping("/chart/contractBack/contractOrderChart")
     public CommonResponse<List<OrderContractResp>> getOrderContractChart(@RequestBody DashBoardReq req) {
         HashMap<String, String> mapping = new HashMap<>();
@@ -83,6 +88,7 @@ public class DashBoardController {
     /**
      * 查询用户转化情况
      */
+    @ConvertToGoFormats
     @PostMapping("/chart/userBackMrg/UserChart")
     public CommonResponse<UserTransResp> getUserTransChart(@RequestBody DashBoardReq req) {
         UserTransResp resp = new UserTransResp();
@@ -98,6 +104,7 @@ public class DashBoardController {
     /**
      * 查询公司评价分布
      */
+    @ConvertToGoFormats
     @PostMapping("/chart/contractBack/evaluateChart")
     public CommonResponse<EvaluateListResp> getEvaluateChart() {
         EvaluateListResp resp = new EvaluateListResp();
@@ -115,6 +122,7 @@ public class DashBoardController {
     /**
      * 查询投诉类型占比
      */
+    @ConvertToGoFormats
     @PostMapping("/chart/complainBack/complainPerChart")
     public CommonResponse<DashBoardComplainTypeStatistic> getComplainPieChart(@RequestBody DashBoardReq req) {
         return CommonResponse.suc(dashBoardService.getComplainTypeStatistic(transDateTime(req)));
@@ -123,6 +131,7 @@ public class DashBoardController {
     /**
      * 查询投诉单位排名
      */
+    @ConvertToGoFormats
     @PostMapping("/chart/complainBack/complainRankChart")
     public CommonResponse<List<DashBoardComplainRank>> getComplainRank(@RequestBody DashBoardReq req) {
         return CommonResponse.suc(dashBoardService.getComplainRankList(transDateTime(req)));

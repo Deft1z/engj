@@ -1,5 +1,6 @@
 package com.kge.energy.crm.order.controller;
 
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.order.req.ContractReq;
 import com.kge.energy.crm.order.resp.ContractResp;
@@ -26,6 +27,7 @@ public class ContractController {
     /**
      * 获取合同
      */
+    @ConvertToGoFormats
     @PostMapping("/form")
     public CommonResponse<List<ContractResp>> form(@Validated @RequestBody ContractReq req) {
 
