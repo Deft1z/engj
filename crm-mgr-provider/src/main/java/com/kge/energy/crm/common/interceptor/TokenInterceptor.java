@@ -1,10 +1,12 @@
 package com.kge.energy.crm.common.interceptor;
 
+import cn.hutool.core.text.AntPathMatcher;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
+import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult;
@@ -14,7 +16,6 @@ import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -33,8 +34,9 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
     private final UserService userService;
 
-    @Value("${redis.tokenfront}")
-    private String tokenFront;
+    private final AuthProperties authProperties;
+
+    private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     @Override
     public int getOrder() {
@@ -44,12 +46,21 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+        String url = request.getRequestURI();
+        boolean isWhiteUrl = authProperties.getToken()
+                .getTokenWhiteList()
+                .stream()
+                .anyMatch(item -> antPathMatcher.match(item, url));
+        if (isWhiteUrl) {
+            return true;
+        }
+
         String authToken = request.getHeader("Authorization");
         if (StrUtil.isBlank(authToken)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }
 
-        String uid = stringRedisTemplate.opsForValue().get(tokenFront + authToken);
+        String uid = stringRedisTemplate.opsForValue().get(authProperties.getToken().getRedisFront() + authToken);
         if (StrUtil.isBlank(uid)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }

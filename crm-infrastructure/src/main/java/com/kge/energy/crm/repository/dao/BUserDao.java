@@ -57,5 +57,12 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         Assert.notNull(currentOrgId, "currentOrgId must not be null");
         return mapper.findUserByCurrentOrgId(currentOrgId);
     }
+
+    public BUser findOneByName(String name) {
+        LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
+                .eq(BUser::getName, name);
+
+        return mapper.selectOne(wrapper);
+    }
 }
 
