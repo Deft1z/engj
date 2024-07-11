@@ -10,6 +10,7 @@ import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
 import com.kge.energy.crm.external.ecc.resp.EccPageData;
 import com.kge.energy.crm.external.ecc.resp.EccResp;
 import com.kge.platform.framework.web.util.RestUtils;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +23,10 @@ import java.util.TimeZone;
 
 @Service
 public class EccService {
+    private final String ECC_PREFIX = "https://ecc.nftz:8181";
+
     public EccResp<EccPageData<EccMaintenance>> getMaintenanceList(EccReq req) throws NoSuchAlgorithmException {
-        String url = "https://ecc.nftz:8181/publicApi/maintenance/list";
+        String url = ECC_PREFIX + "/publicApi/maintenance/list";
 
         // 构造ecc接口请求头
         // 生成timestamp
@@ -49,6 +52,11 @@ public class EccService {
         headers.add("Authorization", authorization);
 
         Object resObj = RestUtils.postForObject(url, headers, req, Object.class);
-        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>(){}, false);
+        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>() {}, false);
+    }
+
+    public Resource getFile(String filePath) {
+        String url = ECC_PREFIX + filePath;
+        return RestUtils.instance().getForEntity(url, Resource.class).getBody();
     }
 }

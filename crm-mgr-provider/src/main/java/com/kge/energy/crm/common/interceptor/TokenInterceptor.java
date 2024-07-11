@@ -75,7 +75,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         optSign = optSign.split("\\?")[0];
 
         ResourcePermissionResult permissionResult = new ResourcePermissionResult();
-        ;
+
         List<ResourcePermissionResult> permissionList = bResourceService.findPermission(userId, List.of(resource));
         Map<String, ResourcePermissionResult> urlMap = new HashMap<>();
         for (ResourcePermissionResult item : permissionList) {
@@ -101,7 +101,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
             case "delete", "batchDelete", "hardDelete", "batchHardDelete", "del" ->
                     Optional.ofNullable(permissionResult.getAuthDelete()).orElse(Boolean.TRUE);
             case "audit" -> Optional.ofNullable(permissionResult.getAuthAudit()).orElse(Boolean.TRUE);
-            default -> Optional.ofNullable(permissionResult.getAuthRead()).orElse(Boolean.TRUE);
+            default -> Optional.ofNullable(permissionResult.getAuthRead()).orElse(Boolean.FALSE);
         };
 
         if (!pass) {
