@@ -14,3 +14,7 @@ spring:
       host: 172.16.17.157
       port: 6379
       database: 13
+
+auth:
+  token:
+    redis-front: ntcrm_prod_token_
