@@ -65,12 +65,14 @@ mybatis-plus:
 auth:
   token:
     redis-front: ntcrm_test_token_
-    token-white-list:
+    white-list:
       - /base/user/salt
       - /base/user/login
+      - /external/sso/auth
+  permission:
+    white-list:
       - /chart/contractBack/contractOrderChart
       - /chart/contractBack/evaluateChart
       - /chart/userBackMrg/UserChart
       - /chart/complainBack/complainPerChart
       - /chart/complainBack/complainRankChart
-      - /external/sso/auth

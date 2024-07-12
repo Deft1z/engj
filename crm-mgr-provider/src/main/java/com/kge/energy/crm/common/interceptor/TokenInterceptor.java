@@ -51,11 +51,11 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         String url = request.getRequestURI();
         log.info("url:{}", url);
 
-        boolean isWhiteUrl = authProperties.getToken()
-                .getTokenWhiteList()
+        boolean isTokenWhiteUrl = authProperties.getToken()
+                .getWhiteList()
                 .stream()
                 .anyMatch(item -> antPathMatcher.match(item, url));
-        if (isWhiteUrl) {
+        if (isTokenWhiteUrl) {
             return true;
         }
 
@@ -69,6 +69,14 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }
         Integer userId = Integer.valueOf(uid);
+
+        boolean isPermissionWhiteUrl = authProperties.getPermission()
+                .getWhiteList()
+                .stream()
+                .anyMatch(item -> antPathMatcher.match(item, url));
+        if (isPermissionWhiteUrl) {
+            return true;
+        }
 
         handlePermission(request, userId);
 

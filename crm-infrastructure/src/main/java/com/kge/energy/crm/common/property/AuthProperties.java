@@ -17,12 +17,20 @@ public class AuthProperties {
 
     private Token token;
 
+    private Permission permission;
+
     @Data
     public static class Token {
 
         private String redisFront;
 
-        private List<String> tokenWhiteList = new ArrayList<>();
+        private List<String> whiteList = new ArrayList<>();
+    }
+
+    @Data
+    public static class Permission {
+
+        private List<String> whiteList = new ArrayList<>();
     }
 
 
