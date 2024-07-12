@@ -3,10 +3,10 @@ server:
 
 mysql:
   host: 172.18.26.102
-  port: 6033 # 3306
-  dbname: ntcrm_test
-  username: ntcrmTest
-  password: ntcrmT@1113
+  port: 6033
+  dbname: ntcrm_dev
+  username: ntcrmDev
+  password: ntcrmD@1113
 
 spring:
   data:
