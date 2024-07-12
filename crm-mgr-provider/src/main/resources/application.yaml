@@ -73,3 +73,4 @@ auth:
       - /chart/userBackMrg/UserChart
       - /chart/complainBack/complainPerChart
       - /chart/complainBack/complainRankChart
+      - /external/sso/auth

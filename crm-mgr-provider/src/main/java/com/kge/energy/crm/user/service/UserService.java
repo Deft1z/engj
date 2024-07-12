@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +71,10 @@ public class UserService {
         return userInfoDto;
     }
 
+    public BUser getUserByMobile(String mobile) {
+        return bUserDao.getUserByMobile(mobile);
+    }
+
     public List<RoleUserResp> getUserByRoleId(RoleUserReq req) {
 
         Integer userId = UserInfoContextUtils.getCurrentUserId();
@@ -111,27 +116,8 @@ public class UserService {
 
         // 获取uid关联的租户
         RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
-        String authToken = IdUtil.fastSimpleUUID();
-        LocalDateTime expiredTime = LocalDateTime.now().plusHours(121);
 
-        stringRedisTemplate.opsForValue()
-                .set(authProperties.getToken().getRedisFront() + authToken, String.valueOf(bUser.getUserId()), 121, TimeUnit.HOURS);
-
-        LUserToken lUserToken = lUserTokenDao.findByUid(bUser.getUserId());
-
-        if (ObjUtil.isNotNull(lUserToken) && ObjUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
-            stringRedisTemplate.delete(authProperties.getToken().getRedisFront() + lUserToken.getLoginToken());
-            lUserToken.setLoginToken(authToken)
-                    .setLoginExpiredTime(expiredTime);
-            lUserTokenDao.updateById(lUserToken);
-        } else {
-
-            lUserTokenDao.save(new LUserToken()
-                    .setUserId(bUser.getUserId())
-                    .setLoginExpiredTime(expiredTime)
-                    .setLoginToken(authToken)
-            );
-        }
+        String authToken = genToken(bUser);
 
         return new UserLoginResp()
                 .setUserId(bUser.getUserId())
@@ -167,5 +153,29 @@ public class UserService {
                 .setRoleId(userInfoDto.getRoleId())
                 .setRoleName(userInfoDto.getRoleName())
                 .setOrganizationList(orgs);
+    }
+
+    public String genToken(@Nonnull BUser user) {
+        String authToken = IdUtil.fastSimpleUUID();
+        LocalDateTime expiredTime = LocalDateTime.now().plusHours(121);
+
+        stringRedisTemplate.opsForValue()
+                .set(authProperties.getToken().getRedisFront() + authToken, String.valueOf(user.getUserId()), 121, TimeUnit.HOURS);
+
+        LUserToken lUserToken = lUserTokenDao.findByUid(user.getUserId());
+
+        if (ObjUtil.isNotNull(lUserToken) && ObjUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
+            stringRedisTemplate.delete(authProperties.getToken().getRedisFront() + lUserToken.getLoginToken());
+            lUserToken.setLoginToken(authToken)
+                    .setLoginExpiredTime(expiredTime);
+            lUserTokenDao.updateById(lUserToken);
+        } else {
+            lUserTokenDao.save(new LUserToken()
+                    .setUserId(user.getUserId())
+                    .setLoginExpiredTime(expiredTime)
+                    .setLoginToken(authToken)
+            );
+        }
+        return authToken;
     }
 }

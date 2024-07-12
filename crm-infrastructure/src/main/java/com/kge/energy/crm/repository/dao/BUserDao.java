@@ -64,5 +64,12 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
 
         return mapper.selectOne(wrapper);
     }
+
+    public BUser getUserByMobile(String mobile) {
+        LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
+                .eq(BUser::getMobile, mobile)
+                .eq(BUser::getFlag, 1);
+        return mapper.selectOne(wrapper);
+    }
 }
 
