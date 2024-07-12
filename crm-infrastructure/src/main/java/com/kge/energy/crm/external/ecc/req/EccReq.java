@@ -11,12 +11,12 @@ public class EccReq {
     /**
      * 页码
      */
-    private int pageNo;
+    private Integer pageNo;
 
     /**
      * 分页大小
      */
-    private int pageSize;
+    private Integer pageSize;
 
     /**
      * 筛选条件

@@ -5,12 +5,12 @@ import lombok.Data;
 @Data
 public class StatisticResp1 {
     // 日新用户统计
-    private int newUserCount;
+    private Integer newUserCount;
 
     // 日新增
-    private int newConsultingCount;
+    private Integer newConsultingCount;
 
-    private int newComplainCount;
+    private Integer newComplainCount;
 
-    private int newContractCount;
+    private Integer newContractCount;
 }

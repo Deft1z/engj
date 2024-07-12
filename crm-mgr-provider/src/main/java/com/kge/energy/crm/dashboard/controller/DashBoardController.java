@@ -5,6 +5,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.dashboard.req.DashBoardContractOrderReq;
 import com.kge.energy.crm.dashboard.req.DashBoardReq;
 import com.kge.energy.crm.dashboard.resp.*;
 import com.kge.energy.crm.dashboard.service.DashBoardService;
@@ -13,6 +14,7 @@ import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +45,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/externalBack/aggregateData/dashboardData")
-    public CommonResponse<StatisticResp1> getStatistic1(@RequestBody DashBoardReq req) {
+    public CommonResponse<StatisticResp1> getStatistic1(@Validated @RequestBody DashBoardReq req) {
         StatisticResp1 resp = BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), StatisticResp1.class);
         return CommonResponse.suc(resp);
     }
@@ -53,7 +55,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/workMgrBack/contractBack/showOderContractNum")
-    public CommonResponse<StatisticResp2> getStatistic2(@RequestBody DashBoardReq req) {
+    public CommonResponse<StatisticResp2> getStatistic2(@Validated @RequestBody DashBoardReq req) {
         StatisticResp2 resp = new StatisticResp2();
 
         HashMap<String, String> mapping = new HashMap<>();
@@ -70,7 +72,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/contractBack/contractOrderChart")
-    public CommonResponse<List<OrderContractResp>> getOrderContractChart(@RequestBody DashBoardReq req) {
+    public CommonResponse<List<OrderContractResp>> getOrderContractChart(@Validated @RequestBody DashBoardContractOrderReq req) {
         HashMap<String, String> mapping = new HashMap<>();
         mapping.put("date", "timeStr");
 
@@ -90,7 +92,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/userBackMrg/UserChart")
-    public CommonResponse<UserTransResp> getUserTransChart(@RequestBody DashBoardReq req) {
+    public CommonResponse<UserTransResp> getUserTransChart(@Validated @RequestBody DashBoardReq req) {
         UserTransResp resp = new UserTransResp();
 
         HashMap<String, String> mapping = new HashMap<>();
@@ -124,7 +126,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/complainBack/complainPerChart")
-    public CommonResponse<DashBoardComplainTypeStatistic> getComplainPieChart(@RequestBody DashBoardReq req) {
+    public CommonResponse<DashBoardComplainTypeStatistic> getComplainPieChart(@Validated @RequestBody DashBoardReq req) {
         return CommonResponse.suc(dashBoardService.getComplainTypeStatistic(transDateTime(req)));
     }
 
@@ -133,7 +135,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/complainBack/complainRankChart")
-    public CommonResponse<List<DashBoardComplainRank>> getComplainRank(@RequestBody DashBoardReq req) {
+    public CommonResponse<List<DashBoardComplainRank>> getComplainRank(@Validated @RequestBody DashBoardReq req) {
         return CommonResponse.suc(dashBoardService.getComplainRankList(transDateTime(req)));
     }
 

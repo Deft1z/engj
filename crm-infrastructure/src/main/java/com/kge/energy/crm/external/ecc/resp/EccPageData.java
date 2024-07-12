@@ -11,22 +11,22 @@ public class EccPageData<T> {
     /**
      * 页码
      */
-    private int pageNum;
+    private Integer pageNum;
 
     /**
      * 分页大小
      */
-    private int pageSize;
+    private Integer pageSize;
 
     /**
      * 页数
      */
-    private int size;
+    private Integer size;
 
     /**
      * 总数
      */
-    private int total;
+    private Integer total;
 
     /**
      * 内容

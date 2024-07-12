@@ -6,7 +6,7 @@ import lombok.Data;
 public class OrderContractResp {
     private String timeStr;
 
-    private int orderNum;
+    private Integer orderNum;
 
-    private int contractNum;
+    private Integer contractNum;
 }

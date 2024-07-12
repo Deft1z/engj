@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class UserTransResp {
-    private int newUserNum;
+    private Integer newUserNum;
 
-    private int orderNum;
+    private Integer orderNum;
 
-    private int contractNum;
+    private Integer contractNum;
 
     private String newUserTransRate;
 

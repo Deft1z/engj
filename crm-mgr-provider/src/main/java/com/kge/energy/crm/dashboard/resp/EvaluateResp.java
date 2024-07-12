@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class EvaluateResp {
-    private int start;
+    private Integer start;
 
-    private int starNum;
+    private Integer starNum;
 
-    private double rate;
+    private Double rate;
 }

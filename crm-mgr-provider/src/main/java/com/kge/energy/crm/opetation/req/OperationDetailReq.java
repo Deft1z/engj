@@ -24,7 +24,7 @@ public class OperationDetailReq {
     /**
      * 文件（编辑）
      */
-    private int reportFileId;
+    private Integer reportFileId;
 
     /**
      * 运维记录号
@@ -34,5 +34,5 @@ public class OperationDetailReq {
     /**
      * 报告结论
      */
-    private int reportResult;
+    private Integer reportResult;
 }

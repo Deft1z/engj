@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class StatisticResp2 {
-    private int sendDanNum;
+    private Integer sendDanNum;
 
-    private int endNum;
+    private Integer endNum;
 
-    private int signNum;
+    private Integer signNum;
 
-    private int startNum;
+    private Integer startNum;
 }

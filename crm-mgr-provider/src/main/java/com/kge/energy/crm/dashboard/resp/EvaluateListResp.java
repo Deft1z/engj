@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class EvaluateListResp {
     private List<EvaluateResp> list;
-    private double average;
+    private Double average;
 }

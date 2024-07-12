@@ -9,7 +9,7 @@ public class EccResp<T> {
     /**
      * 状态码
      */
-    private int code;
+    private Integer code;
 
     /**
      * 信息
