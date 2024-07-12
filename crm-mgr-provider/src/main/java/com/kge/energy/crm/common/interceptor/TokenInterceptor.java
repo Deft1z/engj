@@ -16,6 +16,7 @@ import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ import java.util.*;
 /**
  * @author wangjihua
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenInterceptor implements DelegatedOrderedInterceptor {
@@ -47,6 +49,8 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         String url = request.getRequestURI();
+        log.info("url:{}", url);
+
         boolean isWhiteUrl = authProperties.getToken()
                 .getTokenWhiteList()
                 .stream()

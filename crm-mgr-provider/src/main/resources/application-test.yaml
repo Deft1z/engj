@@ -1,0 +1,16 @@
+server:
+  port: 9250
+
+mysql:
+  host: 172.16.17.157
+  port: 3307
+  dbname: ntcrm_test
+  username: ntcrmTest
+  password: ntcrmT@1113
+
+spring:
+  data:
+    redis:
+      host: 172.16.17.157
+      port: 6379
+      database: 3
