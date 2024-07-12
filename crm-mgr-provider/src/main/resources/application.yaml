@@ -70,3 +70,6 @@ auth:
       - /base/user/login
       - /chart/contractBack/contractOrderChart
       - /chart/contractBack/evaluateChart
+      - /chart/userBackMrg/UserChart
+      - /chart/complainBack/complainPerChart
+      - /chart/complainBack/complainRankChart
