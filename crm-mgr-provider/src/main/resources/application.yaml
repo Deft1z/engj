@@ -68,3 +68,5 @@ auth:
     token-white-list:
       - /base/user/salt
       - /base/user/login
+      - /chart/contractBack/contractOrderChart
+      - /chart/contractBack/evaluateChart

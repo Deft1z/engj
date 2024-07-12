@@ -64,7 +64,7 @@ public class OperationController {
                     list.forEach(e ->
                             e.setAttactments(
                                     e.getAttactments().stream()
-                                            .map(attachment -> attachment.setUrl(attachment.getUrl().replace("https://ecc.nftz:8181", "")))
+                                            .map(attachment -> attachment.setUrl(attachment.getUrl().replace(eccService.ECC_PREFIX, "")))
                                             .collect(Collectors.toList())
                             )
                     );
@@ -91,6 +91,7 @@ public class OperationController {
     /**
      * 查看附件
      */
+    // TODO 当前url地址为临时命名，待前端修改时再确定url地址命名
     @GetMapping("/omBack/file/test/{*filePath}")
     public Resource getFile(@PathVariable("filePath") String filePath) {
         return eccService.getFile(filePath);

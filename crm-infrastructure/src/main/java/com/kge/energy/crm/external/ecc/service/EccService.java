@@ -23,7 +23,7 @@ import java.util.TimeZone;
 
 @Service
 public class EccService {
-    private final String ECC_PREFIX = "https://ecc.nftz:8181";
+    public final String ECC_PREFIX = "https://ecc.nftz:8181";
 
     public EccResp<EccPageData<EccMaintenance>> getMaintenanceList(EccReq req) throws NoSuchAlgorithmException {
         String url = ECC_PREFIX + "/publicApi/maintenance/list";
