@@ -23,24 +23,47 @@ public class RoutingHttpMessageConverter extends MappingJackson2HttpMessageConve
 
     public RoutingHttpMessageConverter(ObjectMapper objectMapper) {
         super(objectMapper);
-        convertToGoFormatsConverter = new ConvertToGoFormatsConverter(objectMapper);
+        convertToGoFormatsConverter = new ConvertToGoFormatsConverter();
+    }
+
+    @Override
+    public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+
+        if (useConvertToGoFormatsConverter()) {
+            return convertToGoFormatsConverter.read(type, contextClass, inputMessage);
+        }
+
+        return super.read(type, contextClass, inputMessage);
     }
 
     @Override
     protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+
+        if (useConvertToGoFormatsConverter()) {
+            return convertToGoFormatsConverter.readInternal(clazz, inputMessage);
+        }
+
         return super.readInternal(clazz, inputMessage);
     }
 
     @Override
     protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
 
-        Object isConvertToGoFormats = ThreadLocalUtils.get("IS_CONVERT_TO_GO_FORMATS");
-
-        if (ObjUtil.isNotNull(isConvertToGoFormats) && ObjUtil.equals(isConvertToGoFormats, Boolean.TRUE)) {
+        if (useConvertToGoFormatsConverter()) {
             convertToGoFormatsConverter.writeInternal(object, type, outputMessage);
         } else {
             super.writeInternal(object, type, outputMessage);
         }
+    }
+
+    /**
+     * 是否使用 Go 格式转换器
+     */
+    private boolean useConvertToGoFormatsConverter() {
+
+        Object isConvertToGoFormats = ThreadLocalUtils.get("IS_CONVERT_TO_GO_FORMATS");
+
+        return ObjUtil.isNotNull(isConvertToGoFormats) && ObjUtil.equals(isConvertToGoFormats, Boolean.TRUE);
     }
 }
 

@@ -2,13 +2,14 @@ package com.kge.energy.crm.common.go;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
-import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -21,8 +22,13 @@ import java.util.List;
  */
 public class ConvertToGoFormatsConverter extends MappingJackson2HttpMessageConverter {
 
-    public ConvertToGoFormatsConverter(ObjectMapper objectMapper) {
-        super(goFormatsObjectMapper(objectMapper));
+    public ConvertToGoFormatsConverter() {
+        super(goFormatsObjectMapper());
+    }
+
+    @Override
+    protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+        return super.readInternal(clazz, inputMessage);
     }
 
     @Override
@@ -30,21 +36,19 @@ public class ConvertToGoFormatsConverter extends MappingJackson2HttpMessageConve
         super.writeInternal(object, type, outputMessage);
     }
 
-    public static ObjectMapper goFormatsObjectMapper(ObjectMapper mapper) {
-
-        DefaultSerializerProvider provider = (DefaultSerializerProvider) mapper.getSerializerProvider();
-
-        DefaultDeserializationContext context = (DefaultDeserializationContext) mapper.getDeserializationContext();
+    private static ObjectMapper goFormatsObjectMapper() {
 
         SimpleModule module = new SimpleModule()
                 .setSerializerModifier(new MyBeanSerializerModifier());
 
-        return new ObjectMapper(mapper.getFactory(), provider, context)
-                .registerModule(module)
-                .registerModule(new JavaTimeModule())
+        return JsonMapper.builder()
+                .addModule(module)
+                .addModule(new JavaTimeModule())
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+                .build();
     }
 
     private static class MyBeanSerializerModifier extends BeanSerializerModifier {
@@ -52,9 +56,7 @@ public class ConvertToGoFormatsConverter extends MappingJackson2HttpMessageConve
         @Override
         public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
 
-            for (int i = 0; i < beanProperties.size(); i++) {
-
-                BeanPropertyWriter writer = beanProperties.get(i);
+            for (BeanPropertyWriter writer : beanProperties) {
 
                 if (isStringType(writer)) {
                     writer.assignNullSerializer(new NullStringSerializer());
