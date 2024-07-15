@@ -14,7 +14,7 @@ public class DashBoardParam {
 
     private List<String> dateList;
 
-    private int orgId;
+    private Integer orgId;
 
     private String area;
 }
