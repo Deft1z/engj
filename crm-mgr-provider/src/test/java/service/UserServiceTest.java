@@ -9,13 +9,8 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(classes = CrmMgrProvider.class)
 class UserServiceTest {
-
-    @Resource
-    private UserService userService;
 
     @Resource
     private BUserDao bUserDao;
