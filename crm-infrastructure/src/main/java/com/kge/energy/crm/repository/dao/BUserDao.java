@@ -3,7 +3,10 @@ package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BUser;
@@ -70,6 +73,18 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
                 .eq(BUser::getMobile, mobile)
                 .eq(BUser::getFlag, 1);
         return mapper.selectOne(wrapper);
+    }
+
+    public IPage<BUser> findAllWxUser(String name, Long currentPage, Long pageSize) {
+        QueryWrapper<BUser> wrapper = Wrappers.query();
+        // 封装分页信息
+        Page<BUser> page = new Page<>(currentPage, pageSize);
+        wrapper.and(w -> w.eq("type","社会客户").or().eq("type","领导"));
+        if (name == null) {
+            return mapper.selectPage(page,wrapper);
+        }
+        wrapper.like("name",name).or().eq("mobile",name).or().like("realname",name).or().like("company",name);
+        return mapper.selectPage(page,wrapper);
     }
 }
 

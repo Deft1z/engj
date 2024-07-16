@@ -5,9 +5,11 @@ import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.user.req.RoleUserReq;
 import com.kge.energy.crm.user.req.UserLoginReq;
 import com.kge.energy.crm.user.req.UserSaltReq;
+import com.kge.energy.crm.user.req.WxUserListReq;
 import com.kge.energy.crm.user.resp.CurrentUserInfoResp;
 import com.kge.energy.crm.user.resp.RoleUserResp;
 import com.kge.energy.crm.user.resp.UserLoginResp;
+import com.kge.energy.crm.user.resp.WxUserListResp;
 import com.kge.energy.crm.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -65,6 +67,12 @@ public class UserController {
         return CommonResponse.suc(userService.currentUserInfo());
     }
 
-
-
+    /**
+     * 获取小程序用户列表
+     */
+    @ConvertToGoFormats
+    @PostMapping("/baseDataBack/userBackMrg/wxUser/load")
+    public CommonResponse<WxUserListResp> currentWxUserList(@RequestBody WxUserListReq req) {
+        return CommonResponse.suc(userService.findWxUserList(req));
+    }
 }
