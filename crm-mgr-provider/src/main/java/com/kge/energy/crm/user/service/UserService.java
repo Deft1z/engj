@@ -160,8 +160,7 @@ public class UserService {
 
     public WxUserListResp findWxUserList(WxUserListReq req) {
         IPage<BUser> users = bUserDao.findAllWxUser(req.getNameF(),req.getCurrentPage(),req.getPageSize());
-        WxUserListResp wxUserListResp = new WxUserListResp(users.getCurrent(), users.getSize(), users.getTotal(), users.getRecords());
-        return wxUserListResp;
+        return new WxUserListResp(users.getCurrent(), users.getSize(), users.getTotal(), users.getRecords());
     }
 
     public String genToken(@Nonnull BUser user) {
