@@ -1,5 +1,7 @@
 mvn clean -U package -Pdev -DskipTests
 
+mvn clean compile -Pdev -DprofileActive=local -DskipTests
+
 mvn clean -U package -Ptest -DskipTests
 
 mvn clean -U package -Pprod -DskipTests
