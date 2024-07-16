@@ -40,7 +40,7 @@ public class OperationController {
      */
     @ConvertToGoFormats
     @PostMapping("/external/getRecord")
-    public CommonResponse<Object> getList(@RequestBody OperationListReq req) throws NoSuchAlgorithmException {
+    public CommonResponse<Object> getPage(@RequestBody OperationListReq req) throws NoSuchAlgorithmException {
 
         // 构造ecc接口请求参数
         EccReq eccReq = new EccReq();
