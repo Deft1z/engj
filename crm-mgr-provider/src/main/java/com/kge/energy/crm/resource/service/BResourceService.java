@@ -83,7 +83,7 @@ public class BResourceService {
                     }
                     childMenuList.add(new MenuNodeResp(menu.getResourceId(),
                             menu.getParentResourceId(),menu.getReferResourceId(),
-                            menu.getLevel(),originParentPath.get(),"/"+menu.getName(),
+                            menu.getLevel(),"/"+menu.getName(),originParentPath.get(),
                             menu.getDisplayName(),menu.getSort(),menu.getFlag(),null,permission));
                 }
             }
