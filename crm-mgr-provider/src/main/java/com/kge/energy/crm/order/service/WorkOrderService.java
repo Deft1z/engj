@@ -15,6 +15,7 @@ import com.kge.energy.crm.flwo.service.WfFormFlowService;
 import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
 import com.kge.energy.crm.order.req.WorkOrdeUpdateReq;
 import com.kge.energy.crm.order.req.WorkOrderListReq;
+import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.repository.dao.BUserDao;
@@ -24,6 +25,7 @@ import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
+import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import lombok.RequiredArgsConstructor;
@@ -135,5 +137,22 @@ public class WorkOrderService {
         }
 
         return null;
+    }
+
+
+    /**
+     * 微信小程序客户 -> 工单
+     */
+    public PageResp<FormResp> getWxUserOrder(WxUserWorkOrderReq req) {
+        IPage<WxUserWorkOrderParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
+        WxUserWorkOrderParam wxUserWorkOrderParam = BeanUtil.copyProperties(req, WxUserWorkOrderParam.class);
+        IPage<FormResult> pages = wfFormFlowService.getWxUserWorkOrder(reqIpage, wxUserWorkOrderParam);
+        List<FormResp> resps = BeanUtil.copyToList(pages.getRecords(), FormResp.class);
+
+        return new PageResp<FormResp>()
+                .setList(resps)
+                .setCurrentPage(pages.getCurrent())
+                .setPageSize(pages.getSize())
+                .setTotal(pages.getTotal());
     }
 }
