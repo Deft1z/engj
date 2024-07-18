@@ -1,6 +1,7 @@
 package com.kge.energy.crm.user.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.kge.energy.crm.order.req.WorkOrderListReq;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -12,6 +13,11 @@ public class WxUserListReq {
     private Long CurrentPage;
     private Long PageSize;
     private Map<String,String> Sort;
-    @JsonProperty("name")
-    private String NameF;
+    private WxUserListReq.SearchMapBean searchMap;
+
+    @Data
+    @Accessors(chain = true)
+    public static class SearchMapBean {
+        private String name;
+    }
 }
