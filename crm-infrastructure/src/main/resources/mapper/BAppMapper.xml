@@ -20,5 +20,22 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <select id="contractPageByUserIdLoad" resultType="com.kge.energy.crm.repository.entityext.result.WxUserAppResult">
+        select a.name, a.app_id, DATE_FORMAT(b.binding_time, '%Y-%m-%d') AS binding_time, b.openid_id, b.binding_state, a.bind_type, b.external_account
+        from b_app a
+        LEFT JOIN b_openid b ON b.app_id = a.app_id
+        <where>
+            b.user_id = #{listParam.userId} AND a.flag = 1 AND b.flag = 1
+        </where>
+    </select>
+
+    <select id="appUnbindingListLoad" resultType="com.kge.energy.crm.repository.entityext.result.AppDetailUserResult">
+        select `name`, app_id
+        from b_app
+        <where>
+            app_id NOT IN ( SELECT app_id FROM b_openid WHERE user_id = #{userId} AND flag = 1 ) AND flag = 1
+        </where>
+    </select>
+
 </mapper>
 

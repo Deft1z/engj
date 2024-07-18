@@ -27,7 +27,6 @@ public class OrgController {
     @ConvertToGoFormats
     @PostMapping("/getOrgDictList")
     public CommonResponse<List<OrgDictResp>> getOrgDictList() {
-
         return CommonResponse.suc(orgService.getOrgDictList());
     }
 

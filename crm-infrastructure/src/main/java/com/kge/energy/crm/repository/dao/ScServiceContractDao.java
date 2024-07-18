@@ -1,8 +1,10 @@
 package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.repository.entity.ScServiceContract;
+import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.repository.mapper.ScServiceContractMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,14 @@ public class ScServiceContractDao extends ServiceImpl<ScServiceContractMapper, S
         Assert.notNull(formId);
 
         return mapper.form(formId);
+
     }
+
+    public IPage<ContractResult> contractPageByUserIdLoad(IPage<WxUserWorkOrderParam> page, WxUserWorkOrderParam wparam) {
+
+        return mapper.contractPageByUserIdLoad(page,wparam);
+
+    }
+
 }
 

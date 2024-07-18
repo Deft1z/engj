@@ -6,6 +6,7 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
 import com.kge.energy.crm.order.req.WorkOrdeUpdateReq;
 import com.kge.energy.crm.order.req.WorkOrderListReq;
+import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
@@ -56,6 +57,19 @@ public class WorkOrderController {
     @PostMapping("/workOrderUpdate")
     public CommonResponse<Integer> workOrderUpdate(WorkOrdeUpdateReq req) {
         return CommonResponse.suc(workOrderService.workOrderUpdate(req));
+
+    }
+
+    /**
+     * 小程序客户 -> 多条件查询工单
+     */
+    @ConvertToGoFormats
+    @PostMapping("/workOrderByUserIdLoad")
+    public CommonResponse<PageResp<FormResp>> workOrderByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
+        System.out.println("req = "+req);
+        System.out.println("req = "+req.getUserId());
+        System.out.println("req = "+req.getCurrentPage());
+        return CommonResponse.suc(workOrderService.getWxUserOrder(req));
 
     }
 }

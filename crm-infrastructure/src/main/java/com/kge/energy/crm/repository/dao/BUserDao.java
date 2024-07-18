@@ -78,6 +78,10 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
     public IPage<BUser> findAllWxUser(String name, Long currentPage, Long pageSize) {
         QueryWrapper<BUser> wrapper = Wrappers.query();
         // 封装分页信息
+        if (currentPage == null || pageSize == null) {
+            currentPage = 1L;
+            pageSize = 10L;
+        }
         Page<BUser> page = new Page<>(currentPage, pageSize);
         wrapper.and(w -> w.eq("type","社会客户").or().eq("type","领导"));
         if (name == null) {
