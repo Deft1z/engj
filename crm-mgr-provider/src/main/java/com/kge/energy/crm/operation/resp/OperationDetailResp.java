@@ -1,9 +1,8 @@
-package com.kge.energy.crm.opetation.resp;
+package com.kge.energy.crm.operation.resp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 public class OperationDetailResp {
@@ -46,8 +45,7 @@ public class OperationDetailResp {
     /**
      * 操作时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDateTime operationTime;
+    private LocalDate operationTime;
 
     /**
      * 文件真实名字

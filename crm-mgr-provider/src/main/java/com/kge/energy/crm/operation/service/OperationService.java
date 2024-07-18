@@ -1,4 +1,4 @@
-package com.kge.energy.crm.opetation.service;
+package com.kge.energy.crm.operation.service;
 
 import com.kge.energy.crm.repository.dao.OmReportDao;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OperationService {
 
-    private final OmReportDao omReportDao;
+    private final OmReportDao dao;
 
     public OperationDetail getDetail(OperationParam param) {
-        return omReportDao.getDetail(param);
+        return dao.getDetail(param);
     }
 }

@@ -1,7 +1,6 @@
 package com.kge.energy.crm.content.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
@@ -37,13 +35,7 @@ public class ModuleController {
         ModuleParam param = BeanUtil.copyProperties(req, ModuleParam.class);
         param.setName(Optional.ofNullable(req.getSearchMap()).map(e -> e.get("name")).orElse(null));
 
-        PageResp<CmsBlock> resp = new PageResp<>();
-        HashMap<String, String> mapping = new HashMap<>();
-        mapping.put("current", "currentPage");
-        mapping.put("size", "pageSize");
-        mapping.put("records", "list");
-
-        BeanUtil.copyProperties(moduleService.getPage(param), resp, CopyOptions.create().setFieldMapping(mapping));
+        PageResp<CmsBlock> resp = new PageResp<>(moduleService.getPage(param));
         return CommonResponse.suc(resp);
     }
 

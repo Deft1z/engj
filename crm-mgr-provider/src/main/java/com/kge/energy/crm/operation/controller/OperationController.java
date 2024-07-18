@@ -1,4 +1,4 @@
-package com.kge.energy.crm.opetation.controller;
+package com.kge.energy.crm.operation.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
@@ -9,10 +9,10 @@ import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
 import com.kge.energy.crm.external.ecc.resp.EccPageData;
 import com.kge.energy.crm.external.ecc.resp.EccResp;
 import com.kge.energy.crm.external.ecc.service.EccService;
-import com.kge.energy.crm.opetation.req.OperationDetailReq;
-import com.kge.energy.crm.opetation.req.OperationListReq;
-import com.kge.energy.crm.opetation.resp.OperationDetailResp;
-import com.kge.energy.crm.opetation.service.OperationService;
+import com.kge.energy.crm.operation.req.OperationDetailReq;
+import com.kge.energy.crm.operation.req.OperationListReq;
+import com.kge.energy.crm.operation.resp.OperationDetailResp;
+import com.kge.energy.crm.operation.service.OperationService;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -77,6 +77,7 @@ public class OperationController {
     /**
      * 查询运维记录详情
      */
+    // TODO 后续可能会取消这个接口
     @ConvertToGoFormats
     @PostMapping("/omBack/report/back")
     public CommonResponse<OperationDetailResp> getDetail(@RequestBody OperationDetailReq req) {
