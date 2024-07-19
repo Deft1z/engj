@@ -44,8 +44,8 @@ public class ModuleController {
      */
     @PostMapping("/opt/add")
     public CommonResponse<Boolean> add(@Validated @RequestBody ModuleAddReq req) {
-        CmsBlock cmsBlock = BeanUtil.copyProperties(req, CmsBlock.class);
-        return CommonResponse.suc(moduleService.add(cmsBlock));
+        CmsBlock block = BeanUtil.copyProperties(req, CmsBlock.class);
+        return CommonResponse.suc(moduleService.add(block));
     }
 
 

@@ -29,7 +29,7 @@ public class DashBoardDao {
         return mapper.selectEvaluateList();
     }
 
-    public double getEvaluateAverage() {
+    public Double getEvaluateAverage() {
         return mapper.selectEvaluateAverage();
     }
 

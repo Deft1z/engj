@@ -1,9 +1,10 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * cms_block_content 板块内容(CmsBlockContent)实体类
@@ -39,6 +40,7 @@ public class CmsBlockContent {
     /**
      * 文章内容
      */
+    @TableField(value = "`desc`")
     private String desc; 
 
     /**
