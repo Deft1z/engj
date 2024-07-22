@@ -3,7 +3,7 @@ spring:
     active: @profileActive@
 
   application:
-    name: CrmMgrProvider
+    name: CrmAppletProvider
 
   main:
     allow-circular-references: true
@@ -33,6 +33,7 @@ spring:
       lettuce:
         pool:
           min-idle: 1
+      front: engjkfxcx_dev_
 
 decorator:
   datasource:
@@ -66,13 +67,5 @@ auth:
   token:
     redis-front: ntcrm_test_token_
     white-list:
-      - /base/user/salt
-      - /base/user/login
-      - /external/sso/auth
   permission:
     white-list:
-      - /chart/contractBack/contractOrderChart
-      - /chart/contractBack/evaluateChart
-      - /chart/userBackMrg/UserChart
-      - /chart/complainBack/complainPerChart
-      - /chart/complainBack/complainRankChart

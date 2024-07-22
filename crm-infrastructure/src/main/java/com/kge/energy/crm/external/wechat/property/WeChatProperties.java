@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "wechat")
-public class WechatProperties {
+public class WeChatProperties {
 
     private String appId;
 
@@ -23,7 +23,7 @@ public class WechatProperties {
     private String feebackTemplate;
 
     private String wxUrl;
-    
+
     private String version;
 
     private String agencyOrderPage;

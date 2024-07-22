@@ -1,4 +1,4 @@
-package com.kge.energy.crm.wechat.login.resp;
+package com.kge.energy.crm.external.wechat.resp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -11,12 +11,11 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class WechatAccessResp {
+public class WeChatAppletLoginResp {
 
 
     @JsonProperty("session_key")
     private String sessionKey;
-
 
     @JsonProperty("unionid")
     private String unionId;
@@ -24,18 +23,11 @@ public class WechatAccessResp {
     @JsonProperty("openid")
     private String openId;
 
-
-    @JsonProperty("token")
-    private String token;
-
-
     @JsonProperty("errmsg")
-    private String msg;
-
+    private String errMsg;
 
     @JsonProperty("errcode")
-    private Integer code;
-
+    private Integer errCode;
 
 
 }

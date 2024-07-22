@@ -27,14 +27,13 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
 
     private final BUserMapper mapper;
 
-
-    public BUser FindUserByMobile(String openId) {
+    public BUser findUserByOpenId(String openId) {
         if (Objects.equals(openId, "")) {
             return null;
         }
 
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
-                .eq(BUser::getOpenId, openId).eq(BUser::getFlag, 1);
+                .eq(BUser::getOpenId, openId);
 
         return mapper.selectOne(wrapper);
     }
@@ -83,12 +82,12 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
             pageSize = 10L;
         }
         Page<BUser> page = new Page<>(currentPage, pageSize);
-        wrapper.and(w -> w.eq("type","社会客户").or().eq("type","领导"));
+        wrapper.and(w -> w.eq("type", "社会客户").or().eq("type", "领导"));
         if (name == null) {
-            return mapper.selectPage(page,wrapper);
+            return mapper.selectPage(page, wrapper);
         }
-        wrapper.like("name",name).or().eq("mobile",name).or().like("realname",name).or().like("company",name);
-        return mapper.selectPage(page,wrapper);
+        wrapper.like("name", name).or().eq("mobile", name).or().like("realname", name).or().like("company", name);
+        return mapper.selectPage(page, wrapper);
     }
 }
 
