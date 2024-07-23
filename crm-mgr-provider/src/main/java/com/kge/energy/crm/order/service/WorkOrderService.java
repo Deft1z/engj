@@ -10,7 +10,6 @@ import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.external.wechat.property.WechatProperties;
 import com.kge.energy.crm.flow.service.WfFormFlowService;
 import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
 import com.kge.energy.crm.order.req.WorkOrdeUpdateReq;
@@ -43,8 +42,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class WorkOrderService {
-
-    private final WechatProperties wechatProperties;
 
     private final WfFormFlowService wfFormFlowService;
 

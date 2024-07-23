@@ -1,9 +1,12 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.kge.energy.crm.repository.entityext.result.OrganizationParameter;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 机构表(BOrganization)实体类
@@ -13,6 +16,7 @@ import com.baomidou.mybatisplus.annotation.*;
  */
 @Data
 @Accessors(chain = true)
+@TableName(autoResultMap = true)
 public class BOrganization {
 
     /**
@@ -69,7 +73,8 @@ public class BOrganization {
     /**
      * 停用
      */
-    private String parameter; 
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private OrganizationParameter parameter;
 
     /**
      * 停用
@@ -101,7 +106,7 @@ public class BOrganization {
      * 创建时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime createTime; 
+    private LocalDateTime createTime;
 
     /**
      * 修改用户ID
@@ -113,7 +118,7 @@ public class BOrganization {
      * 修改时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime modifyTime; 
+    private LocalDateTime modifyTime;
 
     /**
      * 备注

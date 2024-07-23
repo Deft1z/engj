@@ -1,0 +1,37 @@
+package com.kge.energy.crm.wechat.login.controller;
+
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
+import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
+import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
+import com.kge.energy.crm.wechat.login.service.WeChatLoginService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * 用户登录接口
+ *
+ * @author zqy
+ */
+@RestController
+@RequestMapping("/wechat")
+@RequiredArgsConstructor
+public class WeChatLoginController {
+
+    private final WeChatLoginService weChatLoginService;
+
+    /**
+     * 用户登录
+     */
+    @PostMapping("/login")
+    @ConvertToGoFormats
+    public CommonResponse<WeChatLoginResp> login(@RequestBody WeChatLoginReq req) {
+        return CommonResponse.suc(weChatLoginService.login(req));
+    }
+}
+
+
+

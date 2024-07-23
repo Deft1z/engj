@@ -16,10 +16,9 @@ public interface DashBoardMapper {
 
     List<DashBoardEvaluate> selectEvaluateList();
 
-    double selectEvaluateAverage();
+    Double selectEvaluateAverage();
 
     DashBoardComplainTypeStatistic selectComplainTypeStatistic(DashBoardParam param);
 
     List<DashBoardComplainRank> selectComplainRankList(DashBoardParam param);
-
 }

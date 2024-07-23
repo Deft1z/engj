@@ -1,0 +1,71 @@
+spring:
+  profiles:
+    active: @profileActive@
+
+  application:
+    name: CrmAppletProvider
+
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname:test}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true
+    username: ${mysql.username}
+    password: ${mysql.password}
+    hikari:
+      maximumPoolSize: 100 # 最大连接数
+      minimumIdle: 5 # 最小空闲连接数
+      idleTimeout: 60000 # 空闲连接超时时间（毫秒）
+      maxLifetime: 1800000 # 连接最大生命周期（毫秒）
+      connectionTimeout: 30000 # 获取连接超时时间（毫秒）
+      autoCommit: true # 自动提交
+      validationTimeout: 5000 # 连接验证超时时间（毫秒）
+      leakDetectionThreshold: 60000 # 检测连接泄露的阈值（毫秒）
+      isolateInternalQueries: false # 是否对内部查询使用独立的连接
+      allowPoolSuspension: false # 是否允许暂停连接池
+      readOnly: false # 连接是否只读
+      connectionTestQuery: SELECT 1 # 测试连接是否可用的SQL
+
+  data:
+    redis:
+      lettuce:
+        pool:
+          min-idle: 1
+      front: engjkfxcx_dev_
+
+decorator:
+  datasource:
+    p6spy:
+      log-format: "time:%(executionTime) || sql:%(sql)\n"
+      logging: custom
+      custom-appender-class: com.p6spy.engine.spy.appender.StdoutLogger
+
+wechat:
+  appId: wx00c47c0f09ea4612
+  appSecret: ee6576d61d20ba65286739ea977a6096
+  orderStatusChangeTemplate: C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE
+  agencyOrderTemplate: TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU
+  feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
+  wxUrl: http://api.weixin.qq.com
+  version: developer
+  agencyOrderPage: pages/user/order/order
+
+
+logging:
+  config: classpath:config/logback.xml
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: flag
+      logic-delete-value: -1
+      logic-not-delete-value: 1
+
+auth:
+  token:
+    redis-front: ntcrm_test_token_
+    white-list:
+  permission:
+    white-list:

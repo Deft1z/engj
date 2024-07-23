@@ -9,6 +9,7 @@ import com.kge.energy.crm.external.iam.service.IamService;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.sso.req.SSOReq;
 import com.kge.energy.crm.sso.resp.SSOResp;
+import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class SSOService {
 
     private final IamService iamService;
     private final UserService userService;
+    private final UserDomainService userDomainService;
 
     public SSOResp auth(SSOReq req) {
         IamResp<IamCheckTicket> ict = iamService.checkTicket(req.getTicket());
@@ -42,7 +44,7 @@ public class SSOService {
         BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new BadException(ResponseCode.SHOULD_LOGIN));
 
         SSOResp resp = new SSOResp();
-        resp.setToken(userService.genToken(user));
+        resp.setToken(userDomainService.genToken(user, true));
         resp.setUserId(user.getUserId());
 
         return resp;

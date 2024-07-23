@@ -12,7 +12,7 @@
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="lat" column="lat" jdbcType="VARCHAR"/>
         <result property="lng" column="lng" jdbcType="VARCHAR"/>
-        <result property="parameter" column="parameter" jdbcType="VARCHAR"/>
+        <result property="parameter" column="parameter" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result property="variables" column="variables" jdbcType="VARCHAR"/>
         <result property="referSource" column="refer_source" jdbcType="VARCHAR"/>
         <result property="referId" column="refer_id" jdbcType="VARCHAR"/>

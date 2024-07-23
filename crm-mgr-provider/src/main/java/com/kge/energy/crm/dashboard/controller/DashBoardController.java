@@ -9,7 +9,6 @@ import com.kge.energy.crm.dashboard.req.DashBoardContractOrderReq;
 import com.kge.energy.crm.dashboard.req.DashBoardReq;
 import com.kge.energy.crm.dashboard.resp.*;
 import com.kge.energy.crm.dashboard.service.DashBoardService;
-import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic;
@@ -36,8 +35,9 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/workMgrBack/contractBack/getAllCompany")
-    public CommonResponse<List<BOrganization>> getCompanyList() {
-        return CommonResponse.suc(dashBoardService.getCompanyList());
+    public CommonResponse<List<CompanyResp>> getCompanyList() {
+        List<CompanyResp> resp = BeanUtil.copyToList(dashBoardService.getCompanyList(), CompanyResp.class);
+        return CommonResponse.suc(resp);
     }
 
     /**
@@ -50,6 +50,7 @@ public class DashBoardController {
         return CommonResponse.suc(resp);
     }
 
+    // TODO 这个接口后续建议与上面的接口合并
     /**
      * 查询统计下半部分
      */

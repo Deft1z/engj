@@ -38,7 +38,7 @@ public class DashBoardService {
         return dao.getEvaluateList();
     }
 
-    public double getEvaluateAverage() {
+    public Double getEvaluateAverage() {
         return dao.getEvaluateAverage();
     }
 
