@@ -48,7 +48,7 @@ wechat:
   orderStatusChangeTemplate: C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE
   agencyOrderTemplate: TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU
   feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
-  wxUrl: http://api.weixin.qq.com
+  wxUrl: https://api.weixin.qq.com
   version: developer
   agencyOrderPage: pages/user/order/order
 

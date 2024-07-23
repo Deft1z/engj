@@ -2,7 +2,10 @@ package com.kge.energy.crm.user.service;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
+import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.property.AuthProperties;
+import com.kge.energy.crm.repository.dao.BOrganizationDao;
+import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.LUserTokenDao;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entity.LUserToken;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,9 +27,30 @@ public class UserDomainService {
 
     private final AuthProperties authProperties;
 
+    private final BUserDao bUserDao;
+
+    private final BOrganizationDao bOrganizationDao;
+
     private final LUserTokenDao lUserTokenDao;
 
     private final StringRedisTemplate stringRedisTemplate;
+
+    public BUser getBUserById(int id) {
+        return bUserDao.getById(id);
+    }
+
+    public UserInfoDto findUserInfoDto(BUser bUser) {
+
+        UserInfoDto userInfoDto = bUserDao.findUserInfoDto(bUser.getUserId());
+        if (ObjUtil.isNull(userInfoDto)) {
+            return null;
+        }
+
+        List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrOrgs(bUser.getUserId());
+        userInfoDto.setOrganizationList(orgs);
+
+        return userInfoDto;
+    }
 
     /**
      * 生成用户认证令牌。

@@ -13,6 +13,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class WeChatAppletLoginResp {
 
+    public static final Integer SUCCESS_CODE = 0;
 
     @JsonProperty("session_key")
     private String sessionKey;

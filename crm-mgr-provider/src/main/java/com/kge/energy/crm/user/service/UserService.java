@@ -53,24 +53,6 @@ public class UserService {
 
     private final UserDomainService userDomainService;
 
-
-    public BUser getBUserById(int id) {
-        return bUserDao.getById(id);
-    }
-
-    public UserInfoDto findUserInfoDto(BUser bUser) {
-
-        UserInfoDto userInfoDto = bUserDao.findUserInfoDto(bUser.getUserId());
-        if (ObjUtil.isNull(userInfoDto)) {
-            return null;
-        }
-
-        List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrOrgs(bUser.getUserId());
-        userInfoDto.setOrganizationList(orgs);
-
-        return userInfoDto;
-    }
-
     public BUser getUserByMobile(String mobile) {
         return bUserDao.getUserByMobile(mobile);
     }

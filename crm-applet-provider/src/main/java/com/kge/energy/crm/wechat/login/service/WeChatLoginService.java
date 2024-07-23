@@ -2,16 +2,25 @@ package com.kge.energy.crm.wechat.login.service;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.kge.energy.crm.common.execption.BadException;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.UserTypeEnums;
+import com.kge.energy.crm.external.wechat.resp.WeChatAppletGetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.resp.WeChatAppletLoginResp;
+import com.kge.energy.crm.external.wechat.resp.WeChatAppletStableAccessTokenResp;
 import com.kge.energy.crm.external.wechat.service.WeChatInfraService;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.RUserRoleDao;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entity.RUserRole;
 import com.kge.energy.crm.user.service.UserDomainService;
+import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
+import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
+import com.kge.platform.framework.common.enums.IsDeleteFlagEnums;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -48,7 +57,7 @@ public class WeChatLoginService {
 
         //请求微信接口
         WeChatAppletLoginResp appletLoginResp = weChatInfraService.appletLogin(req.getJsCode());
-        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), 0)) {
+        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), WeChatAppletLoginResp.SUCCESS_CODE)) {
             throw new BadException(appletLoginResp.getErrMsg());
         }
 
@@ -83,4 +92,103 @@ public class WeChatLoginService {
     }
 
 
+    /**
+     * 获取微信小程序用户的手机号码
+     */
+    @Transactional
+    public WeChatPhoneNumberResp phoneNumber(PhoneNumberReq req) {
+
+        WeChatAppletStableAccessTokenResp resp = weChatInfraService.getStableAccessToken();
+
+        if (ObjUtil.isNull(resp)) {
+            throw new BadException("获取小程序Token失败");
+        }
+
+        WeChatAppletGetUserPhoneNumberResp getUserPhoneNumberResp = weChatInfraService.getUserPhoneNumber(resp.getAccessToken(), req.getCode(), req.getOpenid());
+        if (ObjUtil.isNull(getUserPhoneNumberResp) || ObjUtil.notEqual(getUserPhoneNumberResp.getErrCode(), WeChatAppletGetUserPhoneNumberResp.SUCCESS_CODE)) {
+            throw new BadException("获取用户手机号码失败");
+        }
+
+        //更新用户绑定手机号码
+        String token = updateMobileByUserId(UserInfoContextUtils.getCurrentUserId(),
+                getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber(), req.getOpenid());
+
+        WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
+                .setTimestamp(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())
+                .setAppId(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getAppId());
+
+        WeChatPhoneNumberResp.PhoneInfo phoneInfo = new WeChatPhoneNumberResp.PhoneInfo()
+                .setPhoneNumber(getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber())
+                .setPurePhoneNumber(getUserPhoneNumberResp.getPhoneInfo().getPurePhoneNumber())
+                .setWatermark(watermark)
+                .setCountryCode(getUserPhoneNumberResp.getPhoneInfo().getCountryCode());
+
+        return new WeChatPhoneNumberResp()
+                .setErrCode(getUserPhoneNumberResp.getErrCode())
+                .setErrMsg(getUserPhoneNumberResp.getErrMsg())
+                .setPhoneInfo(phoneInfo)
+                .setToken(token);
+    }
+
+
+    /**
+     * todo: 此段逻辑有点复杂，后续需要优化
+     */
+    private String updateMobileByUserId(Integer userId, String mobile, String openId) {
+        BUser bUser = new LambdaQueryChainWrapper<>(BUser.class)
+                .eq(BUser::getMobile, mobile)
+                .eq(BUser::getType, UserTypeEnums.SYSTEM_USERS.getDesc()).one();
+
+        if (ObjUtil.isNotNull(bUser) && ObjUtil.notEqual(bUser.getUserId(), 0)) {
+            //将系统账号绑定openid
+            bUser.setOpenId(openId);
+            bUserDao.updateById(bUser);
+
+            //将小程序账号置为-1
+            new LambdaUpdateChainWrapper<>(BUser.class)
+                    .set(BUser::getFlag, IsDeleteFlagEnums.YES)
+                    .eq(BUser::getUserId, userId)
+                    .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
+                    .update();
+
+            return userDomainService.genToken(bUser, false);
+
+        } else {
+
+            BUser bUser1 = new LambdaQueryChainWrapper<>(BUser.class)
+                    .eq(BUser::getMobile, mobile)
+                    .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
+                    .in(BUser::getOpenId, "", null)
+                    .one();
+
+            if (ObjUtil.isNotNull(bUser1) && ObjUtil.notEqual(bUser1.getUserId(), 0)) {
+                //将新小程序账号置为-1
+                new LambdaUpdateChainWrapper<>(BUser.class)
+                        .set(BUser::getFlag, IsDeleteFlagEnums.YES)
+                        .eq(BUser::getUserId, userId)
+                        .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
+                        .notIn(BUser::getOpenId, "", null)
+                        .in(BUser::getMobile, null, "")
+                        .update();
+
+                new LambdaUpdateChainWrapper<>(BUser.class)
+                        .set(BUser::getOpenId, openId)
+                        .eq(BUser::getMobile, mobile)
+                        .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
+                        .update();
+
+                return userDomainService.genToken(bUser1, false);
+
+            } else {
+
+                new LambdaUpdateChainWrapper<>(BUser.class)
+                        .set(BUser::getMobile, mobile)
+                        .eq(BUser::getUserId, userId)
+                        .update();
+
+                return "";
+            }
+        }
+
+    }
 }

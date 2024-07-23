@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadException.class)
     public <T> CommonResponse<T> handleBadException(BadException e) {
-        return errorResult(e.getResponseCode(), e);
+        return errorResult(e.getCode(), e.getMsg(), e.getShowType(), e);
     }
 
 

@@ -11,7 +11,7 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult;
 import com.kge.energy.crm.resource.service.BResourceService;
-import com.kge.energy.crm.user.service.UserService;
+import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +34,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
     private final BResourceService bResourceService;
 
-    private final UserService userService;
+    private final UserDomainService userDomainService;
 
     private final AuthProperties authProperties;
 
@@ -148,13 +148,13 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
      */
     private void putUserInfo(Integer uid) {
 
-        BUser user = userService.getBUserById(uid);
+        BUser user = userDomainService.getBUserById(uid);
 
         if (ObjUtil.isNull(user)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }
 
-        UserInfoDto userInfoDto = userService.findUserInfoDto(user);
+        UserInfoDto userInfoDto = userDomainService.findUserInfoDto(user);
         if (ObjUtil.isNull(userInfoDto)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }

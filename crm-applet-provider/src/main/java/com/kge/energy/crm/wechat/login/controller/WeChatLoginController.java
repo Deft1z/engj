@@ -2,10 +2,13 @@ package com.kge.energy.crm.wechat.login.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
+import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
 import com.kge.energy.crm.wechat.login.service.WeChatLoginService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author zqy
  */
 @RestController
-@RequestMapping("/wechat")
+@RequestMapping()
 @RequiredArgsConstructor
 public class WeChatLoginController {
 
@@ -26,11 +29,22 @@ public class WeChatLoginController {
     /**
      * 用户登录
      */
-    @PostMapping("/login")
+    @PostMapping("/wechat/login")
     @ConvertToGoFormats
     public CommonResponse<WeChatLoginResp> login(@RequestBody WeChatLoginReq req) {
         return CommonResponse.suc(weChatLoginService.login(req));
     }
+
+    /**
+     * 获取微信小程序用户的手机号码
+     */
+    @PostMapping("/baseData/wechat/phoneNumber")
+    @ConvertToGoFormats
+    public CommonResponse<WeChatPhoneNumberResp> phoneNumber(@Validated @RequestBody PhoneNumberReq req) {
+
+        return CommonResponse.suc(weChatLoginService.phoneNumber(req));
+    }
+
 }
 
 

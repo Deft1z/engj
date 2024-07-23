@@ -19,7 +19,7 @@ public enum RoleIdEnums {
 
     SUB_CS(3, "Sub CS"),
 
-    CUSTOMER(5, "Customer");;
+    CUSTOMER(5, "Customer");
 
 
     private final Integer code;
