@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -20,5 +21,10 @@ public interface BUserMapper extends BaseMapper<BUser> {
     List<RoleUserResult> getUserByRoleId(@Param("roleId") Integer roleId);
 
     List<BUser> findUserByCurrentOrgId(Integer orgId);
+
+    List<UserBindByMobileResult> findUserBindByUid(@Param("uid") Integer uid);
+
+
+
 }
 

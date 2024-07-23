@@ -76,3 +76,10 @@ auth:
       - /chart/userBackMrg/UserChart
       - /chart/complainBack/complainPerChart
       - /chart/complainBack/complainRankChart
+      - /applicationBack/applicationBackMrg/list
+      - /baseDataBack/internalBind/list
+      - /baseDataBack/internalBind/detail
+      - /baseDataBack/internalBind/addProject/add
+      - /baseDataBack/internalBind/project/update
+      - /baseDataBack/internalBind/finduser
+      - /baseDataBack/internalBind/bind/add

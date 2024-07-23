@@ -70,6 +70,9 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
         Integer userId = Integer.valueOf(uid);
 
+        // 设置用户上下文信息
+        putUserInfo(Integer.valueOf(uid));
+
         boolean isPermissionWhiteUrl = authProperties.getPermission()
                 .getWhiteList()
                 .stream()
@@ -79,9 +82,6 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
 
         handlePermission(request, userId);
-
-        // 设置用户上下文信息
-        putUserInfo(Integer.valueOf(uid));
 
         return true;
     }

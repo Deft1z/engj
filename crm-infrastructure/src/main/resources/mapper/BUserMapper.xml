@@ -67,7 +67,15 @@
         from b_user a
                  LEFT JOIN r_user_tenant b ON b.user_id = a.user_id
         where a.flag != -1
-          AND b.organization_id = #{orgId}
+          AND b.organization_id = #{orgId}s
     </select>
+
+    <select id="findUserBindByUid" resultType="com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult">
+        SELECT bo.app_id as appid
+        FROM  b_openid_share bos
+        LEFT JOIN b_openid bo ON share_openid_id = bo.openid_id
+        WHERE  bos.flag = 1 AND bo.flag = 1	AND bos.user_id = #{uid}
+    </select>
+
 </mapper>
 

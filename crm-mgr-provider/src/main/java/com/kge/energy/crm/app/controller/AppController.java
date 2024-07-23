@@ -1,22 +1,17 @@
 package com.kge.energy.crm.app.controller;
 
 import com.kge.energy.crm.app.req.AppBindingListReq;
+import com.kge.energy.crm.app.req.ListReq;
 import com.kge.energy.crm.app.req.WxUserAppReq;
-import com.kge.energy.crm.app.resp.AppDetailUserResc;
+import com.kge.energy.crm.app.resp.AppDetailUserResp;
 import com.kge.energy.crm.app.resp.WxUserAppResp;
 import com.kge.energy.crm.app.service.AppService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
-import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.order.req.ContractReq;
-import com.kge.energy.crm.order.resp.ContractResp;
-import com.kge.energy.crm.order.service.ContractService;
+import com.kge.energy.crm.repository.entity.BApp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,9 +35,23 @@ public class AppController {
     }
      */
 
+    /**
+     * 小程序客户 -> 获取客户未绑定的应用列表
+     */
     @ConvertToGoFormats
     @PostMapping("/appUnbindingListLoad")
-    public CommonResponse<List<AppDetailUserResc>> appUnbindingListLoad(@Validated @RequestBody AppBindingListReq req) {
+    public CommonResponse<List<AppDetailUserResp>> appUnbindingListLoad(@Validated @RequestBody AppBindingListReq req) {
         return CommonResponse.suc(appService.appUnbindingListLoad(req));
     }
+
+    /**
+     * 绑定管理 -> 获取所有应用列表
+     */
+    @ConvertToGoFormats
+    @GetMapping("/list")
+    public CommonResponse<List<BApp>> list() {
+        return CommonResponse.suc(appService.list());
+    }
+
+
 }

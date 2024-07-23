@@ -5,9 +5,7 @@ import com.kge.energy.crm.repository.entity.BApp;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.AppDetailUserResult;
-import com.kge.energy.crm.repository.entityext.result.FormResult;
-import com.kge.energy.crm.repository.entityext.result.WxUserAppResult;
+import com.kge.energy.crm.repository.entityext.result.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -29,6 +27,38 @@ public interface BAppMapper extends BaseMapper<BApp> {
      * 小程序客户 -> 获取应用绑定列表
      */
     List<AppDetailUserResult> appUnbindingListLoad(@Param("userId") Integer userId);
+
+    /**
+     * 绑定管理 -> 获取用户对应openid列表
+     */
+    List<OpenIdModelList> userOpenId(@Param("appid") Integer appid, @Param("mobile") String mobile, @Param("name") String name, @Param("offset") Integer offset, @Param("limit") Integer limit);
+
+    /**
+     * 绑定管理 -> 获取对应的用户关联应用的项目信息
+     */
+    List<OpenIdModelList> userOpenIdProject(@Param("uids") List<Integer> uids);
+
+    /**
+     * 绑定管理 -> 已关联openId的用户数
+     */
+    List<OpenIdModelList> userOpenIdCount(@Param("appid") Integer appid, @Param("mobile") String mobile, @Param("name") String name);
+
+
+    /**
+     * 绑定管理 -> 获取详情列表
+     */
+    List<OpenShareModelList> FindBindList(@Param("page") Integer page,@Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids,@Param("offset") Integer offset,@Param("limit") Integer limit);
+
+
+    /**
+     * 绑定管理 -> 获取详情列表(总数)
+     */
+    List<OpenShareModelList> FindBindListCount(@Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids);
+
+    /**
+     * 绑定管理 -> 用户绑定组织关系记录
+     */
+    List<OpenIdModelList> FindByUidAndOid(@Param("uids") List<Integer> uids, @Param("ids") List<Integer> ids);
 
 }
 

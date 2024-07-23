@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Data
-public class AppDetailUserResc {
+public class AppDetailUserResp {
     /**
      * 应用名称
      */

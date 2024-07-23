@@ -37,5 +37,137 @@
         </where>
     </select>
 
+    <select id="userOpenId" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
+        SELECT b_openid.user_id as uid FROM b_openid LEFT JOIN b_user ON b_openid.user_id = b_user.user_id
+        <where>
+            binding_state = 1 AND b_openid.flag  = 1 AND b_user.flag = 1
+            <if test="appid != null and appid > 0">
+                AND b_openid.app_id =  #{appid}
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and b_user.mobile = #{mobile}
+            </if>
+            <if test="name != null and name != ''">
+                and b_user.realname like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+        GROUP BY b_openid.user_id limit #{offset},#{limit}
+    </select>
+
+    <select id="userOpenIdProject" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
+        SELECT
+            realname,
+            mobile,
+            o.user_id AS uid,
+            o.flag,
+            o.binding_state AS state,
+            o.remark AS remark,
+            o.app_id AS appid,
+            bp.app_id AS proaid,
+            bp.project_id AS pid,
+            bp.NAME AS pname,
+            o.openid_id AS oid,
+            rop.flag AS rflag
+        FROM
+            b_openid o
+                LEFT JOIN b_user b ON o.user_id = b.user_id
+                LEFT JOIN r_openid_project rop ON rop.open_id = o.openid_id
+                LEFT JOIN b_project bp ON bp.project_id = rop.project_id
+        WHERE
+            o.flag = 1
+            <if test="uids != null and !uids.isEmpty()">
+                AND o.user_id IN
+                <foreach item="uid" collection="uids" open="(" separator="," close=")">
+                    #{uid}
+                </foreach>
+            </if>
+        ORDER BY
+            uid,
+            appid,
+            proaid
+    </select>
+
+
+    <select id="userOpenIdCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
+        SELECT 1 FROM b_openid LEFT JOIN b_user ON b_openid.user_id = b_user.user_id
+        <where>
+            binding_state = 1 AND b_openid.flag  = 1 AND b_user.flag = 1
+            <if test="appid != null and appid > 0">
+                AND b_openid.app_id =  #{appid}
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and b_user.mobile = #{mobile}
+            </if>
+            <if test="name != null and name != ''">
+                and b_user.realname like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+        GROUP BY b_openid.user_id
+    </select>
+
+    <select id="FindBindList" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
+        SELECT bos.user_id as uid,realname,mobile
+        FROM b_openid_share bos LEFT JOIN b_user u ON bos.user_id = u.user_id
+        <where>
+            <if test="ids != null and !ids.isEmpty()">
+                share_openid_id in
+                <foreach item="id" collection="ids" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            AND bos.flag = 1 AND u.flag = 1
+            <if test="mobile != null and mobile != ''">
+                and u.mobile = #{mobile}
+            </if>
+            <if test="name != null and name != ''">
+                and u.realname like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+        GROUP BY bos.user_id limit #{offset},#{limit}
+    </select>
+
+    <select id="FindBindListCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
+        SELECT 1
+        FROM b_openid_share bos LEFT JOIN b_user u ON bos.user_id = u.user_id
+        <where>
+            <if test="ids != null and !ids.isEmpty()">
+                share_openid_id in
+                <foreach item="id" collection="ids" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            AND bos.flag = 1 AND u.flag = 1
+            <if test="mobile != null and mobile != ''">
+                and u.mobile = #{mobile}
+            </if>
+            <if test="name != null and name != ''">
+                and u.realname like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+        GROUP BY bos.user_id
+    </select>
+
+    <select id="FindByUidAndOid" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
+        SELECT b_openid.app_id as appid,
+               b_openid_share.share_openid_id as id,
+               b_openid_share.user_id as uid
+        FROM b_openid_share
+        LEFT JOIN b_openid ON b_openid.openid_id = b_openid_share.share_openid_id
+        <where>
+            <if test="uids != null and !uids.isEmpty()">
+                b_openid_share.user_id in
+                <foreach item="uid" collection="uids" open="(" separator="," close=")">
+                    #{uid}
+                </foreach>
+            </if>
+            <if test="ids != null and !ids.isEmpty()">
+                AND share_openid_id in
+                <foreach item="id" collection="ids" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            AND b_openid_share.flag = 1
+        </where>
+    </select>
 </mapper>
 
