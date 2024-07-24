@@ -63,7 +63,7 @@ public class UserDomainService {
 
         String authToken = IdUtil.fastSimpleUUID();
         String authTokenKeyPrefix = authProperties.getToken().getRedisFront();
-        ;
+
         LocalDateTime expiredTime = LocalDateTime.now().plusHours(121);
 
         stringRedisTemplate.opsForValue()

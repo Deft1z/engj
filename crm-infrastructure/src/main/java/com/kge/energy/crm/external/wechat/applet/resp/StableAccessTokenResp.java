@@ -1,4 +1,4 @@
-package com.kge.energy.crm.external.wechat.resp;
+package com.kge.energy.crm.external.wechat.applet.resp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.Data;
  * @author wangjihua
  */
 @Data
-public class WeChatAppletStableAccessTokenResp {
+public class StableAccessTokenResp {
 
     @JsonProperty("access_token")
     private String accessToken;

@@ -1,4 +1,4 @@
-package com.kge.energy.crm.external.wechat.req;
+package com.kge.energy.crm.external.wechat.applet.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class WeChatAppletStableAccessTokenReq {
+public class StableAccessTokenReq {
 
     @JsonProperty("grant_type")
     private String grantType = "client_credential";

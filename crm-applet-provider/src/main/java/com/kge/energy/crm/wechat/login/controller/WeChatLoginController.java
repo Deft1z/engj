@@ -3,9 +3,11 @@ package com.kge.energy.crm.wechat.login.controller;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
+import com.kge.energy.crm.wechat.login.req.SendMessageReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
+import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.energy.crm.wechat.login.service.WeChatLoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -41,8 +43,26 @@ public class WeChatLoginController {
     @PostMapping("/baseData/wechat/phoneNumber")
     @ConvertToGoFormats
     public CommonResponse<WeChatPhoneNumberResp> phoneNumber(@Validated @RequestBody PhoneNumberReq req) {
-
         return CommonResponse.suc(weChatLoginService.phoneNumber(req));
+    }
+
+    /**
+     * 获取登陆用户信息
+     */
+    @PostMapping("/baseData/wechat/userInfo")
+    @ConvertToGoFormats
+    public CommonResponse<WxLoginUserInfoResp> getWxLoginUserInfo() {
+        return CommonResponse.suc(weChatLoginService.getWxLoginUserInfo());
+    }
+
+
+    /**
+     * 发送订阅消息（已弃用）
+     */
+//    @PostMapping("/baseData/wechat/sendMessage")
+//    @ConvertToGoFormats
+    public CommonResponse<Boolean> sendMessage(@Validated @RequestBody SendMessageReq req) {
+        return CommonResponse.suc(weChatLoginService.sendMessage(req));
     }
 
 }

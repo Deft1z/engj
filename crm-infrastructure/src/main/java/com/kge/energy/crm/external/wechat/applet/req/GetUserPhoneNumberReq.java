@@ -1,4 +1,4 @@
-package com.kge.energy.crm.external.wechat.req;
+package com.kge.energy.crm.external.wechat.applet.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class WeChatAppletGetUserPhoneNumberReq {
+public class GetUserPhoneNumberReq {
 
     private String code;
 

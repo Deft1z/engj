@@ -4,22 +4,26 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
+import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.UserTypeEnums;
-import com.kge.energy.crm.external.wechat.resp.WeChatAppletGetUserPhoneNumberResp;
-import com.kge.energy.crm.external.wechat.resp.WeChatAppletLoginResp;
-import com.kge.energy.crm.external.wechat.resp.WeChatAppletStableAccessTokenResp;
-import com.kge.energy.crm.external.wechat.service.WeChatInfraService;
+import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
+import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
+import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
+import com.kge.energy.crm.external.wechat.applet.resp.SendSubscribeResp;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.RUserRoleDao;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entity.RUserRole;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
+import com.kge.energy.crm.wechat.login.req.SendMessageReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
+import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.platform.framework.common.enums.IsDeleteFlagEnums;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 
 /**
@@ -44,7 +49,7 @@ public class WeChatLoginService {
     private final StringRedisTemplate stringRedisTemplate;
 
     private final UserDomainService userDomainService;
-    private final WeChatInfraService weChatInfraService;
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
@@ -56,8 +61,8 @@ public class WeChatLoginService {
     public WeChatLoginResp login(WeChatLoginReq req) {
 
         //请求微信接口
-        WeChatAppletLoginResp appletLoginResp = weChatInfraService.appletLogin(req.getJsCode());
-        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), WeChatAppletLoginResp.SUCCESS_CODE)) {
+        LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
+        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
             throw new BadException(appletLoginResp.getErrMsg());
         }
 
@@ -98,14 +103,8 @@ public class WeChatLoginService {
     @Transactional
     public WeChatPhoneNumberResp phoneNumber(PhoneNumberReq req) {
 
-        WeChatAppletStableAccessTokenResp resp = weChatInfraService.getStableAccessToken();
-
-        if (ObjUtil.isNull(resp)) {
-            throw new BadException("获取小程序Token失败");
-        }
-
-        WeChatAppletGetUserPhoneNumberResp getUserPhoneNumberResp = weChatInfraService.getUserPhoneNumber(resp.getAccessToken(), req.getCode(), req.getOpenid());
-        if (ObjUtil.isNull(getUserPhoneNumberResp) || ObjUtil.notEqual(getUserPhoneNumberResp.getErrCode(), WeChatAppletGetUserPhoneNumberResp.SUCCESS_CODE)) {
+        GetUserPhoneNumberResp getUserPhoneNumberResp = weChatAppletInfraService.getUserPhoneNumber(req.getCode(), req.getOpenid());
+        if (ObjUtil.isNull(getUserPhoneNumberResp) || ObjUtil.notEqual(getUserPhoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
             throw new BadException("获取用户手机号码失败");
         }
 
@@ -190,5 +189,59 @@ public class WeChatLoginService {
             }
         }
 
+    }
+
+    /**
+     * 获取登陆用户信息
+     */
+    public WxLoginUserInfoResp getWxLoginUserInfo() {
+
+        UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
+
+        BUser bUser = bUserDao.getById(currentUserInfo.getUserId());
+
+        if (ObjUtil.isNull(bUser)) {
+            return null;
+        }
+
+        return new WxLoginUserInfoResp()
+                .setUserId(bUser.getUserId())
+                .setUserName(bUser.getName())
+                .setRoleId(currentUserInfo.getRoleId())
+                .setRoleName(currentUserInfo.getRoleName())
+                .setType(bUser.getType())
+                .setMobile(bUser.getMobile())
+                .setRealname(bUser.getRealname())
+                .setCompany(bUser.getCompany())
+                .setAddress(bUser.getAddress())
+                .setOrganizationList(currentUserInfo.getOrganizationList()
+                        .stream()
+                        .map(org -> new WxLoginUserInfoResp.Organization()
+                                .setId(org.getId())
+                                .setName(org.getName())
+                                .setAuthCode(org.getAuthCode())
+                        ).collect(Collectors.toList()));
+    }
+
+    /**
+     * 发送订阅消息
+     */
+    public Boolean sendMessage(SendMessageReq req) {
+
+        SendSubscribeReq sendSubscribeReq = new SendSubscribeReq()
+                .setTemplateId(req.getTemplateId())
+                .setPage(req.getPage())
+                .setToUserOpenId(req.getToUserOpenId())
+                .setData(req.getData())
+                .setPage(req.getPage())
+                .setMiniprogramState(req.getMiniprogramState());
+
+        SendSubscribeResp sendSubscribeResp = weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
+
+        if (ObjUtil.notEqual(sendSubscribeResp.getErrCode(), SendSubscribeResp.SUCCESS_CODE)) {
+            return false;
+        }
+
+        return true;
     }
 }
