@@ -77,5 +77,20 @@
         WHERE  bos.flag = 1 AND bo.flag = 1	AND bos.user_id = #{uid}
     </select>
 
+    <select id="findShareUser" resultType="java.lang.String">
+        SELECT u.mobile as mobile
+        FROM b_openid_share as bos
+        INNER JOIN b_openid as bo ON bos.share_openid_id  = bo.openid_id
+        LEFT JOIN b_user as u ON bo.user_id = u.user_id
+        WHERE (
+            bos.user_id  IN
+                <foreach collection="userIdList" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            AND bos.flag = 1
+            AND bo.app_id = #{appid}
+        )
+    </select>
+
 </mapper>
 

@@ -17,5 +17,13 @@
         left join s_file `file` on `file`.file_id = report.report_file_id and `file`.flag = 1
         where report.patrol_record_code = #{patrolRecordCode}
     </select>
+
+    <select id="getPatrolRecordInfo" resultType="com.kge.energy.crm.repository.entityext.result.PatrolRecordResp">
+        select a.report_id, a.form_id, a.service_code, a.patrol_record_code, a.report_file_id, a.report_result,
+               a.operator, DATE_FORMAT(a.operation_time, '%Y-%m-%d %T') AS operation_time, b.filepath
+        from om_report a
+        LEFT JOIN s_file b ON b.file_id = a.report_file_id and b.flag = 1
+        where a.patrol_record_code = #{patrolRecordCode}
+    </select>
 </mapper>
 

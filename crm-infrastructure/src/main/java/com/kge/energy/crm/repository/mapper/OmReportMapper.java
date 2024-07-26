@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kge.energy.crm.repository.entity.OmReport;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import com.kge.energy.crm.repository.entityext.result.OperationDetail;
+import com.kge.energy.crm.repository.entityext.result.PatrolRecordResp;
 
 /**
  * om_report(OmReport)表数据库接口层
@@ -11,5 +12,7 @@ import com.kge.energy.crm.repository.entityext.result.OperationDetail;
 public interface OmReportMapper extends BaseMapper<OmReport> {
 
     OperationDetail getDetail(OperationParam param);
+
+    PatrolRecordResp getPatrolRecordInfo(OperationParam param);
 }
 

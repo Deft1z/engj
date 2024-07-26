@@ -5,11 +5,13 @@ import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.kge.energy.crm.external.ecc.property.EccProperties;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
 import com.kge.energy.crm.external.ecc.resp.EccPageData;
 import com.kge.energy.crm.external.ecc.resp.EccResp;
 import com.kge.platform.framework.web.util.RestUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -22,8 +24,11 @@ import java.util.Date;
 import java.util.TimeZone;
 
 @Service
+@RequiredArgsConstructor
 public class EccService {
     public final String ECC_PREFIX = "https://ecc.nftz:8181";
+
+    private final EccProperties eccProperties;
 
     public EccResp<EccPageData<EccMaintenance>> getMaintenanceList(EccReq req) throws NoSuchAlgorithmException {
         String url = ECC_PREFIX + "/publicApi/maintenance/list";
@@ -37,9 +42,8 @@ public class EccService {
         JSONObject jsonObject = JSONUtil.parseObj(req, false);
         String base64Body = Base64.encode(jsonObject.toString());
         // 生成Authorization
-        // TODO 后面可能改为从配置里获取
-        String appSecret = "h9r2e2nd5bipf6z";
-        String appId = "ntwx001";
+        String appSecret = eccProperties.getAppSecret();
+        String appId = eccProperties.getAppId();
         String signString = base64Body + "&" + timestamp + "&" + appSecret;
         // sha256加密
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");

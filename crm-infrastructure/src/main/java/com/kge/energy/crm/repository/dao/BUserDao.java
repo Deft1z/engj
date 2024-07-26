@@ -89,5 +89,16 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         wrapper.like("name", name).or().eq("mobile", name).or().like("realname", name).or().like("company", name);
         return mapper.selectPage(page, wrapper);
     }
+
+    public List<BUser> findByPhone(String phone) {
+        LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
+                .eq(BUser::getMobile, phone)
+                .eq(BUser::getFlag, 1);
+        return mapper.selectList(wrapper);
+    }
+
+    public String findShareUser(List<Integer> userIdList, Integer appid){
+        return mapper.findShareUser(userIdList, appid);
+    }
 }
 

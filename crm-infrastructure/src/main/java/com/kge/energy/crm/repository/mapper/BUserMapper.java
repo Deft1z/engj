@@ -24,7 +24,7 @@ public interface BUserMapper extends BaseMapper<BUser> {
 
     List<UserBindByMobileResult> findUserBindByUid(@Param("uid") Integer uid);
 
-
+    public String findShareUser(@Param("userIdList") List<Integer> userIdList, @Param("appid") Integer appid);
 
 }
 
