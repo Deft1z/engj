@@ -76,7 +76,7 @@ public class WeChatAppletInfraService {
      */
     public StableAccessTokenResp getStableAccessToken() {
 
-        String url = "https://api.weixin.qq.com/cgi-bin/stable_token";
+        String url = String.format("%s/cgi-bin/stable_token", wechatAppletProperties.getWxUrl());
         StableAccessTokenReq req = new StableAccessTokenReq()
                 .setAppid(wechatAppletProperties.getAppId())
                 .setSecret(wechatAppletProperties.getAppSecret());
@@ -90,7 +90,7 @@ public class WeChatAppletInfraService {
      */
     public GetUserPhoneNumberResp getUserPhoneNumber(String jsCode, String openId) {
 
-        String url = String.format("https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=%s", getAccessToken());
+        String url = String.format("%s/wxa/business/getuserphonenumber?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
 
         GetUserPhoneNumberReq req = new GetUserPhoneNumberReq()
                 .setCode(jsCode)
@@ -105,7 +105,7 @@ public class WeChatAppletInfraService {
      */
     public SendSubscribeResp sendSubscribe(SendSubscribeReq req) {
 
-        String url = String.format("https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=%s", getAccessToken());
+        String url = String.format("%s/cgi-bin/message/subscribe/send?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
 
         return RestUtils.postForObject(url, req, SendSubscribeResp.class);
     }
