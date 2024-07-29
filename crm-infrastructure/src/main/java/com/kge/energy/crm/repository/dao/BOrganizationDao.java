@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.result.OrgDictResult;
+import com.kge.energy.crm.repository.entityext.result.OrgResult;
 import com.kge.energy.crm.repository.mapper.BOrganizationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -36,6 +37,10 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
 
     public List<OrgDictResult> getOrgDictList() {
         return mapper.getOrgDictList();
+    }
+
+    public List<OrgResult> getCompanyList(){
+        return mapper.getCompanyList();
     }
 }
 

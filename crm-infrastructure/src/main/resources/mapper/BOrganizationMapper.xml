@@ -46,5 +46,18 @@
         where flag != -1
           and parameter ->> "$.serviceType" != 0
     </select>
+
+    <select id="getCompanyList" resultType="com.kge.energy.crm.repository.entityext.result.OrgResult">
+        select a.organization_id,
+               a.parameter ->> '$.fullName' as full_name,
+               a.parameter ->> '$.serviceType' as service_type,
+               a.parameter ->> '$.type' as type,
+               a.parameter ->> '$.filepath' as filepath
+        from b_organization a
+        where a.flag = 1
+          and a.parameter ->> '$.serviceType' != 0
+        order by a.parameter ->> '$.serviceType', a.create_time asc
+    </select>
+
 </mapper>
 
