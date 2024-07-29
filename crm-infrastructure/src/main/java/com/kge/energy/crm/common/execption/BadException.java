@@ -43,4 +43,11 @@ public class BadException extends RuntimeException {
     public BadException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public BadException(Integer code, String message, String messagebox) {
+        super(message);
+        this.code = code;
+        this.msg = message;
+        this.showType = messagebox;
+    }
 }

@@ -290,5 +290,18 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         }
         throw new BadException(ResponseCode.DB_INSERT_FAIL);
     }
+
+    /**
+     * @description 小程序我的->获取业务系统列表
+     * @author tangchenghui
+     * @date 2024/7/29 15:28
+    */
+    public List<AppListResult> getAppListByUserId(Integer userId) {
+        return mapper.getAppListByUserId(userId);
+    }
+
+    public List<AppAvatarListResult> getAppAvatarList() {
+        return mapper.getAppAvatarList();
+    }
 }
 

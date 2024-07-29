@@ -60,5 +60,18 @@ public interface BAppMapper extends BaseMapper<BApp> {
      */
     List<OpenIdModelList> FindByUidAndOid(@Param("uids") List<Integer> uids, @Param("ids") List<Integer> ids);
 
+    /**
+     * @description 小程序我的->获取业务系统列表
+     * @author tangchenghui
+     * @date 2024/7/29 15:16
+    */
+    List<AppListResult> getAppListByUserId(@Param("userId") Integer userId);
+
+    /**
+     * @description 小程序我的->获取业务系统图标列表
+     * @author tangchenghui
+     * @date 2024/7/29 15:47
+    */
+    List<AppAvatarListResult> getAppAvatarList();
 }
 
