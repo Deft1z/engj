@@ -10,9 +10,10 @@
         <result property="level" column="level" jdbcType="INTEGER"/>
         <result property="authCode" column="auth_code" jdbcType="VARCHAR"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
-        <result property="lat" column="lat" jdbcType="VARCHAR"/>
-        <result property="lng" column="lng" jdbcType="VARCHAR"/>
-        <result property="parameter" column="parameter" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="sort" column="sort" jdbcType="INTEGER"/>
+        <result property="leaderUserId" column="leader_user_id" jdbcType="INTEGER"/>
+        <result property="parameter" column="parameter"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result property="variables" column="variables" jdbcType="VARCHAR"/>
         <result property="referSource" column="refer_source" jdbcType="VARCHAR"/>
         <result property="referId" column="refer_id" jdbcType="VARCHAR"/>
@@ -22,6 +23,7 @@
         <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
     </resultMap>
 
     <select id="findUserInfoDtoOrOrgs" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Organization">
@@ -49,15 +51,14 @@
 
     <select id="getCompanyList" resultType="com.kge.energy.crm.repository.entityext.result.OrgResult">
         select a.organization_id,
-               a.parameter ->> '$.fullName' as full_name,
+               a.parameter ->> '$.fullName'    as full_name,
                a.parameter ->> '$.serviceType' as service_type,
-               a.parameter ->> '$.type' as type,
-               a.parameter ->> '$.filepath' as filepath
+               a.parameter ->> '$.type'        as type,
+               a.parameter ->> '$.filepath'    as filepath
         from b_organization a
         where a.flag = 1
           and a.parameter ->> '$.serviceType' != 0
         order by a.parameter ->> '$.serviceType', a.create_time asc
     </select>
-
 </mapper>
 
