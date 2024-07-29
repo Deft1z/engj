@@ -1,9 +1,10 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 资源表(BResource)实体类
@@ -16,75 +17,120 @@ import com.baomidou.mybatisplus.annotation.*;
 public class BResource {
 
     @TableId(type = IdType.AUTO)
-    private Integer resourceId; 
+    private Integer resourceId;
 
     /**
      * 父资源
      */
-    private Integer parentResourceId; 
+    private Integer parentResourceId;
 
     /**
-     * 停用
+     * 资源名称
      */
-    private Integer referResourceId; 
+    private String resourceName;
 
     /**
-     * 0，1，2，3,路由三级
+     * 资源编码
      */
-    private Integer level; 
+    private String resourceCode;
 
     /**
-     * 子系统、板块、模块、功能块
+     * 资源类型：menu、button
      */
-    private String type; 
+    private String resourceType;
 
     /**
-     * 与真实路由对应
+     * 重构后停用
      */
-    private String name; 
+    private Integer referResourceId;
 
     /**
-     * 管理后台资源名称
+     * 0，1，2，3,路由三级，重构后停用
      */
-    private String displayName; 
+    private Integer level;
+
+    /**
+     * 子系统、板块、模块、功能块，重构后停用
+     */
+    private String type;
+
+    /**
+     * 与真实路由对应，重构后停用
+     */
+    private String name;
+
+    /**
+     * 管理后台资源名称，重构后停用
+     */
+    private String displayName;
 
     /**
      * 排序
      */
-    private Integer sort; 
+    private Integer sort;
+
+    /**
+     * 路由地址
+     */
+    private String path;
+
+    /**
+     * 图标编码
+     */
+    private String iconCode;
+
+    /**
+     * 图标文件路径
+     */
+    private String iconFilePath;
+
+    /**
+     * 菜单状态（0正常 1停用）
+     */
+    private Integer status;
+
+    /**
+     * 系统类型：applet、mgr
+     */
+    private String systemType;
 
     /**
      * 软删除标识
      */
-    private Integer flag; 
+    private Integer flag;
 
     /**
      * 创建用户ID
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer createUserId; 
+    private Integer createUserId;
 
     /**
      * 创建时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime createTime; 
+    private LocalDateTime createTime;
 
     /**
      * 修改用户ID
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer modifyUserId; 
+    private Integer modifyUserId;
 
     /**
      * 修改时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime modifyTime; 
+    private LocalDateTime modifyTime;
 
     /**
      * 备注
      */
-    private String remark; 
+    private String remark;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 

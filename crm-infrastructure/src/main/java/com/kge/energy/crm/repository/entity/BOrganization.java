@@ -23,55 +23,65 @@ public class BOrganization {
      * 集团及二级公司组织表
      */
     @TableId(type = IdType.AUTO)
-    private Integer organizationId; 
+    private Integer organizationId;
 
     /**
      * 上一级组织ID
      */
-    private Integer parentOrganizationId; 
+    private Integer parentOrganizationId;
 
     /**
      * 停用
      */
-    private Integer regionId; 
+    private Integer regionId;
 
     /**
      * 停用
      */
-    private Integer userTenantId; 
+    private Integer userTenantId;
 
     /**
      * 集团总部；电力建设；工程咨询设计；科技服务与智慧能源；物业运营；城建建设；
      */
-    private String type; 
+    private String type;
 
     /**
      * 总共两层
      */
-    private Integer level; 
+    private Integer level;
 
     /**
      * 停用
      */
-    private String authCode; 
+    private String authCode;
 
     /**
      * 为集团以及旗下16家子公司名称
      */
-    private String name; 
+    private String name;
 
     /**
-     * 纬度
+     * 显示顺序
      */
-    private String lat; 
+    private Integer sort;
 
     /**
-     * 经度
+     * 维度，重构后停用
      */
-    private String lng; 
+    private String lat;
 
     /**
-     * 停用
+     * 经度，重构后停用
+     */
+    private String lng;
+
+    /**
+     * 负责人ID
+     */
+    private Integer leaderUserId;
+
+    /**
+     * type：标签，full Name：公司全称，serviceType：服务类型，filepath：介绍图片
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
     private OrganizationParameter parameter;
@@ -79,28 +89,28 @@ public class BOrganization {
     /**
      * 停用
      */
-    private String variables; 
+    private String variables;
 
     /**
      * 停用
      */
-    private String referSource; 
+    private String referSource;
 
     /**
      * 停用
      */
-    private String referId; 
+    private String referId;
 
     /**
-     * 软删除标识
+     * 数据状态：-1-删除，1-正常
      */
-    private Integer flag; 
+    private Integer flag;
 
     /**
      * 创建用户ID
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer createUserId; 
+    private Integer createUserId;
 
     /**
      * 创建时间
@@ -112,7 +122,7 @@ public class BOrganization {
      * 修改用户ID
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer modifyUserId; 
+    private Integer modifyUserId;
 
     /**
      * 修改时间
@@ -123,6 +133,11 @@ public class BOrganization {
     /**
      * 备注
      */
-    private String remark; 
+    private String remark;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 

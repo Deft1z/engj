@@ -7,30 +7,45 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 
 /**
- * 用户租户关系(RUserTenant)实体类
+ * 资源接口表(BResourceInterface)实体类
  *
  * @author wangjihua
- * @since 2024-07-03 20:38:23
+ * @since 2024-07-29 16:33:13
  */
 @Data
 @Accessors(chain = true)
-public class RUserTenant {
+public class BResourceInterface {
 
     /**
-     * 用户机构归属表
+     * id
      */
     @TableId(type = IdType.AUTO)
-    private Integer userTenantId;
+    private Integer id;
 
     /**
-     * 用户ID
+     * 资源id
      */
-    private Integer userId;
+    private Integer resourceId;
 
     /**
-     * 组织ID
+     * 接口名称
      */
-    private Integer organizationId;
+    private String interfaceName;
+
+    /**
+     * 接口地址
+     */
+    private String interfaceUrl;
+
+    /**
+     * 请求方式（GET POST PUT DELETE）
+     */
+    private String requestMethod;
+
+    /**
+     * 状态（0正常 1停用）
+     */
+    private Integer status;
 
     /**
      * 数据状态：-1-删除，1-正常
@@ -38,7 +53,7 @@ public class RUserTenant {
     private Integer flag;
 
     /**
-     * 创建用户ID
+     * 创建人ID
      */
     @TableField(fill = FieldFill.INSERT)
     private Integer createUserId;
@@ -50,25 +65,15 @@ public class RUserTenant {
     private LocalDateTime createTime;
 
     /**
-     * 修改用户ID
+     * 更新人ID
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Integer modifyUserId;
 
     /**
-     * 修改时间
+     * 更新时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
     private LocalDateTime modifyTime;
-
-    /**
-     * 备注
-     */
-    private String remark;
-
-    /**
-     * 租户id
-     */
-    private Integer tenantId;
 }
 

@@ -1,15 +1,16 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 角色资源权限(RRoleResource)实体类
  *
  * @author wangjihua
- * @since 2024-07-03 20:38:24
+ * @since 2024-07-29 16:54:07
  */
 @Data
 @Accessors(chain = true)
@@ -19,65 +20,75 @@ public class RRoleResource {
      * 角色资源表
      */
     @TableId(type = IdType.AUTO)
-    private Integer roleResourceId; 
+    private Integer roleResourceId;
 
     /**
      * b_role主键
      */
-    private Integer roleId; 
+    private Integer roleId;
 
     /**
      * b_resource主键
      */
-    private Integer resourceId; 
+    private Integer resourceId;
 
     /**
-     * 读权限
+     * 数据状态：-1-删除，1-正常
      */
-    private Integer authRead; 
+    private Integer flag;
 
     /**
-     * 写权限
+     * 读权限，重构后停用
      */
-    private Integer authWrite; 
+    private Integer authRead;
 
     /**
-     * 删除权限
+     * 写权限，重构后停用
      */
-    private Integer authDelete; 
+    private Integer authWrite;
 
     /**
-     * 审核权限
+     * 删除权限，重构后停用
      */
-    private Integer authAudit; 
+    private Integer authDelete;
+
+    /**
+     * 审核权限，重构后停用
+     */
+    private Integer authAudit;
 
     /**
      * 创建用户ID
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer createUserId; 
+    private Integer createUserId;
 
     /**
      * 创建时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime createTime; 
+    private LocalDateTime createTime;
 
     /**
      * 修改用户ID
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer modifyUserId; 
+    private Integer modifyUserId;
 
     /**
      * 修改时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime modifyTime; 
+    private LocalDateTime modifyTime;
 
     /**
      * 备注
      */
-    private String remark; 
+    private String remark;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 
