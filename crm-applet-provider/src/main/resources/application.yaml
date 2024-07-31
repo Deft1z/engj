@@ -1,3 +1,7 @@
+server:
+  servlet:
+    context-path: /applet
+
 spring:
   profiles:
     active: @profileActive@

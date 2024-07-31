@@ -11,5 +11,29 @@
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+    <select id="getAllCommentsByUserId" resultType="com.kge.energy.crm.repository.entityext.result.AppletCommentResult">
+        SELECT
+            b.realname AS name,
+            c.comment_id AS id,
+            c.parent_comment_id AS pid,
+            c.user_id AS uid,
+            c.content AS content,
+            (select count(*) from r_user_like_comment where comment_id = c.comment_id and flag = 1) as cal_like_num,
+            c.like_number AS thumb,
+            c.create_time AS date,
+            bu.realname AS rname,
+        CASE
+            WHEN (select count(*) from r_user_like_comment where comment_id = c.comment_id and flag = 1 and user_id = #{userId}) > 0 THEN 1
+            ELSE 0
+        END AS status
+        FROM
+            cms_comment c
+                LEFT JOIN b_user b ON c.user_id = b.user_id
+                LEFT JOIN cms_comment c1 ON c.parent_comment_id = c1.comment_id
+                LEFT JOIN b_user bu ON c1.user_id = bu.user_id
+        ORDER BY
+            c.create_time
+    </select>
+
 </mapper>
 
