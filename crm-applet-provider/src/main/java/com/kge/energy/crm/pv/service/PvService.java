@@ -1,13 +1,24 @@
 package com.kge.energy.crm.pv.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.execption.BadException;
+import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.epcpv.req.EpcpvInfoReq;
 import com.kge.energy.crm.external.epcpv.service.EpcpvService;
+import com.kge.energy.crm.pv.req.PvCommentReq;
 import com.kge.energy.crm.pv.req.PvInfoReq;
 import com.kge.energy.crm.external.epcpv.property.EpcpvProperties;
+import com.kge.energy.crm.pv.req.PvLikeReq;
 import com.kge.energy.crm.pv.resp.AppletCommentResp;
 import com.kge.energy.crm.repository.dao.CmsCommentDao;
+import com.kge.energy.crm.repository.dao.RUserLikeCommentDao;
+import com.kge.energy.crm.repository.entity.CmsComment;
+import com.kge.energy.crm.repository.entity.RUserLikeComment;
 import com.kge.energy.crm.repository.entityext.result.AppletCommentResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +35,8 @@ public class PvService {
     private final EpcpvService epcpvService;
 
     private final CmsCommentDao commentDao;
+
+    private final RUserLikeCommentDao userLikeCommentDao;
 
     public Map<String, Object> getAllPvInfo(PvInfoReq pvInfoReq){
         EpcpvInfoReq epcpvInfoReq = new EpcpvInfoReq(pvInfoReq.getStartdate(), pvInfoReq.getEnddate());
@@ -51,5 +64,75 @@ public class PvService {
         return resultMap;
     }
 
+    public Integer commentPv(PvCommentReq pvCommentReq){
+        CmsComment cmsComment = new CmsComment();
+        cmsComment.setUserId(UserInfoContextUtils.getCurrentUserId());
+        cmsComment.setContent(pvCommentReq.getContent());
 
+        if(pvCommentReq.getId() > 0){
+            cmsComment.setParentCommentId(pvCommentReq.getId());
+        }
+        commentDao.save(cmsComment);
+
+        return cmsComment.getCommentId();
+    }
+
+    public boolean likeComment(PvLikeReq pvLikeReq){
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        if(ObjectUtil.isNull(userInfoDto)){
+            throw new BadException(ResponseCode.AUTHORITY_FAIL);
+        }
+
+        CmsComment cmsComment = commentDao.getById(pvLikeReq.getId());
+        if(ObjectUtil.isNull(cmsComment)){
+            return false;
+        }
+
+        if(pvLikeReq.getStatus() == 0) { // 点赞
+            RUserLikeComment userLikeComment = new RUserLikeComment();
+            userLikeComment.setCommentId(pvLikeReq.getId());
+            userLikeComment.setUserId(userInfoDto.getUserId().intValue());
+            userLikeComment.setFlag(1);
+
+            if(userLikeCommentDao.findThumbsUp(userLikeComment)){// 查找之前是否已经点赞了
+                return false;
+            }
+
+            if(userLikeCommentDao.findThumbsUp2(userLikeComment)){// 之前点赞过，但又取消的
+                boolean result = userLikeCommentDao.thumbsUp2(userLikeComment);
+                if(result){
+                    return commentDao.thumbsUp(pvLikeReq.getId());
+                }
+                return false;
+            }
+
+            boolean result = userLikeCommentDao.save(userLikeComment);
+            if(result){
+                return commentDao.thumbsUp(pvLikeReq.getId());
+            }
+
+            return false;
+
+        } else { //取消点赞
+            RUserLikeComment userLikeComment = new RUserLikeComment();
+            userLikeComment.setCommentId(pvLikeReq.getId());
+            userLikeComment.setUserId(userInfoDto.getUserId().intValue());
+
+            LambdaQueryWrapper<RUserLikeComment> wrapper = Wrappers.<RUserLikeComment>lambdaQuery()
+                    .eq(RUserLikeComment::getCommentId, userLikeComment.getCommentId())
+                    .eq(RUserLikeComment::getUserId, userLikeComment.getUserId());
+            Long cnt = userLikeCommentDao.count(wrapper);
+
+            if(userLikeCommentDao.findThumbsUp(userLikeComment)){// 查找之前是否已经点赞了
+                boolean result = userLikeCommentDao.cancelThumbsUp(userLikeComment);
+                if(result){
+                    boolean commentResult = commentDao.reduceLikeNumber(pvLikeReq.getId());
+                    return commentResult;
+                }
+                return false;
+            } else {
+                return false;
+            }
+        }
+    }
 }

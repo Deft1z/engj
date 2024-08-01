@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
+import cn.hutool.core.lang.Opt;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.repository.entity.BOpenidShare;
@@ -30,6 +31,25 @@ public class CmsCommentDao extends ServiceImpl<CmsCommentMapper, CmsComment> {
         LambdaUpdateWrapper<CmsComment> wrapper = Wrappers.<CmsComment>update().lambda()
                 .set(CmsComment::getLikeNumber, likeNumber)
                 .eq(CmsComment::getCommentId, commentId);
+        int resultInt = mapper.update(wrapper);
+        return resultInt != 0;
+    }
+
+    public boolean thumbsUp(Integer commentId) {
+        CmsComment cmsComment = mapper.selectById(commentId);
+        LambdaUpdateWrapper<CmsComment> wrapper = Wrappers.<CmsComment>update().lambda()
+                .set(CmsComment::getLikeNumber, Opt.ofNullable(cmsComment.getLikeNumber()).orElse(0) + 1)
+                .eq(CmsComment::getCommentId, commentId);
+        int resultInt = mapper.update(wrapper);
+        return resultInt != 0;
+    }
+
+    public boolean reduceLikeNumber(Integer commentId) {
+        CmsComment cmsComment = mapper.selectById(commentId);
+        LambdaUpdateWrapper<CmsComment> wrapper = Wrappers.<CmsComment>update().lambda()
+                .set(CmsComment::getLikeNumber, Opt.ofNullable(cmsComment.getLikeNumber()).orElse(0) - 1)
+                .eq(CmsComment::getCommentId, commentId)
+                .gt(CmsComment::getLikeNumber, 0);
         int resultInt = mapper.update(wrapper);
         return resultInt != 0;
     }
