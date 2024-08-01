@@ -2,8 +2,10 @@ package com.kge.energy.crm.pv.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.organization.req.OrgReq;
 import com.kge.energy.crm.pv.req.PvCommentReq;
+import com.kge.energy.crm.pv.req.PvDetailReq;
 import com.kge.energy.crm.pv.req.PvInfoReq;
 import com.kge.energy.crm.pv.req.PvLikeReq;
 import com.kge.energy.crm.pv.service.PvService;
@@ -49,5 +51,11 @@ public class PvController {
     @PostMapping("/Management/Pv/like/add")
     public CommonResponse<Object> commentPv(@Validated @RequestBody PvLikeReq pvLikeReq){
         return CommonResponse.suc(pvService.likeComment(pvLikeReq));
+    }
+
+    @ConvertToGoFormats
+    @GetMapping("/Management/Pv/detail")
+    public CommonResponse<Object> commentPv(@Validated @RequestBody PvDetailReq req){
+        return CommonResponse.suc(pvService.getProjectDetailsList(req));
     }
 }

@@ -9,6 +9,8 @@ import cn.hutool.json.JSONUtil;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.kge.energy.crm.external.epcpv.property.EpcpvProperties;
+import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsCondition;
+import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.external.epcpv.req.EpcpvInfoReq;
 import com.kge.energy.crm.external.epcpv.resp.*;
 import com.kge.platform.framework.web.util.RestUtils;
@@ -217,6 +219,38 @@ public class EpcpvService {
 
         return resultMap;
     }
+
+    public Map<String, Object> getProjectDetailsList(EpcpvDetailsReq req) {
+        Map<String, Object> resultMap = new HashMap<>();
+        List<EpcpvDetailsResp> list = new ArrayList<>();
+        Integer total = 0;
+
+        String url = epcpvProperties.getUrl() + epcpvProperties.getProlist();
+        HttpHeaders headers = RestUtils.defaultJsonHeaders();
+        headers.add("Authorization", genAccessToken());
+        String resultStr = RestUtils.postForObject(url, headers, JSONUtil.toJsonStr(req), String.class);
+        JSONObject data = JSONUtil.parseObj(resultStr).getJSONObject("data");
+        total = data.getInt("total");
+
+        JSONArray details = data.getJSONArray("list");
+        for(Object object : details){
+            JSONObject item = (JSONObject) object;
+            EpcpvDetailsResp epcpvDetailsResp = new EpcpvDetailsResp(
+                    item.getStr("projectName"),
+                    item.getStr("regionName"),
+                    item.getStr("stageShowName"),
+                    item.getStr("projectMaster"),
+                    String.format("%.2f", Opt.ofNullable(item.getFloat("capacity")).orElse(0.00f)),
+                    item.getStr("startDate")
+            );
+            list.add(epcpvDetailsResp);
+        }
+
+        resultMap.put("list", list);
+        resultMap.put("total", total);
+        return resultMap;
+    }
+
     public String genAccessToken(){
         String tokenString = stringRedisTemplate.opsForValue().get(redisFront + PVM_ACCESS_TOKEN_KEY_SUFFIX);
         if(StrUtil.isNotBlank(tokenString)){

@@ -1,6 +1,7 @@
 package com.kge.energy.crm.pv.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -8,9 +9,12 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsCondition;
+import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.external.epcpv.req.EpcpvInfoReq;
 import com.kge.energy.crm.external.epcpv.service.EpcpvService;
 import com.kge.energy.crm.pv.req.PvCommentReq;
+import com.kge.energy.crm.pv.req.PvDetailReq;
 import com.kge.energy.crm.pv.req.PvInfoReq;
 import com.kge.energy.crm.external.epcpv.property.EpcpvProperties;
 import com.kge.energy.crm.pv.req.PvLikeReq;
@@ -134,5 +138,18 @@ public class PvService {
                 return false;
             }
         }
+    }
+
+    public Map<String, Object> getProjectDetailsList(PvDetailReq req) {
+        EpcpvDetailsReq request = new EpcpvDetailsReq();
+        EpcpvDetailsCondition condition = new EpcpvDetailsCondition();
+        request.setPageNo(req.getPage());
+        request.setPageSize(req.getSize());
+        Opt.ofBlankAble(req.getZone()).ifPresentOrElse(s -> condition.setRegionName(s.substring(0, s.length()-1)), () -> condition.setRegionName(""));
+        condition.setStageShowName(Opt.ofBlankAble(req.getPeriod()).orElse(""));
+        condition.setQueryDateStart(Opt.ofBlankAble(req.getStartdate()).orElse(""));
+        condition.setQueryDateEnd(Opt.ofBlankAble(req.getEnddate()).orElse(""));
+        request.setCondition(condition);
+        return epcpvService.getProjectDetailsList(request);
     }
 }
