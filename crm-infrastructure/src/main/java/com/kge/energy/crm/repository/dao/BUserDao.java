@@ -100,5 +100,13 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
     public String findShareUser(List<Integer> userIdList, Integer appid){
         return mapper.findShareUser(userIdList, appid);
     }
+
+    public Long findNewUserNum(String startTime, String endTime){
+        return mapper.findNewUserNum(startTime, endTime);
+    }
+
+    public Long findNewUserCount(String startTime, String endTime){
+        return mapper.findNewUserCount(startTime, endTime);
+    }
 }
 

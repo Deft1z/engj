@@ -25,5 +25,9 @@ public interface WfFormMapper extends BaseMapper<WfForm> {
                                           @Param("listParam") WxUserWorkOrderParam listParam);
 
     List<FlowResult> getFlowByFormId(Integer formId);
+
+    public Long findOrderNum(@Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    public Long findNewConsultingCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 }
 

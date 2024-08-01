@@ -98,5 +98,34 @@
         where c.form_id = #{formId}
           AND a.flag != -1
     </select>
+
+    <select id="findContractNum" resultType="java.lang.Long">
+        SELECT
+            count(*)
+        FROM
+            sc_service_contract
+        WHERE
+            form_id = ANY (
+                SELECT
+                    form_id
+                FROM
+                    wf_form
+                WHERE
+                    create_user_id = ANY (
+                        SELECT b.user_id from b_user b
+                        LEFT JOIN r_user_role r ON r.user_id = b.user_id
+                        LEFT JOIN l_user_token l on l.user_id = b.user_id
+                        WHERE
+                            l.modify_time BETWEEN #{startTime} AND #{endTime}
+                        AND r.role_id = 5)
+            )
+    </select>
+
+    <select id="findNewContractCount" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM sc_service_contract
+        WHERE flag != -1 AND create_time between #{startTime} and #{endTime}
+    </select>
+
 </mapper>
 

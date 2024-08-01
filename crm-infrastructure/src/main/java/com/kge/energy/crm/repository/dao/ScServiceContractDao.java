@@ -35,5 +35,13 @@ public class ScServiceContractDao extends ServiceImpl<ScServiceContractMapper, S
 
     }
 
+    public Long findContractNum(String startTime, String endTime) {
+        return mapper.findContractNum(startTime,endTime);
+    }
+
+    public Long findNewContractCount(String startTime, String endTime) {
+        return mapper.findNewContractCount(startTime,endTime);
+    }
+
 }
 

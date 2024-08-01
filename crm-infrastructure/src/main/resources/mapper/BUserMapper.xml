@@ -96,5 +96,24 @@
         AND bo.app_id = #{appid}
         )
     </select>
+
+    <select id="findNewUserNum" resultType="java.lang.Long">
+        SELECT
+            count(b.user_id)
+        FROM
+            b_user b
+                LEFT JOIN r_user_role r ON r.user_id = b.user_id
+                LEFT JOIN l_user_token l on l.user_id = b.user_id
+        WHERE
+            l.modify_time BETWEEN #{startTime} AND #{endTime}
+            AND r.role_id = 5
+    </select>
+
+    <select id="findNewUserCount" resultType="java.lang.Long">
+        select count(1) AS new_user_count
+        from b_user
+        where (type = '社会客户' or type = '领导') AND flag != -1 AND create_time between #{startTime} and #{endTime}
+    </select>
+
 </mapper>
 

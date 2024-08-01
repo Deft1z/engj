@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
+import com.kge.energy.crm.repository.entityext.result.StartEva;
 import com.kge.energy.crm.repository.mapper.ScContractEvaluateMapper;
 import com.kge.energy.crm.repository.entity.ScContractEvaluate;
 import jakarta.annotation.Resource;
@@ -16,5 +17,12 @@ public class ScContractEvaluateDao extends ServiceImpl<ScContractEvaluateMapper,
 
     private final ScContractEvaluateMapper mapper;
 
+    public StartEva getStartEva(Integer star) {
+        return mapper.getStartEva(star).get(0);
+    }
+
+    public Float getAverage() {
+        return mapper.getAverage();
+    }
 }
 

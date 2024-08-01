@@ -16,5 +16,9 @@ public class WComplainDao extends ServiceImpl<WComplainMapper, WComplain> {
 
     private final WComplainMapper mapper;
 
+    public Long findComplainCount(String startTime, String endTime) {
+        return mapper.findNewComplainCount(startTime, endTime);
+    }
+
 }
 

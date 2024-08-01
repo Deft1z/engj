@@ -25,5 +25,11 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <select id="findNewComplainCount" resultType="java.lang.Long">
+        select count(1) AS new_complain_count
+        from w_complain
+        where flag != -1 AND create_time between #{startTime} and #{endTime}
+    </select>
+
 </mapper>
 

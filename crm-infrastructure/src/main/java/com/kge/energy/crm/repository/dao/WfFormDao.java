@@ -39,5 +39,13 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
     public List<FlowResult> getFlowByFormId(Integer formId) {
         return mapper.getFlowByFormId(formId);
     }
+
+    public Long findOrderNum(String startTime, String endTime) {
+        return mapper.findOrderNum(startTime, endTime);
+    }
+
+    public Long findNewConsultingCount(String startTime, String endTime) {
+        return mapper.findNewConsultingCount(startTime, endTime);
+    }
 }
 

@@ -160,5 +160,24 @@
         from wf_form_flow
         where form_id = #{formId}
     </select>
+
+    <select id="findOrderNum" resultType="java.lang.Long">
+        select count(*) from wf_form where create_user_id = any(SELECT
+                b.user_id
+            FROM
+                b_user b
+                    LEFT JOIN r_user_role r ON r.user_id = b.user_id
+                    LEFT JOIN l_user_token l on l.user_id = b.user_id
+            WHERE
+                l.modify_time BETWEEN #{startTime} AND #{endTime}
+              AND r.role_id = 5)
+    </select>
+
+    <select id="findNewConsultingCount" resultType="java.lang.Long">
+        select count(1) AS new_consulting_count
+        from wf_form a
+        where a.flag != -1 AND a.create_time between #{startTime} and #{endTime}
+    </select>
+
 </mapper>
 

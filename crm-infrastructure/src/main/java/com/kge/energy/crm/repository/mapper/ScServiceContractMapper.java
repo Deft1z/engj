@@ -18,5 +18,9 @@ public interface ScServiceContractMapper extends BaseMapper<ScServiceContract> {
 
     IPage<ContractResult> contractPageByUserIdLoad(@Param("reqIpage") IPage<WxUserWorkOrderParam> reqIpage,
                                                    @Param("listParam") WxUserWorkOrderParam listParam);
+
+    public Long findContractNum(@Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    public Long findNewContractCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 }
 

@@ -26,5 +26,8 @@ public interface BUserMapper extends BaseMapper<BUser> {
 
     public String findShareUser(@Param("userIdList") List<Integer> userIdList, @Param("appid") Integer appid);
 
+    public Long findNewUserNum(@Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    public Long findNewUserCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 }
 
