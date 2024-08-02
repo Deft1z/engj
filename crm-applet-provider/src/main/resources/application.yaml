@@ -37,7 +37,6 @@ spring:
       lettuce:
         pool:
           min-idle: 1
-      front: engjkfxcx_dev_
 
 decorator:
   datasource:
@@ -73,3 +72,14 @@ auth:
     white-list:
   permission:
     white-list:
+
+epcpv:
+  allregions: api/v1/pv/project/dim/regions
+  allstages: api/v1/pv/project/dim/stages
+  total: api/v1/pv/project/total
+  capacitytotal: api/v1/pv/project/transformer/capacity/total
+  regionstat: api/v1/pv/project/region/stat
+  capacitystat: api/v1/pv/project/transformer/region/capacity/stat
+  stagestat: api/v1/pv/project/stage/stat
+  prolist: api/v1/pv/project/list
+  inststat: api/v1/pv/project/inst/capacity/stat

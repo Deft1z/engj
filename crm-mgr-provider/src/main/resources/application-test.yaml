@@ -2,22 +2,23 @@ server:
   port: 9250
 
 mysql:
-  host: 172.16.17.157
-  port: 3307
+  host: 172.16.17.137
+  port: 3306
   dbname: ntcrm_test
-  username: ntcrmTest
-  password: ntcrmT@1113
+  username: crm_test
+  password: Crm_test@3030
 
 spring:
   data:
     redis:
-      host: 172.16.17.157
+      host: 172.16.17.137
       port: 6379
-      database: 11
+      database: 0
+      front: engjkfxcx_test_
 
 auth:
   token:
-    redis-front: ntcrm_prod_token_
+    redis-front: ntcrm_test_token_
 
 ecc:
   appId: ntwx001

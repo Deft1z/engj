@@ -2,22 +2,32 @@ server:
   port: 9251
 
 mysql:
-  host: 172.16.17.157
-  port: 3307
+  host: 172.16.17.137
+  port: 3306
   dbname: ntcrm_test
-  username: ntcrmTest
-  password: ntcrmT@1113
+  username: crm_test
+  password: Crm_test@3030
 
 spring:
   data:
     redis:
-      host: 172.16.17.157
+      host: 172.16.17.137
       port: 6379
-      database: 11
+      database: 0
+      front: engjkfxcx_test_
 
 auth:
   token:
-    redis-front: ntcrm_prod_token_
+    redis-front: ntcrm_test_token_
+
+wechat:
+  appId: wx00c47c0f09ea4612
+  appSecret: ee6576d61d20ba65286739ea977a6096
+  orderStatusChangeTemplate: C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE
+  agencyOrderTemplate: TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU
+  feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
+  wxUrl: http://172.16.17.147:9011/vcheck
+  version: formal
 
 ecc:
   appId: ntwx001
@@ -26,13 +36,4 @@ ecc:
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
   appSecret: BR9P25wO1qmKy9U7759S46AE9A5Yq6HN
-  url: http://172.18.26.131:8086/
-  allregions: api/v1/pv/project/dim/regions
-  allstages: api/v1/pv/project/dim/stages
-  total: api/v1/pv/project/total
-  capacitytotal: api/v1/pv/project/transformer/capacity/total
-  regionstat: api/v1/pv/project/region/stat
-  capacitystat: api/v1/pv/project/transformer/region/capacity/stat
-  stagestat: api/v1/pv/project/stage/stat
-  prolist: api/v1/pv/project/list
-  inststat: api/v1/pv/project/inst/capacity/stat
+  url: http://172.16.17.71:8087/

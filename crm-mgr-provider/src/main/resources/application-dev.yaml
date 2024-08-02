@@ -15,6 +15,7 @@ spring:
       port: 6379
       password: iot
       database: 11
+      front: engjkfxcx_dev_
 
 ecc:
   appId: ntwx001
