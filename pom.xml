@@ -14,6 +14,10 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
+	<properties>
+		<knife4j-openapi3-jakarta-spring-boot-starter.version>4.5.0</knife4j-openapi3-jakarta-spring-boot-starter.version>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -27,6 +31,14 @@
 				<artifactId>crm-domain</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+
+			<!-- Knife4j swagger增强在线接口文档 -->
+			<dependency>
+				<groupId>com.github.xiaoymin</groupId>
+				<artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+				<version>${knife4j-openapi3-jakarta-spring-boot-starter.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
