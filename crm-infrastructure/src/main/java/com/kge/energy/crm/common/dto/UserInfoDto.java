@@ -18,9 +18,9 @@ import java.util.List;
 public class UserInfoDto extends CommonUserInfoDto {
 
     /**
-     * 用户类型
+     * 系统类型：applet、mgr
      */
-    private String type;
+    private String systemType;
 
     /**
      * 手机
@@ -33,19 +33,23 @@ public class UserInfoDto extends CommonUserInfoDto {
     private String wxOpenId;
 
     /**
-     * 角色ID
+     * 角色列表
      */
-    private Integer roleId;
-
-    /**
-     * 角色名称
-     */
-    private String roleName;
+    private List<Role> roleList;
 
     /**
      * 组织列表
      */
     private List<Organization> organizationList;
+
+    @Data
+    @Accessors(chain = true)
+    public static class Role {
+
+        private Integer id;
+
+        private String name;
+    }
 
     @Data
     @Accessors(chain = true)

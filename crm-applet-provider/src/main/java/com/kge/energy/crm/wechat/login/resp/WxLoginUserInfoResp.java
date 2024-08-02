@@ -18,10 +18,6 @@ public class WxLoginUserInfoResp {
 
     private String userName;
 
-    private Integer roleId;
-
-    private String roleName;
-
     private String type;
 
     private String mobile;
@@ -32,7 +28,22 @@ public class WxLoginUserInfoResp {
 
     private String address;
 
+    /**
+     * 角色列表
+     */
+    private List<Role> roleList;
+
     private List<Organization> organizationList;
+
+    @Data
+    @Accessors(chain = true)
+    public static class Role {
+
+        private Integer id;
+
+        private String name;
+    }
+
 
     @NoArgsConstructor
     @Data

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * 资源表(BResource)实体类
  *
  * @author wangjihua
- * @since 2024-07-03 20:38:24
+ * @since 2024-07-30 16:47:28
  */
 @Data
 @Accessors(chain = true)
@@ -70,9 +70,14 @@ public class BResource {
     private Integer sort;
 
     /**
-     * 路由地址
+     * 资源地址
      */
     private String path;
+
+    /**
+     * 资源地址类型：system、file、app、link
+     */
+    private String pathType;
 
     /**
      * 图标编码
