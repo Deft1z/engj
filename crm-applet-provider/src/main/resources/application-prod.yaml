@@ -1,5 +1,5 @@
 server:
-  port: 9050
+  port: 9051
 
 mysql:
   host: 172.16.17.157
