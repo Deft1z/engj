@@ -70,20 +70,20 @@ auth:
   token:
     redis-front: ntcrm_test_token_
     white-list:
-      - /base/user/salt
-      - /base/user/login
-      - /external/sso/auth
+      - /mgr/base/user/salt
+      - /mgr/base/user/login
+      - /mgr/external/sso/auth
   permission:
     white-list:
-      - /chart/contractBack/contractOrderChart
-      - /chart/contractBack/evaluateChart
-      - /chart/userBackMrg/UserChart
-      - /chart/complainBack/complainPerChart
-      - /chart/complainBack/complainRankChart
-      - /applicationBack/applicationBackMrg/list
-      - /baseDataBack/internalBind/list
-      - /baseDataBack/internalBind/detail
-      - /baseDataBack/internalBind/addProject/add
-      - /baseDataBack/internalBind/project/update
-      - /baseDataBack/internalBind/finduser
-      - /baseDataBack/internalBind/bind/add
+      - /mgr/chart/contractBack/contractOrderChart
+      - /mgr/chart/contractBack/evaluateChart
+      - /mgr/chart/userBackMrg/UserChart
+      - /mgr/chart/complainBack/complainPerChart
+      - /mgr/chart/complainBack/complainRankChart
+      - /mgr/applicationBack/applicationBackMrg/list
+      - /mgr/baseDataBack/internalBind/list
+      - /mgr/baseDataBack/internalBind/detail
+      - /mgr/baseDataBack/internalBind/addProject/add
+      - /mgr/baseDataBack/internalBind/project/update
+      - /mgr/baseDataBack/internalBind/finduser
+      - /mgr/baseDataBack/internalBind/bind/add
