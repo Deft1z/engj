@@ -21,16 +21,20 @@ public class CrmMgrProvider {
         ThreadUtil.sleep(1, TimeUnit.SECONDS); // 延迟 1 秒，保证输出到结尾
         log.info("\n" + """
                    =========================================================
-                   Application: {} is running Success!
-                   Local URL:   http://localhost:{}{}
-                   Document:    http://localhost:{}{}/doc.html
+                   Application:       {} is running Success!
+                   Local URL:         http://localhost:{}{}
+                   Document URL:      http://localhost:{}{}/doc.html
+                   Document UserName: {}
+                   Document Password: {}
                    =========================================================
                  """,
                 env.getProperty("spring.application.name"),
                 env.getProperty("server.port"),
                 env.getProperty("server.servlet.context-path"),
                 env.getProperty("server.port"),
-                env.getProperty("server.servlet.context-path")
+                env.getProperty("server.servlet.context-path"),
+                env.getProperty("knife4j.basic.username"),
+                env.getProperty("knife4j.basic.password")
         );
 
     }

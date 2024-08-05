@@ -146,7 +146,7 @@ knife4j:
     enable-home-custom: false
     # 启用自定义主页内容后可以设置一个Markdown文件来自定义显示Home主页的显示内容
     home-custom-path: classpath:markdown/home.md
-    # 否启用搜索功能,默认值为true(代表开启搜索)，如果要禁用搜索，该值设为false
+    # 是否启用搜索功能,默认值为true(代表开启搜索)，如果要禁用搜索，该值设为false
     enable-search: true
     # 禁用默认的Footer显示，如果要自定义的话该属性必须设置为false,否则不会生效
     enable-footer: false
@@ -163,8 +163,8 @@ knife4j:
     enable-group: true
   # 开启Swagger的Basic认证功能,默认是false
   basic:
-    enable: false
+    enable: true
     # Basic认证用户名
     username: admin
-    # Basic认证用密码
+    # Basic认证密码
     password: Kge@2024!

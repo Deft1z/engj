@@ -70,6 +70,9 @@ auth:
   token:
     redis-front: ntcrm_test_token_
     white-list:
+      - ${server.servlet.context-path}/doc.html
+      - ${server.servlet.context-path}/webjars/**
+      - ${server.servlet.context-path}/v3/api-docs/**
   permission:
     white-list:
 
@@ -83,3 +86,80 @@ epcpv:
   stagestat: api/v1/pv/project/stage/stat
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
+
+# springdoc-openapi项目配置
+springdoc:
+  sys-name: 'E能管家-客户小程序API'
+  author: '广州南方电力集团科技发展有限公司'
+  version: 1.0.0
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: ${springdoc.sys-name}
+      paths-to-match: '/**'
+      packages-to-scan: com.kge.energy.crm
+  default-flat-param-object: true
+
+# knife4j的增强配置
+knife4j:
+  # 是否开启Knife4j增强模式
+  enable: true
+  # 是否开启一个默认的跨域配置,该功能配合自定义Host使用
+  cors: false
+  # 是否开启生产环境保护策略
+  production: false
+  setting:
+    # Knife4j默认显示中文(zh-CN),如果想直接显示英文(en-US)，通过该配置进行设置即可
+    language: zh-CN
+    # 是否显示界面中SwaggerModel功能
+    enable-swagger-models: true
+    # 重命名SwaggerModel名称
+    swagger-model-name: 实体类列表
+    # 是否显示界面中"文档管理"功能
+    enable-document-manage: true
+    # 是否开启界面中对某接口的版本控制,如果开启，后端变化后Ui界面会存在小蓝点
+    enable-version: true
+    # 是否在每个Debug调试栏后显示刷新变量按钮,默认不显示
+    enable-reload-cache-parameter: true
+    # 调试Tab是否显示AfterScript功能,默认开启
+    enable-after-script: true
+    # 具体接口的过滤类型,默认为POST
+    enable-filter-multipart-api-method-type: POST
+    # 针对RequestMapping的接口请求类型,在不指定参数类型的情况下,如果不过滤,默认会显示7个类型的接口地址参数,如果开启此配置,默认展示一个Post类型的接口地址
+    enable-filter-multipart-apis: false
+    # 是否开启请求参数缓存，默认为true
+    enable-request-cache: true
+    # 是否启用Host
+    enable-host: false
+    # 启用Host后地址，如：192.168.0.1:8080
+    enable-host-text: ""
+    # 是否启用自定义主页内容，默认false
+    enable-home-custom: false
+    # 启用自定义主页内容后可以设置一个Markdown文件来自定义显示Home主页的显示内容
+    home-custom-path: classpath:markdown/home.md
+    # 是否启用搜索功能,默认值为true(代表开启搜索)，如果要禁用搜索，该值设为false
+    enable-search: true
+    # 禁用默认的Footer显示，如果要自定义的话该属性必须设置为false,否则不会生效
+    enable-footer: false
+    # 是否启用自定义Footer内容，默认false
+    enable-footer-custom: true
+    # 最终在Ui界面底部显示的Footer内容，支持Markdown格式
+    footer-custom-content: Apache License 2.0 | Copyright  2024 - ${springdoc.contact}
+    # 开启动态请求参数，true-开启，false-关闭
+    enable-dynamic-parameter: true
+    # 否启用调试功能,默认值为true(代表开启调试)，如果要禁用调试，该值设为false
+    enable-debug: true
+    # 是否启用OpenAPI功能,默认值为true(代表开启OpenAPI显示)，如果要禁用OpenAPI显示，该值设为false(需要注意的是如果开发者直接禁用调试，那么OpenAPI默认也是不显示的)
+    enable-open-api: true
+    enable-group: true
+  # 开启Swagger的Basic认证功能,默认是false
+  basic:
+    enable: true
+    # Basic认证用户名
+    username: admin
+    # Basic认证密码
+    password: Kge@2024!
