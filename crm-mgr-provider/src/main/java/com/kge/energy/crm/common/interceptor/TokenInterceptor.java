@@ -73,15 +73,15 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         // 设置用户上下文信息
         putUserInfo(Integer.valueOf(uid));
 
-        boolean isPermissionWhiteUrl = authProperties.getPermission()
-                .getWhiteList()
-                .stream()
-                .anyMatch(item -> antPathMatcher.match(item, url));
-        if (isPermissionWhiteUrl) {
-            return true;
-        }
-
-        handlePermission(request, userId);
+        // todo：重构后废弃
+//        boolean isPermissionWhiteUrl = authProperties.getPermission()
+//                .getWhiteList()
+//                .stream()
+//                .anyMatch(item -> antPathMatcher.match(item, url));
+//        if (isPermissionWhiteUrl) {
+//            return true;
+//        }
+//        handlePermission(request, userId);
 
         return true;
     }

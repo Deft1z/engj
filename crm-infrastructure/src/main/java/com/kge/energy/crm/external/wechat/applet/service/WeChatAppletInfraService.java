@@ -11,6 +11,7 @@ import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.resp.SendSubscribeResp;
 import com.kge.energy.crm.external.wechat.applet.resp.StableAccessTokenResp;
+import com.kge.platform.framework.web.util.JsonUtils;
 import com.kge.platform.framework.web.util.RestUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,13 +37,15 @@ public class WeChatAppletInfraService {
     /**
      * 微信小程序登录
      * https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/user-login/code2Session.html
+     * todo：现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}，官网更新不及时
      */
     public LoginResp appletLogin(String jsCode) {
 
         String url = String.format("%s/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",
                 wechatAppletProperties.getWxUrl(), wechatAppletProperties.getAppId(), wechatAppletProperties.getAppSecret(), jsCode);
 
-        return RestUtils.instance().getForObject(url, LoginResp.class);
+        String result = RestUtils.instance().getForObject(url, String.class);
+        return JsonUtils.deserialize(result, LoginResp.class);
     }
 
 

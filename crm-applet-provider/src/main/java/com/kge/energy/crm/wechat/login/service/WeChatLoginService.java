@@ -62,9 +62,10 @@ public class WeChatLoginService {
 
         //请求微信接口
         LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
-        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
-            throw new BadException(appletLoginResp.getErrMsg());
-        }
+        // 现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}
+//        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
+//            throw new BadException(appletLoginResp.getErrMsg());
+//        }
 
         BUser user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 

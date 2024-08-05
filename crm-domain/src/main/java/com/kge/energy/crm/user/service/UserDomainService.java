@@ -46,6 +46,11 @@ public class UserDomainService {
             return null;
         }
 
+        // todo：重构后改为查数据库
+        userInfoDto.setRoleList(
+                List.of(new UserInfoDto.Role().setId(userInfoDto.getRoleId()).setName(userInfoDto.getRoleName()))
+        );
+
         List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrOrgs(bUser.getUserId());
         userInfoDto.setOrganizationList(orgs);
 

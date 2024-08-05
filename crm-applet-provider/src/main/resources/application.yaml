@@ -73,8 +73,6 @@ auth:
       - ${server.servlet.context-path}/doc.html
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
-  permission:
-    white-list:
       - /applet/wechat/login
 
 epcpv:

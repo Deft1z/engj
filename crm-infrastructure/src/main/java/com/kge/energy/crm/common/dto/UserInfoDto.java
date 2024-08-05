@@ -18,6 +18,16 @@ import java.util.List;
 public class UserInfoDto extends CommonUserInfoDto {
 
     /**
+     * 角色ID，重构后废弃
+     */
+    private Integer roleId;
+
+    /**
+     * 角色名称，重构后废弃
+     */
+    private String roleName;
+
+    /**
      * 系统类型：applet、mgr
      */
     private String systemType;
