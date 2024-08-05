@@ -34,3 +34,7 @@ epcpv:
   stagestat: api/v1/pv/project/stage/stat
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
+
+knife4j:
+  # 是否开启生产环境保护策略
+  production: false

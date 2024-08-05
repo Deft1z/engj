@@ -25,3 +25,7 @@ epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
   appSecret: BR9P25wO1qmKy9U7759S46AE9A5Yq6HN
   url: http://172.18.26.131:8086/
+
+knife4j:
+  # 是否开启生产环境保护策略
+  production: false

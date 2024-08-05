@@ -37,10 +37,3 @@ epcpv:
   stagestat: api/v1/pv/project/stage/stat
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
-
-# knife4j的增强配置
-knife4j:
-  # 是否开启Knife4j增强模式
-  enable: true
-  # 是否开启生产环境保护策略
-  production: true
