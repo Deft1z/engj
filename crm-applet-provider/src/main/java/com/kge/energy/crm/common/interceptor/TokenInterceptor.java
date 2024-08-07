@@ -43,8 +43,13 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+        String method = request.getMethod();
         String url = request.getRequestURI();
-        log.info("url:{}", url);
+        log.info("{} {}", request.getMethod(), url);
+
+        if (StrUtil.equalsIgnoreCase(method, "OPTIONS")) {
+            return true;
+        }
 
         boolean isTokenWhiteUrl = authProperties.getToken()
                 .getWhiteList()

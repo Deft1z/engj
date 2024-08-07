@@ -70,9 +70,11 @@ auth:
   token:
     redis-front: ntcrm_test_token_
     white-list:
-      - /mgr/base/user/salt
-      - /mgr/base/user/login
-      - /mgr/external/sso/auth
+      - ${server.servlet.context-path}/base/user/salt
+      - ${server.servlet.context-path}/base/user/login
+      - ${server.servlet.context-path}/external/sso/auth
+      - ${server.servlet.context-path}/external/sso/auth
+      - ${server.servlet.context-path}/error
       - ${server.servlet.context-path}/doc.html
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**

@@ -1,4 +1,4 @@
-package com.kge.energy.crm.resource.req;
+package com.kge.energy.crm.role.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -10,8 +10,11 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "系统菜单资源name", description = "系统菜单资源对象")
-public class SystemResourceReq {
+@Schema(name = "角色列表name", description = "角色列表对象")
+public class RoleListReq {
+
+    @Schema(description = "租户ID")
+    private Integer tenantId;
 
     @Schema(description = "系统类型：applet、mgr", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank

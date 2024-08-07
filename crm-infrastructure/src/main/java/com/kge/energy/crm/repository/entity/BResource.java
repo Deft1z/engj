@@ -134,7 +134,7 @@ public class BResource {
     private String remark;
 
     /**
-     * 租户id
+     * 租户id, todo: 删掉字段
      */
     private Integer tenantId;
 }
