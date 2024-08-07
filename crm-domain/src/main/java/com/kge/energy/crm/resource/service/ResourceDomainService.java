@@ -101,7 +101,6 @@ public class ResourceDomainService {
         resourceBean.setStatus(bResource.getStatus());
         resourceBean.setSystemType(bResource.getSystemType());
         resourceBean.setRemark(bResource.getRemark());
-        resourceBean.setTenantId(bResource.getTenantId());
 
         return resourceBean;
 
