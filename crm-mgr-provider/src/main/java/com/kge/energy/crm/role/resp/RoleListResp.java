@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "角色列表name", description = "角色列表对象")
+@Schema(name = "角色列表响应参数", description = "角色列表响应参数")
 public class RoleListResp {
 
     private List<Role> roles;

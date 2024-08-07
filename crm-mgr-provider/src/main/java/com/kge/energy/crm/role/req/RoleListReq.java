@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "角色列表name", description = "角色列表对象")
+@Schema(name = "角色列表请求参数", description = "角色列表请求参数")
 public class RoleListReq {
 
     @Schema(description = "租户ID")

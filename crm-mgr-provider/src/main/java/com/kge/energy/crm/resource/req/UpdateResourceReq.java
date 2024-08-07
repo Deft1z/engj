@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "编辑菜单资源name", description = "编辑菜单资源对象")
+@Schema(name = "编辑菜单资源请求参数", description = "编辑菜单资源请求参数")
 public class UpdateResourceReq {
 
     @Schema(description = "资源ID", requiredMode = Schema.RequiredMode.REQUIRED)

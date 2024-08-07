@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "删除角色name", description = "删除角色对象")
+@Schema(name = "删除角色请求参数", description = "删除角色请求参数")
 public class DeleteRoleReq {
 
     @Schema(description = "角色ID", requiredMode = Schema.RequiredMode.REQUIRED)

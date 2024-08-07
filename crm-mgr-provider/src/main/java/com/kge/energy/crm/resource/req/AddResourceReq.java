@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "新增菜单资源name", description = "新增菜单资源对象")
+@Schema(name = "新增菜单资源请求参数", description = "新增菜单资源请求参数")
 public class AddResourceReq {
 
     @Schema(description = "父资源ID")

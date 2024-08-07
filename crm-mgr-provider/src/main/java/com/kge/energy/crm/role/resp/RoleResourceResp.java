@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "角色关联菜单name", description = "角色关联菜单对象")
+@Schema(name = "角色关联菜单响应参数", description = "角色关联菜单响应参数")
 public class RoleResourceResp {
 
     @Schema(description = "菜单资源ID", requiredMode = Schema.RequiredMode.REQUIRED)

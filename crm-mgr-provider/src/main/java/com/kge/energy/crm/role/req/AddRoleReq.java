@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "新增角色name", description = "新增角色对象")
+@Schema(name = "新增角色请求参数", description = "新增角色请求参数")
 public class AddRoleReq {
 
     @Schema(description = "租户ID", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "菜单列表name", description = "菜单列表对象")
+@Schema(name = "菜单列表响应参数", description = "菜单列表响应参数")
 public class ResourceListResp {
 
     private List<ResourceBean> resources;

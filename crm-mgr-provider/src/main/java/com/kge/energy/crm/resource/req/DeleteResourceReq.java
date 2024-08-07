@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "删除菜单资源name", description = "删除菜单资源对象")
+@Schema(name = "删除菜单资源请求参数", description = "删除菜单资源请求参数")
 public class DeleteResourceReq {
 
     @Schema(description = "资源ID", requiredMode = Schema.RequiredMode.REQUIRED)
