@@ -162,3 +162,6 @@ knife4j:
     username: admin
     # Basic认证密码
     password: Kge@2024!
+
+framework:
+  global-exception-handler: false
