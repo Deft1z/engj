@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BUserMapper">
+    <resultMap type="com.kge.energy.crm.repository.entity.BUser" id="BUserMap">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="passwd" column="passwd" jdbcType="VARCHAR"/>
+        <result property="passwdSalt" column="passwd_salt" jdbcType="VARCHAR"/>
+        <result property="passwdModifyTime" column="passwd_modify_time" jdbcType="TIMESTAMP"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="realname" column="realname" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <result property="openId" column="open_id" jdbcType="VARCHAR"/>
+        <result property="company" column="company" jdbcType="VARCHAR"/>
+        <result property="address" column="address" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="findUserInfoDto" resultType="com.kge.energy.crm.common.dto.UserInfoDto">
+        select a.user_id userId,
+               a.name    userName,
+               a.realname,
+               a.type,
+               a.mobile,
+               a.open_id wxOpenId,
+               c.role_id roleId,
+               c.name AS roleName
+        from b_user a
+                 JOIN r_user_role b ON b.user_id = a.user_id
+                 JOIN b_role c ON c.role_id = b.role_id
+        where a.flag = 1
+          AND a.user_id = #{userId}
+    </select>
+
+    <select id="getUserByRoleAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
+        select b.`name` AS username, b.realname, b.open_id, a.user_id
+        from r_user_role a
+                 LEFT JOIN b_user b ON b.user_id = a.user_id
+                 LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
+        where b.flag = 1
+          and a.role_id = #{roleId}
+          AND c.organization_id = #{organizationId}
+    </select>
+
+    <select id="getUserByRoleId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
+        select b.`name` AS username, b.realname, b.open_id, a.user_id
+        from r_user_role a
+                 LEFT JOIN b_user b ON b.user_id = a.user_id
+        where b.flag = 1
+          and a.role_id = #{roleId}
+    </select>
+
+    <select id="findUserByCurrentOrgId" resultMap="BUserMap">
+        select a.open_id,
+               a.type,
+               a.user_id,
+               a.`name`,
+               a.mobile,
+               a.remark,
+               a.realname,
+               a.address,
+               a.company
+        from b_user a
+                 LEFT JOIN r_user_tenant b ON b.user_id = a.user_id
+        where a.flag != -1
+          AND b.organization_id = #{orgId}s
+    </select>
+
+    <select id="findUserBindByUid" resultType="com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult">
+        SELECT bo.app_id as appid
+        FROM b_openid_share bos
+                 LEFT JOIN b_openid bo ON share_openid_id = bo.openid_id
+        WHERE bos.flag = 1
+          AND bo.flag = 1
+          AND bos.user_id = #{uid}
+    </select>
+
+    <select id="findShareUser" resultType="java.lang.String">
+        SELECT u.mobile as mobile
+        FROM b_openid_share as bos
+        INNER JOIN b_openid as bo ON bos.share_openid_id = bo.openid_id
+        LEFT JOIN b_user as u ON bo.user_id = u.user_id
+        WHERE (
+        bos.user_id IN
+        <foreach collection="userIdList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND bos.flag = 1
+        AND bo.app_id = #{appid}
+        )
+    </select>
+
+    <select id="findNewUserNum" resultType="java.lang.Long">
+        SELECT
+            count(b.user_id)
+        FROM
+            b_user b
+                LEFT JOIN r_user_role r ON r.user_id = b.user_id
+                LEFT JOIN l_user_token l on l.user_id = b.user_id
+        WHERE
+            l.modify_time BETWEEN #{startTime} AND #{endTime}
+            AND r.role_id = 5
+    </select>
+
+    <select id="findNewUserCount" resultType="java.lang.Long">
+        select count(1) AS new_user_count
+        from b_user
+        where (type = '社会客户' or type = '领导') AND flag != -1 AND create_time between #{startTime} and #{endTime}
+    </select>
+
+</mapper>
+

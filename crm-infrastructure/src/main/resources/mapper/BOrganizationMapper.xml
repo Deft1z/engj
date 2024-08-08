@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BOrganizationMapper">
+    <resultMap type="com.kge.energy.crm.repository.entity.BOrganization" id="BOrganizationMap">
+        <result property="organizationId" column="organization_id" jdbcType="INTEGER"/>
+        <result property="parentOrganizationId" column="parent_organization_id" jdbcType="INTEGER"/>
+        <result property="regionId" column="region_id" jdbcType="INTEGER"/>
+        <result property="userTenantId" column="user_tenant_id" jdbcType="INTEGER"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="level" column="level" jdbcType="INTEGER"/>
+        <result property="authCode" column="auth_code" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="sort" column="sort" jdbcType="INTEGER"/>
+        <result property="leaderUserId" column="leader_user_id" jdbcType="INTEGER"/>
+        <result property="parameter" column="parameter"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result property="variables" column="variables" jdbcType="VARCHAR"/>
+        <result property="referSource" column="refer_source" jdbcType="VARCHAR"/>
+        <result property="referId" column="refer_id" jdbcType="VARCHAR"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="findUserInfoDtoOrOrgs" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Organization">
+        select b.organization_id id, b.name, b.auth_code
+        from r_user_tenant a
+                 LEFT JOIN b_organization b ON b.organization_id = a.organization_id
+        where a.user_id = #{userId}
+    </select>
+
+    <select id="getOrgByUserId" resultMap="BOrganizationMap">
+        select a.*
+        from b_organization a
+                 LEFT JOIN r_user_tenant b ON b.organization_id = a.organization_id
+                 LEFT JOIN b_user c ON c.user_id = b.user_id
+        where c.flag = 1
+          and c.user_id = #{userId}
+    </select>
+
+    <select id="getOrgDictList" resultType="com.kge.energy.crm.repository.entityext.result.OrgDictResult">
+        select name AS label, organization_id AS value
+        from b_organization
+        where flag != -1
+          and parameter ->> "$.serviceType" != 0
+    </select>
+
+    <select id="getCompanyList" resultType="com.kge.energy.crm.repository.entityext.result.OrgResult">
+        select a.organization_id,
+               a.parameter ->> '$.fullName'    as full_name,
+               a.parameter ->> '$.serviceType' as service_type,
+               a.parameter ->> '$.type'        as type,
+               a.parameter ->> '$.filepath'    as filepath
+        from b_organization a
+        where a.flag = 1
+          and a.parameter ->> '$.serviceType' != 0
+        order by a.parameter ->> '$.serviceType', a.create_time asc
+    </select>
+</mapper>
+

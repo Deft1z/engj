@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.OmReportMapper">
+
+    <select id="getDetail" resultType="com.kge.energy.crm.repository.entityext.result.OperationDetail">
+        select
+            report.report_id,
+            report.form_id,
+            report.service_code,
+            report.patrol_record_code,
+            report.report_file_id,
+            if(`file`.filepath is null, '', report.report_file_name) as report_file_name,
+            report.operator,
+            if(report.operation_time is null, '', date_format(report.operation_time, '%Y-%m-%d')) as operation_time,
+            `file`.filepath
+        from om_report report
+        left join s_file `file` on `file`.file_id = report.report_file_id and `file`.flag = 1
+        where report.patrol_record_code = #{patrolRecordCode}
+    </select>
+
+    <select id="getPatrolRecordInfo" resultType="com.kge.energy.crm.repository.entityext.result.PatrolRecordResp">
+        select a.report_id, a.form_id, a.service_code, a.patrol_record_code, a.report_file_id, a.report_result,
+               a.operator, DATE_FORMAT(a.operation_time, '%Y-%m-%d %T') AS operation_time, b.filepath
+        from om_report a
+        LEFT JOIN s_file b ON b.file_id = a.report_file_id and b.flag = 1
+        where a.patrol_record_code = #{patrolRecordCode}
+    </select>
+</mapper>
+

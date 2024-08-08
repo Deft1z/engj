@@ -1,0 +1,42 @@
+package com.kge.energy.crm;
+
+import cn.hutool.core.thread.ThreadUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
+@EnableTransactionManagement
+@MapperScan("com.kge.**.mapper")
+@SpringBootApplication(scanBasePackages = "com.kge")
+public class CrmMgrProvider {
+    public static void main(String[] args) {
+        ConfigurableEnvironment env = SpringApplication.run(CrmMgrProvider.class, args).getEnvironment();
+
+        ThreadUtil.sleep(1, TimeUnit.SECONDS); // 延迟 1 秒，保证输出到结尾
+        log.info("\n" + """
+                   =========================================================
+                   Application:       {} is running Success!
+                   Local URL:         http://localhost:{}{}
+                   Document URL:      http://localhost:{}{}/doc.html
+                   Document UserName: {}
+                   Document Password: {}
+                   =========================================================
+                 """,
+                env.getProperty("spring.application.name"),
+                env.getProperty("server.port"),
+                env.getProperty("server.servlet.context-path"),
+                env.getProperty("server.port"),
+                env.getProperty("server.servlet.context-path"),
+                env.getProperty("knife4j.basic.username"),
+                env.getProperty("knife4j.basic.password")
+        );
+
+    }
+
+}

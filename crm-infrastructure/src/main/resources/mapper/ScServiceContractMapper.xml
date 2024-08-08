@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.ScServiceContractMapper">
+    <resultMap type="com.kge.energy.crm.repository.entity.ScServiceContract" id="ScServiceContractMap">
+        <result property="serviceContractId" column="service_contract_id" jdbcType="INTEGER"/>
+        <result property="formId" column="form_id" jdbcType="INTEGER"/>
+        <result property="fileId" column="file_id" jdbcType="INTEGER"/>
+        <result property="company" column="company" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="amount" column="amount" jdbcType="NUMERIC"/>
+        <result property="implAddress" column="impl_address" jdbcType="VARCHAR"/>
+        <result property="implAddressDetail" column="impl_address_detail" jdbcType="VARCHAR"/>
+        <result property="signingTime" column="signing_time" jdbcType="TIMESTAMP"/>
+        <result property="serviceStartTime" column="service_start_time" jdbcType="TIMESTAMP"/>
+        <result property="serviceEndTime" column="service_end_time" jdbcType="TIMESTAMP"/>
+        <result property="projectStartTime" column="project_start_time" jdbcType="TIMESTAMP"/>
+        <result property="projectEndTime" column="project_end_time" jdbcType="TIMESTAMP"/>
+        <result property="projectCode" column="project_code" jdbcType="VARCHAR"/>
+        <result property="serviceUnit" column="service_unit" jdbcType="INTEGER"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="owner" column="owner" jdbcType="INTEGER"/>
+        <result property="pm" column="pm" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="contractPageByUserIdLoad" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
+        select a.service_contract_id,
+               a.form_id,
+               a.company,
+               a.`name`,
+               a.`code`,
+               ROUND(a.amount, 2)                            as amount,
+               a.project_code,
+               DATE_FORMAT(a.signing_time, '%Y-%m-%d')       AS signing_time,
+               DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
+               DATE_FORMAT(a.service_end_time, '%Y-%m-%d')   AS service_end_time,
+               a.service_unit,
+               DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
+               DATE_FORMAT(a.project_end_time, '%Y-%m-%d')   AS project_end_time,
+               a.content,
+               a.OWNER,
+               a.pm,
+               a.flag,
+               a.`status`,
+               b.NAME                                        AS service_provider,
+               g.satisfaction,
+               g.evaluate
+        from sc_service_contract a
+                 LEFT JOIN b_organization b ON b.organization_id = a.service_unit
+                 LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
+                 LEFT JOIN wf_form c ON c.form_id = a.form_id
+                 LEFT JOIN b_user d ON d.user_id = c.create_user_id
+        <where>
+            c.create_user_id = #{listParam.userId} AND a.flag = 1
+            <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
+                and a.status = #{listParam.searchMap.status}
+            </if>
+            <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+                and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="form" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
+        select a.service_contract_id,
+               a.form_id,
+               a.company,
+               a.`name`,
+               a.`code`,
+               ROUND(a.amount, 2)                            as amount,
+               a.project_code,
+               DATE_FORMAT(a.signing_time, '%Y-%m-%d')       AS signing_time,
+               DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
+               DATE_FORMAT(a.service_end_time, '%Y-%m-%d')   AS service_end_time,
+               a.service_unit,
+               DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
+               DATE_FORMAT(a.project_end_time, '%Y-%m-%d')   AS project_end_time,
+               a.content,
+               a.OWNER,
+               a.pm,
+               a.flag,
+               a.`status`,
+               b.NAME                                        AS service_provider,
+               g.satisfaction,
+               g.evaluate
+        from sc_service_contract a
+                 LEFT JOIN b_organization b ON b.organization_id = a.service_unit
+                 LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
+                 LEFT JOIN wf_form c ON c.form_id = a.form_id
+                 LEFT JOIN b_user d ON d.user_id = c.create_user_id
+        where c.form_id = #{formId}
+          AND a.flag != -1
+    </select>
+
+    <select id="findContractNum" resultType="java.lang.Long">
+        SELECT
+            count(*)
+        FROM
+            sc_service_contract
+        WHERE
+            form_id = ANY (
+                SELECT
+                    form_id
+                FROM
+                    wf_form
+                WHERE
+                    create_user_id = ANY (
+                        SELECT b.user_id from b_user b
+                        LEFT JOIN r_user_role r ON r.user_id = b.user_id
+                        LEFT JOIN l_user_token l on l.user_id = b.user_id
+                        WHERE
+                            l.modify_time BETWEEN #{startTime} AND #{endTime}
+                        AND r.role_id = 5)
+            )
+    </select>
+
+    <select id="findNewContractCount" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM sc_service_contract
+        WHERE flag != -1 AND create_time between #{startTime} and #{endTime}
+    </select>
+
+</mapper>
+

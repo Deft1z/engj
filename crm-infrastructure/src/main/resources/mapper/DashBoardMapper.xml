@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.DashBoardMapper">
+
+    <select id="selectStatistic" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardStatistic">
+        select *
+        from (
+            <!-- 查询新增客户数量 -->
+            select count(*) AS new_user_count
+            from b_user
+            where
+                type = '社会客户'
+                and flag != -1
+                and create_time between #{startTime} and #{endTime}
+        ) new_user, (
+            <!-- 查询咨询工单数量 -->
+            select count(*) AS new_consulting_count
+            from wf_form
+            where
+                flag != -1
+                and create_time between #{startTime} and #{endTime}
+        ) consulting, (
+            <!-- 查询问题/投诉数量 -->
+            select count(*) AS new_complain_count
+            from w_complain
+            where
+                flag != -1
+                and create_time between #{startTime} and #{endTime}
+        ) complain, (
+            <!-- 查询新增合同数量 -->
+            select count(*) AS new_contract_count
+            from sc_service_contract
+            where
+                flag != -1
+                and create_time between #{startTime} and #{endTime}
+        ) new_contract, (
+            <!-- 查询已分派工单数量 -->
+            select count(*) as sent_num
+            from wf_form wf
+            join b_organization org on org.organization_id = wf.current_org_id
+            where
+                wf.flag = 1
+                and org.level != 1
+                and wf.create_time between #{startTime} and #{endTime}
+        ) sent_order, (
+            <!-- 查询已签订合同数量 -->
+            select count(*) as sign_num
+            from wf_form wf
+            join b_organization org on org.organization_id = wf.current_org_id
+            where
+                wf.form_id = any(
+                    select form_id
+                    from sc_service_contract
+                    where flag = 1
+                )
+                and wf.flag = 1
+                and org.level != 1
+                and wf.create_time between #{startTime} and #{endTime}
+        ) sign_contract, (
+            <!-- 查询已终止工单数量 -->
+            select count(*) as terminate_num
+            from wf_form wf
+            join b_organization org on org.organization_id = wf.current_org_id
+            where
+                wf.flag = 1
+                and wf.status = '已终止'
+                and org.level != 1
+                and wf.create_time between #{startTime} and #{endTime}
+        ) terminate_order, (
+            <!-- 查询开展中工单数量 -->
+            select count(*) as processing_num
+            from wf_form wf
+            join b_organization org on org.organization_id = wf.current_org_id
+            where
+                wf.form_id not in (
+                    select form_id
+                    from sc_service_contract
+                    where flag = 1
+                )
+                and wf.flag = 1
+                and wf.status != '已终止'
+                and org.level != 1
+                and wf.create_time between #{startTime} and #{endTime}
+        ) processing_order
+    </select>
+
+    <select id="selectOrderContractList" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardOrderContract">
+        select
+            date_list.date,
+            `order`.num as order_num,
+            contract.num as contract_num
+        from (
+            select *
+            from (values
+                <foreach item="item" collection="dateList" separator=", ">
+                    row(#{item})
+                </foreach>
+            ) t(date)
+        ) date_list
+
+        <!-- 查找工单 -->
+        left join (
+            select
+                date_format(create_time, '%Y-%m') as date,
+                count(*) as num
+            from wf_form
+            where
+                date_format(create_time, '%Y-%m') between date_format(#{startTime}, '%Y-%m') and date_format(#{endTime} , '%Y-%m')
+                and flag = 1
+
+                <!-- 按公司查找 -->
+                <if test="orgId != null and orgId > 0">
+                    and current_org_id = #{orgId}
+                </if>
+
+                <!-- 按区域查找 -->
+                <if test="area != null and area != ''">
+                    <bind name="area" value="'%' + area + '%'"/>
+                    and content->'$.area' like #{area}
+                </if>
+            group by date_format(create_time, '%Y-%m')
+        ) `order` on `order`.date = date_list.date
+
+        <!-- 查找合同 -->
+        left join (
+            select
+                date_format(ssc.create_time, '%Y-%m') as date,
+                count(*) as num
+            from sc_service_contract ssc
+            <if test="area != null and area != ''">
+                join wf_form wf ON ssc.form_id = wf.form_id
+            </if>
+            where
+                date_format(ssc.create_time, '%Y-%m') between date_format(#{startTime}, '%Y-%m') and date_format(#{endTime} , '%Y-%m')
+                and ssc.flag = 1
+
+                <!-- 按公司查找 -->
+                <if test="orgId != null and orgId > 0">
+                    and ssc.service_unit = #{orgId}
+                </if>
+
+                <!-- 按区域查找 -->
+                <if test="area != null and area != ''">
+                    <!-- 模糊查询bind只需要在最开始加一次，后面就不需要再加了 -->
+                    and wf.content->'$.area' like #{area}
+                </if>
+            group by date_format(ssc.create_time, '%Y-%m')
+        ) contract on contract.date = date_list.date
+    </select>
+
+    <select id="selectUserTrans" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardUserTrans">
+        select
+            *,
+            ROUND(order_num / active_user_num * 100, 2) AS active_user_trans_rate,
+            ROUND(contract_num / order_num * 100, 2) AS order_trans_rate
+        from (
+            <!-- 查询活跃客户数量 -->
+            select count(*) AS active_user_num
+            from b_user user
+            left join r_user_role rur on rur.user_id = user.user_id
+            left join l_user_token token on token.user_id = user.user_id
+            where
+                token.modify_time between #{startTime} and #{endTime}
+                and rur.role_id = 5
+        ) active_user, (
+            <!-- 查询下单咨询数量 -->
+            select count(*) AS order_num
+            from b_user user
+            left join r_user_role rur on rur.user_id = user.user_id
+            left join l_user_token token on token.user_id = user.user_id
+            where
+                token.modify_time between #{startTime} and #{endTime}
+                and rur.role_id = 5
+                and user.user_id = any(select create_user_id from wf_form)
+        ) `order`, (
+            <!-- 查询提交合同数量 -->
+            select count(*) AS contract_num
+            from b_user user
+            left join r_user_role rur on rur.user_id = user.user_id
+            left join l_user_token token on token.user_id = user.user_id
+            where
+                token.modify_time between #{startTime} and #{endTime}
+                and rur.role_id = 5
+                and user.user_id = any(
+                    select create_user_id
+                    from wf_form
+                    where form_id = any(select form_id from sc_service_contract)
+                )
+        ) contract
+    </select>
+
+    <select id="selectEvaluateList" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardEvaluate">
+        select
+            star_list.star,
+            count(satisfaction) as ent_num,
+            count(satisfaction) * 100 / (
+                select count(*) as num
+                from sc_contract_evaluate
+                where satisfaction > 0
+            ) as rate
+        from (select 1 as star union select 2 union select 3 union select 4 union select 5) star_list
+        left join sc_contract_evaluate sce on sce.satisfaction = star_list.star
+        group by star_list.star
+    </select>
+
+    <select id="selectEvaluateAverage" resultType="double">
+        select
+        (
+            1 * count(if(satisfaction = 1, 1, null)) +
+            2 * count(if(satisfaction = 2, 1, null)) +
+            3 * count(if(satisfaction = 3, 1, null)) +
+            4 * count(if(satisfaction = 4, 1, null)) +
+            5 * count(if(satisfaction = 5, 1, null))
+        ) / count(if(satisfaction > 0, 1, null)) as average
+        from sc_contract_evaluate
+    </select>
+
+    <select id="selectComplainTypeStatistic" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic">
+        select
+            count(if(subject LIKE '%进度慢%', 1, null)) as slow_num,
+            count(if(subject LIKE '%质量差%', 1, null)) as bad_quality_num,
+            count(if(subject LIKE '%态度恶劣%', 1, null)) as bad_attitude,
+            count(*) as total
+        from w_complain
+        where
+            flag = 1
+            and create_time between #{startTime} and #{endTime}
+    </select>
+
+    <select id="selectComplainRankList" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank">
+        select
+            complain.organization_id as organization_id,
+            ifnull(org.name, '无所属单位') as company_name,
+            count(*) as num
+        from w_complain complain
+        left join b_organization org on org.organization_id = complain.organization_id
+        where complain.create_time between #{startTime} and #{endTime}
+        group by complain.organization_id
+        order by num desc
+    </select>
+</mapper>

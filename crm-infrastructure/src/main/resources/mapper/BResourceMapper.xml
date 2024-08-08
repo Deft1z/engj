@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BResourceMapper">
+    <resultMap type="com.kge.energy.crm.repository.entity.BResource" id="BResourceMap">
+        <result property="resourceId" column="resource_id" jdbcType="INTEGER"/>
+        <result property="parentResourceId" column="parent_resource_id" jdbcType="INTEGER"/>
+        <result property="resourceName" column="resource_name" jdbcType="VARCHAR"/>
+        <result property="resourceCode" column="resource_code" jdbcType="VARCHAR"/>
+        <result property="resourceType" column="resource_type" jdbcType="VARCHAR"/>
+        <result property="referResourceId" column="refer_resource_id" jdbcType="INTEGER"/>
+        <result property="level" column="level" jdbcType="INTEGER"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="displayName" column="display_name" jdbcType="VARCHAR"/>
+        <result property="sort" column="sort" jdbcType="INTEGER"/>
+        <result property="path" column="path" jdbcType="VARCHAR"/>
+        <result property="pathType" column="path_type" jdbcType="VARCHAR"/>
+        <result property="iconCode" column="icon_code" jdbcType="VARCHAR"/>
+        <result property="iconFilePath" column="icon_file_path" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="systemType" column="system_type" jdbcType="VARCHAR"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="findPermission" resultType="com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult">
+        select a.resource_id,
+        a.parent_resource_id,
+        a.name,
+        a.level,
+        b.auth_read,
+        b.auth_write,
+        b.auth_delete,
+        b.auth_audit
+        from b_resource a
+        JOIN r_role_resource b ON b.resource_id = a.resource_id
+        JOIN r_user_role c ON c.role_id = b.role_id
+        where a.name in
+        <foreach collection="urls" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+        AND c.user_id = #{userId}
+    </select>
+
+    <select id="findMenu" resultType="com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult">
+        select DISTINCT a.resource_id,
+                        a.refer_resource_id,
+                        a.parent_resource_id,
+                        a.level,
+                        a.type,
+                        a.name,
+                        a.display_name,
+                        a.sort,
+                        a.flag,
+                        b.auth_read,
+                        b.auth_write,
+                        b.auth_delete,
+                        b.auth_audit
+        from b_resource a
+                 LEFT JOIN r_role_resource b ON b.resource_id = a.resource_id
+                 LEFT JOIN r_user_role c ON c.role_id = b.role_id
+        where a.flag IN (1, 2)
+          AND c.user_id = #{userId}
+        Order by a.sort ASC
+    </select>
+
+    <select id="getSystemResources" resultMap="BResourceMap">
+        select *
+        from b_resource
+        where flag = 1
+        and tenant_id is not null
+        <if test="systemType != null and systemType != ''">
+            and system_type = #{systemType}
+        </if>
+        <if test="tenantId != null">
+            and tenant_id = #{tenantId}
+        </if>
+        order by sort
+    </select>
+
+    <select id="getUserResources" resultMap="BResourceMap">
+        select r.*
+        from b_resource r,
+             r_user_role ur,
+             r_role_resource rr
+        where r.flag = 1
+          and rr.flag = 1
+          and ur.flag = 1
+          and r.resource_id = rr.resource_id
+          and ur.role_id = rr.role_id
+          and rr.tenant_id = #{tenantId}
+          and rr.tenant_id = #{tenantId}
+          and ur.tenant_id = #{tenantId}
+          and r.system_type = #{systemType}
+          and ur.user_id = #{userId}
+        order by r.sort
+    </select>
+</mapper>
+

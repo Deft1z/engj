@@ -1,0 +1,9 @@
+mvn clean -U package -Pdev -DskipTests
+
+mvn clean -U package -Ptest -DskipTests
+
+mvn clean -U package -Pprod -DskipTests
+
+nohup java -Xms512m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -jar crm-mgr-provider.jar > /dev/null 2>&1 &
+
+nohup java -Xms512m -Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -jar crm-applet-provider.jar > /dev/null 2>&1 &
