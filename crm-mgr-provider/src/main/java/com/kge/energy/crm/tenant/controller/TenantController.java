@@ -1,6 +1,7 @@
 package com.kge.energy.crm.tenant.controller;
 
 import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.tenant.req.AddTenantReq;
 import com.kge.energy.crm.tenant.req.DeleteTenantReq;
 import com.kge.energy.crm.tenant.req.UpdateTenantReq;
@@ -24,7 +25,7 @@ public class TenantController {
 
     @Operation(summary = "租户列表")
     @GetMapping("/list")
-    public CommonResponse<List<TenantListResp>> list() {
+    public CommonResponse<PageResp<TenantListResp>> list(@Validated @RequestBody QueryTenantReq req) {
         return null;
     }
 
