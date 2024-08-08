@@ -37,3 +37,6 @@ epcpv:
   stagestat: api/v1/pv/project/stage/stat
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
+
+edata:
+  baseUrl: http://localhost:9052
