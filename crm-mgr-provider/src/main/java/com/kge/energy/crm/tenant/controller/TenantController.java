@@ -4,6 +4,7 @@ import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.tenant.req.AddTenantReq;
 import com.kge.energy.crm.tenant.req.DeleteTenantReq;
+import com.kge.energy.crm.tenant.req.QueryTenantReq;
 import com.kge.energy.crm.tenant.req.UpdateTenantReq;
 import com.kge.energy.crm.tenant.resp.TenantListResp;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,8 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * @author wangjihua

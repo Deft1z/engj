@@ -64,7 +64,7 @@ public class BUserMsg {
      * 已读标识，false 未读 true 已读
      */
     @TableField(value = "is_read")
-    private Boolean read;
+    private Boolean isRead;
 
     /**
      * 创建时间

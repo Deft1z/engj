@@ -10,9 +10,30 @@
         <result property="msgBizType" column="msg_biz_type" jdbcType="INTEGER"/>
         <result property="pathType" column="path_type" jdbcType="VARCHAR"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
-        <result property="read" column="is_read" jdbcType="TINYINT"/>
+        <result property="isRead" column="is_read" jdbcType="TINYINT"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="getUserAlatmMsgList" resultType="com.kge.energy.crm.repository.entityext.result.UserMsgListResult">
+        select b.id, b.msg_biz_id, b.path_type, b.content, b.is_read
+        from b_user_msg b
+        where b.user_id = #{param.userId}
+        and b.msg_biz_type = #{param.msgBizType}
+
+        <if test="param.alarmLevel != null and param.alarmLevel != ''">
+            and b.content ->> '$.alarmLevel' = #{param.alarmLevel}
+        </if>
+
+        <if test="param.startTime != null">
+            and #{param.startTime} &lt;= STR_TO_DATE(b.content ->> '$.alarmTime', '%Y-%m-%d %H:%i:%s')
+        </if>
+
+        <if test="param.endTime != null">
+            and STR_TO_DATE(b.content ->> '$.alarmTime', '%Y-%m-%d %H:%i:%s') &lt;= #{param.endTime}
+        </if>
+
+    </select>
+
 </mapper>
 

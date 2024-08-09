@@ -26,7 +26,7 @@ public class UserMsgListReq extends PageReq {
     private Integer msgBizType;
 
     @Schema(description = "告警级别: 一般告警、严重告警、紧急告警")
-    @NotNull
+    //@NotNull
     private String alarmLevel;
 
     @Schema(description = "开始时间 yyyy-MM-dd HH:mm:ss")

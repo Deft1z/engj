@@ -1,4 +1,4 @@
-package com.kge.energy.crm.msg.resp;
+package com.kge.energy.crm.repository.entityext.result;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @Schema(name = "用户消息列表响应参数", description = "用户消息列表响应参数")
-public class UserMsgListResp {
+public class UserMsgListResult {
 
     @Schema(description = "用户消息主键")
     private Long id;
@@ -25,5 +25,5 @@ public class UserMsgListResp {
     private String content;
 
     @Schema(description = "已读标识，false 未读 true 已读")
-    private Boolean read;
+    private Boolean isRead;
 }

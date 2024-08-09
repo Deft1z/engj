@@ -1,4 +1,4 @@
-package com.kge.energy.crm.tenant.controller;
+package com.kge.energy.crm.tenant.req;
 
 import com.kge.energy.crm.common.page.PageReq;
 import lombok.Data;
