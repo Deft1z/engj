@@ -1,4 +1,4 @@
-package com.kge.energy.crm.tenant.resp;
+package com.kge.energy.crm.repository.entityext.result;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @Accessors(chain = true)
 @Schema(name = "租户列表name", description = "租户列表对象")
-public class TenantListResp {
+public class TenantListResult {
 
     @Schema(description = "租户id")
     private Integer id;

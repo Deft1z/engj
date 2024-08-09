@@ -6,7 +6,8 @@ import com.kge.energy.crm.tenant.req.AddTenantReq;
 import com.kge.energy.crm.tenant.req.DeleteTenantReq;
 import com.kge.energy.crm.tenant.req.QueryTenantReq;
 import com.kge.energy.crm.tenant.req.UpdateTenantReq;
-import com.kge.energy.crm.tenant.resp.TenantListResp;
+import com.kge.energy.crm.repository.entityext.result.TenantListResult;
+import com.kge.energy.crm.tenant.service.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TenantController {
 
+    private final TenantService tenantService;
+
     @Operation(summary = "租户列表")
-    @GetMapping("/list")
-    public CommonResponse<PageResp<TenantListResp>> list(@Validated @RequestBody QueryTenantReq req) {
-        return null;
+    @PostMapping("/list")
+    public CommonResponse<PageResp<TenantListResult>> list(@Validated @RequestBody QueryTenantReq req) {
+        return CommonResponse.suc(tenantService.selectPage(req));
     }
 
     @Operation(summary = "新增租户")

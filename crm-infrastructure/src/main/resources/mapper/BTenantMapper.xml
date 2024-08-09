@@ -13,5 +13,12 @@
         <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="selectPage" resultType="com.kge.energy.crm.repository.entityext.result.TenantListResult">
+        select bt.id, bt.name, bt.contact_name, bt.contact_mobile, bt.status, bt.create_time
+        from b_tenant bt
+        where bt.flag = 1
+    </select>
+
 </mapper>
 

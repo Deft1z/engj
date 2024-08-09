@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface BUserMsgMapper extends BaseMapper<BUserMsg> {
 
-    IPage<UserMsgListResult> getUserAlatmMsgList(Page<BUserMsg> page, @Param("param") UserAlarmMsgParam param);
+    IPage<UserMsgListResult> getUserAlatmMsgList(Page<UserMsgListResult> page, @Param("param") UserAlarmMsgParam param);
     
 }
 
