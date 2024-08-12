@@ -39,19 +39,19 @@ public class ResourceController {
     @Operation(summary = "新增菜单")
     @PostMapping("/add")
     public CommonResponse<Boolean> add(@Validated @RequestBody AddResourceReq req) {
-        return CommonResponse.suc(true);
+        return CommonResponse.suc(resourceService.add(req));
     }
 
     @Operation(summary = "编辑菜单")
     @PostMapping("/update")
     public CommonResponse<Boolean> update(@Validated @RequestBody UpdateResourceReq req) {
-        return CommonResponse.suc(true);
+        return CommonResponse.suc(resourceService.update(req));
     }
 
     @Operation(summary = "删除菜单")
     @PostMapping("/delete")
     public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteResourceReq req) {
-        return CommonResponse.suc(true);
+        return CommonResponse.suc(resourceService.delete(req));
     }
 
 }

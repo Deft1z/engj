@@ -7,7 +7,7 @@ spring:
     active: @profileActive@
 
   application:
-    name: CrmAppletProvider
+    name: crm-applet-provider
 
   main:
     allow-circular-references: true

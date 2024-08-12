@@ -69,7 +69,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
 
         // 设置用户上下文信息
-        UserInfoDto userInfoDto = putUserInfo("mgr", Integer.valueOf(uid));
+        UserInfoDto userInfoDto = putUserInfo("applet", Integer.valueOf(uid));
         if (CollectionUtil.isEmpty(userInfoDto.getOrganizationList())) {
             log.error("找不到用户对应的租户ID: {}", userInfoDto.getUserId());
         }

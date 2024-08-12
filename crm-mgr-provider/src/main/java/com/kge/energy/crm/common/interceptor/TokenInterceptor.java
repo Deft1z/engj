@@ -75,7 +75,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         Integer userId = Integer.valueOf(uid);
 
         // 设置用户上下文信息
-        putUserInfo("applet", userId);
+        putUserInfo("mgr", userId);
 
         // todo：重构后废弃
 //        boolean isPermissionWhiteUrl = authProperties.getPermission()

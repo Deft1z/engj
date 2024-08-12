@@ -7,7 +7,7 @@ spring:
     active: @profileActive@
 
   application:
-    name: CrmMgrProvider
+    name: crm-mgr-provider
 
   main:
     allow-circular-references: true
