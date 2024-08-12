@@ -139,5 +139,10 @@ public class BOrganization {
      * 租户id
      */
     private Integer tenantId;
+
+    /**
+     * 状态,0-停用 1-正常
+     */
+    private Integer status;
 }
 
