@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -27,6 +28,7 @@ import com.kge.energy.crm.user.resp.UserLoginResp;
 import com.kge.energy.crm.user.resp.WxUserListResp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +58,9 @@ public class UserService {
     private final LUserTokenDao lUserTokenDao;
 
     private final StringRedisTemplate stringRedisTemplate;
+
+    @Value("${spring.profiles.active}")
+    private String env;
 
     public BUser getBUserById(int id) {
         return bUserDao.getById(id);
@@ -170,7 +175,12 @@ public class UserService {
         LUserToken lUserToken = lUserTokenDao.findByUid(user.getUserId());
 
         if (ObjUtil.isNotNull(lUserToken) && ObjUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
-            stringRedisTemplate.delete(authProperties.getToken().getRedisFront() + lUserToken.getLoginToken());
+
+            //如果是dev环境不删除旧的token
+            if(!StrUtil.equals(env, "dev")) {
+                stringRedisTemplate.delete(authProperties.getToken().getRedisFront() + lUserToken.getLoginToken());
+            }
+
             lUserToken.setLoginToken(authToken)
                     .setLoginExpiredTime(expiredTime);
             lUserTokenDao.updateById(lUserToken);
