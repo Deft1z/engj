@@ -6,7 +6,6 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.energy.crm.user.service.UserService;
-import com.kge.platform.framework.common.exception.ServiceException;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -43,9 +42,6 @@ public class UserController {
     @ConvertToGoFormats
     @PostMapping("/base/user/salt")
     public CommonResponse<String> userSalt(@Validated @RequestBody UserSaltReq req) {
-        if (true) {
-            throw new ServiceException("sdfdsf");
-        }
         return CommonResponse.suc(userService.userSalt(req));
     }
 
