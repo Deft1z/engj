@@ -1,10 +1,14 @@
 package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BOrganization;
+import com.kge.energy.crm.repository.entityext.param.OrgQueryParam;
 import com.kge.energy.crm.repository.entityext.result.OrgDictResult;
+import com.kge.energy.crm.repository.entityext.result.OrgListResult;
 import com.kge.energy.crm.repository.entityext.result.OrgResult;
 import com.kge.energy.crm.repository.mapper.BOrganizationMapper;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +45,15 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
 
     public List<OrgResult> getCompanyList() {
         return mapper.getCompanyList();
+    }
+
+    public IPage<OrgListResult> selectPage(OrgQueryParam param){
+        Page<OrgListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+        return mapper.selectPage(page, param);
+    }
+
+    public void logicDelete(Integer orgId){
+        mapper.logicDelete(orgId);
     }
 }
 
