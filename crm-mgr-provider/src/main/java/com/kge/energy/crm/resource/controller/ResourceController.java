@@ -33,7 +33,7 @@ public class ResourceController {
     @Operation(summary = "系统所有菜单资源")
     @PostMapping("/systemResources")
     public CommonResponse<ResourceListResp> systemResources(@Validated @RequestBody SystemResourceReq req) {
-        return CommonResponse.suc(resourceService.systemResources());
+        return CommonResponse.suc(resourceService.systemResources(req));
     }
 
     @Operation(summary = "新增菜单")

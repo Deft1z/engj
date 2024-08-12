@@ -21,11 +21,11 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
 
     private final BOrganizationMapper mapper;
 
-    public List<UserInfoDto.Organization> findUserInfoDtoOrOrgs(Integer userId) {
+    public List<UserInfoDto.Organization> findUserInfoDtoOrgs(Integer userId) {
 
         Assert.notNull(userId, "userId must not be null");
 
-        return mapper.findUserInfoDtoOrOrgs(userId);
+        return mapper.findUserInfoDtoOrgs(userId);
     }
 
     public BOrganization getOrgByUserId(Integer userId) {
@@ -39,7 +39,7 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.getOrgDictList();
     }
 
-    public List<OrgResult> getCompanyList(){
+    public List<OrgResult> getCompanyList() {
         return mapper.getCompanyList();
     }
 }

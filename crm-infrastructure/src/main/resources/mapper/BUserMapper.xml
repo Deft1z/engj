@@ -23,20 +23,19 @@
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
     </resultMap>
 
-    <select id="findUserInfoDto" resultType="com.kge.energy.crm.common.dto.UserInfoDto">
-        select a.user_id userId,
-               a.name    userName,
-               a.realname,
-               a.type,
-               a.mobile,
-               a.open_id wxOpenId,
-               c.role_id roleId,
-               c.name AS roleName
-        from b_user a
-                 JOIN r_user_role b ON b.user_id = a.user_id
-                 JOIN b_role c ON c.role_id = b.role_id
-        where a.flag = 1
-          AND a.user_id = #{userId}
+    <select id="getUserRoles" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Role">
+        select r.role_id, r.name, r.code
+        from b_user u,
+             b_role r,
+             r_user_role ur
+        where u.flag = 1
+          and r.flag = 1
+          and ur.flag = 1
+          and u.user_id = ur.user_id
+          and r.role_id = ur.role_id
+          and u.tenant_id = r.tenant_id
+          and u.user_id = #{userId}
+          and r.system_type = #{systemType}
     </select>
 
     <select id="getUserByRoleAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
@@ -98,22 +97,20 @@
     </select>
 
     <select id="findNewUserNum" resultType="java.lang.Long">
-        SELECT
-            count(b.user_id)
-        FROM
-            b_user b
-                LEFT JOIN r_user_role r ON r.user_id = b.user_id
-                LEFT JOIN l_user_token l on l.user_id = b.user_id
-        WHERE
-            l.modify_time BETWEEN #{startTime} AND #{endTime}
-            AND r.role_id = 5
+        SELECT count(b.user_id)
+        FROM b_user b
+                 LEFT JOIN r_user_role r ON r.user_id = b.user_id
+                 LEFT JOIN l_user_token l on l.user_id = b.user_id
+        WHERE l.modify_time BETWEEN #{startTime} AND #{endTime}
+          AND r.role_id = 5
     </select>
 
     <select id="findNewUserCount" resultType="java.lang.Long">
         select count(1) AS new_user_count
         from b_user
-        where (type = '社会客户' or type = '领导') AND flag != -1 AND create_time between #{startTime} and #{endTime}
+        where (type = '社会客户' or type = '领导')
+          AND flag != -1
+          AND create_time between #{startTime} and #{endTime}
     </select>
-
 </mapper>
 

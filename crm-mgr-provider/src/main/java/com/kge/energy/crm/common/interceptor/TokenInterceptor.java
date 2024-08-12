@@ -8,7 +8,6 @@ import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult;
 import com.kge.energy.crm.resource.service.BResourceService;
 import com.kge.energy.crm.user.service.UserDomainService;
@@ -38,7 +37,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
     private final AuthProperties authProperties;
 
-    private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
+    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     @Override
     public int getOrder() {
@@ -59,7 +58,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         boolean isTokenWhiteUrl = authProperties.getToken()
                 .getWhiteList()
                 .stream()
-                .anyMatch(item -> antPathMatcher.match(item, url));
+                .anyMatch(item -> ANT_PATH_MATCHER.match(item, url));
         if (isTokenWhiteUrl) {
             return true;
         }
@@ -76,7 +75,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         Integer userId = Integer.valueOf(uid);
 
         // 设置用户上下文信息
-        putUserInfo(Integer.valueOf(uid));
+        putUserInfo("applet", userId);
 
         // todo：重构后废弃
 //        boolean isPermissionWhiteUrl = authProperties.getPermission()
@@ -151,15 +150,9 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
     /**
      * 设置用户上下文信息
      */
-    private void putUserInfo(Integer uid) {
+    private void putUserInfo(String systemType, Integer userId) {
 
-        BUser user = userDomainService.getBUserById(uid);
-
-        if (ObjUtil.isNull(user)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
-        }
-
-        UserInfoDto userInfoDto = userDomainService.findUserInfoDto(user);
+        UserInfoDto userInfoDto = userDomainService.findUserInfoDto(systemType, userId);
         if (ObjUtil.isNull(userInfoDto)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }

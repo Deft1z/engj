@@ -8,7 +8,6 @@ import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +32,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
     private final AuthProperties authProperties;
 
-    private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
+    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     @Override
     public int getOrder() {
@@ -54,7 +53,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         boolean isTokenWhiteUrl = authProperties.getToken()
                 .getWhiteList()
                 .stream()
-                .anyMatch(item -> antPathMatcher.match(item, url));
+                .anyMatch(item -> ANT_PATH_MATCHER.match(item, url));
         if (isTokenWhiteUrl) {
             return true;
         }
@@ -70,7 +69,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
 
         // 设置用户上下文信息
-        UserInfoDto userInfoDto = putUserInfo(Integer.valueOf(uid));
+        UserInfoDto userInfoDto = putUserInfo("mgr", Integer.valueOf(uid));
         if (CollectionUtil.isEmpty(userInfoDto.getOrganizationList())) {
             log.error("找不到用户对应的租户ID: {}", userInfoDto.getUserId());
         }
@@ -82,15 +81,9 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
     /**
      * 设置用户上下文信息
      */
-    private UserInfoDto putUserInfo(Integer uid) {
+    private UserInfoDto putUserInfo(String systemType, Integer userId) {
 
-        BUser user = userDomainService.getBUserById(uid);
-
-        if (ObjUtil.isNull(user)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
-        }
-
-        UserInfoDto userInfoDto = userDomainService.findUserInfoDto(user);
+        UserInfoDto userInfoDto = userDomainService.findUserInfoDto(systemType, userId);
         if (ObjUtil.isNull(userInfoDto)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }

@@ -39,9 +39,10 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
     }
 
 
-    public UserInfoDto findUserInfoDto(Integer userId) {
+    public List<UserInfoDto.Role> getUserRoles(String systemType, Integer userId) {
+        Assert.notBlank(systemType, "systemType must not be null or blank");
         Assert.notNull(userId, "userId must not be null");
-        return mapper.findUserInfoDto(userId);
+        return mapper.getUserRoles(systemType, userId);
     }
 
     public List<RoleUserResult> getUserByRoleId(Integer roleId) {
@@ -97,15 +98,15 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.selectList(wrapper);
     }
 
-    public String findShareUser(List<Integer> userIdList, Integer appid){
+    public String findShareUser(List<Integer> userIdList, Integer appid) {
         return mapper.findShareUser(userIdList, appid);
     }
 
-    public Long findNewUserNum(String startTime, String endTime){
+    public Long findNewUserNum(String startTime, String endTime) {
         return mapper.findNewUserNum(startTime, endTime);
     }
 
-    public Long findNewUserCount(String startTime, String endTime){
+    public Long findNewUserCount(String startTime, String endTime) {
         return mapper.findNewUserCount(startTime, endTime);
     }
 }

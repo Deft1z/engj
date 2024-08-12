@@ -24,8 +24,6 @@ public class CrmMgrProvider {
                           Application:       {} is running Success!
                           Local URL:         http://localhost:{}{}
                           Document URL:      http://localhost:{}{}/doc.html
-                          Document UserName: {}
-                          Document Password: {}
                           =========================================================
                         """,
                 env.getProperty("spring.application.name"),

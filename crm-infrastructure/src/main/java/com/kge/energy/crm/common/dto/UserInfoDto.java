@@ -18,14 +18,9 @@ import java.util.List;
 public class UserInfoDto extends CommonUserInfoDto {
 
     /**
-     * 角色ID，重构后废弃
+     * 租户ID
      */
-    private Integer roleId;
-
-    /**
-     * 角色名称，重构后废弃
-     */
-    private String roleName;
+    private Integer tenantId;
 
     /**
      * 系统类型：applet、mgr
@@ -59,6 +54,8 @@ public class UserInfoDto extends CommonUserInfoDto {
         private Integer id;
 
         private String name;
+
+        private String code;
     }
 
     @Data
@@ -69,6 +66,9 @@ public class UserInfoDto extends CommonUserInfoDto {
 
         private String name;
 
+        /**
+         * 重构后废弃
+         */
         private String authCode;
     }
 }

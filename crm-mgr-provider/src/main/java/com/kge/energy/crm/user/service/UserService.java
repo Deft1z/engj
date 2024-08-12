@@ -66,19 +66,6 @@ public class UserService {
         return bUserDao.getById(id);
     }
 
-    public UserInfoDto findUserInfoDto(BUser bUser) {
-
-        UserInfoDto userInfoDto = bUserDao.findUserInfoDto(bUser.getUserId());
-        if (ObjUtil.isNull(userInfoDto)) {
-            return null;
-        }
-
-        List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrOrgs(bUser.getUserId());
-        userInfoDto.setOrganizationList(orgs);
-
-        return userInfoDto;
-    }
-
     public BUser getUserByMobile(String mobile) {
         return bUserDao.getUserByMobile(mobile);
     }
@@ -177,7 +164,7 @@ public class UserService {
         if (ObjUtil.isNotNull(lUserToken) && ObjUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
 
             //如果是dev环境不删除旧的token
-            if(!StrUtil.equals(env, "dev")) {
+            if (!StrUtil.equals(env, "dev")) {
                 stringRedisTemplate.delete(authProperties.getToken().getRedisFront() + lUserToken.getLoginToken());
             }
 

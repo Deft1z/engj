@@ -3,6 +3,8 @@ package com.kge.energy.crm.user.service;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.execption.BadException;
+import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BUserDao;
@@ -39,19 +41,26 @@ public class UserDomainService {
         return bUserDao.getById(id);
     }
 
-    public UserInfoDto findUserInfoDto(BUser bUser) {
+    public UserInfoDto findUserInfoDto(String systemType, Integer userId) {
 
-        UserInfoDto userInfoDto = bUserDao.findUserInfoDto(bUser.getUserId());
-        if (ObjUtil.isNull(userInfoDto)) {
-            return null;
+        BUser user = bUserDao.getById(userId);
+        if (ObjUtil.isNull(user)) {
+            throw new BadException(ResponseCode.TOKEN_FAIL);
         }
 
-        // todo：重构后改为查数据库
-        userInfoDto.setRoleList(
-                List.of(new UserInfoDto.Role().setId(userInfoDto.getRoleId()).setName(userInfoDto.getRoleName()))
-        );
+        UserInfoDto userInfoDto = new UserInfoDto();
+        userInfoDto.setUserId(Long.valueOf(user.getUserId()));
+        userInfoDto.setUserName(user.getName());
+        userInfoDto.setRealname(user.getRealname());
+        userInfoDto.setTenantId(user.getTenantId());
+        userInfoDto.setSystemType(systemType);
+        userInfoDto.setMobile(user.getMobile());
+        userInfoDto.setWxOpenId(user.getOpenId());
 
-        List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrOrgs(bUser.getUserId());
+        List<UserInfoDto.Role> userRoles = bUserDao.getUserRoles(systemType, user.getUserId());
+        userInfoDto.setRoleList(userRoles);
+
+        List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrgs(user.getUserId());
         userInfoDto.setOrganizationList(orgs);
 
         return userInfoDto;

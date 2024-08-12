@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface BOrganizationMapper extends BaseMapper<BOrganization> {
 
-    List<UserInfoDto.Organization> findUserInfoDtoOrOrgs(Integer userId);
+    List<UserInfoDto.Organization> findUserInfoDtoOrgs(Integer userId);
 
     BOrganization getOrgByUserId(Integer userId);
 
