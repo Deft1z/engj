@@ -15,5 +15,7 @@ public interface BTenantMapper extends BaseMapper<BTenant> {
 
     IPage<TenantListResult> selectPage(Page<TenantListResult> page, TenantQueryParam param);
 
+    void logicDelete(Integer tenantId);
+
 }
 

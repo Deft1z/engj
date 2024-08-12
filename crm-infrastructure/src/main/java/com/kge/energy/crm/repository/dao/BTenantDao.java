@@ -24,5 +24,9 @@ public class BTenantDao extends ServiceImpl<BTenantMapper, BTenant> {
         return mapper.selectPage(page, param);
     }
 
+    public void logicDelete(Integer tenantId) {
+        mapper.logicDelete(tenantId);
+    }
+
 }
 

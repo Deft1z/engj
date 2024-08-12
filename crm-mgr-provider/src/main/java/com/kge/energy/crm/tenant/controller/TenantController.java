@@ -34,18 +34,18 @@ public class TenantController {
     @Operation(summary = "新增租户")
     @PostMapping("/add")
     public CommonResponse<Boolean> add(@Validated @RequestBody AddTenantReq req) {
-        return null;
+        return CommonResponse.suc(tenantService.add(req));
     }
 
     @Operation(summary = "编辑租户")
     @PostMapping("/update")
     public CommonResponse<Boolean> update(@Validated @RequestBody UpdateTenantReq req) {
-        return null;
+        return CommonResponse.suc(tenantService.update(req));
     }
 
     @Operation(summary = "删除租户")
     @PostMapping("/delete")
-    public CommonResponse<Boolean> update(@Validated @RequestBody DeleteTenantReq req) {
-        return null;
+    public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteTenantReq req) {
+        return CommonResponse.suc(tenantService.delete(req));
     }
 }
