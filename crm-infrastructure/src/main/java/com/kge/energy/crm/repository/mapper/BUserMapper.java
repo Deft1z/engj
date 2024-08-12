@@ -14,7 +14,7 @@ import java.util.List;
  */
 public interface BUserMapper extends BaseMapper<BUser> {
 
-    List<UserInfoDto.Role> getUserRoles(String systemType, Integer userId);
+    List<UserInfoDto.Role> getUserRoles(@Param("systemType") String systemType, @Param("userId") Integer userId);
 
     List<RoleUserResult> getUserByRoleAndOrgId(@Param("roleId") Integer roleId, @Param("organizationId") Integer organizationId);
 

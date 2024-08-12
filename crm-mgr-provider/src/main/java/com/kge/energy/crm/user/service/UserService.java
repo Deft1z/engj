@@ -134,6 +134,14 @@ public class UserService {
             throw new BadException("找不到用户对应的租户ID");
         }
 
+        List<CurrentUserInfoResp.Role> roles = userInfoDto.getRoleList()
+                .stream()
+                .map(item -> new CurrentUserInfoResp.Role()
+                        .setId(item.getId())
+                        .setName(item.getName())
+                        .setCode(item.getCode())
+                ).toList();
+
         List<CurrentUserInfoResp.OrganizationListBean> orgs = userInfoDto.getOrganizationList()
                 .stream()
                 .map(item -> new CurrentUserInfoResp.OrganizationListBean()
@@ -146,9 +154,7 @@ public class UserService {
                 .setUserId(Math.toIntExact(userInfoDto.getUserId()))
                 .setUserName(userInfoDto.getUserName())
                 .setUserName(userInfoDto.getUserName())
-                // todo
-                .setRoleId(userInfoDto.getRoleList().get(0).getId())
-                .setRoleName(userInfoDto.getRoleList().get(0).getName())
+                .setRoleList(roles)
                 .setOrganizationList(orgs);
     }
 
