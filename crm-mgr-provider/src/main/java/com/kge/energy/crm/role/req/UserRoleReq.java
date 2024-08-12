@@ -1,8 +1,9 @@
 package com.kge.energy.crm.role.req;
 
-import com.kge.energy.crm.common.page.PageReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,14 +12,16 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "角色列表请求参数", description = "角色列表请求参数")
-public class RoleListReq extends PageReq {
+@Schema(name = "获取用户角色请求参数", description = "获取用户角色请求参数")
+public class UserRoleReq {
 
-    @Schema(description = "租户ID")
-    private Integer tenantId;
+    @Schema(description = "用户ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull
+    private Integer userId;
 
     @Schema(description = "系统类型：applet、mgr", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank
+    @Pattern(regexp = "applet|mgr")
     private String systemType;
 
 }
