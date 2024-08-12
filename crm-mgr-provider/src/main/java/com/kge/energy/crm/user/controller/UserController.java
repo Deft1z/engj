@@ -2,16 +2,11 @@ package com.kge.energy.crm.user.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
-import com.kge.energy.crm.user.req.RoleUserReq;
-import com.kge.energy.crm.user.req.UserLoginReq;
-import com.kge.energy.crm.user.req.UserSaltReq;
-import com.kge.energy.crm.user.req.WxUserListReq;
-import com.kge.energy.crm.user.resp.CurrentUserInfoResp;
-import com.kge.energy.crm.user.resp.RoleUserResp;
-import com.kge.energy.crm.user.resp.UserLoginResp;
-import com.kge.energy.crm.user.resp.WxUserListResp;
+import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.user.req.*;
+import com.kge.energy.crm.user.resp.*;
 import com.kge.energy.crm.user.service.UserService;
-import com.kge.platform.framework.common.exception.ServiceException;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,9 +42,6 @@ public class UserController {
     @ConvertToGoFormats
     @PostMapping("/base/user/salt")
     public CommonResponse<String> userSalt(@Validated @RequestBody UserSaltReq req) {
-        if (true) {
-            throw new ServiceException("sdfdsf");
-        }
         return CommonResponse.suc(userService.userSalt(req));
     }
 
@@ -78,5 +70,35 @@ public class UserController {
     @PostMapping("/baseDataBack/userBackMrg/wxUser/load")
     public CommonResponse<WxUserListResp> currentWxUserList(@RequestBody WxUserListReq req) {
         return CommonResponse.suc(userService.findWxUserList(req));
+    }
+
+    @Operation(summary = "获取租户或部门下的用户列表")
+    @PostMapping("/user/list")
+    public CommonResponse<PageResp<UserListResp>> list(@Validated @RequestBody UserListReq req) {
+        return CommonResponse.suc(null);
+    }
+
+    @Operation(summary = "新增用户")
+    @PostMapping("/user/add")
+    public CommonResponse<Boolean> add(@Validated @RequestBody AddUserReq req) {
+        return CommonResponse.suc(null);
+    }
+
+    @Operation(summary = "编辑用户")
+    @PostMapping("/user/update")
+    public CommonResponse<Boolean> update(@Validated @RequestBody UpdateUserReq req) {
+        return CommonResponse.suc(null);
+    }
+
+    @Operation(summary = "删除用户")
+    @PostMapping("/user/delete")
+    public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteUserReq req) {
+        return CommonResponse.suc(null);
+    }
+
+    @Operation(summary = "分配用户角色")
+    @PostMapping("/user/assignRole")
+    public CommonResponse<Boolean> delete(@Validated @RequestBody AssignUserRoleReq req) {
+        return CommonResponse.suc(null);
     }
 }

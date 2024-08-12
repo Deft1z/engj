@@ -1,9 +1,11 @@
 package com.kge.energy.crm.role.controller;
 
 import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.role.req.*;
 import com.kge.energy.crm.role.resp.RoleListResp;
 import com.kge.energy.crm.role.resp.RoleResourceResp;
+import com.kge.energy.crm.role.resp.UserRoleResp;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,7 @@ public class RoleController {
 
     @Operation(summary = "角色列表")
     @PostMapping("/list")
-    public CommonResponse<RoleListResp> list(@Validated @RequestBody RoleListReq req) {
+    public CommonResponse<PageResp<RoleListResp>> list(@Validated @RequestBody RoleListReq req) {
         return CommonResponse.suc(null);
     }
 
@@ -49,6 +51,12 @@ public class RoleController {
     @Operation(summary = "角色已关联菜单")
     @PostMapping("/roleResource")
     public CommonResponse<RoleResourceResp> delete(@Validated @RequestBody RoleResourceReq req) {
+        return CommonResponse.suc(null);
+    }
+
+    @Operation(summary = "获取用户角色")
+    @PostMapping("/userRole")
+    public CommonResponse<UserRoleResp> userRole(@Validated @RequestBody UserRoleReq req) {
         return CommonResponse.suc(null);
     }
 }
