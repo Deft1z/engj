@@ -13,6 +13,10 @@ public class UpdateOrgReq {
     @NotNull
     private Integer organizationId;
 
+    @Schema(description = "上级组织id")
+    @NotNull
+    private Integer parentOrganizationId;
+
     @Schema(description = "组织名称")
     @NotBlank
     private String name;

@@ -8,4 +8,5 @@ public class OrgQueryParam extends PageReq {
     private String name;
     private Integer parentOrganizationId;
     private Integer tenantId;
+    private Integer level;
 }

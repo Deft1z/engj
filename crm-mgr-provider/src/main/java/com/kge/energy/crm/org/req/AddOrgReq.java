@@ -24,4 +24,8 @@ public class AddOrgReq {
     @Schema(description = "状态,0正常 1停用")
     @NotNull
     private Integer status;
+
+    @Schema(description = "租户id")
+    @NotNull
+    private Integer tenantId;
 }

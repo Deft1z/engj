@@ -28,5 +28,6 @@ public interface BOrganizationMapper extends BaseMapper<BOrganization> {
 
     IPage<OrgListResult> selectPage(Page<OrgListResult> page, @Param("param") OrgQueryParam param);
 
+    Integer getTopLevel(Integer tenantId);
 }
 
