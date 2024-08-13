@@ -260,14 +260,14 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许编辑其他租户用户");
-        }
-
         checkMobile(req.getMobile());
 
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
+
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允许编辑其他租户用户");
+        }
 
         bUser.setTenantId(req.getTenantId())
                 .setName(req.getName())
@@ -297,12 +297,12 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许编辑其他租户用户");
-        }
-
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
+
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允许编辑其他租户用户");
+        }
 
         bUserDao.removeById(bUser);
 

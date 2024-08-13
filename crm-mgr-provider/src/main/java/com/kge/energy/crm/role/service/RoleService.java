@@ -84,12 +84,12 @@ public class RoleService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许更新其他租户角色");
-        }
-
         BRole bRole = bRoleDao.getById(req.getRoleId());
         Assert.notNull(bRole, "角色不存在");
+
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
+            throw new ServiceException("非法请求，不允许更新其他租户角色");
+        }
 
         bRole.setName(req.getName())
                 .setCode(req.getCode())
@@ -102,12 +102,13 @@ public class RoleService {
     public Boolean delete(DeleteRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许删除其他租户角色");
-        }
 
         BRole bRole = bRoleDao.getById(req.getRoleId());
         Assert.notNull(bRole, "角色不存在");
+
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
+            throw new ServiceException("非法请求，不允许删除其他租户角色");
+        }
 
         return bRoleDao.removeById(bRole);
     }
@@ -117,6 +118,8 @@ public class RoleService {
      */
     public RoleResourceResp roleResource(RoleResourceReq req) {
 
+        AuthVerifyUtils.mustAdmin();
+
         List<Integer> resourceIdList = bRoleDao.roleResource(req.getRoleId());
 
         return new RoleResourceResp()
@@ -124,6 +127,8 @@ public class RoleService {
     }
 
     public UserRoleResp userRole(UserRoleReq req) {
+
+        AuthVerifyUtils.mustAdmin();
 
         List<BRole> bRoles = bRoleDao.userRole(req.getUserId(), req.getSystemType());
 

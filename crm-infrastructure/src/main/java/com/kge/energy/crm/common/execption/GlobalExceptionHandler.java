@@ -8,6 +8,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.rmi.ServerException;
+
 /**
  * 统一异常处理
  *
@@ -22,6 +24,10 @@ public class GlobalExceptionHandler {
         return errorResult(e.getCode(), e.getMsg(), e.getShowType(), e);
     }
 
+    @ExceptionHandler(ServerException.class)
+    public <T> CommonResponse<T> handleServerException(ServerException e) {
+        return errorResult(ResponseCode.UNKNOWN.getCode(), e.getMessage(), null, e);
+    }
 
     @ExceptionHandler(value = {
             ConstraintViolationException.class,
