@@ -24,7 +24,7 @@
     </resultMap>
 
     <select id="getUserRoles" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Role">
-        select r.role_id, r.name, r.code
+        select r.role_id id, r.name, r.code
         from b_user u,
              b_role r,
              r_user_role ur
@@ -111,6 +111,36 @@
         where (type = '社会客户' or type = '领导')
           AND flag != -1
           AND create_time between #{startTime} and #{endTime}
+    </select>
+
+    <select id="list" resultMap="BUserMap">
+        select bu.*
+        from b_user bu,
+        b_organization bo,
+        r_user_tenant rut
+        where bu.flag = 1
+        and bo.flag = 1
+        and rut.flag = 1
+        and bu.user_id = rut.user_id
+        and bo.organization_id = rut.organization_id
+        <if test="param.tenantId != null">
+            and bu.tenant_id = #{param.tenantId}
+        </if>
+        <if test="param.organizationId != null">
+            and bo.organization_id = #{param.organizationId}
+        </if>
+        <if test="param.name != null and param.name != ''">
+            and bu.name like CONCAT('%',#{param.name},'%')
+        </if>
+        <if test="param.realname != null and param.realname != ''">
+            and bu.realname like CONCAT('%',#{param.realname},'%')
+        </if>
+        <if test="param.mobile != null and param.mobile != ''">
+            and bu.mobile like CONCAT('%',#{param.mobile},'%')
+        </if>
+        <if test="param.status != null">
+            and bu.status = #{param.status}
+        </if>
     </select>
 </mapper>
 

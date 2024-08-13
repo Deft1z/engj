@@ -14,6 +14,10 @@ import lombok.experimental.Accessors;
 @Schema(name = "编辑角色请求参数", description = "编辑角色请求参数")
 public class UpdateRoleReq {
 
+    @Schema(description = "租户ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull
+    private Integer tenantId;
+
     @Schema(description = "角色ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private Integer roleId;

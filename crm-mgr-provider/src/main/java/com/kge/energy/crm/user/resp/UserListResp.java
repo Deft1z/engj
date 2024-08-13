@@ -1,9 +1,7 @@
 package com.kge.energy.crm.user.resp;
 
-import com.kge.energy.crm.common.page.PageReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
@@ -11,9 +9,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@EqualsAndHashCode(callSuper = true)
 @Schema(name = "用户列表响应参数", description = "用户列表响应参数")
-public class UserListResp extends PageReq {
+public class UserListResp {
 
     @Schema(description = "用户ID")
     private Integer userId;
