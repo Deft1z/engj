@@ -33,8 +33,17 @@ public class AddUserReq extends PageReq {
     @NotBlank
     private String realname;
 
-    @Schema(description = "手机号码")
+    @Schema(description = "手机号码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
     private String mobile;
+
+    @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
+    private String passwd;
+
+    @Schema(description = "密码盐值", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
+    private String passwdSalt;
 
     @Schema(description = "帐号状态（0正常 1停用）", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull

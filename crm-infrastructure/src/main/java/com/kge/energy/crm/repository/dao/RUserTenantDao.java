@@ -24,5 +24,6 @@ public class RUserTenantDao extends ServiceImpl<RUserTenantMapper, RUserTenant> 
 
         return mapper.selectOne(wrapper);
     }
+
 }
 

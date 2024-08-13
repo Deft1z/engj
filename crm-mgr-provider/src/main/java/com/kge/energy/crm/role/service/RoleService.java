@@ -2,8 +2,11 @@ package com.kge.energy.crm.role.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BRoleDao;
 import com.kge.energy.crm.repository.entity.BRole;
 import com.kge.energy.crm.repository.entityext.param.RoleListParam;
@@ -11,6 +14,7 @@ import com.kge.energy.crm.role.req.*;
 import com.kge.energy.crm.role.resp.RoleListResp;
 import com.kge.energy.crm.role.resp.RoleResourceResp;
 import com.kge.energy.crm.role.resp.UserRoleResp;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,14 +34,40 @@ public class RoleService {
 
     public PageResp<RoleListResp> list(RoleListReq req) {
 
+        AuthVerifyUtils.mustAdmin();
+
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户角色");
+        }
+
         RoleListParam param = BeanUtil.copyProperties(req, RoleListParam.class);
 
-        return new PageResp<RoleListResp>(bRoleDao.selectPage(param));
+        Page<BRole> page = bRoleDao.selectPage(param);
+
+        List<RoleListResp> roles = page.getRecords()
+                .stream()
+                .map(role -> new RoleListResp()
+                        .setRoleId(role.getRoleId())
+                        .setName(role.getName())
+                        .setCode(role.getCode())
+                        .setStatus(role.getStatus())
+                        .setRemark(role.getRemark())
+                ).collect(Collectors.toList());
+
+        return new PageResp<RoleListResp>()
+                .setList(roles)
+                .setTotal(page.getTotal())
+                .setPageSize(page.getSize())
+                .setCurrentPage(page.getCurrent());
     }
 
     public Boolean add(AddRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
+
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许新增其他租户角色");
+        }
 
         BRole bRole = new BRole()
                 .setTenantId(req.getTenantId())
@@ -54,6 +84,10 @@ public class RoleService {
 
         AuthVerifyUtils.mustAdmin();
 
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许更新其他租户角色");
+        }
+
         BRole bRole = bRoleDao.getById(req.getRoleId());
         Assert.notNull(bRole, "角色不存在");
 
@@ -68,6 +102,9 @@ public class RoleService {
     public Boolean delete(DeleteRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许删除其他租户角色");
+        }
 
         BRole bRole = bRoleDao.getById(req.getRoleId());
         Assert.notNull(bRole, "角色不存在");

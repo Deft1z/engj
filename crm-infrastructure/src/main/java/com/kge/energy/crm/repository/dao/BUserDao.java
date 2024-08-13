@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BUser;
+import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.repository.mapper.BUserMapper;
 import lombok.RequiredArgsConstructor;
@@ -108,6 +109,11 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
 
     public Long findNewUserCount(String startTime, String endTime) {
         return mapper.findNewUserCount(startTime, endTime);
+    }
+
+    public IPage<BUser> list(UserListParam req) {
+        Page<BUser> page = new Page<>(req.getCurrentPage(), req.getPageSize());
+        return mapper.list(page, req);
     }
 }
 

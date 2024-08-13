@@ -75,25 +75,25 @@ public class UserController {
     @Operation(summary = "获取租户或部门下的用户列表")
     @PostMapping("/user/list")
     public CommonResponse<PageResp<UserListResp>> list(@Validated @RequestBody UserListReq req) {
-        return CommonResponse.suc(null);
+        return CommonResponse.suc(userService.list(req));
     }
 
     @Operation(summary = "新增用户")
     @PostMapping("/user/add")
     public CommonResponse<Boolean> add(@Validated @RequestBody AddUserReq req) {
-        return CommonResponse.suc(null);
+        return CommonResponse.suc(userService.add(req));
     }
 
     @Operation(summary = "编辑用户")
     @PostMapping("/user/update")
     public CommonResponse<Boolean> update(@Validated @RequestBody UpdateUserReq req) {
-        return CommonResponse.suc(null);
+        return CommonResponse.suc(userService.update(req));
     }
 
     @Operation(summary = "删除用户")
     @PostMapping("/user/delete")
     public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteUserReq req) {
-        return CommonResponse.suc(null);
+        return CommonResponse.suc(userService.delete(req));
     }
 
     @Operation(summary = "分配用户角色")

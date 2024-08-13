@@ -16,6 +16,10 @@ import lombok.experimental.Accessors;
 @Schema(name = "删除用户请求参数", description = "删除用户请求参数")
 public class DeleteUserReq extends PageReq {
 
+    @Schema(description = "租户ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull
+    private Integer tenantId;
+
     @Schema(description = "用户ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private Integer userId;
