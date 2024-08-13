@@ -66,9 +66,5 @@ public class UserInfoDto extends CommonUserInfoDto {
 
         private String name;
 
-        /**
-         * 重构后废弃
-         */
-        private String authCode;
     }
 }

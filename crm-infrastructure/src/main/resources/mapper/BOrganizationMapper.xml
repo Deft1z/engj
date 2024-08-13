@@ -27,7 +27,7 @@
     </resultMap>
 
     <select id="findUserInfoDtoOrgs" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Organization">
-        select o.organization_id id, o.name, o.auth_code
+        select o.organization_id id, o.name
         from b_organization o,
              r_user_tenant rut
         where o.flag = 1
@@ -66,7 +66,7 @@
 
     <select id="selectPage" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
         select bo.organization_id, bo.parent_organization_id, bo.level, bo.tenant_id, bo.name, bo.sort,
-               bo.status, DATE_FORMAT(bo.create_time, '%Y-%m-%d %H:%i:%s') as create_time
+        bo.status, DATE_FORMAT(bo.create_time, '%Y-%m-%d %H:%i:%s') as create_time
         from b_organization bo
         where bo.flag = 1
 
@@ -84,12 +84,12 @@
         </if>
 
         order by bo.sort asc
-
     </select>
 
     <select id="logicDelete">
-        update b_organization bo set bo.flag = -1 where bo.organization_id = {#orgId}
+        update b_organization bo
+        set bo.flag = -1
+        where bo.organization_id = {#orgId}
     </select>
-
 </mapper>
 
