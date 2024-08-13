@@ -6,6 +6,7 @@ import lombok.Data;
  * @author wangjihua
  */
 @Data
+@Deprecated //前端接新的菜单接口后删除
 public class ResourcePermissionResult {
 
     private Integer resourceId;

@@ -224,7 +224,6 @@ public class WeChatLoginService {
                         .map(org -> new WxLoginUserInfoResp.Organization()
                                 .setId(org.getId())
                                 .setName(org.getName())
-                                .setAuthCode(org.getAuthCode())
                         ).collect(Collectors.toList()));
     }
 

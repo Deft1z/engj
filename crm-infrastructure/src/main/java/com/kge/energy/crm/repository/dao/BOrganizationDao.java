@@ -47,13 +47,10 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.getCompanyList();
     }
 
-    public IPage<OrgListResult> selectPage(OrgQueryParam param){
+    public IPage<OrgListResult> selectPage(OrgQueryParam param) {
         Page<OrgListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
         return mapper.selectPage(page, param);
     }
 
-    public void logicDelete(Integer orgId){
-        mapper.logicDelete(orgId);
-    }
 }
 

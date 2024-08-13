@@ -40,31 +40,6 @@ public class BResource {
     private String resourceType;
 
     /**
-     * 重构后停用
-     */
-    private Integer referResourceId;
-
-    /**
-     * 0，1，2，3,路由三级，重构后停用
-     */
-    private Integer level;
-
-    /**
-     * 子系统、板块、模块、功能块，重构后停用
-     */
-    private String type;
-
-    /**
-     * 与真实路由对应，重构后停用
-     */
-    private String name;
-
-    /**
-     * 管理后台资源名称，重构后停用
-     */
-    private String displayName;
-
-    /**
      * 排序
      */
     private Integer sort;
@@ -133,9 +108,5 @@ public class BResource {
      */
     private String remark;
 
-    /**
-     * 租户id, todo: 删掉字段
-     */
-    private Integer tenantId;
 }
 

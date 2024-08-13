@@ -4,19 +4,13 @@
     <resultMap type="com.kge.energy.crm.repository.entity.BOrganization" id="BOrganizationMap">
         <result property="organizationId" column="organization_id" jdbcType="INTEGER"/>
         <result property="parentOrganizationId" column="parent_organization_id" jdbcType="INTEGER"/>
-        <result property="regionId" column="region_id" jdbcType="INTEGER"/>
-        <result property="userTenantId" column="user_tenant_id" jdbcType="INTEGER"/>
         <result property="type" column="type" jdbcType="VARCHAR"/>
         <result property="level" column="level" jdbcType="INTEGER"/>
-        <result property="authCode" column="auth_code" jdbcType="VARCHAR"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="sort" column="sort" jdbcType="INTEGER"/>
         <result property="leaderUserId" column="leader_user_id" jdbcType="INTEGER"/>
         <result property="parameter" column="parameter"
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
-        <result property="variables" column="variables" jdbcType="VARCHAR"/>
-        <result property="referSource" column="refer_source" jdbcType="VARCHAR"/>
-        <result property="referId" column="refer_id" jdbcType="VARCHAR"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -84,12 +78,6 @@
         </if>
 
         order by bo.sort asc
-    </select>
-
-    <select id="logicDelete">
-        update b_organization bo
-        set bo.flag = -1
-        where bo.organization_id = {#orgId}
     </select>
 </mapper>
 

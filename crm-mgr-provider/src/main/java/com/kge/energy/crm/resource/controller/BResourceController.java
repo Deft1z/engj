@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/baseDataBack/menu")
 @RequiredArgsConstructor
+@Deprecated //前端接新的菜单接口后删除
 public class BResourceController {
     private final BResourceService bResourceService;
 
@@ -24,6 +25,7 @@ public class BResourceController {
      */
     @ConvertToGoFormats
     @PostMapping("/list")
+    @Deprecated //前端接新的菜单接口后删除
     public CommonResponse<List<MenuNodeResp>> menuList(@RequestBody ResourceReq req) {
         List<MenuNodeResp> menuArr = bResourceService.findMenu(req.getUserId());
         return CommonResponse.suc(menuArr);

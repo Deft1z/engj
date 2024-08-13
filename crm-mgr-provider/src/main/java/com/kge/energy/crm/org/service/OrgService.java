@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.org.req.AddOrgReq;
 import com.kge.energy.crm.org.req.DeleteOrgReq;
 import com.kge.energy.crm.org.req.OrgQueryReq;
@@ -39,18 +38,15 @@ public class OrgService {
         return BeanUtil.copyToList(orgDictResults, OrgDictResp.class);
     }
 
-    public PageResp<OrgListResult> selectPage(OrgQueryReq req){
+    public PageResp<OrgListResult> selectPage(OrgQueryReq req) {
         OrgQueryParam param = BeanUtil.copyProperties(req, OrgQueryParam.class);
-
-        boolean isSuperAdmin = UserInfoContextUtils.isSuperAdmin();
-        boolean isTenantAdmin = UserInfoContextUtils.isTenantAdmin();
 
         return new PageResp<>(bOrganizationDao.selectPage(param));
     }
 
-    public Boolean add(AddOrgReq addOrgReq){
+    public Boolean add(AddOrgReq addOrgReq) {
         BOrganization parentOrganization = bOrganizationDao.getById(addOrgReq.getParentOrganizationId());
-        if(ObjectUtil.isNull(parentOrganization)){
+        if (ObjectUtil.isNull(parentOrganization)) {
             throw new ServiceException("上级组织不存在");
         }
 
@@ -62,7 +58,7 @@ public class OrgService {
 
     public Boolean update(UpdateOrgReq updateOrgReq) {
         BOrganization old = bOrganizationDao.getById(updateOrgReq.getOrganizationId());
-        if(ObjectUtil.isNull(old)){
+        if (ObjectUtil.isNull(old)) {
             throw new ServiceException("组织结构不存在");
         }
 
@@ -70,13 +66,12 @@ public class OrgService {
         return bOrganizationDao.saveOrUpdate(old);
     }
 
-    public Boolean delete(DeleteOrgReq deleteOrgReq){
+    public Boolean delete(DeleteOrgReq deleteOrgReq) {
         BOrganization old = bOrganizationDao.getById(deleteOrgReq.getOrganizationId());
-        if(ObjectUtil.isNull(old)){
+        if (ObjectUtil.isNull(old)) {
             throw new ServiceException("组织结构不存在");
         }
 
-        bOrganizationDao.logicDelete(deleteOrgReq.getOrganizationId());
-        return true;
+        return bOrganizationDao.removeById(deleteOrgReq.getOrganizationId());
     }
 }

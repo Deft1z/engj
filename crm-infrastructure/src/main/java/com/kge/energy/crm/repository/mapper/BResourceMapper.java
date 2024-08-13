@@ -14,8 +14,6 @@ import java.util.List;
  */
 public interface BResourceMapper extends BaseMapper<BResource> {
 
-    List<ResourcePermissionResult> findPermission(@Param("userId") Integer userId, @Param("urls") List<String> urls);
-
     List<ResourcePermissionResult> findMenu(@Param("userId") Integer userId);
 
     List<BResource> getSystemResources(SystemResourceParam param);

@@ -31,16 +31,6 @@ public class BOrganization {
     private Integer parentOrganizationId;
 
     /**
-     * 停用
-     */
-    private Integer regionId;
-
-    /**
-     * 停用
-     */
-    private Integer userTenantId;
-
-    /**
      * 集团总部；电力建设；工程咨询设计；科技服务与智慧能源；物业运营；城建建设；
      */
     private String type;
@@ -49,11 +39,6 @@ public class BOrganization {
      * 总共两层
      */
     private Integer level;
-
-    /**
-     * 停用
-     */
-    private String authCode;
 
     /**
      * 为集团以及旗下16家子公司名称
@@ -66,16 +51,6 @@ public class BOrganization {
     private Integer sort;
 
     /**
-     * 维度，重构后停用
-     */
-    private String lat;
-
-    /**
-     * 经度，重构后停用
-     */
-    private String lng;
-
-    /**
      * 负责人ID
      */
     private Integer leaderUserId;
@@ -85,21 +60,6 @@ public class BOrganization {
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
     private OrganizationParameter parameter;
-
-    /**
-     * 停用
-     */
-    private String variables;
-
-    /**
-     * 停用
-     */
-    private String referSource;
-
-    /**
-     * 停用
-     */
-    private String referId;
 
     /**
      * 数据状态：-1-删除，1-正常
