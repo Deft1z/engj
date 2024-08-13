@@ -73,7 +73,6 @@
         select *
         from b_resource
         where flag = 1
-        and tenant_id is not null
         <if test="systemType != null and systemType != ''">
             and system_type = #{systemType}
         </if>

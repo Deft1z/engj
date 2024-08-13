@@ -81,6 +81,8 @@ public class ResourceDomainService {
             }
         }
 
+        sortResources(rootNodes);
+
         return new ResourceListResp()
                 .setResources(rootNodes);
     }
@@ -104,6 +106,31 @@ public class ResourceDomainService {
 
         return resourceBean;
 
+    }
+
+    /**
+     * 对树形结构的ResourceBean列表进行排序。
+     *
+     * @param resources 树形结构的ResourceBean列表
+     */
+
+    public static void sortResources(List<ResourceBean> resources) {
+
+        // 首先对当前层级进行排序
+        resources.sort(
+                (rb1, rb2) -> {
+                    Integer sort1 = rb1.getSort() == null ? Integer.MAX_VALUE : rb1.getSort();
+                    Integer sort2 = rb2.getSort() == null ? Integer.MAX_VALUE : rb2.getSort();
+                    return sort1.compareTo(sort2);
+                }
+        );
+
+        // 然后递归地对每个子节点列表进行排序
+        for (ResourceBean resource : resources) {
+            if (resource.getChildrens() != null) {
+                sortResources(resource.getChildrens());
+            }
+        }
     }
 
 }

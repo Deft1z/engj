@@ -147,7 +147,6 @@ public class UserService {
                 .map(item -> new CurrentUserInfoResp.OrganizationListBean()
                         .setId(item.getId())
                         .setName(item.getName())
-                        .setAuthCode(item.getAuthCode())
                 ).toList();
 
         return new CurrentUserInfoResp()
