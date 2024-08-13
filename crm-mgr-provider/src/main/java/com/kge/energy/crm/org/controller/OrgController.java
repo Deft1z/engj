@@ -43,8 +43,8 @@ public class OrgController {
 
     @Operation(summary = "组织列表")
     @PostMapping("/getOrgList")
-    public CommonResponse<PageResp<OrgListResult>> list(@Validated @RequestBody OrgQueryReq req) {
-        return CommonResponse.suc(orgService.selectPage(req));
+    public CommonResponse<List<OrgListResult>> list(@Validated @RequestBody OrgQueryReq req) {
+        return CommonResponse.suc(orgService.selectList(req));
     }
 
     @Operation(summary = "新增组织")

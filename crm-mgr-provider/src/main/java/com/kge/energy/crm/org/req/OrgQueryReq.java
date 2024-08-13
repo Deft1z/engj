@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Schema(name = "查询组织列表name", description = "查询组织列表对象")
-public class OrgQueryReq extends PageReq {
+public class OrgQueryReq{
 
     @Schema(description = "组织名称")
     private String name;

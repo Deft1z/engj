@@ -49,9 +49,8 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.getCompanyList();
     }
 
-    public IPage<OrgListResult> selectPage(OrgQueryParam param) {
-        Page<OrgListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
-        return mapper.selectPage(page, param);
+    public List<OrgListResult> selectList(OrgQueryParam param) {
+        return mapper.selectList(param);
     }
 
     public Integer getTopLevel(Integer tenantId) {

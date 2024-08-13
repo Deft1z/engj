@@ -58,23 +58,27 @@
         order by a.parameter ->> '$.serviceType', a.create_time asc
     </select>
 
-    <select id="selectPage" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
+    <select id="selectList" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
         select bo.organization_id, bo.parent_organization_id, bo.level, bo.tenant_id, bo.name, bo.sort,
                bo.status, DATE_FORMAT(bo.create_time, '%Y-%m-%d %H:%i:%s') as create_time
         from b_organization bo
         where bo.flag = 1
 
         <if test="param.tenantId != null">
-            bo.tenant_id = #{param.tenantId}
+            and bo.tenant_id = #{param.tenantId}
+        </if>
+
+        <if test="param.level != null">
+            and bo.level = #{param.level}
         </if>
 
         <if test="param.parentOrganizationId != null">
-            bo.parent_organization_id = #{param.parent_organization_id}
+            and bo.parent_organization_id = #{param.parentOrganizationId}
         </if>
 
         <if test="param.name != null and param.name != ''">
             <bind name="name" value="'%' + param.name + '%'"/>
-            and block.name like #{name}
+            and bo.name like #{name}
         </if>
 
         order by bo.sort asc

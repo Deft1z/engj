@@ -49,7 +49,7 @@ public class TenantService {
             throw new ServiceException("租户不存在");
         }
 
-        bTenantDao.logicDelete(req.getId());
+        bTenantDao.removeById(req.getId());
         return true;
     }
 

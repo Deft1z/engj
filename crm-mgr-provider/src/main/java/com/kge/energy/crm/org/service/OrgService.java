@@ -42,7 +42,7 @@ public class OrgService {
         return BeanUtil.copyToList(orgDictResults, OrgDictResp.class);
     }
 
-    public PageResp<OrgListResult> selectPage(OrgQueryReq req){
+    public List<OrgListResult> selectList(OrgQueryReq req){
         AuthVerifyUtils.mustAdmin();
 
         OrgQueryParam param = BeanUtil.copyProperties(req, OrgQueryParam.class);
@@ -63,7 +63,7 @@ public class OrgService {
             param.setTenantId(UserInfoContextUtils.getCurrentTenantId());
         }
 
-        return new PageResp<>(bOrganizationDao.selectPage(param));
+        return bOrganizationDao.selectList(param);
     }
 
     public Boolean add(AddOrgReq addOrgReq){
