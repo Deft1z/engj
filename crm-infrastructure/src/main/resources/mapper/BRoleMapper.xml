@@ -15,5 +15,33 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
     </resultMap>
+
+    <select id="roleResource" resultType="java.lang.Integer">
+        select bre.resource_id
+        from b_role br,
+             b_resource bre,
+             r_role_resource rrr
+        where br.flag = 1
+          and bre.flag = 1
+          and rrr.flag = 1
+          and br.role_id = rrr.role_id
+          and bre.resource_id = rrr.resource_id
+          and br.role_id = #{roleId}
+          and bre.resource_id > 499
+    </select>
+
+    <select id="userRole" resultType="com.kge.energy.crm.repository.entity.BRole">
+        select br.*
+        from b_user bu,
+             b_role br,
+             r_user_role rur
+        where bu.flag = 1
+          and br.flag = 1
+          and rur.flag = 1
+          and bu.user_id = rur.user_id
+          and br.role_id = rur.role_id
+          and bu.user_id = #{userId}
+          and br.system_type = #{systemType}
+    </select>
 </mapper>
 

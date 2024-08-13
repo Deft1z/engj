@@ -1,11 +1,16 @@
 package com.kge.energy.crm.repository.dao;
 
-import com.kge.energy.crm.repository.mapper.BRoleMapper;
-import com.kge.energy.crm.repository.entity.BRole;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
+import cn.hutool.core.lang.Assert;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.BRole;
+import com.kge.energy.crm.repository.entityext.param.RoleListParam;
+import com.kge.energy.crm.repository.mapper.BRoleMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 角色(BRole)表数据库访问层
@@ -16,5 +21,26 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
 
     private final BRoleMapper mapper;
 
+    public Page selectPage(RoleListParam param) {
+        Page<BRole> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+
+        LambdaQueryWrapper wrapper = new LambdaQueryWrapper<BRole>()
+                .eq(BRole::getTenantId, param.getTenantId())
+                .eq(BRole::getSystemType, param.getSystemType());
+
+        return mapper.selectPage(page, wrapper);
+    }
+
+
+    public List<Integer> roleResource(Integer roleId) {
+
+        Assert.notNull(roleId);
+
+        return mapper.roleResource(roleId);
+    }
+
+    public List<BRole> userRole(Integer userId, String systemType) {
+        return mapper.userRole(userId, systemType);
+    }
 }
 

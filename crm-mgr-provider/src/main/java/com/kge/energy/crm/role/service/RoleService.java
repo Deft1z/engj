@@ -1,0 +1,102 @@
+package com.kge.energy.crm.role.service;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.Assert;
+import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.repository.dao.BRoleDao;
+import com.kge.energy.crm.repository.entity.BRole;
+import com.kge.energy.crm.repository.entityext.param.RoleListParam;
+import com.kge.energy.crm.role.req.*;
+import com.kge.energy.crm.role.resp.RoleListResp;
+import com.kge.energy.crm.role.resp.RoleResourceResp;
+import com.kge.energy.crm.role.resp.UserRoleResp;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @author wangjihua
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class RoleService {
+
+    private final BRoleDao bRoleDao;
+
+    public PageResp<RoleListResp> list(RoleListReq req) {
+
+        RoleListParam param = BeanUtil.copyProperties(req, RoleListParam.class);
+
+        return new PageResp<RoleListResp>(bRoleDao.selectPage(param));
+    }
+
+    public Boolean add(AddRoleReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BRole bRole = new BRole()
+                .setTenantId(req.getTenantId())
+                .setSystemType(req.getSystemType())
+                .setName(req.getName())
+                .setCode(req.getCode())
+                .setStatus(req.getStatus())
+                .setRemark(req.getRemark());
+
+        return bRoleDao.save(bRole);
+    }
+
+    public Boolean update(UpdateRoleReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BRole bRole = bRoleDao.getById(req.getRoleId());
+        Assert.notNull(bRole, "角色不存在");
+
+        bRole.setName(req.getName())
+                .setCode(req.getCode())
+                .setStatus(req.getStatus())
+                .setRemark(req.getRemark());
+
+        return bRoleDao.updateById(bRole);
+    }
+
+    public Boolean delete(DeleteRoleReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BRole bRole = bRoleDao.getById(req.getRoleId());
+        Assert.notNull(bRole, "角色不存在");
+
+        return bRoleDao.removeById(bRole);
+    }
+
+    /**
+     * 角色已关联菜单
+     */
+    public RoleResourceResp roleResource(RoleResourceReq req) {
+
+        List<Integer> resourceIdList = bRoleDao.roleResource(req.getRoleId());
+
+        return new RoleResourceResp()
+                .setResourceIdList(resourceIdList);
+    }
+
+    public UserRoleResp userRole(UserRoleReq req) {
+
+        List<BRole> bRoles = bRoleDao.userRole(req.getUserId(), req.getSystemType());
+
+        List<UserRoleResp.Role> roles = bRoles.stream()
+                .map(role -> new UserRoleResp.Role()
+                        .setName(role.getName())
+                        .setRoleId(role.getRoleId()))
+                .collect(Collectors.toList());
+
+        return new UserRoleResp()
+                .setRoles(roles);
+    }
+}
