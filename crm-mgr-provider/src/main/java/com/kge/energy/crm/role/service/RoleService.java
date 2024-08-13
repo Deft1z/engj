@@ -3,6 +3,7 @@ package com.kge.energy.crm.role.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -41,7 +42,23 @@ public class RoleService {
 
         RoleListParam param = BeanUtil.copyProperties(req, RoleListParam.class);
 
-        return new PageResp<RoleListResp>(bRoleDao.selectPage(param));
+        Page<BRole> page = bRoleDao.selectPage(param);
+
+        List<RoleListResp> roles = page.getRecords()
+                .stream()
+                .map(role -> new RoleListResp()
+                        .setRoleId(role.getRoleId())
+                        .setName(role.getName())
+                        .setCode(role.getCode())
+                        .setStatus(role.getStatus())
+                        .setRemark(role.getRemark())
+                ).collect(Collectors.toList());
+
+        return new PageResp<RoleListResp>()
+                .setList(roles)
+                .setTotal(page.getTotal())
+                .setPageSize(page.getSize())
+                .setCurrentPage(page.getCurrent());
     }
 
     public Boolean add(AddRoleReq req) {
