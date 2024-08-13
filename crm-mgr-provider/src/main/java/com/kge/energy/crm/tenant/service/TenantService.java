@@ -3,9 +3,12 @@ package com.kge.energy.crm.tenant.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BTenantDao;
 import com.kge.energy.crm.repository.entity.BTenant;
 import com.kge.energy.crm.repository.entityext.param.TenantQueryParam;
+import com.kge.energy.crm.repository.entityext.result.TenantListForOrgResult;
 import com.kge.energy.crm.repository.entityext.result.TenantListResult;
 import com.kge.energy.crm.tenant.req.AddTenantReq;
 import com.kge.energy.crm.tenant.req.DeleteTenantReq;
@@ -15,6 +18,8 @@ import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -49,8 +54,13 @@ public class TenantService {
             throw new ServiceException("租户不存在");
         }
 
-        bTenantDao.removeById(req.getId());
-        return true;
+        return bTenantDao.removeById(req.getId());
+    }
+
+    public List<TenantListForOrgResult> getTenantDictList() {
+        return AuthVerifyUtils.isSuperAdmin() ?
+                bTenantDao.getTenantDictList(null) :
+                bTenantDao.getTenantDictList(UserInfoContextUtils.getCurrentTenantId());
     }
 
 }

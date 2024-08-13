@@ -125,7 +125,6 @@ public class OrgService {
             throw new ServiceException("当前组织存在下级组织，不允许删除");
         }
 
-        bOrganizationDao.removeById(deleteOrgReq.getOrganizationId());
-        return true;
+        return bOrganizationDao.removeById(deleteOrgReq.getOrganizationId());
     }
 }
