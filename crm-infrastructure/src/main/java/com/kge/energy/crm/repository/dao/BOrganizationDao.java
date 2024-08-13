@@ -1,7 +1,9 @@
 package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -54,6 +56,16 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
 
     public void logicDelete(Integer orgId){
         mapper.logicDelete(orgId);
+    }
+
+    public Integer getTopLevel(Integer tenantId){
+        return mapper.getTopLevel(tenantId);
+    }
+
+    public Long getNextLevelOrgCount(Integer orgId){
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getParentOrganizationId, orgId);
+        return mapper.selectCount(wrapper);
     }
 }
 
