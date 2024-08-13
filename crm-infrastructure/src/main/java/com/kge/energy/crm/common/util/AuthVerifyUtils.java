@@ -1,5 +1,6 @@
 package com.kge.energy.crm.common.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.kge.platform.framework.common.exception.ServiceException;
 
 /**
@@ -7,23 +8,46 @@ import com.kge.platform.framework.common.exception.ServiceException;
  */
 public class AuthVerifyUtils {
 
+    private static final String SUPER_ADMIN = "super_admin";
+
+    private static final String TENANT_ADMIN = "tenant_admin";
+
     private AuthVerifyUtils() {
     }
 
+    /**
+     * 是否超级管理员
+     */
+    public static boolean isSuperAdmin() {
+        return UserInfoContextUtils.getCurrentUserInfo().getRoleList()
+                .stream()
+                .anyMatch(role -> StrUtil.equals(role.getCode(), SUPER_ADMIN));
+    }
+
+    /**
+     * 是否租户管理员
+     */
+    public static boolean isTenantAdmin() {
+        return UserInfoContextUtils.getCurrentUserInfo().getRoleList()
+                .stream()
+                .anyMatch(role -> StrUtil.equals(role.getCode(), TENANT_ADMIN));
+    }
+
+
     public static void mustSuperAdmin() {
-        if (!UserInfoContextUtils.isSuperAdmin()) {
+        if (!isSuperAdmin()) {
             throw new ServiceException("当前用户非超级管理员用户");
         }
     }
 
     public static void mustTenantAdmin() {
-        if (!UserInfoContextUtils.isTenantAdmin()) {
+        if (!isTenantAdmin()) {
             throw new ServiceException("当前用户非租户管理员用户");
         }
     }
 
     public static void mustAdmin() {
-        if (!UserInfoContextUtils.isSuperAdmin() || !UserInfoContextUtils.isTenantAdmin()) {
+        if (!isSuperAdmin() && !isTenantAdmin()) {
             throw new ServiceException("当前用户非管理员用户");
         }
     }

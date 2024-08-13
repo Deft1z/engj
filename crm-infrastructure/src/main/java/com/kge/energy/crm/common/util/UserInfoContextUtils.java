@@ -1,6 +1,5 @@
 package com.kge.energy.crm.common.util;
 
-import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.platform.framework.common.util.CommonUserInfoContextUtils;
 
@@ -10,10 +9,6 @@ import com.kge.platform.framework.common.util.CommonUserInfoContextUtils;
  * @author wangjihua
  */
 public class UserInfoContextUtils {
-
-    private static final String SUPER_ADMIN = "super_admin";
-
-    private static final String TENANT_ADMIN = "tenant_admin";
 
     private UserInfoContextUtils() {
     }
@@ -51,22 +46,5 @@ public class UserInfoContextUtils {
         CommonUserInfoContextUtils.putUserInfo(userInfoDto);
     }
 
-    /**
-     * 是否超级管理员
-     */
-    public static boolean isSuperAdmin() {
-        return getCurrentUserInfo().getRoleList()
-                .stream()
-                .anyMatch(role -> StrUtil.equals(role.getCode(), SUPER_ADMIN));
-    }
-
-    /**
-     * 是否租户管理员
-     */
-    public static boolean isTenantAdmin() {
-        return getCurrentUserInfo().getRoleList()
-                .stream()
-                .anyMatch(role -> StrUtil.equals(role.getCode(), TENANT_ADMIN));
-    }
 
 }
