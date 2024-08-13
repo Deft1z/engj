@@ -3,7 +3,6 @@ package com.kge.energy.crm.role.req;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -18,11 +17,6 @@ public class AddRoleReq {
     @Schema(description = "租户ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private Integer tenantId;
-
-    @Schema(description = "系统类型：applet、mgr", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
-    @Pattern(regexp = "applet|mgr")
-    private String systemType;
 
     @Schema(description = "角色名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank

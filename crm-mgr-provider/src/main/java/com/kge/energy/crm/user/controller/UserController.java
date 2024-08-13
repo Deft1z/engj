@@ -98,7 +98,7 @@ public class UserController {
 
     @Operation(summary = "分配用户角色")
     @PostMapping("/user/assignRole")
-    public CommonResponse<Boolean> delete(@Validated @RequestBody AssignUserRoleReq req) {
+    public CommonResponse<Boolean> assignRole(@Validated @RequestBody AssignUserRoleReq req) {
         return CommonResponse.suc(null);
     }
 }

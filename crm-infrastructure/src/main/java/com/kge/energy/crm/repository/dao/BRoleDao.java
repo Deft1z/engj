@@ -32,15 +32,16 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
     }
 
 
-    public List<Integer> roleResource(Integer roleId) {
+    public List<Integer> roleResource(Integer roleId, String systemType) {
 
         Assert.notNull(roleId);
+        Assert.notBlank(systemType);
 
-        return mapper.roleResource(roleId);
+        return mapper.roleResource(roleId, systemType);
     }
 
-    public List<BRole> userRole(Integer userId, String systemType) {
-        return mapper.userRole(userId, systemType);
+    public List<BRole> userRole(Integer userId) {
+        return mapper.userRole(userId);
     }
 }
 

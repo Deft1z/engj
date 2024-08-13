@@ -1,12 +1,10 @@
 package com.kge.energy.crm.user.req;
 
-import com.kge.energy.crm.common.page.PageReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
@@ -14,9 +12,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@EqualsAndHashCode(callSuper = true)
 @Schema(name = "分配用户角色请求参数", description = "分配用户角色请求参数")
-public class AssignUserRoleReq extends PageReq {
+public class AssignUserRoleReq {
 
     @Schema(description = "租户ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull

@@ -55,6 +55,8 @@ public class UserService {
 
     private final RUserTenantDao rUserTenantDao;
 
+    private final RUserRoleDao rUserRoleDao;
+
     private final AuthProperties authProperties;
 
     private final LUserTokenDao lUserTokenDao;
@@ -305,8 +307,9 @@ public class UserService {
         }
 
         bUserDao.removeById(bUser);
+        rUserTenantDao.removeByUserId(bUser.getUserId());
+        rUserRoleDao.removeByUserId(bUser.getUserId());
 
-        //todo
         return true;
     }
 

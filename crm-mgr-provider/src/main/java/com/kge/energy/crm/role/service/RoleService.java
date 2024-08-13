@@ -3,12 +3,15 @@ package com.kge.energy.crm.role.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BRoleDao;
+import com.kge.energy.crm.repository.dao.RRoleResourceDao;
 import com.kge.energy.crm.repository.entity.BRole;
+import com.kge.energy.crm.repository.entity.RUserRole;
 import com.kge.energy.crm.repository.entityext.param.RoleListParam;
 import com.kge.energy.crm.role.req.*;
 import com.kge.energy.crm.role.resp.RoleListResp;
@@ -31,6 +34,8 @@ import java.util.stream.Collectors;
 public class RoleService {
 
     private final BRoleDao bRoleDao;
+
+    private final RRoleResourceDao rRoleResourceDao;
 
     public PageResp<RoleListResp> list(RoleListReq req) {
 
@@ -71,7 +76,6 @@ public class RoleService {
 
         BRole bRole = new BRole()
                 .setTenantId(req.getTenantId())
-                .setSystemType(req.getSystemType())
                 .setName(req.getName())
                 .setCode(req.getCode())
                 .setStatus(req.getStatus())
@@ -110,6 +114,14 @@ public class RoleService {
             throw new ServiceException("非法请求，不允许删除其他租户角色");
         }
 
+        boolean existedRoleUsers = new LambdaQueryChainWrapper<>(RUserRole.class)
+                .eq(RUserRole::getRoleId, req.getRoleId()).exists();
+        if (existedRoleUsers) {
+            throw new ServiceException("当前角色存在绑定用户，不允许删除");
+        }
+
+        rRoleResourceDao.removeByRoleId(bRole.getRoleId());
+
         return bRoleDao.removeById(bRole);
     }
 
@@ -120,7 +132,7 @@ public class RoleService {
 
         AuthVerifyUtils.mustAdmin();
 
-        List<Integer> resourceIdList = bRoleDao.roleResource(req.getRoleId());
+        List<Integer> resourceIdList = bRoleDao.roleResource(req.getRoleId(), req.getSystemType());
 
         return new RoleResourceResp()
                 .setResourceIdList(resourceIdList);
@@ -130,7 +142,7 @@ public class RoleService {
 
         AuthVerifyUtils.mustAdmin();
 
-        List<BRole> bRoles = bRoleDao.userRole(req.getUserId(), req.getSystemType());
+        List<BRole> bRoles = bRoleDao.userRole(req.getUserId());
 
         List<UserRoleResp.Role> roles = bRoles.stream()
                 .map(role -> new UserRoleResp.Role()
