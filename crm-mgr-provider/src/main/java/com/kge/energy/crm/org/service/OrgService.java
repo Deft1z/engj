@@ -63,7 +63,7 @@ public class OrgService {
             param.setTenantId(UserInfoContextUtils.getCurrentTenantId());
         }
 
-        return bOrganizationDao.selectList(param);
+        return bOrganizationDao.getOrgList(param);
     }
 
     public Boolean add(AddOrgReq addOrgReq){

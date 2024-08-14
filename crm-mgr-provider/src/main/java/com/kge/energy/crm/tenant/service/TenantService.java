@@ -30,7 +30,7 @@ public class TenantService {
 
     public PageResp<TenantListResult> selectPage(QueryTenantReq req){
         TenantQueryParam param = BeanUtil.copyProperties(req, TenantQueryParam.class);
-        return new PageResp<>(bTenantDao.selectPage(param));
+        return new PageResp<>(bTenantDao.selectTenantPage(param));
     }
 
     public Boolean add(AddTenantReq req) {

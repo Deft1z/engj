@@ -49,8 +49,8 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.getCompanyList();
     }
 
-    public List<OrgListResult> selectList(OrgQueryParam param) {
-        return mapper.selectList(param);
+    public List<OrgListResult> getOrgList(OrgQueryParam param) {
+        return mapper.getOrgList(param);
     }
 
     public Integer getTopLevel(Integer tenantId) {

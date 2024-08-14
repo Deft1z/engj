@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface BTenantMapper extends BaseMapper<BTenant> {
 
-    IPage<TenantListResult> selectPage(Page<TenantListResult> page, @Param("param") TenantQueryParam param);
+    IPage<TenantListResult> selectTenantPage(Page<TenantListResult> page, @Param("param") TenantQueryParam param);
 
     List<TenantListForOrgResult> getTenantDictList(Integer tenantId);
 
