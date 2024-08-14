@@ -17,5 +17,17 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
     </resultMap>
+
+    <update id="removeByRoleIdWithSystemType">
+        update b_role bro,b_resource bre,r_role_resource rrr
+        set rrr.flag = -1
+        where bro.flag = 1
+          and bre.flag = 1
+          and rrr.flag = 1
+          and bro.role_id = rrr.role_id
+          and bre.resource_id = rrr.resource_id
+          and bro.role_id = #{roleId}
+          and bre.system_type = #{systemType}
+    </update>
 </mapper>
 

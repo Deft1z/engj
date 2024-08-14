@@ -21,5 +21,9 @@ public class RRoleResourceDao extends ServiceImpl<RRoleResourceMapper, RRoleReso
                 .eq(RRoleResource::getRoleId, roleId);
         return mapper.delete(wrapper);
     }
+
+    public int removeByRoleIdWithSystemType(Integer roleId, String systemType) {
+        return mapper.removeByRoleIdWithSystemType(roleId, systemType);
+    }
 }
 

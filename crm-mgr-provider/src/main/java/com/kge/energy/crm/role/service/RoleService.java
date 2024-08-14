@@ -11,6 +11,7 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BRoleDao;
 import com.kge.energy.crm.repository.dao.RRoleResourceDao;
 import com.kge.energy.crm.repository.entity.BRole;
+import com.kge.energy.crm.repository.entity.RRoleResource;
 import com.kge.energy.crm.repository.entity.RUserRole;
 import com.kge.energy.crm.repository.entityext.param.RoleListParam;
 import com.kge.energy.crm.role.req.*;
@@ -21,8 +22,10 @@ import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -138,6 +141,33 @@ public class RoleService {
                 .setResourceIdList(resourceIdList);
     }
 
+    /**
+     * 给角色关联菜单
+     */
+    @Transactional
+    public Boolean assignResource(RoleAssignResourceReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BRole bRole = bRoleDao.getById(req.getRoleId());
+        Assert.notNull(bRole, "角色不存在");
+
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
+            throw new ServiceException("非法请求，不允许操作其他租户角色");
+        }
+
+        rRoleResourceDao.removeByRoleIdWithSystemType(req.getRoleId(), req.getSystemType());
+
+        Set<RRoleResource> rRoleResources = req.getResourceIds()
+                .stream()
+                .map(resourceId -> new RRoleResource()
+                        .setRoleId(bRole.getRoleId())
+                        .setResourceId(resourceId)
+                        .setTenantId(bRole.getTenantId()))
+                .collect(Collectors.toSet());
+        return rRoleResourceDao.saveBatch(rRoleResources);
+    }
+
     public UserRoleResp userRole(UserRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -153,4 +183,5 @@ public class RoleService {
         return new UserRoleResp()
                 .setRoles(roles);
     }
+
 }
