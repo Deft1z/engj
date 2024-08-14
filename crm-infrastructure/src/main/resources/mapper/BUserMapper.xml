@@ -35,7 +35,6 @@
           and r.role_id = ur.role_id
           and u.tenant_id = r.tenant_id
           and u.user_id = #{userId}
-          and r.system_type = #{systemType}
     </select>
 
     <select id="getUserByRoleAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">

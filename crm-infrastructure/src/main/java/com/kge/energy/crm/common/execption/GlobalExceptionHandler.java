@@ -24,26 +24,21 @@ public class GlobalExceptionHandler {
         return errorResult(e.getCode(), e.getMsg(), e.getShowType(), e);
     }
 
-    @ExceptionHandler(ServerException.class)
-    public <T> CommonResponse<T> handleServerException(ServerException e) {
+    @ExceptionHandler(value = {
+            ServerException.class,
+            MethodArgumentNotValidException.class,
+            ConstraintViolationException.class
+    })
+    public <T> CommonResponse<T> handleServerException(Exception e) {
         return errorResult(ResponseCode.UNKNOWN.getCode(), e.getMessage(), null, e);
     }
 
     @ExceptionHandler(value = {
-            ConstraintViolationException.class,
-    })
-    public <T> CommonResponse<T> handleConstraintViolationException(Exception e) {
-        return errorResult(ResponseCode.PARAM_NOT_VALID, e);
-    }
-
-    @ExceptionHandler(value = {
-            MethodArgumentNotValidException.class,
             Exception.class
     })
     public <T> CommonResponse<T> handleUnknowxception(Exception e) {
         return errorResult(ResponseCode.UNKNOWN, e);
     }
-
 
     public <T> CommonResponse<T> errorResult(ResponseCode responseCode, Exception e) {
         return errorResult(responseCode.getCode(), responseCode.getMsg(), responseCode.getShowType(), e);
@@ -53,10 +48,6 @@ public class GlobalExceptionHandler {
 
         log.error("==> Error code [{}], msg [{}], showType [{}]", code, msg, showType, e);
 
-        return new CommonResponse()
-                .setErrorCode(code)
-                .setErrorMsg(msg)
-                .setShowType(showType)
-                .setData(null);
+        return new CommonResponse().setErrorCode(code).setErrorMsg(msg).setShowType(showType).setData(null);
     }
 }

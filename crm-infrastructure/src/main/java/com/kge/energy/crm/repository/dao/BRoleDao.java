@@ -25,8 +25,7 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
         Page<BRole> page = new Page<>(param.getCurrentPage(), param.getPageSize());
 
         LambdaQueryWrapper wrapper = new LambdaQueryWrapper<BRole>()
-                .eq(BRole::getTenantId, param.getTenantId())
-                .eq(BRole::getSystemType, param.getSystemType());
+                .eq(BRole::getTenantId, param.getTenantId());
 
         return mapper.selectPage(page, wrapper);
     }

@@ -41,6 +41,5 @@ public class CurrentUserInfoResp {
 
         private String name;
 
-        private String authCode;
     }
 }
