@@ -50,6 +50,10 @@ public class RoleService {
 
         RoleListParam param = BeanUtil.copyProperties(req, RoleListParam.class);
 
+        if (AuthVerifyUtils.notSuperAdmin()) {
+            param.setExcludeCodes(List.of(AuthVerifyUtils.SUPER_ADMIN));
+        }
+
         Page<BRole> page = bRoleDao.selectPage(param);
 
         List<RoleListResp> roles = page.getRecords()

@@ -2,6 +2,7 @@ package com.kge.energy.crm.common.execption;
 
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
+import com.kge.platform.framework.common.util.TraceIdUtils;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -48,6 +49,7 @@ public class GlobalExceptionHandler {
 
         log.error("==> Error code [{}], msg [{}], showType [{}]", code, msg, showType, e);
 
-        return new CommonResponse().setErrorCode(code).setErrorMsg(msg).setShowType(showType).setData(null);
+        return new CommonResponse().setErrorCode(code).setErrorMsg(msg).setShowType(showType).setData(null)
+                .setTraceId(TraceIdUtils.getCurrentTraceId());
     }
 }

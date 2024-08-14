@@ -8,9 +8,9 @@ import com.kge.platform.framework.common.exception.ServiceException;
  */
 public class AuthVerifyUtils {
 
-    private static final String SUPER_ADMIN = "super_admin";
+    public static final String SUPER_ADMIN = "super_admin";
 
-    private static final String TENANT_ADMIN = "tenant_admin";
+    public static final String TENANT_ADMIN = "tenant_admin";
 
     private AuthVerifyUtils() {
     }

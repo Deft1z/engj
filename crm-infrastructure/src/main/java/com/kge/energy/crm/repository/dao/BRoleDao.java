@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,8 +25,14 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
     public Page selectPage(RoleListParam param) {
         Page<BRole> page = new Page<>(param.getCurrentPage(), param.getPageSize());
 
-        LambdaQueryWrapper wrapper = new LambdaQueryWrapper<BRole>()
+        LambdaQueryWrapper<BRole> wrapper = new LambdaQueryWrapper<BRole>()
                 .eq(BRole::getTenantId, param.getTenantId());
+
+        if (CollectionUtil.isNotEmpty(param.getExcludeCodes())) {
+            wrapper.notIn(BRole::getCode, param.getExcludeCodes())
+                    .or()
+                    .isNull(BRole::getCode);
+        }
 
         return mapper.selectPage(page, wrapper);
     }
