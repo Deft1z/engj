@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,8 @@ public class UserService {
     private final LUserTokenDao lUserTokenDao;
 
     private final StringRedisTemplate stringRedisTemplate;
+
+    private final BRoleDao bRoleDao;
 
     @Value("${spring.profiles.active}")
     private String env;
@@ -197,8 +200,8 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许其他租户获取用户列表信息");
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许获取其他租户用户列表信息");
         }
 
         UserListParam userListParam = BeanUtil.copyProperties(req, UserListParam.class);
@@ -226,7 +229,7 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许添加其他租户用户");
         }
 
@@ -260,14 +263,14 @@ public class UserService {
     @Transactional
     public Boolean update(UpdateUserReq req) {
 
-        AuthVerifyUtils.mustAdmin();
-
         checkMobile(req.getMobile());
+
+        AuthVerifyUtils.mustAdmin();
 
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许编辑其他租户用户");
         }
 
@@ -302,8 +305,8 @@ public class UserService {
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
-            throw new ServiceException("非法请求，不允许编辑其他租户用户");
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允许删除其他租户用户");
         }
 
         bUserDao.removeById(bUser);
@@ -313,11 +316,47 @@ public class UserService {
         return true;
     }
 
+    /**
+     * 分配用户角色
+     */
+    @Transactional
+    public Boolean assignRole(AssignUserRoleReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BUser bUser = bUserDao.getById(req.getUserId());
+        Assert.notNull(bUser);
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允分配其他租户用户角色");
+        }
+
+        List<BRole> bRoles = bRoleDao.listByIds(req.getRoleIds());
+        boolean isCurrentTenantRole = bRoles.stream()
+                .allMatch(brole -> ObjUtil.equals(UserInfoContextUtils.getCurrentTenantId(), brole.getTenantId()));
+        if (AuthVerifyUtils.notSuperAdmin() && !isCurrentTenantRole) {
+            throw new ServiceException("非法请求，不允分配其他租户用户角色");
+        }
+
+        rUserRoleDao.removeByUserId(bUser.getUserId());
+
+        Set<RUserRole> rUserRoles = req.getRoleIds()
+                .stream()
+                .map(roleId -> new RUserRole()
+                        .setUserId(bUser.getUserId())
+                        .setRoleId(roleId)
+                        .setTenantId(bUser.getTenantId())
+                ).collect(Collectors.toSet());
+        return rUserRoleDao.saveBatch(rUserRoles);
+    }
+
+
     private void checkMobile(String mobile) {
         if (!PhoneUtil.isPhone(mobile)) {
             throw new ServiceException("手机号码不正确");
         }
     }
+
 
     private void checkExistedUser(AddUserReq req) {
 

@@ -23,6 +23,9 @@ public class ResourceService {
     private final BResourceDao bResourceDao;
 
 
+    /**
+     * 当前登录用户菜单
+     */
     public ResourceListResp currentUserResource() {
 
         UserResourceReq req = new UserResourceReq()
@@ -37,9 +40,15 @@ public class ResourceService {
      * 获取系统所有菜单资源
      */
     public ResourceListResp systemResources(SystemResourceReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
         return resourceDomainService.getSystemResources(req);
     }
 
+    /**
+     * 新增菜单
+     */
     public Boolean add(AddResourceReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -61,6 +70,9 @@ public class ResourceService {
         return bResourceDao.save(bResource);
     }
 
+    /**
+     * 编辑菜单
+     */
     public Boolean update(UpdateResourceReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -84,6 +96,9 @@ public class ResourceService {
         return bResourceDao.updateById(bResource);
     }
 
+    /**
+     * 删除菜单
+     */
     public Boolean delete(DeleteResourceReq req) {
 
         AuthVerifyUtils.mustAdmin();

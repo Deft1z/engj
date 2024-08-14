@@ -25,6 +25,13 @@ public class AuthVerifyUtils {
     }
 
     /**
+     * 不是超级管理员
+     */
+    public static boolean notSuperAdmin() {
+        return !isSuperAdmin();
+    }
+
+    /**
      * 是否租户管理员
      */
     public static boolean isTenantAdmin() {
@@ -33,6 +40,12 @@ public class AuthVerifyUtils {
                 .anyMatch(role -> StrUtil.equals(role.getCode(), TENANT_ADMIN));
     }
 
+    /**
+     * 不是租户管理员
+     */
+    public static boolean notTenantAdmin() {
+        return !isTenantAdmin();
+    }
 
     public static void mustSuperAdmin() {
         if (!isSuperAdmin()) {
@@ -47,7 +60,7 @@ public class AuthVerifyUtils {
     }
 
     public static void mustAdmin() {
-        if (!isSuperAdmin() && !isTenantAdmin()) {
+        if (notSuperAdmin() && notTenantAdmin()) {
             throw new ServiceException("当前用户非管理员用户");
         }
     }

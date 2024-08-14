@@ -44,7 +44,7 @@ public class RoleService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许查看其他租户角色");
         }
 
@@ -73,7 +73,7 @@ public class RoleService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许新增其他租户角色");
         }
 
@@ -94,7 +94,7 @@ public class RoleService {
         BRole bRole = bRoleDao.getById(req.getRoleId());
         Assert.notNull(bRole, "角色不存在");
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
             throw new ServiceException("非法请求，不允许更新其他租户角色");
         }
 
@@ -113,7 +113,7 @@ public class RoleService {
         BRole bRole = bRoleDao.getById(req.getRoleId());
         Assert.notNull(bRole, "角色不存在");
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
             throw new ServiceException("非法请求，不允许删除其他租户角色");
         }
 
@@ -152,7 +152,7 @@ public class RoleService {
         BRole bRole = bRoleDao.getById(req.getRoleId());
         Assert.notNull(bRole, "角色不存在");
 
-        if (!AuthVerifyUtils.isSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bRole.getTenantId())) {
             throw new ServiceException("非法请求，不允许操作其他租户角色");
         }
 
