@@ -29,16 +29,19 @@ public class TenantService {
     private final BTenantDao bTenantDao;
 
     public PageResp<TenantListResult> selectPage(QueryTenantReq req){
+        AuthVerifyUtils.isSuperAdmin();
         TenantQueryParam param = BeanUtil.copyProperties(req, TenantQueryParam.class);
         return new PageResp<>(bTenantDao.selectTenantPage(param));
     }
 
     public Boolean add(AddTenantReq req) {
+        AuthVerifyUtils.isSuperAdmin();
         BTenant bTenant = BeanUtil.copyProperties(req, BTenant.class);
         return bTenantDao.save(bTenant);
     }
 
     public Boolean update(UpdateTenantReq req) {
+        AuthVerifyUtils.isSuperAdmin();
         BTenant old = bTenantDao.getById(req.getId());
         if(ObjectUtil.isNull(old)){
             throw new ServiceException("租户不存在");
@@ -49,6 +52,7 @@ public class TenantService {
     }
 
     public Boolean delete(DeleteTenantReq req) {
+        AuthVerifyUtils.isSuperAdmin();
         BTenant old = bTenantDao.getById(req.getId());
         if(ObjectUtil.isNull(old)){
             throw new ServiceException("租户不存在");
@@ -58,6 +62,7 @@ public class TenantService {
     }
 
     public List<TenantListForOrgResult> getTenantDictList() {
+        AuthVerifyUtils.mustAdmin();
         return AuthVerifyUtils.isSuperAdmin() ?
                 bTenantDao.getTenantDictList(null) :
                 bTenantDao.getTenantDictList(UserInfoContextUtils.getCurrentTenantId());
