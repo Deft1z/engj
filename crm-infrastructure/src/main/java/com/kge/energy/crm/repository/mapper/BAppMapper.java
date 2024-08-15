@@ -1,8 +1,10 @@
 package com.kge.energy.crm.repository.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.repository.entity.BApp;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.kge.energy.crm.repository.entityext.param.AppMgrListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.*;
@@ -73,5 +75,13 @@ public interface BAppMapper extends BaseMapper<BApp> {
      * @date 2024/7/29 15:47
     */
     List<AppAvatarListResult> getAppAvatarList();
+
+    /**
+     * @description 后台管理-分页获取应用列表
+     * @author tangchenghui
+     * @date 2024/8/15 17:38
+    */
+    IPage<AppMgrListResult> selectAppPage(Page<AppMgrListResult> page, @Param("param") AppMgrListParam param);
+
 }
 

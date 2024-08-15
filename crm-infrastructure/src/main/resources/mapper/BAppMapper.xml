@@ -187,5 +187,16 @@
         LEFT JOIN s_file d ON d.file_id = c.image_url
         WHERE  c.flag = 1 AND cb.flag = 1 AND c.app_id > 0 AND cb.type = '家园模块'
     </select>
+
+    <select id="selectAppPage" resultType="com.kge.energy.crm.repository.entityext.result.AppMgrListResult">
+        select ba.app_id, ba.name, ba.bind_type, ba.app_address, ba.interface_address, ba.bind_address, ba.flag, remark
+        from b_app ba
+        where ba.flag = 1
+        <if test="param.name != null and param.name != ''">
+            <bind name="name" value="'%' + param.name + '%'"/>
+            and ba.name like #{name}
+        </if>
+    </select>
+
 </mapper>
 

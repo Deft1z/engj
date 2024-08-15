@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -9,6 +10,7 @@ import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.entity.*;
+import com.kge.energy.crm.repository.entityext.param.AppMgrListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.*;
@@ -302,6 +304,21 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
 
     public List<AppAvatarListResult> getAppAvatarList() {
         return mapper.getAppAvatarList();
+    }
+
+    public IPage<AppMgrListResult> selectAppPage(AppMgrListParam param){
+        Page<AppMgrListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+        return mapper.selectAppPage(page, param);
+    }
+
+    public Long getCountByName(String name){
+        LambdaQueryWrapper<BApp> wrapper = Wrappers.<BApp>lambdaQuery().eq(BApp::getName, name);
+        return mapper.selectCount(wrapper);
+    }
+
+    public Long getOtherCountByIdAndName(Integer appId, String name){
+        LambdaQueryWrapper<BApp> wrapper = Wrappers.<BApp>lambdaQuery().eq(BApp::getName, name).ne(BApp::getAppId, appId);
+        return mapper.selectCount(wrapper);
     }
 }
 
