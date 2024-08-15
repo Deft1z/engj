@@ -1,12 +1,16 @@
 package com.kge.energy.crm.resource.service;
 
 import cn.hutool.core.lang.Assert;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BResourceDao;
+import com.kge.energy.crm.repository.dao.RRoleResourceDao;
 import com.kge.energy.crm.repository.entity.BResource;
+import com.kge.energy.crm.repository.entity.RRoleResource;
 import com.kge.energy.crm.resource.req.*;
 import com.kge.energy.crm.resource.resp.ResourceListResp;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +24,10 @@ import org.springframework.stereotype.Service;
 public class ResourceService {
 
     private final ResourceDomainService resourceDomainService;
+
     private final BResourceDao bResourceDao;
+
+    private final RRoleResourceDao rRoleResourceDao;
 
 
     /**
@@ -105,6 +112,13 @@ public class ResourceService {
 
         BResource bResource = bResourceDao.getById(req.getResourceId());
         Assert.notNull(bResource, "菜单不存在");
+
+        boolean existsRoleResource = new LambdaQueryChainWrapper<>(RRoleResource.class)
+                .eq(RRoleResource::getResourceId, req.getResourceId())
+                .exists();
+        if (existsRoleResource) {
+            throw new ServiceException("已有角色绑定该菜单，不允许删除");
+        }
 
         return bResourceDao.removeById(req.getResourceId());
     }

@@ -77,6 +77,7 @@ public class ResourceDomainService {
                 if (parentResourceBean.getChildrens() == null) {
                     parentResourceBean.setChildrens(new ArrayList<>());
                 }
+                resourceBean.setParentResourceName(parentResourceBean.getResourceName());
                 parentResourceBean.getChildrens().add(resourceBean);
             }
         }

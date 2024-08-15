@@ -2,14 +2,13 @@ package com.kge.energy.crm.common.execption;
 
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
+import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.common.util.TraceIdUtils;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.rmi.ServerException;
 
 /**
  * 统一异常处理
@@ -26,11 +25,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = {
-            ServerException.class,
+            ServiceException.class,
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class
     })
-    public <T> CommonResponse<T> handleServerException(Exception e) {
+    public <T> CommonResponse<T> handleServiceException(Exception e) {
         return errorResult(ResponseCode.UNKNOWN.getCode(), e.getMessage(), null, e);
     }
 
