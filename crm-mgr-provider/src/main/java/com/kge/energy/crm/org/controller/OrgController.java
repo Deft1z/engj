@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Tag(name = "组织管理")
 @RestController
-@RequestMapping()
+@RequestMapping("/org")
 @RequiredArgsConstructor
 public class OrgController {
 
@@ -35,31 +35,31 @@ public class OrgController {
      * 获取组织字典
      */
     @ConvertToGoFormats
-    @PostMapping("/baseDataBack/organizationBackMrg/getOrgDictList")
+    @PostMapping("/getOrgDictList")
     public CommonResponse<List<OrgDictResp>> getOrgDictList() {
         return CommonResponse.suc(orgService.getOrgDictList());
     }
 
     @Operation(summary = "组织列表")
-    @PostMapping("/org/getOrgList")
+    @PostMapping("/getOrgList")
     public CommonResponse<List<OrgListResult>> list(@Validated @RequestBody OrgQueryReq req) {
         return CommonResponse.suc(orgService.selectList(req));
     }
 
     @Operation(summary = "新增组织")
-    @PostMapping("/org/addOrg")
+    @PostMapping("/addOrg")
     public CommonResponse<Boolean> add(@Validated @RequestBody AddOrgReq req) {
         return CommonResponse.suc(orgService.add(req));
     }
 
     @Operation(summary = "更新组织")
-    @PostMapping("/org/updateOrg")
+    @PostMapping("/updateOrg")
     public CommonResponse<Boolean> update(@Validated @RequestBody UpdateOrgReq updateOrgReq) {
         return CommonResponse.suc(orgService.update(updateOrgReq));
     }
 
     @Operation(summary = "删除组织")
-    @PostMapping("/org/deleteOrg")
+    @PostMapping("/deleteOrg")
     public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteOrgReq deleteOrgReq) {
         return CommonResponse.suc(orgService.delete(deleteOrgReq));
     }
