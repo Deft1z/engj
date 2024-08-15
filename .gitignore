@@ -44,3 +44,5 @@ target
 
 pom.xml.*
 **/pom.xml.*
+
+**/rebel.xml
