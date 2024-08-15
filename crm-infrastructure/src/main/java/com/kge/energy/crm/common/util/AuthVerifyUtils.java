@@ -8,9 +8,9 @@ import com.kge.platform.framework.common.exception.ServiceException;
  */
 public class AuthVerifyUtils {
 
-    private static final String SUPER_ADMIN = "super_admin";
+    public static final String SUPER_ADMIN = "super_admin";
 
-    private static final String TENANT_ADMIN = "tenant_admin";
+    public static final String TENANT_ADMIN = "tenant_admin";
 
     private AuthVerifyUtils() {
     }
@@ -25,6 +25,13 @@ public class AuthVerifyUtils {
     }
 
     /**
+     * 不是超级管理员
+     */
+    public static boolean notSuperAdmin() {
+        return !isSuperAdmin();
+    }
+
+    /**
      * 是否租户管理员
      */
     public static boolean isTenantAdmin() {
@@ -33,6 +40,12 @@ public class AuthVerifyUtils {
                 .anyMatch(role -> StrUtil.equals(role.getCode(), TENANT_ADMIN));
     }
 
+    /**
+     * 不是租户管理员
+     */
+    public static boolean notTenantAdmin() {
+        return !isTenantAdmin();
+    }
 
     public static void mustSuperAdmin() {
         if (!isSuperAdmin()) {
@@ -47,7 +60,7 @@ public class AuthVerifyUtils {
     }
 
     public static void mustAdmin() {
-        if (!isSuperAdmin() && !isTenantAdmin()) {
+        if (notSuperAdmin() && notTenantAdmin()) {
             throw new ServiceException("当前用户非管理员用户");
         }
     }

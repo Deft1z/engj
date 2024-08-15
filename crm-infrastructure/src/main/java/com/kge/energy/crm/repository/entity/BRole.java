@@ -38,11 +38,6 @@ public class BRole {
     private Integer status;
 
     /**
-     * 系统类型：applet、mgr
-     */
-    private String systemType;
-
-    /**
      * 软删除标识
      */
     private Integer flag;

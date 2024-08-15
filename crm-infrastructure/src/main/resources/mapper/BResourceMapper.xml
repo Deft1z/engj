@@ -65,6 +65,7 @@
           and ur.flag = 1
           and r.resource_id = rr.resource_id
           and ur.role_id = rr.role_id
+          and r.status = 0
           and rr.tenant_id = #{tenantId}
           and rr.tenant_id = #{tenantId}
           and ur.tenant_id = #{tenantId}

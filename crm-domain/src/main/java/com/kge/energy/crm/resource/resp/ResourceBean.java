@@ -20,6 +20,9 @@ public class ResourceBean {
     @Schema(description = "父资源ID")
     private Integer parentResourceId;
 
+    @Schema(description = "父资源名称")
+    private String parentResourceName;
+
     @Schema(description = "菜单名称")
     private String resourceName;
 

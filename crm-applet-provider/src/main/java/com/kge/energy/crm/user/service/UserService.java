@@ -15,11 +15,11 @@ public class UserService {
 
     private final BUserDao bUserDao;
 
-    public List<BUser> findByPhone(String phone){
+    public List<BUser> findByPhone(String phone) {
         return bUserDao.findByPhone(phone);
     }
 
-    public String findShareUser(List<Integer> userIdList, Integer appid){
+    public String findShareUser(List<Integer> userIdList, Integer appid) {
         return bUserDao.findShareUser(userIdList, appid);
     }
 }

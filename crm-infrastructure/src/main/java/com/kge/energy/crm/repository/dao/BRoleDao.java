@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,23 +25,29 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
     public Page selectPage(RoleListParam param) {
         Page<BRole> page = new Page<>(param.getCurrentPage(), param.getPageSize());
 
-        LambdaQueryWrapper wrapper = new LambdaQueryWrapper<BRole>()
-                .eq(BRole::getTenantId, param.getTenantId())
-                .eq(BRole::getSystemType, param.getSystemType());
+        LambdaQueryWrapper<BRole> wrapper = new LambdaQueryWrapper<BRole>()
+                .eq(BRole::getTenantId, param.getTenantId());
+
+        if (CollectionUtil.isNotEmpty(param.getExcludeCodes())) {
+            wrapper.notIn(BRole::getCode, param.getExcludeCodes())
+                    .or()
+                    .isNull(BRole::getCode);
+        }
 
         return mapper.selectPage(page, wrapper);
     }
 
 
-    public List<Integer> roleResource(Integer roleId) {
+    public List<Integer> roleResource(Integer roleId, String systemType) {
 
         Assert.notNull(roleId);
+        Assert.notBlank(systemType);
 
-        return mapper.roleResource(roleId);
+        return mapper.roleResource(roleId, systemType);
     }
 
-    public List<BRole> userRole(Integer userId, String systemType) {
-        return mapper.userRole(userId, systemType);
+    public List<BRole> userRole(Integer userId) {
+        return mapper.userRole(userId);
     }
 }
 

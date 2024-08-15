@@ -7,13 +7,15 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Set;
+
 /**
  * @author wangjihua
  */
 @Data
 @Accessors(chain = true)
-@Schema(name = "角色关联菜单请求参数", description = "角色关联菜单请求参数")
-public class RoleResourceReq {
+@Schema(name = "给角色关联菜单请求参数", description = "给角色关联菜单请求参数")
+public class RoleAssignResourceReq {
 
     @Schema(description = "角色ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
@@ -24,4 +26,6 @@ public class RoleResourceReq {
     @Pattern(regexp = "applet|mgr")
     private String systemType;
 
+    @Schema(description = "菜单资源ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<Integer> resourceIds;
 }

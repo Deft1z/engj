@@ -1,5 +1,6 @@
 package com.kge.energy.crm.common.net;
 
+import com.kge.platform.framework.common.util.TraceIdUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -37,11 +38,14 @@ public class CommonResponse<T> implements Serializable {
      */
     private T data;
 
+    private String traceId;
+
     public CommonResponse(Integer errorCode, String errorMsg, String showType, T data) {
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
         this.showType = showType;
         this.data = data;
+        this.traceId = TraceIdUtils.getMDCTraceId();
     }
 
     public CommonResponse(ResponseCode responseCode, T data) {
@@ -50,6 +54,7 @@ public class CommonResponse<T> implements Serializable {
         this.errorMsg = responseCode.getMsg();
         this.showType = responseCode.getShowType();
         this.data = data;
+        this.traceId = TraceIdUtils.getMDCTraceId();
     }
 
     public static <T> CommonResponse<T> suc(T data) {
@@ -70,7 +75,8 @@ public class CommonResponse<T> implements Serializable {
 
     public static <T> CommonResponse<T> compatible(T data) {
         return new CommonResponse<T>()
-                .setData(data);
+                .setData(data)
+                .setTraceId(TraceIdUtils.getMDCTraceId());
     }
 
 

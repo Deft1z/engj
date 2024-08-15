@@ -11,8 +11,8 @@ import java.util.List;
  */
 public interface BRoleMapper extends BaseMapper<BRole> {
 
-    List<Integer> roleResource(Integer roleId);
+    List<Integer> roleResource(@Param("roleId") Integer roleId, @Param("systemType") String systemType);
 
-    List<BRole> userRole(@Param("userId") Integer userId, @Param("systemType") String systemType);
+    List<BRole> userRole(@Param("userId") Integer userId);
 }
 

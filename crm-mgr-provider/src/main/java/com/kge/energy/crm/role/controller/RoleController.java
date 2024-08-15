@@ -57,6 +57,12 @@ public class RoleController {
         return CommonResponse.suc(roleService.roleResource(req));
     }
 
+    @Operation(summary = "给角色关联菜单")
+    @PostMapping("/assignResource")
+    public CommonResponse<Boolean> assignResource(@Validated @RequestBody RoleAssignResourceReq req) {
+        return CommonResponse.suc(roleService.assignResource(req));
+    }
+
     @Operation(summary = "获取用户角色")
     @PostMapping("/userRole")
     public CommonResponse<UserRoleResp> userRole(@Validated @RequestBody UserRoleReq req) {

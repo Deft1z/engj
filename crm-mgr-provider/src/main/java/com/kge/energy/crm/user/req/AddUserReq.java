@@ -1,11 +1,9 @@
 package com.kge.energy.crm.user.req;
 
-import com.kge.energy.crm.common.page.PageReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
@@ -13,9 +11,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@EqualsAndHashCode(callSuper = true)
 @Schema(name = "新增用户请求参数", description = "新增用户请求参数")
-public class AddUserReq extends PageReq {
+public class AddUserReq {
 
     @Schema(description = "租户ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
@@ -33,8 +30,17 @@ public class AddUserReq extends PageReq {
     @NotBlank
     private String realname;
 
-    @Schema(description = "手机号码")
+    @Schema(description = "手机号码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
     private String mobile;
+
+    @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
+    private String passwd;
+
+    @Schema(description = "密码盐值", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank
+    private String passwdSalt;
 
     @Schema(description = "帐号状态（0正常 1停用）", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull

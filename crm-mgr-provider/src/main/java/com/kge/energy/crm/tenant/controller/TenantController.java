@@ -2,6 +2,7 @@ package com.kge.energy.crm.tenant.controller;
 
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.repository.entityext.result.TenantListForOrgResult;
 import com.kge.energy.crm.tenant.req.AddTenantReq;
 import com.kge.energy.crm.tenant.req.DeleteTenantReq;
 import com.kge.energy.crm.tenant.req.QueryTenantReq;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author wangjihua
@@ -47,5 +50,11 @@ public class TenantController {
     @PostMapping("/delete")
     public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteTenantReq req) {
         return CommonResponse.suc(tenantService.delete(req));
+    }
+
+    @Operation(summary = "获取租户筛选列表")
+    @PostMapping("/getTenantDictList")
+    public CommonResponse<List<TenantListForOrgResult>> getTenantDictList() {
+        return CommonResponse.suc(tenantService.getTenantDictList());
     }
 }

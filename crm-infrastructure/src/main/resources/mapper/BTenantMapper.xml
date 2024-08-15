@@ -14,14 +14,19 @@
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <select id="selectPage" resultType="com.kge.energy.crm.repository.entityext.result.TenantListResult">
+    <select id="selectTenantPage" resultType="com.kge.energy.crm.repository.entityext.result.TenantListResult">
         select bt.id, bt.name, bt.contact_name, bt.contact_mobile, bt.status, bt.create_time
         from b_tenant bt
         where bt.flag = 1
     </select>
     
-    <select id="logicDelete">
-        UPDATE b_tenant bt set bt.flag = -1 where bt.id = #{tenantId}
+    <select id="getTenantDictList" resultType="com.kge.energy.crm.repository.entityext.result.TenantListForOrgResult">
+        select bt.id, bt.name
+        from b_tenant bt
+        where bt.flag = 1
+        <if test="tenantId != null">
+            and bt.id = #{tenantId}
+        </if>
     </select>
 
 </mapper>

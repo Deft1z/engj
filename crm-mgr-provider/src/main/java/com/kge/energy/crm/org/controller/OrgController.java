@@ -2,7 +2,6 @@ package com.kge.energy.crm.org.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
-import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.org.req.AddOrgReq;
 import com.kge.energy.crm.org.req.DeleteOrgReq;
 import com.kge.energy.crm.org.req.OrgQueryReq;
@@ -26,7 +25,7 @@ import java.util.List;
  */
 @Tag(name = "组织管理")
 @RestController
-@RequestMapping("/baseDataBack/organizationBackMrg")
+@RequestMapping("/org")
 @RequiredArgsConstructor
 public class OrgController {
 

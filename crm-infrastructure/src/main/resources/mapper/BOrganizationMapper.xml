@@ -58,7 +58,7 @@
         order by a.parameter ->> '$.serviceType', a.create_time asc
     </select>
 
-    <select id="selectList" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
+    <select id="getOrgList" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
         select bo.organization_id, bo.parent_organization_id, bo.level, bo.tenant_id, bo.name, bo.sort,
                bo.status, DATE_FORMAT(bo.create_time, '%Y-%m-%d %H:%i:%s') as create_time
         from b_organization bo

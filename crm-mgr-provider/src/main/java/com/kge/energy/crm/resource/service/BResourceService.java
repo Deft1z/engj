@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * @author wangjihua
@@ -26,6 +27,9 @@ public class BResourceService {
 
     public List<MenuNodeResp> findMenu(Integer userId) {
         List<ResourcePermissionResult> rpms = bResourceDao.findMenu(userId);
+        rpms = rpms.stream()
+                .filter(result -> result.getResourceId() < 500)
+                .collect(Collectors.toList());
         List<MenuNodeResp> menuArr = new ArrayList<>();
         rpms.forEach(rpm -> {
             if (rpm.getLevel() == 1 && rpm.getFlag() == 1) {

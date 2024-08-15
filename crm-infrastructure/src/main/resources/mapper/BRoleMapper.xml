@@ -6,7 +6,6 @@
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="code" column="code" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
-        <result property="systemType" column="system_type" jdbcType="VARCHAR"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -27,6 +26,7 @@
           and br.role_id = rrr.role_id
           and bre.resource_id = rrr.resource_id
           and br.role_id = #{roleId}
+          and bre.system_type = #{systemType}
           and bre.resource_id > 499
     </select>
 
@@ -41,7 +41,6 @@
           and bu.user_id = rur.user_id
           and br.role_id = rur.role_id
           and bu.user_id = #{userId}
-          and br.system_type = #{systemType}
     </select>
 </mapper>
 

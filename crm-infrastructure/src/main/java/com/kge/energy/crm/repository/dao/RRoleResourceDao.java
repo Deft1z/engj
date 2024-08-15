@@ -1,11 +1,11 @@
 package com.kge.energy.crm.repository.dao;
 
-import com.kge.energy.crm.repository.mapper.RRoleResourceMapper;
-import com.kge.energy.crm.repository.entity.RRoleResource;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.RRoleResource;
+import com.kge.energy.crm.repository.mapper.RRoleResourceMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * 角色资源权限(RRoleResource)表数据库访问层
@@ -16,5 +16,14 @@ public class RRoleResourceDao extends ServiceImpl<RRoleResourceMapper, RRoleReso
 
     private final RRoleResourceMapper mapper;
 
+    public int removeByRoleId(Integer roleId) {
+        LambdaUpdateWrapper wrapper = new LambdaUpdateWrapper<>(RRoleResource.class)
+                .eq(RRoleResource::getRoleId, roleId);
+        return mapper.delete(wrapper);
+    }
+
+    public int removeByRoleIdWithSystemType(Integer roleId, String systemType) {
+        return mapper.removeByRoleIdWithSystemType(roleId, systemType);
+    }
 }
 
