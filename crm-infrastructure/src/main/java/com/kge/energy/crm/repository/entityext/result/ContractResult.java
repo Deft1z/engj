@@ -154,4 +154,9 @@ public class ContractResult {
      * 评价留言
      */
     private String evaluate;
+
+    /**
+     * 组织id
+     */
+    private Integer organizationId;
 }

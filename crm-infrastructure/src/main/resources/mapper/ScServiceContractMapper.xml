@@ -50,22 +50,33 @@
                a.flag,
                a.`status`,
                b.NAME                                        AS service_provider,
+               a.service_unit                                AS organization_id,
                g.satisfaction,
                g.evaluate
         from sc_service_contract a
-                 LEFT JOIN b_organization b ON b.organization_id = a.service_unit
-                 LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
-                 LEFT JOIN wf_form c ON c.form_id = a.form_id
-                 LEFT JOIN b_user d ON d.user_id = c.create_user_id
-        <where>
-            c.create_user_id = #{listParam.userId} AND a.flag = 1
-            <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
-                and a.status = #{listParam.searchMap.status}
-            </if>
-            <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
-                and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
-            </if>
-        </where>
+        LEFT JOIN b_organization b ON b.organization_id = a.service_unit
+        LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
+        LEFT JOIN wf_form c ON c.form_id = a.form_id
+        LEFT JOIN b_user d ON d.user_id = c.create_user_id
+        where a.flag = 1
+        <choose>
+            <when test="listParam.roleId != null and listParam.roleId == 2">
+                and 1 = 1
+            </when>
+            <when test="listParam.roleId != null and listParam.roleId == 3">
+                and a.create_user_id = #{listParam.userId}
+            </when>
+            <otherwise>
+                and c.create_user_id = #{listParam.userId}
+            </otherwise>
+        </choose>
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
+            and a.status = #{listParam.searchMap.status}
+        </if>
+        <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+            and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
+        </if>
+        order by a.modify_time DESC
     </select>
 
     <select id="form" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
