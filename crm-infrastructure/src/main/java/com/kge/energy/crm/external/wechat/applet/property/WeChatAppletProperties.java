@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "wechat")
+@ConfigurationProperties(prefix = "wechat.applet")
 public class WeChatAppletProperties {
 
     private String appId;

@@ -20,6 +20,11 @@ auth:
   token:
     redis-front: ntcrm_prod_token_
 
+wechat:
+  wxUrl: http://172.16.17.147:9011/vcheck
+  applet:
+    version: formal
+
 ecc:
   appId: ntwx001
   appSecret: h9r2e2nd5bipf6z
