@@ -14,7 +14,7 @@ public class UpdateOrgReq {
     private Integer organizationId;
 
     @Schema(description = "上级组织id")
-    @NotNull
+//    @NotNull
     private Integer parentOrganizationId;
 
     @Schema(description = "组织名称")
@@ -28,5 +28,8 @@ public class UpdateOrgReq {
     @Schema(description = "状态,0正常 1停用")
     @NotNull
     private Integer status;
+
+    @Schema(description = "备注")
+    private String remark;
 
 }

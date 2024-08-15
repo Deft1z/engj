@@ -28,4 +28,7 @@ public class AddOrgReq {
     @Schema(description = "租户id")
     @NotNull
     private Integer tenantId;
+
+    @Schema(description = "备注")
+    private String remark;
 }

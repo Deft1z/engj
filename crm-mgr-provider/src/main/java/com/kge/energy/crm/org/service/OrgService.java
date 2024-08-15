@@ -90,17 +90,26 @@ public class OrgService {
         if(ObjectUtil.isNull(old)){
             throw new ServiceException("组织结构不存在");
         }
+
+        //非超管用户，不能修改1级组织
+        if(!AuthVerifyUtils.isSuperAdmin() && !NumberUtil.equals(old.getLevel(), Integer.valueOf(1))){
+            throw new ServiceException("不能修改顶级组织");
+        }
+
         //非超管用户，只能修改自己租户的组织
         if(!AuthVerifyUtils.isSuperAdmin() && !NumberUtil.equals(old.getTenantId(), UserInfoContextUtils.getCurrentTenantId())){
             throw new ServiceException("只能修改当前租户的组织");
         }
 
-
-        BOrganization pold = bOrganizationDao.getById(updateOrgReq.getParentOrganizationId());
-        if(ObjectUtil.isNull(pold)){
-            throw new ServiceException("上级组织结构不存在");
+        BOrganization pold = null;
+        if(!NumberUtil.equals(old.getLevel(), Integer.valueOf(1))){
+            pold = bOrganizationDao.getById(updateOrgReq.getParentOrganizationId());
+            if(ObjectUtil.isNull(pold)){
+                throw new ServiceException("上级组织结构不存在");
+            }
         }
-        //非超管用户，只能修改自己租户的组织
+
+        //非超管用户，只能挂靠自己租户的组织
         if(!AuthVerifyUtils.isSuperAdmin() && !NumberUtil.equals(pold.getTenantId(), UserInfoContextUtils.getCurrentTenantId())){
             throw new ServiceException("只能挂靠当前租户的组织");
         }
