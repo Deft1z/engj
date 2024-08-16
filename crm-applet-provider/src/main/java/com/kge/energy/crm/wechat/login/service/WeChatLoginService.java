@@ -218,6 +218,7 @@ public class WeChatLoginService {
                         .map(role -> new WxLoginUserInfoResp.Role()
                                 .setId(role.getId())
                                 .setName(role.getName())
+                                .setCode(role.getCode())
                         ).collect(Collectors.toList()))
                 .setOrganizationList(currentUserInfo.getOrganizationList()
                         .stream()
