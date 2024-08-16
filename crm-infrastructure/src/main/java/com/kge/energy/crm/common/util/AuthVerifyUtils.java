@@ -1,16 +1,12 @@
 package com.kge.energy.crm.common.util;
 
-import cn.hutool.core.util.StrUtil;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.platform.framework.common.exception.ServiceException;
 
 /**
  * @author wangjihua
  */
 public class AuthVerifyUtils {
-
-    public static final String SUPER_ADMIN = "super_admin";
-
-    public static final String TENANT_ADMIN = "tenant_admin";
 
     private AuthVerifyUtils() {
     }
@@ -19,9 +15,7 @@ public class AuthVerifyUtils {
      * 是否超级管理员
      */
     public static boolean isSuperAdmin() {
-        return UserInfoContextUtils.getCurrentUserInfo().getRoleList()
-                .stream()
-                .anyMatch(role -> StrUtil.equals(role.getCode(), SUPER_ADMIN));
+        return isContainsRole(RoleEnums.SUPER_ADMIN.getCode());
     }
 
     /**
@@ -35,9 +29,7 @@ public class AuthVerifyUtils {
      * 是否租户管理员
      */
     public static boolean isTenantAdmin() {
-        return UserInfoContextUtils.getCurrentUserInfo().getRoleList()
-                .stream()
-                .anyMatch(role -> StrUtil.equals(role.getCode(), TENANT_ADMIN));
+        return isContainsRole(RoleEnums.TENANT_ADMIN.getCode());
     }
 
     /**
@@ -63,5 +55,14 @@ public class AuthVerifyUtils {
         if (notSuperAdmin() && notTenantAdmin()) {
             throw new ServiceException("当前用户非管理员用户");
         }
+    }
+
+    /**
+     * 当前登录用户是否包含某个角色
+     */
+    public static boolean isContainsRole(String roleCode) {
+        return UserInfoContextUtils.getCurrentUserInfo()
+                .getRoleCodes()
+                .contains(roleCode);
     }
 }

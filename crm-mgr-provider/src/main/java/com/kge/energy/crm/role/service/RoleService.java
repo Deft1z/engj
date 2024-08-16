@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.repository.dao.BRoleDao;
 import com.kge.energy.crm.repository.dao.RRoleResourceDao;
 import com.kge.energy.crm.repository.entity.BRole;
@@ -51,7 +52,7 @@ public class RoleService {
         RoleListParam param = BeanUtil.copyProperties(req, RoleListParam.class);
 
         if (AuthVerifyUtils.notSuperAdmin()) {
-            param.setExcludeCodes(List.of(AuthVerifyUtils.SUPER_ADMIN));
+            param.setExcludeCodes(List.of(RoleEnums.SUPER_ADMIN.getCode()));
         }
 
         Page<BRole> page = bRoleDao.selectPage(param);

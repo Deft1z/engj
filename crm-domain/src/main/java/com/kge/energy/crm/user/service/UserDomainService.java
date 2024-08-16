@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author wangjihua
@@ -59,6 +60,8 @@ public class UserDomainService {
 
         List<UserInfoDto.Role> userRoles = bUserDao.getUserRoles(systemType, user.getUserId());
         userInfoDto.setRoleList(userRoles);
+
+        userInfoDto.setRoleCodes(userRoles.stream().map(UserInfoDto.Role::getCode).collect(Collectors.toSet()));
 
         List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrgs(user.getUserId());
         userInfoDto.setOrganizationList(orgs);

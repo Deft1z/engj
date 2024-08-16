@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户信息上下文
@@ -41,6 +43,11 @@ public class UserInfoDto extends CommonUserInfoDto {
      * 角色列表
      */
     private List<Role> roleList;
+
+    /**
+     * 用户角色编码集合，方便业务判断用户是否有该角色
+     */
+    private Set<String> roleCodes = new HashSet<>();
 
     /**
      * 组织列表

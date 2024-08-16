@@ -1,3 +1,7 @@
+## 枚举类
+
+- RoleEnums：系统角色枚举类
+
 ## 注解类
 
 - @ConvertToGoFormats：兼容旧的 Go 接口响应字段格式，新接口无需添加此注解
