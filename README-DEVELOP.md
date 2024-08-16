@@ -12,6 +12,8 @@
   ：获取用户信息工具类
 - [AuthVerifyUtils.java](crm-infrastructure%2Fsrc%2Fmain%2Fjava%2Fcom%2Fkge%2Fenergy%2Fcrm%2Fcommon%2Futil%2FAuthVerifyUtils.java)
   ：用户权限校验工具类
+- [RedisUtils.java](crm-infrastructure%2Fsrc%2Fmain%2Fjava%2Fcom%2Fkge%2Fenergy%2Fcrm%2Fcommon%2Futil%2FRedisUtils.java)
+  ：Redis工具类
 
 ## 异常处理
 
