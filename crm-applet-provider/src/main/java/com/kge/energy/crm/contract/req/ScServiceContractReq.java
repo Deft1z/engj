@@ -13,11 +13,11 @@ import lombok.experimental.Accessors;
 public class ScServiceContractReq extends PageReq {
 
     @Schema(description = "查询参数map")
-    private searchMap searchMap;
+    private ContracSearchMap searchMap;
 
     @Data
     @Accessors(chain = true)
-    public static class searchMap {
+    public static class ContracSearchMap {
         @Schema(description = "状态")
         private String status;
     }

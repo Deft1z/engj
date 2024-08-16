@@ -3,9 +3,9 @@ package com.kge.energy.crm.contract.controller;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.contract.req.ScServiceContractReq;
+import com.kge.energy.crm.contract.resp.ScServiceContractResp;
 import com.kge.energy.crm.contract.service.ScServiceContractService;
-import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class ScServiceContractController {
     @Operation(summary = "获取服务合同列表")
     @PostMapping(value = "/getPage")
     @ConvertToGoFormats
-    public CommonResponse<PageResp<ContractResult>> getPage(@RequestBody WxUserWorkOrderParam req){
+    public CommonResponse<PageResp<ScServiceContractResp>> getPage(@RequestBody ScServiceContractReq req){
         return CommonResponse.suc(scServiceContractService.getPage(req));
     }
 
