@@ -7,6 +7,7 @@ import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.energy.crm.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import java.util.List;
 /**
  * @author wangjihua
  */
+@Tag(name = "用户模块")
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
