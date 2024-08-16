@@ -141,5 +141,19 @@
             and bu.status = #{param.status}
         </if>
     </select>
+
+    <!--查询集团总部的客服人员手机号-->
+    <select id="findJtCustomerPhones" resultType="string">
+        select a.mobile
+        from b_user a
+        join r_user_tenant b on b.user_id = a.user_id
+        join r_user_role c on c.user_id = a.user_id
+        where a.flag = 1 and b.flag = 1 and c.flag = 1
+          /*集团总部*/
+          and b.organization_id = 1
+          /*集团客服*/
+          and c.role_id = 2
+    </select>
+
 </mapper>
 

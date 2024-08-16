@@ -115,5 +115,10 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         Page<BUser> page = new Page<>(req.getCurrentPage(), req.getPageSize());
         return mapper.list(page, req);
     }
+
+    public List<String> findJtCustomerPhones() {
+        return mapper.findJtCustomerPhones();
+    }
+
 }
 

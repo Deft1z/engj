@@ -34,5 +34,7 @@ public interface BUserMapper extends BaseMapper<BUser> {
     Long findNewUserCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     IPage<BUser> list(Page<BUser> page, @Param("param") UserListParam param);
+
+    List<String> findJtCustomerPhones();
 }
 
