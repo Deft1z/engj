@@ -95,22 +95,30 @@
             FROM b_organization bo
             WHERE bo.flag = 1
 
-            <if test="param.orgIds != null and !param.orgIds.isEmpty()">
-                and bo.organization_id in
-                <foreach item="item" index="index" collection="param.orgIds" open="(" separator="," close=")">
-                    #{item}
-                </foreach>
-            </if>
-
-
             <if test="param.tenantId != null">
                 and bo.tenant_id = #{param.tenantId}
             </if>
 
-            <if test="param.name != null and param.name != ''">
-                <bind name="name" value="'%' + param.name + '%'"/>
-                and bo.name like #{name}
-            </if>
+            <choose>
+                <when test="param.name != null and param.name != ''">
+                    <bind name="name" value="'%' + param.name + '%'"/>
+                    and bo.organization_id in (
+                    select s.organization_id from b_organization s where s.flag = 1 and bo.name like #{name}
+                    <if test="param.tenantId != null">
+                        and s.tenant_id = #{param.tenantId}
+                    </if>
+                    )
+                </when>
+
+                <otherwise>
+                    <if test="param.orgIds != null and !param.orgIds.isEmpty()">
+                        and bo.organization_id in
+                        <foreach item="item" index="index" collection="param.orgIds" open="(" separator="," close=")">
+                            #{item}
+                        </foreach>
+                    </if>
+                </otherwise>
+            </choose>
 
             UNION ALL
 
@@ -118,6 +126,7 @@
             d.status, DATE_FORMAT(d.create_time, '%Y-%m-%d %H:%i:%s') as create_time
             FROM b_organization d
             JOIN orgs o ON d.parent_organization_id = o.organization_id
+            where d.flag = 1
         )
         SELECT * FROM orgs
 

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -176,10 +177,11 @@ public class OrgService {
 
         List<OrgListResult> treeList = new ArrayList<>();
         for(OrgListResult orgListResult : originalList) {
-            if(ObjectUtil.isNull(orgListResult.getParentOrganizationId())) {
+            Integer pid = orgListResult.getParentOrganizationId();
+            if(ObjectUtil.isNull(pid) || !idOrgMap.containsKey(pid)) {
                 treeList.add(orgListResult);
             }else{
-                OrgListResult pOrgListResult = idOrgMap.get(orgListResult.getParentOrganizationId());
+                OrgListResult pOrgListResult = idOrgMap.get(pid);
                 if(CollUtil.isEmpty(pOrgListResult.getChildren())){
                     pOrgListResult.setChildren(new ArrayList<OrgListResult>());
                 }
