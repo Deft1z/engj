@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Schema(name = "组织列表name", description = "组织列表对象")
@@ -32,4 +33,8 @@ public class OrgListResult {
 
     @Schema(description = "创建时间")
     private String createTime;
+
+    @Schema(description = "子节点")
+    private List<OrgListResult> children;
+
 }

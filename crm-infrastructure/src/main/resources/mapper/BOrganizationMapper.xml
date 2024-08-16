@@ -88,5 +88,40 @@
         select level from b_organization where flag = 1 and tenant_id = #{tenantId} order by level asc limit 1
     </select>
 
+    <select id="getAllOrgList" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
+        WITH RECURSIVE orgs AS (
+            SELECT bo.organization_id, bo.parent_organization_id, bo.level, bo.tenant_id, bo.name, bo.sort,
+            bo.status, DATE_FORMAT(bo.create_time, '%Y-%m-%d %H:%i:%s') as create_time
+            FROM b_organization bo
+            WHERE bo.flag = 1
+
+            <if test="param.orgIds != null and !param.orgIds.isEmpty()">
+                and bo.organization_id in
+                <foreach item="item" index="index" collection="param.orgIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+
+            <if test="param.tenantId != null">
+                and bo.tenant_id = #{param.tenantId}
+            </if>
+
+            <if test="param.name != null and param.name != ''">
+                <bind name="name" value="'%' + param.name + '%'"/>
+                and bo.name like #{name}
+            </if>
+
+            UNION ALL
+
+            SELECT d.organization_id, d.parent_organization_id, d.level, d.tenant_id, d.name, d.sort,
+            d.status, DATE_FORMAT(d.create_time, '%Y-%m-%d %H:%i:%s') as create_time
+            FROM b_organization d
+            JOIN orgs o ON d.parent_organization_id = o.organization_id
+        )
+        SELECT * FROM orgs
+
+    </select>
+
 </mapper>
 

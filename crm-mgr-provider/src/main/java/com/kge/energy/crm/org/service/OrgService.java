@@ -1,10 +1,12 @@
 package com.kge.energy.crm.org.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -13,17 +15,22 @@ import com.kge.energy.crm.org.req.DeleteOrgReq;
 import com.kge.energy.crm.org.req.OrgQueryReq;
 import com.kge.energy.crm.org.req.UpdateOrgReq;
 import com.kge.energy.crm.org.resp.OrgDictResp;
+import com.kge.energy.crm.org.resp.OrgTreeResp;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.param.OrgQueryParam;
 import com.kge.energy.crm.repository.entityext.result.OrgDictResult;
 import com.kge.energy.crm.repository.entityext.result.OrgListResult;
+import com.kge.energy.crm.resource.resp.ResourceBean;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wangjihua
@@ -64,6 +71,30 @@ public class OrgService {
         }
 
         return bOrganizationDao.getOrgList(param);
+    }
+
+    public OrgTreeResp getOrgTree(OrgQueryReq req){
+        AuthVerifyUtils.mustAdmin();
+
+        OrgQueryParam param = BeanUtil.copyProperties(req, OrgQueryParam.class);
+        param.setOrgIds(new ArrayList<>());
+
+        //如果是租户管理员，只能看到自己租户的组织
+        boolean isTenantAdmin = AuthVerifyUtils.isTenantAdmin();
+        if(isTenantAdmin){
+            param.setTenantId(UserInfoContextUtils.getCurrentTenantId());
+            param.setOrgIds(UserInfoContextUtils.getCurrentUserInfo().getOrganizationList().stream().map(UserInfoDto.Organization::getId).toList());
+        }
+
+        //如果是超管，可以看全部
+        boolean isSuperAdmin = AuthVerifyUtils.isSuperAdmin();
+        if(isSuperAdmin){
+            //超管是否筛选租户的情况
+            Opt.ofNullable(req.getTenantId()).ifPresentOrElse(param::setTenantId, () -> param.setTenantId(null));
+            param.setOrgIds(bOrganizationDao.getRootOrgList().stream().map(BOrganization::getOrganizationId).toList());
+        }
+
+        return convertToOrgTree(bOrganizationDao.getAllOrgList(param));
     }
 
     public Boolean add(AddOrgReq addOrgReq){
@@ -135,5 +166,47 @@ public class OrgService {
         }
 
         return bOrganizationDao.removeById(deleteOrgReq.getOrganizationId());
+    }
+
+    private OrgTreeResp convertToOrgTree(List<OrgListResult> originalList) {
+        Map<Integer, OrgListResult> idOrgMap = new HashMap<>();
+        for(OrgListResult orgListResult : originalList) {
+            idOrgMap.put(orgListResult.getOrganizationId(), orgListResult);
+        }
+
+        List<OrgListResult> treeList = new ArrayList<>();
+        for(OrgListResult orgListResult : originalList) {
+            if(ObjectUtil.isNull(orgListResult.getParentOrganizationId())) {
+                treeList.add(orgListResult);
+            }else{
+                OrgListResult pOrgListResult = idOrgMap.get(orgListResult.getParentOrganizationId());
+                if(CollUtil.isEmpty(pOrgListResult.getChildren())){
+                    pOrgListResult.setChildren(new ArrayList<OrgListResult>());
+                }
+                pOrgListResult.getChildren().add(orgListResult);
+            }
+        }
+
+        sortResources(treeList);
+        return new OrgTreeResp().setOrgTree(treeList);
+    }
+
+    private static void sortResources(List<OrgListResult> treeList) {
+
+        // 首先对当前层级进行排序
+        treeList.sort(
+                (rb1, rb2) -> {
+                    Integer sort1 = rb1.getSort() == null ? Integer.MAX_VALUE : rb1.getSort();
+                    Integer sort2 = rb2.getSort() == null ? Integer.MAX_VALUE : rb2.getSort();
+                    return sort1.compareTo(sort2);
+                }
+        );
+
+        // 然后递归地对每个子节点列表进行排序
+        for (OrgListResult orgListResult : treeList) {
+            if (orgListResult.getChildren() != null) {
+                sortResources(orgListResult.getChildren());
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.kge.energy.crm.org.req.DeleteOrgReq;
 import com.kge.energy.crm.org.req.OrgQueryReq;
 import com.kge.energy.crm.org.req.UpdateOrgReq;
 import com.kge.energy.crm.org.resp.OrgDictResp;
+import com.kge.energy.crm.org.resp.OrgTreeResp;
 import com.kge.energy.crm.org.service.OrgService;
 import com.kge.energy.crm.repository.entityext.result.OrgListResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,6 +45,12 @@ public class OrgController {
     @PostMapping("/getOrgList")
     public CommonResponse<List<OrgListResult>> list(@Validated @RequestBody OrgQueryReq req) {
         return CommonResponse.suc(orgService.selectList(req));
+    }
+
+    @Operation(summary = "组织树")
+    @PostMapping("/getOrgTree")
+    public CommonResponse<OrgTreeResp> getOrgTree(@Validated @RequestBody OrgQueryReq req) {
+        return CommonResponse.suc(orgService.getOrgTree(req));
     }
 
     @Operation(summary = "新增组织")
