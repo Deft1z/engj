@@ -34,6 +34,9 @@ public class OrgListResult {
     @Schema(description = "创建时间")
     private String createTime;
 
+    @Schema(description = "备注")
+    private String remark;
+
     @Schema(description = "子节点")
     private List<OrgListResult> children;
 
