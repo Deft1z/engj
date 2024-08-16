@@ -27,7 +27,7 @@ public class BOpenidDao extends ServiceImpl<BOpenidMapper, BOpenid> {
                 .eq(BOpenid::getUserId, userId)
                 .eq(BOpenid::getAppId, appId)
                 .eq(BOpenid::getFlag, 1);
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 
     public int logicDeleteOpenId(Integer openIdId) {
