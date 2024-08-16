@@ -21,7 +21,8 @@ auth:
     redis-front: ntcrm_test_token_
 
 wechat:
-  wxUrl: http://172.16.17.147:9011/vcheck
+  common:
+    wxUrl: http://172.16.17.147:9011/vcheck
   applet:
     version: trial
 
