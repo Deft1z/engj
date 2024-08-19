@@ -2,7 +2,10 @@ package com.kge.energy.crm.workflow.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.workflow.req.ConsultingAddReq;
+import com.kge.energy.crm.workflow.req.WfFormReq;
+import com.kge.energy.crm.workflow.resp.WfFormResp;
 import com.kge.energy.crm.workflow.service.ConsultingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +31,11 @@ public class ConsultingController {
         return CommonResponse.suc(consultingService.save(req));
     }
 
-
+    @Operation(summary = "获取工单列表")
+    @PostMapping(value = "/getFormPage")
+    @ConvertToGoFormats
+    public CommonResponse<PageResp<WfFormResp>> getFormPage(@RequestBody WfFormReq req){
+        return CommonResponse.suc(consultingService.getFormPage(req));
+    }
 
 }
