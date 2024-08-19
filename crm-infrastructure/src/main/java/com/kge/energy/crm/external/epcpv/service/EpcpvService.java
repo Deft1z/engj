@@ -61,10 +61,10 @@ public class EpcpvService {
         }
 
 
-        Long regionRatio = stringRedisTemplate.opsForHash().size(redisFront + PVM_REGIONPRO_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd());
+        Long regionRatio = stringRedisTemplate.opsForHash().size(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""));
         if(regionRatio == 0){
 
-            String url = epcpvProperties.getUrl() + epcpvProperties.getRegionstat() + "?queryDateEnd=" + pvInfoReq.getQueryDateEnd() + "&queryDateStart=" + pvInfoReq.getQueryDateStart();
+            String url = epcpvProperties.getUrl() + epcpvProperties.getRegionstat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
 
             HttpHeaders headers = RestUtils.defaultJsonHeaders();
             headers.add("Authorization", genAccessToken());
@@ -80,24 +80,24 @@ public class EpcpvService {
 
             for(int k = 0; k < regions.size(); k++){
                 PvRegionResp pvRegionResp = regions.get(k);
-                stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPRO_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName(), pvRegionResp.getProNum());
+                stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getProNum());
                 Integer per = Integer.valueOf(pvRegionResp.getProNum());
                 if(per != 0){
                     pvRegionResp.setProjectPer(String.format("%.2f", 100.0 * per/proNum));
-                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName(), pvRegionResp.getProjectPer());
+                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getProjectPer());
                 } else {
-                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName(), "0");
+                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), "0");
                 }
             }
 
-            stringRedisTemplate.expire(redisFront + PVM_REGIONPRO_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
-            stringRedisTemplate.expire(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+            stringRedisTemplate.expire(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+            stringRedisTemplate.expire(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
 
         } else {
             for(int k = 0; k < regions.size(); k++){
                 PvRegionResp pvRegionResp = regions.get(k);
-                pvRegionResp.setProNum(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPRO_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName())));
-                pvRegionResp.setProjectPer(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName())));
+                pvRegionResp.setProNum(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                pvRegionResp.setProjectPer(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
                 proNum += Integer.parseInt(Opt.ofBlankAble(pvRegionResp.getProNum()).orElse("0"));
             }
         }
@@ -107,11 +107,11 @@ public class EpcpvService {
             zoneMap.put(regions.get(k).getName(), k);
         }
 
-        Long regionCap = stringRedisTemplate.opsForHash().size(redisFront + PVM_REGIONCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd());
+        Long regionCap = stringRedisTemplate.opsForHash().size(redisFront + PVM_REGIONCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""));
         Float capacity = 0.0f;
         if(regionCap == 0) {
 
-            String url = epcpvProperties.getUrl() + epcpvProperties.getCapacitystat() + "?queryDateEnd=" + pvInfoReq.getQueryDateEnd() + "&queryDateStart=" + pvInfoReq.getQueryDateStart();
+            String url = epcpvProperties.getUrl() + epcpvProperties.getCapacitystat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
             HttpHeaders headers = RestUtils.defaultJsonHeaders();
             headers.add("Authorization", genAccessToken());
 
@@ -126,46 +126,46 @@ public class EpcpvService {
 
             for(int k = 0; k < regions.size(); k++){
                 PvRegionResp pvRegionResp = regions.get(k);
-                stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName(), pvRegionResp.getCapacity());
+                stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getCapacity());
                 Float per = Float.valueOf(pvRegionResp.getCapacity());
                 if(per != 0){
                     pvRegionResp.setCapacityPer(String.format("%.2f", 100.0 * per/capacity));
-                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName(), pvRegionResp.getCapacityPer());
+                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getCapacityPer());
                 } else {
-                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName(), "0");
+                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), "0");
                 }
             }
 
-            stringRedisTemplate.expire(redisFront + PVM_REGIONCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
-            stringRedisTemplate.expire(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+            stringRedisTemplate.expire(redisFront + PVM_REGIONCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+            stringRedisTemplate.expire(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
 
         } else {
             for(int k = 0; k < regions.size(); k++){
                 PvRegionResp pvRegionResp = regions.get(k);
-                pvRegionResp.setProNum(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName())));
-                pvRegionResp.setProjectPer(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), pvRegionResp.getName())));
+                pvRegionResp.setProNum(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                pvRegionResp.setProjectPer(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
                 capacity += Float.parseFloat(Opt.ofBlankAble(pvRegionResp.getProNum()).orElse("0"));
             }
         }
 
         //trans
-        String stageRatio = stringRedisTemplate.opsForValue().get(redisFront + PVM_STAGE_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd());
+        String stageRatio = stringRedisTemplate.opsForValue().get(redisFront + PVM_STAGE_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""));
         if(StrUtil.isBlank(stageRatio)){
-            String url = epcpvProperties.getUrl() + epcpvProperties.getStagestat() + "?queryDateEnd=" + pvInfoReq.getQueryDateEnd() + "&queryDateStart=" + pvInfoReq.getQueryDateStart();
+            String url = epcpvProperties.getUrl() + epcpvProperties.getStagestat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
             HttpHeaders headers = RestUtils.defaultJsonHeaders();
             headers.add("Authorization", genAccessToken());
             String resultStr = RestUtils.getForString(url, headers, null);
-            stringRedisTemplate.opsForValue().set(redisFront + PVM_STAGE_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), resultStr, Duration.ofMillis(PVM_KEY_EXPIRES_IN*2));
+            stringRedisTemplate.opsForValue().set(redisFront + PVM_STAGE_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), resultStr, Duration.ofMillis(PVM_KEY_EXPIRES_IN*2));
         }
         getStage(stageRatio, resultMap);
 
         //capacity
-        Long caps = stringRedisTemplate.opsForHash().size(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd());
+        Long caps = stringRedisTemplate.opsForHash().size(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""));
         List<PvCapacityItemResp> capitems = new ArrayList<>();
         PvCapacityResp pvCapacityResp = new PvCapacityResp("0", "0", "0", "0", "0", capitems);
         resultMap.put("capacity", pvCapacityResp);
         if(caps == 0) {
-            String url = epcpvProperties.getUrl() + epcpvProperties.getInststat() + "?queryDateEnd=" + pvInfoReq.getQueryDateEnd() + "&queryDateStart=" + pvInfoReq.getQueryDateStart();
+            String url = epcpvProperties.getUrl() + epcpvProperties.getInststat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
             HttpHeaders headers = RestUtils.defaultJsonHeaders();
             headers.add("Authorization", genAccessToken());
 
@@ -194,21 +194,21 @@ public class EpcpvService {
                 capitems.add(pvCapacityItemResp);
             }
 
-            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "total", pvCapacityResp.getTotal());
-            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "own", pvCapacityResp.getOwn());
-            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "other", pvCapacityResp.getOther());
-            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "ownper", pvCapacityResp.getOwnper());
-            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "otherper", pvCapacityResp.getOtherper());
-            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "items", JSONUtil.toJsonStr(capitems));
-            stringRedisTemplate.expire(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "total", pvCapacityResp.getTotal());
+            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "own", pvCapacityResp.getOwn());
+            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "other", pvCapacityResp.getOther());
+            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "ownper", pvCapacityResp.getOwnper());
+            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "otherper", pvCapacityResp.getOtherper());
+            stringRedisTemplate.opsForHash().put(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "items", JSONUtil.toJsonStr(capitems));
+            stringRedisTemplate.expire(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
 
         } else {
-            pvCapacityResp.setTotal(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "total")));
-            pvCapacityResp.setOwn(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "own")));
-            pvCapacityResp.setOther(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "other")));
-            pvCapacityResp.setOwnper(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "ownper")));
-            pvCapacityResp.setOtherper(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "otherper")));
-            pvCapacityResp.setItems(JSONUtil.toList(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + pvInfoReq.getQueryDateStart() + pvInfoReq.getQueryDateEnd(), "items")), PvCapacityItemResp.class));
+            pvCapacityResp.setTotal(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "total")));
+            pvCapacityResp.setOwn(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "own")));
+            pvCapacityResp.setOther(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "other")));
+            pvCapacityResp.setOwnper(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "ownper")));
+            pvCapacityResp.setOtherper(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "otherper")));
+            pvCapacityResp.setItems(JSONUtil.toList(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), "items")), PvCapacityItemResp.class));
         }
 
         List<PvRegionResp> newregions = regions.stream()
