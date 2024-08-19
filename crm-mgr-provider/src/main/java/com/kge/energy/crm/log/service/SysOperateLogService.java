@@ -6,8 +6,9 @@ import com.kge.energy.crm.repository.dao.SysOperateLogDao;
 import com.kge.energy.crm.repository.entity.SysOperateLog;
 import com.kge.energy.crm.tenant.service.TenantService;
 import com.kge.platform.framework.common.util.TraceIdUtils;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,12 +16,14 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class SysOperateLogService {
 
-    private final SysOperateLogDao sysOperateLogDao;
+    @Resource
+    private SysOperateLogDao sysOperateLogDao;
 
-    private final TenantService tenantService;
+    @Lazy
+    @Resource
+    private TenantService tenantService;
 
     public void saveLog(Integer tenantId, OperateModuleEnums operateModuleEnums, String operateBehavior) {
 
