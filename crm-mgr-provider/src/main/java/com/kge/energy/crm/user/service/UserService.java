@@ -18,7 +18,9 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.OperateModuleEnums;
 import com.kge.energy.crm.enums.RoleIdEnums;
+import com.kge.energy.crm.log.service.SysOperateLogService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
@@ -65,6 +67,8 @@ public class UserService {
     private final StringRedisTemplate stringRedisTemplate;
 
     private final BRoleDao bRoleDao;
+
+    private final SysOperateLogService sysOperateLogService;
 
     @Value("${spring.profiles.active}")
     private String env;
@@ -254,6 +258,11 @@ public class UserService {
                 .setTenantId(req.getTenantId());
         rUserTenantDao.save(rUserTenant);
 
+        sysOperateLogService.saveLog(
+                bUser.getTenantId(), OperateModuleEnums.USER,
+                "新增用户【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
+        );
+
         return true;
     }
 
@@ -291,6 +300,11 @@ public class UserService {
                     .setTenantId(req.getTenantId()));
         }
 
+        sysOperateLogService.saveLog(
+                bUser.getTenantId(), OperateModuleEnums.USER,
+                "更新用户【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
+        );
+
         return true;
     }
 
@@ -312,6 +326,11 @@ public class UserService {
         bUserDao.removeById(bUser);
         rUserTenantDao.removeByUserId(bUser.getUserId());
         rUserRoleDao.removeByUserId(bUser.getUserId());
+
+        sysOperateLogService.saveLog(
+                bUser.getTenantId(), OperateModuleEnums.USER,
+                "删除用户【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
+        );
 
         return true;
     }
@@ -347,7 +366,14 @@ public class UserService {
                         .setRoleId(roleId)
                         .setTenantId(bUser.getTenantId())
                 ).collect(Collectors.toSet());
-        return rUserRoleDao.saveBatch(rUserRoles);
+        rUserRoleDao.saveBatch(rUserRoles);
+
+        sysOperateLogService.saveLog(
+                bUser.getTenantId(), OperateModuleEnums.USER,
+                "分配用户角色【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
+        );
+
+        return true;
     }
 
 
@@ -391,8 +417,16 @@ public class UserService {
             throw new ServiceException("非法请求，不允许操作其他租户用户");
         }
 
-        bUser.setPasswd(req.getPasswd());
+        bUser.setPasswd(req.getPasswd())
+                .setPasswdModifyTime(LocalDateTime.now());
 
-        return bUserDao.updateById(bUser);
+        bUserDao.updateById(bUser);
+
+        sysOperateLogService.saveLog(
+                bUser.getTenantId(), OperateModuleEnums.USER,
+                "重置用户密码【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
+        );
+
+        return true;
     }
 }

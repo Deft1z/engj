@@ -1,11 +1,16 @@
 package com.kge.energy.crm.workflow.service;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.PhoneUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.RedisUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.elink.ElinkService;
@@ -14,7 +19,14 @@ import com.kge.energy.crm.repository.dao.WfFormDao;
 import com.kge.energy.crm.repository.dao.WfFormFlowDao;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
+import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
+import com.kge.energy.crm.repository.entityext.result.FlowResult;
+import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.workflow.req.ConsultingAddReq;
+import com.kge.energy.crm.workflow.req.WfFormFlowReq;
+import com.kge.energy.crm.workflow.req.WfFormReq;
+import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
+import com.kge.energy.crm.workflow.resp.WfFormResp;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -136,6 +148,31 @@ public class ConsultingService {
         return code;
     }
 
+    public PageResp<WfFormResp> getFormPage(WfFormReq req) {
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        Assert.notNull(userInfoDto);
 
+        IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
+        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
+        log.info("==> workOrderListParam= {}", workOrderListParam);
+
+        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
+        List<WfFormResp> resps = BeanUtil.copyToList(pages.getRecords(), WfFormResp.class);
+
+        return new PageResp<WfFormResp>()
+                .setList(resps)
+                .setCurrentPage(pages.getCurrent())
+                .setPageSize(pages.getSize())
+                .setTotal(pages.getTotal());
+    }
+
+    public List<WfFormFlowResp> getFlowByFormId(WfFormFlowReq req) {
+        UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
+        List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), userInfo);
+        if (list.isEmpty()) {
+            throw new ServiceException("权限不足!");
+        }
+        return BeanUtil.copyToList(list, WfFormFlowResp.class);
+    }
 
 }

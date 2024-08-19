@@ -4,8 +4,9 @@ import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.OperateModuleEnums;
+import com.kge.energy.crm.log.service.SysOperateLogService;
 import com.kge.energy.crm.repository.dao.BResourceDao;
-import com.kge.energy.crm.repository.dao.RRoleResourceDao;
 import com.kge.energy.crm.repository.entity.BResource;
 import com.kge.energy.crm.repository.entity.RRoleResource;
 import com.kge.energy.crm.resource.req.*;
@@ -14,6 +15,7 @@ import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author wangjihua
@@ -27,7 +29,7 @@ public class ResourceService {
 
     private final BResourceDao bResourceDao;
 
-    private final RRoleResourceDao rRoleResourceDao;
+    private final SysOperateLogService sysOperateLogService;
 
 
     /**
@@ -56,6 +58,7 @@ public class ResourceService {
     /**
      * 新增菜单
      */
+    @Transactional
     public Boolean add(AddResourceReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -74,12 +77,20 @@ public class ResourceService {
                 .setSystemType(req.getSystemType())
                 .setRemark(req.getRemark());
 
-        return bResourceDao.save(bResource);
+        bResourceDao.save(bResource);
+
+        sysOperateLogService.saveLog(
+                UserInfoContextUtils.getCurrentTenantId(), OperateModuleEnums.RESOURCE,
+                "新增菜单【" + bResource.getResourceId() + ", " + bResource.getResourceName() + "】"
+        );
+
+        return true;
     }
 
     /**
      * 编辑菜单
      */
+    @Transactional
     public Boolean update(UpdateResourceReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -100,12 +111,20 @@ public class ResourceService {
                 .setSystemType(req.getSystemType())
                 .setRemark(req.getRemark());
 
-        return bResourceDao.updateById(bResource);
+        bResourceDao.updateById(bResource);
+
+        sysOperateLogService.saveLog(
+                UserInfoContextUtils.getCurrentTenantId(), OperateModuleEnums.RESOURCE,
+                "更新菜单【" + bResource.getResourceId() + ", " + bResource.getResourceName() + "】"
+        );
+
+        return true;
     }
 
     /**
      * 删除菜单
      */
+    @Transactional
     public Boolean delete(DeleteResourceReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -120,6 +139,13 @@ public class ResourceService {
             throw new ServiceException("已有角色绑定该菜单，不允许删除");
         }
 
-        return bResourceDao.removeById(req.getResourceId());
+        bResourceDao.removeById(req.getResourceId());
+
+        sysOperateLogService.saveLog(
+                UserInfoContextUtils.getCurrentTenantId(), OperateModuleEnums.RESOURCE,
+                "删除菜单【" + bResource.getResourceId() + ", " + bResource.getResourceName() + "】"
+        );
+
+        return true;
     }
 }

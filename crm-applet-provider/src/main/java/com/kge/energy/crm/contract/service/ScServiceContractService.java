@@ -37,14 +37,9 @@ public class ScServiceContractService {
         //设置userId、roleId
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
         wxUserWorkOrderParam.setUserId(currentUserInfo.getUserId().intValue());
-        List<Integer> roleIds = currentUserInfo.getRoleList().stream().map(UserInfoDto.Role::getId).toList();
-        if (roleIds.contains(2)) {
-            //集团客服，可查看全部服务合同
-            wxUserWorkOrderParam.setRoleId(2);
-        } else if (roleIds.contains(3)){
-            //二级公司客服，仅可查看自己创建的服务合同
-            wxUserWorkOrderParam.setRoleId(3);
-        }
+        //集团客服jt_customer，可查看全部服务合同
+        //二级公司客服sub_company_customer，仅可查看自己创建的服务合同
+        wxUserWorkOrderParam.setRoleCodes(currentUserInfo.getRoleCodes());
         IPage<ContractResult> pages = scServiceContractDao.contractPageByUserIdLoad(reqIpage, wxUserWorkOrderParam);
         List<ScServiceContractResp> resps = BeanUtil.copyToList(pages.getRecords(), ScServiceContractResp.class);
         return new PageResp<ScServiceContractResp>()
