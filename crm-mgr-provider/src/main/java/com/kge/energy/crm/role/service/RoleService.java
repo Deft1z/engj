@@ -8,7 +8,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.OperateModuleEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.log.service.SysOperateLogService;
 import com.kge.energy.crm.repository.dao.BRoleDao;
 import com.kge.energy.crm.repository.dao.RRoleResourceDao;
 import com.kge.energy.crm.repository.entity.BRole;
@@ -40,6 +42,8 @@ public class RoleService {
     private final BRoleDao bRoleDao;
 
     private final RRoleResourceDao rRoleResourceDao;
+
+    private final SysOperateLogService sysOperateLogService;
 
     public PageResp<RoleListResp> list(RoleListReq req) {
 
@@ -74,6 +78,7 @@ public class RoleService {
                 .setCurrentPage(page.getCurrent());
     }
 
+    @Transactional
     public Boolean add(AddRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -89,9 +94,17 @@ public class RoleService {
                 .setStatus(req.getStatus())
                 .setRemark(req.getRemark());
 
-        return bRoleDao.save(bRole);
+        bRoleDao.save(bRole);
+
+        sysOperateLogService.saveLog(
+                bRole.getTenantId(), OperateModuleEnums.ROLE,
+                "新增角色【" + bRole.getRoleId() + ", " + bRole.getName() + "】"
+        );
+
+        return true;
     }
 
+    @Transactional
     public Boolean update(UpdateRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -108,9 +121,17 @@ public class RoleService {
                 .setStatus(req.getStatus())
                 .setRemark(req.getRemark());
 
-        return bRoleDao.updateById(bRole);
+        bRoleDao.updateById(bRole);
+
+        sysOperateLogService.saveLog(
+                bRole.getTenantId(), OperateModuleEnums.ROLE,
+                "更新角色【" + bRole.getRoleId() + ", " + bRole.getName() + "】"
+        );
+
+        return true;
     }
 
+    @Transactional
     public Boolean delete(DeleteRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
@@ -130,7 +151,14 @@ public class RoleService {
 
         rRoleResourceDao.removeByRoleId(bRole.getRoleId());
 
-        return bRoleDao.removeById(bRole);
+        bRoleDao.removeById(bRole);
+
+        sysOperateLogService.saveLog(
+                bRole.getTenantId(), OperateModuleEnums.ROLE,
+                "删除角色【" + bRole.getRoleId() + ", " + bRole.getName() + "】"
+        );
+
+        return true;
     }
 
     /**
@@ -170,7 +198,14 @@ public class RoleService {
                         .setResourceId(resourceId)
                         .setTenantId(bRole.getTenantId()))
                 .collect(Collectors.toSet());
-        return rRoleResourceDao.saveBatch(rRoleResources);
+        rRoleResourceDao.saveBatch(rRoleResources);
+
+        sysOperateLogService.saveLog(
+                bRole.getTenantId(), OperateModuleEnums.ROLE,
+                "角色关联菜单【" + bRole.getRoleId() + ", " + bRole.getName() + "】"
+        );
+
+        return true;
     }
 
     public UserRoleResp userRole(UserRoleReq req) {
