@@ -1,8 +1,10 @@
 package com.kge.energy.crm.app.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kge.energy.crm.app.req.AppMgrListAddReq;
 import com.kge.energy.crm.app.req.AppMgrListReq;
 import com.kge.energy.crm.app.req.AppMgrListUpdateReq;
+import com.kge.energy.crm.app.req.InfoUnbindReq;
 import com.kge.energy.crm.app.service.AppMgrService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping()
@@ -38,6 +42,12 @@ public class AppMgrController {
     @PostMapping("/applicationBack/applicationBackMrg/appWeb/update")
     public CommonResponse<Boolean> appFormUpdate(@Validated @RequestBody AppMgrListUpdateReq req){
         return CommonResponse.suc(appMgrService.appFormUpdate(req));
+    }
+
+    @ConvertToGoFormats
+    @PostMapping("/applicationBack/bindingMgr/bind/update")
+    public CommonResponse<Boolean> infoUnbind(@Validated @RequestBody InfoUnbindReq req) throws NoSuchAlgorithmException, JsonProcessingException {
+        return CommonResponse.suc(appMgrService.infoUnbind(req));
     }
 
 }
