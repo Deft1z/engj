@@ -60,10 +60,10 @@
         LEFT JOIN b_user d ON d.user_id = c.create_user_id
         where a.flag = 1
         <choose>
-            <when test="listParam.roleId != null and listParam.roleId == 2">
+            <when test="listParam.roleCodes != null and listParam.roleCodes.contains('jt_customer')">
                 and 1 = 1
             </when>
-            <when test="listParam.roleId != null and listParam.roleId == 3">
+            <when test="listParam.roleCodes != null and listParam.roleCodes.contains('sub_company_customer')">
                 and a.create_user_id = #{listParam.userId}
             </when>
             <otherwise>

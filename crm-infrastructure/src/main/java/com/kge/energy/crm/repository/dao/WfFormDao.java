@@ -10,10 +10,8 @@ import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.mapper.WfFormMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.springframework.stereotype.Repository;
 
-import java.awt.*;
 import java.util.List;
 
 
@@ -47,5 +45,15 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
     public Long findNewConsultingCount(String startTime, String endTime) {
         return mapper.findNewConsultingCount(startTime, endTime);
     }
+
+    public IPage<FormResult> findListForWx(IPage<WorkOrderListParam> reqIpage, WorkOrderListParam workOrderListParam,
+                                           UserInfoDto userInfoDto) {
+        return mapper.findListForWx(reqIpage, workOrderListParam, userInfoDto);
+    }
+
+    public List<FlowResult> getFlowByFormIdForWx(Integer formId, UserInfoDto userInfoDto) {
+        return mapper.getFlowByFormIdForWx(formId, userInfoDto);
+    }
+
 }
 

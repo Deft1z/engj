@@ -4,13 +4,15 @@ import com.kge.energy.crm.common.page.PageReq;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.Set;
+
 @Data
 @Accessors(chain = true)
 public class WxUserWorkOrderParam extends PageReq {
 
     private Integer userId;
 
-    private Integer roleId;
+    private Set<String> roleCodes;
 
     private WorkOrderListParam.SearchMapBean searchMap;
 
