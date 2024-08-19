@@ -377,4 +377,22 @@ public class UserService {
     }
 
 
+    /**
+     * 重置密码
+     */
+    public Boolean resetPwd(ResetPwdReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BUser bUser = bUserDao.getById(req.getUserId());
+        Assert.notNull(bUser);
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允许操作其他租户用户");
+        }
+
+        bUser.setPasswd(req.getPasswd());
+
+        return bUserDao.updateById(bUser);
+    }
 }

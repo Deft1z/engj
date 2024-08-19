@@ -103,4 +103,11 @@ public class UserController {
     public CommonResponse<Boolean> assignRole(@Validated @RequestBody AssignUserRoleReq req) {
         return CommonResponse.suc(userService.assignRole(req));
     }
+
+    @Operation(summary = "重置密码")
+    @PostMapping("/user/resetPwd")
+    public CommonResponse<Boolean> resetPwd(@Validated @RequestBody ResetPwdReq req) {
+        return CommonResponse.suc(userService.resetPwd(req));
+    }
+
 }

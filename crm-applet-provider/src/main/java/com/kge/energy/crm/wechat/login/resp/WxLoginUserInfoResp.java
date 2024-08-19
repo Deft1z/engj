@@ -42,6 +42,8 @@ public class WxLoginUserInfoResp {
         private Integer id;
 
         private String name;
+
+        private String code;
     }
 
 
@@ -53,6 +55,5 @@ public class WxLoginUserInfoResp {
 
         private String name;
 
-        private String authCode;
     }
 }

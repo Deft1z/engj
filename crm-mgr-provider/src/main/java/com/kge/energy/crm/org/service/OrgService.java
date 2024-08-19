@@ -185,6 +185,7 @@ public class OrgService {
                 if(CollUtil.isEmpty(pOrgListResult.getChildren())){
                     pOrgListResult.setChildren(new ArrayList<OrgListResult>());
                 }
+                orgListResult.setParentOrganizationName(pOrgListResult.getName());
                 pOrgListResult.getChildren().add(orgListResult);
             }
         }
