@@ -22,27 +22,6 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <select id="findMenu" resultType="com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult">
-        select DISTINCT a.resource_id,
-                        a.refer_resource_id,
-                        a.parent_resource_id,
-                        a.level,
-                        a.type,
-                        a.name,
-                        a.display_name,
-                        a.sort,
-                        a.flag,
-                        b.auth_read,
-                        b.auth_write,
-                        b.auth_delete,
-                        b.auth_audit
-        from b_resource a
-                 LEFT JOIN r_role_resource b ON b.resource_id = a.resource_id
-                 LEFT JOIN r_user_role c ON c.role_id = b.role_id
-        where a.flag IN (1, 2)
-          AND c.user_id = #{userId}
-        Order by a.sort ASC
-    </select>
 
     <select id="getSystemResources" resultMap="BResourceMap">
         select *
