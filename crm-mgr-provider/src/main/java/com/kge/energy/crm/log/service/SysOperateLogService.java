@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 /**
  * @author wangjihua
  */
@@ -33,9 +35,10 @@ public class SysOperateLogService {
                 .setTenantName(tenantService.getTenantName(tenantId))
                 .setOperateId(UserInfoContextUtils.getCurrentUserId())
                 .setOperateName(UserInfoContextUtils.getCurrentRealName())
+                .setOperateTime(LocalDateTime.now())
                 .setOperateModule(operateModuleEnums.getCode())
                 .setOperateBehavior(operateBehavior);
-
+        
         sysOperateLogDao.save(sysOperateLog);
     }
 }
