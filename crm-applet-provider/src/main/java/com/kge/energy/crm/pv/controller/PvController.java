@@ -26,7 +26,7 @@ public class PvController {
      * @date 2024/7/31 17:28
     */
     @ConvertToGoFormats
-    @GetMapping("/Management/Pv/all")
+    @PostMapping("/Management/Pv/all")
     public CommonResponse<Object> getAllPvInfo(@RequestBody PvInfoReq pvInfoReq){
         return CommonResponse.suc(pvService.getAllPvInfo(pvInfoReq));
     }
@@ -54,7 +54,7 @@ public class PvController {
     }
 
     @ConvertToGoFormats
-    @GetMapping("/Management/Pv/detail")
+    @PostMapping("/Management/Pv/detail")
     public CommonResponse<Object> commentPv(@Validated @RequestBody PvDetailReq req){
         return CommonResponse.suc(pvService.getProjectDetailsList(req));
     }
