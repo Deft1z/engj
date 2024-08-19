@@ -16,6 +16,9 @@ public class OrgListResult {
     @Schema(description = "上级组织id")
     private Integer parentOrganizationId;
 
+    @Schema(description = "上级组织name")
+    private String parentOrganizationName;
+
     @Schema(description = "组织层级")
     private Integer level;
 
