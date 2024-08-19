@@ -20,9 +20,12 @@ import com.kge.energy.crm.repository.dao.WfFormFlowDao;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
+import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.workflow.req.ConsultingAddReq;
+import com.kge.energy.crm.workflow.req.WfFormFlowReq;
 import com.kge.energy.crm.workflow.req.WfFormReq;
+import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
 import com.kge.energy.crm.workflow.resp.WfFormResp;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
@@ -163,5 +166,13 @@ public class ConsultingService {
                 .setTotal(pages.getTotal());
     }
 
+    public List<WfFormFlowResp> getFlowByFormId(WfFormFlowReq req) {
+        UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
+        List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), userInfo);
+        if (list.isEmpty()) {
+            throw new ServiceException("权限不足!");
+        }
+        return BeanUtil.copyToList(list, WfFormFlowResp.class);
+    }
 
 }

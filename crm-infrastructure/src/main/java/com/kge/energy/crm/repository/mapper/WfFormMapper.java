@@ -33,5 +33,7 @@ public interface WfFormMapper extends BaseMapper<WfForm> {
     IPage<FormResult> findListForWx(@Param("reqIpage") IPage<WorkOrderListParam> reqIpage,
                                     @Param("listParam") WorkOrderListParam listParam,
                                     @Param("userInfo") UserInfoDto userInfoDto);
+
+    List<FlowResult> getFlowByFormIdForWx(@Param("formId") Integer formId, @Param("userInfo") UserInfoDto userInfoDto);
 }
 

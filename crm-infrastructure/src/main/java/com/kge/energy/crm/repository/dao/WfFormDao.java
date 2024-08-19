@@ -51,5 +51,9 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         return mapper.findListForWx(reqIpage, workOrderListParam, userInfoDto);
     }
 
+    public List<FlowResult> getFlowByFormIdForWx(Integer formId, UserInfoDto userInfoDto) {
+        return mapper.getFlowByFormIdForWx(formId, userInfoDto);
+    }
+
 }
 
