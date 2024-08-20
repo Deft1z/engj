@@ -1,7 +1,11 @@
 package com.kge.energy.crm.wechat.login.service;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,6 +17,7 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.LoginPlatformEnums;
 import com.kge.energy.crm.enums.LoginResultEnums;
 import com.kge.energy.crm.enums.UserTypeEnums;
+import com.kge.energy.crm.external.elink.ElinkService;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
@@ -32,13 +37,20 @@ import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.platform.framework.common.enums.IsDeleteFlagEnums;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -47,6 +59,7 @@ import java.util.stream.Collectors;
  *
  * @author zqy
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WeChatLoginService {
@@ -58,9 +71,18 @@ public class WeChatLoginService {
     private final UserDomainService userDomainService;
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final SysLoginLogHandleService sysLoginLogHandleService;
+    private final ElinkService elinkService;
+
+    private final Environment env;
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
+
+    @Value("${loginAttention.leaderPhones}")
+    private String[] leaderPhones;
+
+    @Value("${loginAttention.sendee}")
+    private String[] sendee;
 
     /**
      * 首页微信登录获取openid
@@ -71,15 +93,15 @@ public class WeChatLoginService {
 
         try{
             //请求微信接口
-            LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
-            if(StrUtil.isBlank(appletLoginResp.getOpenId())){
-                throw new BadException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
-            }
+//            LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
+//            if(StrUtil.isBlank(appletLoginResp.getOpenId())){
+//                throw new BadException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
+//            }
             // 现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}
 //        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
 //            throw new BadException(appletLoginResp.getErrMsg());
 //        }
-
+            LoginResp appletLoginResp = new LoginResp().setOpenId(req.getJsCode());
             user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
             if (ObjectUtil.isNotNull(user)) {
@@ -104,6 +126,9 @@ public class WeChatLoginService {
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, null);
 
+            //发送领导登录通知
+            sendLeaderOnlineMsg(user);
+
             return new WeChatLoginResp()
                     .setSessionKey(appletLoginResp.getSessionKey())
                     .setUnionId(appletLoginResp.getUnionId())
@@ -118,6 +143,41 @@ public class WeChatLoginService {
             throw new RuntimeException(e);
         }
 
+
+    }
+
+    @Async
+    public void sendLeaderOnlineMsg(BUser user){
+
+        CompletableFuture.runAsync(() -> {
+            String activeProfile = env.getProperty("spring.profiles.active");
+            if(activeProfile.contains("dev")){
+                return;
+            }
+
+            List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));
+            List<String> sendeeList = new ArrayList<>(Arrays.asList(sendee));
+            if(CollUtil.isEmpty(leaderPhoneList) || CollUtil.isEmpty(sendeeList)){
+                return;
+            }
+
+            if(CollUtil.contains(leaderPhoneList, user.getMobile())){
+                String msg = "领导名字：" + user.getRealname() + "\\n" +
+                        "手机号：" + user.getMobile() + "\\n" +
+                        "登录时间：" + DateUtil.now() +
+                        "请重点关注！！！";
+
+                for(String sendPhone : sendeeList){
+                    String msgContent = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), "e能管家小程序领导登录提醒", msg, sendPhone);
+                    try {
+                        elinkService.pushElinkMsg(msgContent);
+                    } catch (Exception e) {
+                        log.error("sendLeaderOnlineMsg error: ", e);
+                    }
+                    ThreadUtil.sleep(1, TimeUnit.SECONDS);
+                }
+            }
+        });
 
     }
 
