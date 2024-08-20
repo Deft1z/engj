@@ -93,15 +93,14 @@ public class WeChatLoginService {
 
         try{
             //请求微信接口
-//            LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
-//            if(StrUtil.isBlank(appletLoginResp.getOpenId())){
-//                throw new BadException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
-//            }
+            LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
+            if(StrUtil.isBlank(appletLoginResp.getOpenId())){
+                throw new BadException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
+            }
             // 现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}
 //        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
 //            throw new BadException(appletLoginResp.getErrMsg());
 //        }
-            LoginResp appletLoginResp = new LoginResp().setOpenId(req.getJsCode());
             user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
             if (ObjectUtil.isNotNull(user)) {
