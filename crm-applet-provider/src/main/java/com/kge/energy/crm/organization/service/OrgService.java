@@ -1,9 +1,12 @@
 package com.kge.energy.crm.organization.service;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Opt;
 import com.kge.energy.crm.organization.req.OrgReq;
+import com.kge.energy.crm.organization.resp.OrgDictResp;
 import com.kge.energy.crm.organization.resp.OrgResp;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
+import com.kge.energy.crm.repository.entityext.result.OrgDictResult;
 import com.kge.energy.crm.repository.entityext.result.OrgResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,8 +24,8 @@ public class OrgService {
      * @description 获取服务商
      * @author tangchenghui
      * @date 2024/7/26 17:56
-    */
-    public List<OrgResp> getCompanyList(OrgReq orgReq){
+     */
+    public List<OrgResp> getCompanyList(OrgReq orgReq) {
         List<OrgResult> list1 = new ArrayList<>();
         List<OrgResult> list2 = new ArrayList<>();
         List<OrgResult> list3 = new ArrayList<>();
@@ -37,13 +40,13 @@ public class OrgService {
         list.add(new OrgResp(2, "城建服务", list2));
 
         List<OrgResult> orgResultList = organizationDao.getCompanyList();
-        orgResultList.forEach(org ->{
+        orgResultList.forEach(org -> {
             Opt.ofBlankAble(org.getType()).ifPresent(type -> {
                 org.setTypeList(new ArrayList<>());
                 org.getTypeList().addAll(List.of(type.split(",")));
             });
 
-            if(org.getServiceType() == 1){
+            if (org.getServiceType() == 1) {
                 list1.add(org);
             } else if (org.getServiceType() == 2) {
                 list2.add(org);
@@ -59,4 +62,10 @@ public class OrgService {
         return list;
     }
 
+    public List<OrgDictResp> orgDictList() {
+
+        List<OrgDictResult> orgDictResults = organizationDao.getOrgDictList();
+
+        return BeanUtil.copyToList(orgDictResults, OrgDictResp.class);
+    }
 }
