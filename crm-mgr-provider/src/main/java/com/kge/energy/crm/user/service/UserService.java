@@ -13,14 +13,18 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
+import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.LoginPlatformEnums;
+import com.kge.energy.crm.enums.LoginResultEnums;
 import com.kge.energy.crm.enums.OperateModuleEnums;
 import com.kge.energy.crm.enums.RoleIdEnums;
 import com.kge.energy.crm.log.service.SysOperateLogService;
+import com.kge.energy.crm.login.SysLoginLogHandleService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
@@ -38,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +77,8 @@ public class UserService {
     private final SysOperateLogService sysOperateLogService;
 
     private final TenantService tenantService;
+
+    private final SysLoginLogHandleService sysLoginLogHandleService;
 
     @Value("${spring.profiles.active}")
     private String env;
@@ -111,24 +118,43 @@ public class UserService {
         return MD5.create().digestHex(req.getName() + sSystemConfig.getConfig());
     }
 
-    public UserLoginResp userLogin(UserLoginReq req) {
+    public CommonResponse<UserLoginResp> userLogin(UserLoginReq req) {
+        UserLoginResp userLoginResp = null;
+        BUser bUser = null;
 
-        BUser bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
+        try {
 
-        if (ObjUtil.isNull(bUser)) {
-            throw new BadException(ResponseCode.SHOULD_LOGIN);
+            bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
+
+            if (ObjUtil.isNull(bUser)) {
+                throw new BadException(ResponseCode.SHOULD_LOGIN);
+            }
+
+            // 获取uid关联的租户
+            RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
+
+            String authToken = genToken(bUser);
+
+            userLoginResp = new UserLoginResp()
+                    .setUserId(bUser.getUserId())
+                    .setTenantId(rUserTenant.getOrganizationId())
+                    .setAuthToken(authToken)
+                    .setMsg("login success");
+
+            //记录登录成功日志
+            sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.SUCCESS, null);
+
+            return CommonResponse.suc(userLoginResp);
+
+        }catch (Exception e){
+            log.error("pc login error: ",e);
+
+            //记录登录失败日志
+            sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
+
+            return CommonResponse.bad(ResponseCode.SHOULD_LOGIN, userLoginResp);
         }
 
-        // 获取uid关联的租户
-        RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
-
-        String authToken = genToken(bUser);
-
-        return new UserLoginResp()
-                .setUserId(bUser.getUserId())
-                .setTenantId(rUserTenant.getOrganizationId())
-                .setAuthToken(authToken)
-                .setMsg("login success");
     }
 
     public CurrentUserInfoResp currentUserInfo() {

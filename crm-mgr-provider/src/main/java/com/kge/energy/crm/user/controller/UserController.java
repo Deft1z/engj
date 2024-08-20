@@ -50,7 +50,7 @@ public class UserController {
     @ConvertToGoFormats
     @PostMapping("/base/user/login")
     public CommonResponse<UserLoginResp> userLogin(@Validated @RequestBody UserLoginReq req) {
-        return CommonResponse.suc(userService.userLogin(req));
+        return userService.userLogin(req);
     }
 
     /**
