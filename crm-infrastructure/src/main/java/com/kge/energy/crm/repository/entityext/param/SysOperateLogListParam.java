@@ -17,5 +17,5 @@ public class SysOperateLogListParam extends PageReq {
 
     private Integer operateModule;
 
-    private String operateName;
+    private String operatorName;
 }

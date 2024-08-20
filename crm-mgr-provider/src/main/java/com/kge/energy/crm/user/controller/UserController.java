@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -78,6 +75,12 @@ public class UserController {
     @PostMapping("/user/list")
     public CommonResponse<PageResp<UserListResp>> list(@Validated @RequestBody UserListReq req) {
         return CommonResponse.suc(userService.list(req));
+    }
+
+    @Operation(summary = "用户详情")
+    @GetMapping("/user/detail/{userId}")
+    public CommonResponse<UserDetailResp> detail(@PathVariable("userId") Integer userId) {
+        return CommonResponse.suc(userService.detail(userId));
     }
 
     @Operation(summary = "新增用户")

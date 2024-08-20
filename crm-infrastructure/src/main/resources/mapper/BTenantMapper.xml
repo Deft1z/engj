@@ -19,7 +19,7 @@
         from b_tenant bt
         where bt.flag = 1
     </select>
-    
+
     <select id="getTenantDictList" resultType="com.kge.energy.crm.repository.entityext.result.TenantListForOrgResult">
         select bt.id, bt.name
         from b_tenant bt
@@ -29,5 +29,10 @@
         </if>
     </select>
 
+    <select id="getByIdWithDeleted" resultMap="BTenantMap">
+        select *
+        from b_tenant
+        where id = #{tenantId}
+    </select>
 </mapper>
 

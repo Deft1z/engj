@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.repository.entity.BTenant;
 import com.kge.energy.crm.repository.entityext.param.TenantQueryParam;
-import com.kge.energy.crm.repository.entityext.param.UserAlarmMsgParam;
 import com.kge.energy.crm.repository.entityext.result.TenantListForOrgResult;
 import com.kge.energy.crm.repository.entityext.result.TenantListResult;
 import org.apache.ibatis.annotations.Param;
@@ -21,5 +20,6 @@ public interface BTenantMapper extends BaseMapper<BTenant> {
 
     List<TenantListForOrgResult> getTenantDictList(Integer tenantId);
 
+    BTenant getByIdWithDeleted(Integer tenantId);
 }
 

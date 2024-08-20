@@ -25,6 +25,7 @@ import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.tenant.service.TenantService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -69,6 +70,8 @@ public class UserService {
     private final BRoleDao bRoleDao;
 
     private final SysOperateLogService sysOperateLogService;
+
+    private final TenantService tenantService;
 
     @Value("${spring.profiles.active}")
     private String env;
@@ -226,6 +229,39 @@ public class UserService {
                 .setTotal(usersPage.getTotal())
                 .setPageSize(usersPage.getSize())
                 .setList(resps);
+    }
+
+
+    /**
+     * 用户详情
+     */
+    public UserDetailResp detail(Integer userId) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BUser bUser = bUserDao.getById(userId);
+        Assert.notNull(bUser, "用户不存在");
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户用户");
+        }
+
+        String tenantName = tenantService.getTenantName(bUser.getTenantId());
+
+        BOrganization bOrganization = bOrganizationDao.getOrgByUserId(userId);
+        Assert.notNull(bOrganization);
+
+        return new UserDetailResp()
+                .setTenantId(bUser.getTenantId())
+                .setTenantName(tenantName)
+                .setOrganizationId(bOrganization.getOrganizationId())
+                .setOrganizationName(bOrganization.getName())
+                .setUserId(bUser.getUserId())
+                .setName(bUser.getName())
+                .setRealname(bUser.getRealname())
+                .setMobile(bUser.getMobile())
+                .setStatus(bUser.getStatus())
+                .setRemark(bUser.getRemark());
     }
 
     @Transactional

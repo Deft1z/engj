@@ -67,6 +67,8 @@ logging:
   config: classpath:config/logback.xml
 
 mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
   global-config:
     db-config:
       logic-delete-field: flag

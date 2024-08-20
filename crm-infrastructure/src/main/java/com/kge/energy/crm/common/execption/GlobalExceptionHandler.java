@@ -27,7 +27,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = {
             ServiceException.class,
             MethodArgumentNotValidException.class,
-            ConstraintViolationException.class
+            ConstraintViolationException.class,
+            IllegalArgumentException.class
     })
     public <T> CommonResponse<T> handleServiceException(Exception e) {
         return errorResult(ResponseCode.UNKNOWN.getCode(), e.getMessage(), null, e);

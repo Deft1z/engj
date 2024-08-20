@@ -22,5 +22,5 @@ public class SysOperateLogListReq extends PageReq {
     private Integer operateModule;
 
     @Schema(description = "操作人名称")
-    private String operateName;
+    private String operatorName;
 }
