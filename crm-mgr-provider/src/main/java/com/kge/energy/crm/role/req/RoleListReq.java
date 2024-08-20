@@ -3,11 +3,13 @@ package com.kge.energy.crm.role.req;
 import com.kge.energy.crm.common.page.PageReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 /**
  * @author wangjihua
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Accessors(chain = true)
 @Schema(name = "角色列表请求参数", description = "角色列表请求参数")
