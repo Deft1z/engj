@@ -16,19 +16,18 @@
         <result property="loginMessage" column="login_message" jdbcType="VARCHAR"/>
     </resultMap>
 
-<!--    <select id="list" resultMap="SysOperateLogMap">-->
-<!--        select *-->
-<!--        from sys_operate_log-->
-<!--        <if test="param.tenantId != null">-->
-<!--            and tenant_id = #{param.tenantId}-->
-<!--        </if>-->
-<!--        <if test="param.operateModule != null">-->
-<!--            and operate_module = #{param.operateModule}-->
-<!--        </if>-->
-<!--        <if test="param.operatorName != null and param.operatorName != ''">-->
-<!--            and operator_name like CONCAT('%',#{param.operatorName},'%')-->
-<!--        </if>-->
-<!--        order by id desc-->
-<!--    </select>-->
+    <select id="list" resultMap="SysLoginLogMap">
+        select *
+        from sys_login_log
+        <where>
+            <if test="param.tenantId != null">
+                and tenant_id = #{param.tenantId}
+            </if>
+            <if test="param.loginPlatform != null">
+                and login_platform = #{param.loginPlatform}
+            </if>
+        </where>
+        order by id desc
+    </select>
 </mapper>
 
