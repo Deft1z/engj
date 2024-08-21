@@ -91,10 +91,10 @@ public class WeChatLoginService {
     public WeChatLoginResp login(WeChatLoginReq req) {
         BUser user = null;
 
-        try{
+        try {
             //请求微信接口
             LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
-            if(StrUtil.isBlank(appletLoginResp.getOpenId())){
+            if (StrUtil.isBlank(appletLoginResp.getOpenId())) {
                 throw new BadException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
             }
             // 现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}
@@ -146,27 +146,27 @@ public class WeChatLoginService {
     }
 
     @Async
-    public void sendLeaderOnlineMsg(BUser user){
+    public void sendLeaderOnlineMsg(BUser user) {
 
         CompletableFuture.runAsync(() -> {
             String activeProfile = env.getProperty("spring.profiles.active");
-            if(activeProfile.contains("dev")){
+            if (activeProfile.contains("dev")) {
                 return;
             }
 
             List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));
             List<String> sendeeList = new ArrayList<>(Arrays.asList(sendee));
-            if(CollUtil.isEmpty(leaderPhoneList) || CollUtil.isEmpty(sendeeList)){
+            if (CollUtil.isEmpty(leaderPhoneList) || CollUtil.isEmpty(sendeeList)) {
                 return;
             }
 
-            if(CollUtil.contains(leaderPhoneList, user.getMobile())){
+            if (CollUtil.contains(leaderPhoneList, user.getMobile())) {
                 String msg = "领导名字：" + user.getRealname() + "\\n" +
                         "手机号：" + user.getMobile() + "\\n" +
                         "登录时间：" + DateUtil.now() +
                         "请重点关注！！！";
 
-                for(String sendPhone : sendeeList){
+                for (String sendPhone : sendeeList) {
                     String msgContent = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), "e能管家小程序领导登录提醒", msg, sendPhone);
                     try {
                         elinkService.pushElinkMsg(msgContent);
@@ -288,6 +288,8 @@ public class WeChatLoginService {
         }
 
         return new WxLoginUserInfoResp()
+                .setTenantId(currentUserInfo.getTenantId())
+                .setTenantName(currentUserInfo.getTenantName())
                 .setUserId(bUser.getUserId())
                 .setUserName(bUser.getName())
                 .setType(bUser.getType())

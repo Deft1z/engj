@@ -11,6 +11,7 @@ import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.LUserTokenDao;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entity.LUserToken;
+import com.kge.energy.crm.tenant.service.TenantDomainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -38,9 +39,7 @@ public class UserDomainService {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    public BUser getBUserById(int id) {
-        return bUserDao.getById(id);
-    }
+    private final TenantDomainService tenantDomainService;
 
     public UserInfoDto findUserInfoDto(String systemType, Integer userId) {
 
@@ -54,6 +53,7 @@ public class UserDomainService {
         userInfoDto.setUserName(user.getName());
         userInfoDto.setRealname(user.getRealname());
         userInfoDto.setTenantId(user.getTenantId());
+        userInfoDto.setTenantName(tenantDomainService.getTenantName(user.getTenantId()));
         userInfoDto.setSystemType(systemType);
         userInfoDto.setMobile(user.getMobile());
         userInfoDto.setWxOpenId(user.getOpenId());

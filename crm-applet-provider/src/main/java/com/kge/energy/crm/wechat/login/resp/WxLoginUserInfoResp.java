@@ -14,6 +14,16 @@ import java.util.List;
 @Accessors(chain = true)
 public class WxLoginUserInfoResp {
 
+    /**
+     * 租户ID
+     */
+    private Integer tenantId;
+
+    /**
+     * 租户名称
+     */
+    private String tenantName;
+
     private Integer userId;
 
     private String userName;

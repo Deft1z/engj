@@ -12,7 +12,7 @@ import com.kge.energy.crm.log.resp.SysOperateLogListResp;
 import com.kge.energy.crm.repository.dao.SysOperateLogDao;
 import com.kge.energy.crm.repository.entity.SysOperateLog;
 import com.kge.energy.crm.repository.entityext.param.SysOperateLogListParam;
-import com.kge.energy.crm.tenant.service.TenantService;
+import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.common.util.TraceIdUtils;
 import jakarta.annotation.Resource;
@@ -36,7 +36,7 @@ public class SysOperateLogService {
 
     @Lazy
     @Resource
-    private TenantService tenantService;
+    private TenantDomainService tenantService;
 
     public void saveLog(Integer tenantId, OperateModuleEnums operateModuleEnums, String operateBehavior) {
 

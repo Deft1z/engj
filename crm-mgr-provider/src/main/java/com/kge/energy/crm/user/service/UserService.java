@@ -29,7 +29,7 @@ import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
-import com.kge.energy.crm.tenant.service.TenantService;
+import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -76,7 +75,7 @@ public class UserService {
 
     private final SysOperateLogService sysOperateLogService;
 
-    private final TenantService tenantService;
+    private final TenantDomainService tenantDomainService;
 
     private final SysLoginLogHandleService sysLoginLogHandleService;
 
@@ -146,8 +145,8 @@ public class UserService {
 
             return CommonResponse.suc(userLoginResp);
 
-        }catch (Exception e){
-            log.error("pc login error: ",e);
+        } catch (Exception e) {
+            log.error("pc login error: ", e);
 
             //记录登录失败日志
             sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
@@ -272,7 +271,7 @@ public class UserService {
             throw new ServiceException("非法请求，不允许查看其他租户用户");
         }
 
-        String tenantName = tenantService.getTenantName(bUser.getTenantId());
+        String tenantName = tenantDomainService.getTenantName(bUser.getTenantId());
 
         BOrganization bOrganization = bOrganizationDao.getOrgByUserId(userId);
         Assert.notNull(bOrganization);
