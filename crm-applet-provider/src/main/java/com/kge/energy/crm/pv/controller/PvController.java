@@ -4,10 +4,7 @@ import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.organization.req.OrgReq;
-import com.kge.energy.crm.pv.req.PvCommentReq;
-import com.kge.energy.crm.pv.req.PvDetailReq;
-import com.kge.energy.crm.pv.req.PvInfoReq;
-import com.kge.energy.crm.pv.req.PvLikeReq;
+import com.kge.energy.crm.pv.req.*;
 import com.kge.energy.crm.pv.service.PvService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +37,12 @@ public class PvController {
     @PostMapping("/Management/Pv/commnet/add")
     public CommonResponse<Object> commentPv(@Validated @RequestBody PvCommentReq pvCommentReq){
         return CommonResponse.suc(pvService.commentPv(pvCommentReq));
+    }
+
+    @ConvertToGoFormats
+    @PostMapping("/Management/Pv/commnet/del")
+    public CommonResponse<Object> commentPvDel(@Validated @RequestBody PvCommentDelReq pvCommentDelReq){
+        return CommonResponse.suc(pvService.commentPvDel(pvCommentDelReq));
     }
 
     /**

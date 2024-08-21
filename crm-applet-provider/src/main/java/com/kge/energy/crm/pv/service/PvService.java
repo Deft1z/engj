@@ -13,11 +13,8 @@ import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsCondition;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.external.epcpv.req.EpcpvInfoReq;
 import com.kge.energy.crm.external.epcpv.service.EpcpvService;
-import com.kge.energy.crm.pv.req.PvCommentReq;
-import com.kge.energy.crm.pv.req.PvDetailReq;
-import com.kge.energy.crm.pv.req.PvInfoReq;
+import com.kge.energy.crm.pv.req.*;
 import com.kge.energy.crm.external.epcpv.property.EpcpvProperties;
-import com.kge.energy.crm.pv.req.PvLikeReq;
 import com.kge.energy.crm.pv.resp.AppletCommentResp;
 import com.kge.energy.crm.repository.dao.CmsCommentDao;
 import com.kge.energy.crm.repository.dao.RUserLikeCommentDao;
@@ -79,6 +76,10 @@ public class PvService {
         commentDao.save(cmsComment);
 
         return cmsComment.getCommentId();
+    }
+
+    public Boolean commentPvDel(PvCommentDelReq pvCommentDelReq){
+        return true;
     }
 
     public boolean likeComment(PvLikeReq pvLikeReq){

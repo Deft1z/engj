@@ -2,6 +2,7 @@ package com.kge.energy.crm.external.epcpv.service;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -15,6 +16,7 @@ import com.kge.energy.crm.external.epcpv.req.EpcpvInfoReq;
 import com.kge.energy.crm.external.epcpv.resp.*;
 import com.kge.platform.framework.web.util.RestUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +26,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EpcpvService {
@@ -41,8 +43,11 @@ public class EpcpvService {
     private final static String PVM_REGIONPROPER_KEY_SUFFIX = "pvm_regionproper";
     private final static String PVM_REGIONCAP_KEY_SUFFIX = "pvm_regioncap";
     private final static String PVM_REGIONCAPPER_KEY_SUFFIX = "pvm_regioncapper";
+    private final static String PVM_REGIONOWNCAP_KEY_SUFFIX = "pvm_regionowncap";
+    private final static String PVM_REGIONOWNCAPPER_KEY_SUFFIX = "pvm_regionowncapper";
     private final static String PVM_INSTCAP_KEY_SUFFIX = "pvm_instcap";
     private final static String PVM_STAGE_KEY_SUFFIX = "pvm_stage";
+    private final static String PVM_ALLCAP_KEY_SUFFIX = "pvm_allcap";
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
@@ -53,10 +58,13 @@ public class EpcpvService {
 
         Integer proNum = 0;
 
+        //capacitoverall
+        getCapacityTotal(pvInfoReq, resultMap);
+
         //region
         Map<String, Integer> zoneMap = new HashMap<>();
         for(int k = 0; k< zones.size(); k++){
-            regions.add(new PvRegionResp(zones.get(k), "0", "0", "0", "0"));
+            regions.add(new PvRegionResp(zones.get(k), "0", "0", "0", "0", "0", "0"));
             zoneMap.put(zones.get(k), regions.size() - 1);
         }
 
@@ -71,20 +79,21 @@ public class EpcpvService {
 
             String resultStr = RestUtils.getForString(url, headers, null);
             JSONObject jsonObject = new JSONObject(resultStr, false, false);
-            JSONArray regionStatItems = jsonObject.getJSONObject("data").getJSONArray("regionStatItems");
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray regionStatItems = data.getJSONArray("regionStatItems");
             for(int k = 0; k < regionStatItems.size(); k++){
                 JSONObject item = regionStatItems.getJSONObject(k);
-                regions.get(zoneMap.get(item.getStr("regionName"))).setProNum(String.valueOf(item.getInt("statVal")));
+                regions.get(zoneMap.get(item.getStr("regionName"))).setProjectnum(String.valueOf(item.getInt("statVal")));
                 proNum += item.getInt("statVal");
             }
 
             for(int k = 0; k < regions.size(); k++){
                 PvRegionResp pvRegionResp = regions.get(k);
-                stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getProNum());
-                Integer per = Integer.valueOf(pvRegionResp.getProNum());
+                stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getProjectnum());
+                Integer per = Integer.valueOf(pvRegionResp.getProjectnum());
                 if(per != 0){
-                    pvRegionResp.setProjectPer(String.format("%.2f", 100.0 * per/proNum));
-                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getProjectPer());
+                    pvRegionResp.setProjectper(String.format("%.2f", 100.0 * per/proNum));
+                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getProjectper());
                 } else {
                     stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), "0");
                 }
@@ -96,9 +105,9 @@ public class EpcpvService {
         } else {
             for(int k = 0; k < regions.size(); k++){
                 PvRegionResp pvRegionResp = regions.get(k);
-                pvRegionResp.setProNum(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
-                pvRegionResp.setProjectPer(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
-                proNum += Integer.parseInt(Opt.ofBlankAble(pvRegionResp.getProNum()).orElse("0"));
+                pvRegionResp.setProjectnum(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPRO_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                pvRegionResp.setProjectper(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONPROPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                proNum += Integer.parseInt(Opt.ofBlankAble(pvRegionResp.getProjectnum()).orElse("0"));
             }
         }
 
@@ -111,13 +120,15 @@ public class EpcpvService {
         Float capacity = 0.0f;
         if(regionCap == 0) {
 
-            String url = epcpvProperties.getUrl() + epcpvProperties.getCapacitystat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
+            //0 在建容量 - 预估容量
+            String url = epcpvProperties.getUrl() + epcpvProperties.getCapacitystat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + "&queryType=0";
             HttpHeaders headers = RestUtils.defaultJsonHeaders();
             headers.add("Authorization", genAccessToken());
 
             String resultStr = RestUtils.getForString(url, headers, null);
             JSONObject jsonObject = new JSONObject(resultStr, false, false);
-            JSONArray regionStatItems = jsonObject.getJSONObject("data").getJSONArray("regionStatItems");
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray regionStatItems = data.getJSONArray("regionStatItems");
             for(int k = 0; k < regionStatItems.size(); k++){
                 JSONObject item = regionStatItems.getJSONObject(k);
                 regions.get(zoneMap.get(item.getStr("regionName"))).setCapacity(String.valueOf(item.getInt("statVal")));
@@ -136,28 +147,52 @@ public class EpcpvService {
                 }
             }
 
+            //1-并网容量
+            capacity = 0.0f;
+            String url1 = epcpvProperties.getUrl() + epcpvProperties.getCapacitystat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + "&queryType=1";
+            HttpHeaders headers1 = RestUtils.defaultJsonHeaders();
+            headers1.add("Authorization", genAccessToken());
+
+            String resultStr1 = RestUtils.getForString(url1, headers1, null);
+            JSONObject jsonObject1 = new JSONObject(resultStr1, false, false);
+            JSONObject data1 = jsonObject1.getJSONObject("data");
+            JSONArray regionStatItems1 = data1.getJSONArray("regionStatItems");
+            for(int k = 0; k < regionStatItems1.size(); k++){
+                JSONObject item = regionStatItems1.getJSONObject(k);
+                regions.get(zoneMap.get(item.getStr("regionName"))).setOwncapacity(String.valueOf(item.getInt("statVal")));
+                capacity += item.getFloat("statVal");
+            }
+
+            for(int k = 0; k < regions.size(); k++){
+                PvRegionResp pvRegionResp = regions.get(k);
+                stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONOWNCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getOwncapacity());
+                Float per = Float.valueOf(pvRegionResp.getOwncapacity());
+                if(per != 0){
+                    pvRegionResp.setOwncapacityper(String.format("%.2f", 100.0 * per/capacity));
+                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONOWNCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), pvRegionResp.getOwncapacityper());
+                } else {
+                    stringRedisTemplate.opsForHash().put(redisFront + PVM_REGIONOWNCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName(), "0");
+                }
+            }
+
             stringRedisTemplate.expire(redisFront + PVM_REGIONCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
             stringRedisTemplate.expire(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+            stringRedisTemplate.expire(redisFront + PVM_REGIONOWNCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+            stringRedisTemplate.expire(redisFront + PVM_REGIONOWNCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), Duration.ofMillis(PVM_KEY_EXPIRES_IN));
 
         } else {
             for(int k = 0; k < regions.size(); k++){
                 PvRegionResp pvRegionResp = regions.get(k);
-                pvRegionResp.setProNum(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
-                pvRegionResp.setProjectPer(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
-                capacity += Float.parseFloat(Opt.ofBlankAble(pvRegionResp.getProNum()).orElse("0"));
+                pvRegionResp.setCapacity(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                pvRegionResp.setCapacityPer(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                pvRegionResp.setOwncapacity(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONOWNCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                pvRegionResp.setOwncapacityper(String.valueOf(stringRedisTemplate.opsForHash().get(redisFront + PVM_REGIONOWNCAPPER_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), pvRegionResp.getName())));
+                capacity += Float.parseFloat(Opt.ofBlankAble(pvRegionResp.getProjectnum()).orElse("0"));
             }
         }
 
         //trans
-        String stageRatio = stringRedisTemplate.opsForValue().get(redisFront + PVM_STAGE_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""));
-        if(StrUtil.isBlank(stageRatio)){
-            String url = epcpvProperties.getUrl() + epcpvProperties.getStagestat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
-            HttpHeaders headers = RestUtils.defaultJsonHeaders();
-            headers.add("Authorization", genAccessToken());
-            String resultStr = RestUtils.getForString(url, headers, null);
-            stringRedisTemplate.opsForValue().set(redisFront + PVM_STAGE_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), resultStr, Duration.ofMillis(PVM_KEY_EXPIRES_IN*2));
-        }
-        getStage(stageRatio, resultMap);
+        getStage(pvInfoReq, resultMap);
 
         //capacity
         Long caps = stringRedisTemplate.opsForHash().size(redisFront + PVM_INSTCAP_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""));
@@ -183,7 +218,8 @@ public class EpcpvService {
                 pvCapacityResp.setOtherper(String.format("%.2f", 100 * other / total));
             }
 
-            JSONArray otherItems = jsonObject.getJSONObject("data").getJSONArray("otherItems");
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray otherItems = data.getJSONArray("otherItems");
             for(int k = 0; k < otherItems.size(); k++){
                 JSONObject item = otherItems.getJSONObject(k);
                 PvCapacityItemResp pvCapacityItemResp = new PvCapacityItemResp(
@@ -212,9 +248,9 @@ public class EpcpvService {
         }
 
         List<PvRegionResp> newregions = regions.stream()
-                .sorted(Comparator.comparing((PvRegionResp p) -> Integer.parseInt(p.getProNum())).reversed())
+                .sorted(Comparator.comparing((PvRegionResp p) -> Integer.parseInt(p.getProjectnum())).reversed())
                 .collect(Collectors.toList());
-        resultMap.put("regions", newregions);
+        resultMap.put("region", newregions);
         resultMap.put("projectnum", String.valueOf(proNum));
 
         return resultMap;
@@ -273,7 +309,17 @@ public class EpcpvService {
         return tokenString;
     }
 
-    private void getStage(String stageRatio, Map<String, Object> resultMap){
+    private void getStage(EpcpvInfoReq pvInfoReq, Map<String, Object> resultMap){
+        String stageRatio = stringRedisTemplate.opsForValue().get(redisFront + PVM_STAGE_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""));
+        if(StrUtil.isBlank(stageRatio)){
+            String url = epcpvProperties.getUrl() + epcpvProperties.getStagestat() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
+            HttpHeaders headers = RestUtils.defaultJsonHeaders();
+            headers.add("Authorization", genAccessToken());
+            String transResultStr = RestUtils.getForString(url, headers, null);
+            stringRedisTemplate.opsForValue().set(redisFront + PVM_STAGE_KEY_SUFFIX + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("") + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse(""), transResultStr, Duration.ofMillis(PVM_KEY_EXPIRES_IN*2));
+            stageRatio = transResultStr;
+        }
+
         List<PvTranResp> trans = new ArrayList<>();
         JSONObject data = JSONUtil.parseObj(stageRatio).getJSONObject("data");
         JSONArray stageStatItems = data.getJSONArray("stageStatItems");
@@ -337,6 +383,41 @@ public class EpcpvService {
         }
 
         resultMap.put("projectstat", pvProjectStatResp);
+
+    }
+
+    private void getCapacityTotal(EpcpvInfoReq pvInfoReq, Map<String, Object> resultMap){
+        PvRecentCapacity pvRecentCapacity = new PvRecentCapacity().setWeek("0").setMonth("0").setYear("0");
+        try{
+            String pvRecentCapacityStr = stringRedisTemplate.opsForValue().get(redisFront + PVM_ALLCAP_KEY_SUFFIX);
+            if(StrUtil.isBlank(pvRecentCapacityStr)){
+                String url = epcpvProperties.getUrl() + epcpvProperties.getCapacitytotal() + "?queryDateEnd=" + Opt.ofBlankAble(pvInfoReq.getQueryDateEnd()).orElse("") + "&queryDateStart=" + Opt.ofBlankAble(pvInfoReq.getQueryDateStart()).orElse("");
+                HttpHeaders headers = RestUtils.defaultJsonHeaders();
+                headers.add("Authorization", genAccessToken());
+                String resultStr = RestUtils.getForString(url, headers, null);
+                JSONObject result = JSONUtil.parseObj(resultStr);
+                if(NumberUtil.equals(result.getInt("code"), Integer.valueOf(1))){
+                    JSONObject data = result.getJSONObject("data");
+                    JSONArray extendStatItems = data.getJSONArray("extendStatItems");
+                    if(CollUtil.size(extendStatItems) == 3){
+                        pvRecentCapacity.setWeek(String.format("%.2f", JSONUtil.parseObj(extendStatItems.get(0)).getFloat("itemVal")));
+                        pvRecentCapacity.setMonth(String.format("%.2f", JSONUtil.parseObj(extendStatItems.get(1)).getFloat("itemVal")));
+                        pvRecentCapacity.setYear(String.format("%.2f", JSONUtil.parseObj(extendStatItems.get(2)).getFloat("itemVal")));
+                        pvRecentCapacityStr = JSONUtil.toJsonStr(pvRecentCapacity);
+                        stringRedisTemplate.opsForValue().set(redisFront + PVM_ALLCAP_KEY_SUFFIX, pvRecentCapacityStr, Duration.ofMillis(PVM_KEY_EXPIRES_IN));
+                    }
+                }
+
+            }
+            pvRecentCapacity = JSONUtil.toBean(pvRecentCapacityStr, PvRecentCapacity.class, false);
+        } catch (Exception e) {
+            log.error("getCapacityTotal error: ",e);
+        }
+
+        resultMap.put("capacitoverall", pvRecentCapacity);
+    }
+
+    private void getRegion(List<PvRegionResp> regions, Map<String, Integer> zoneMap){
 
     }
 }
