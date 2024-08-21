@@ -35,7 +35,6 @@ public class OrgController {
     /**
      * 获取每个公司的组织机构Id和服务类型
      */
-    @ConvertToGoFormats
     @PostMapping("/baseData/organizationMrg/orgDictList/load")
     public CommonResponse<List<OrgDictResp>> orgDictList() {
         return CommonResponse.suc(orgService.orgDictList());

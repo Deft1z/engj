@@ -182,3 +182,8 @@ knife4j:
 
 framework:
   global-exception-handler: false
+
+file:
+  upload:
+    allow-types: jpg,jpeg,png,pdf
+    upload-url: http://172.18.26.112:80/fileservice/resourceManage/file/manage/upload

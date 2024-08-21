@@ -16,15 +16,17 @@
     <select id="list" resultMap="SysOperateLogMap">
         select *
         from sys_operate_log
-        <if test="param.tenantId != null">
-            and tenant_id = #{param.tenantId}
-        </if>
-        <if test="param.operateModule != null">
-            and operate_module = #{param.operateModule}
-        </if>
-        <if test="param.operatorName != null and param.operatorName != ''">
-            and operator_name like CONCAT('%',#{param.operatorName},'%')
-        </if>
+        <where>
+            <if test="param.tenantId != null">
+                and tenant_id = #{param.tenantId}
+            </if>
+            <if test="param.operateModule != null">
+                and operate_module = #{param.operateModule}
+            </if>
+            <if test="param.operatorName != null and param.operatorName != ''">
+                and operator_name like CONCAT('%',#{param.operatorName},'%')
+            </if>
+        </where>
         order by id desc
     </select>
 </mapper>
