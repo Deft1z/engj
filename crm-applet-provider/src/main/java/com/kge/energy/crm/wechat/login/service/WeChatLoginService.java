@@ -292,7 +292,6 @@ public class WeChatLoginService {
                 .setTenantName(currentUserInfo.getTenantName())
                 .setUserId(bUser.getUserId())
                 .setUserName(bUser.getName())
-                .setType(bUser.getType())
                 .setMobile(bUser.getMobile())
                 .setRealname(bUser.getRealname())
                 .setCompany(bUser.getCompany())

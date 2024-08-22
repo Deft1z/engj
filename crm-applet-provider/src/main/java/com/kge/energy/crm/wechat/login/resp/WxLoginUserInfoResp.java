@@ -28,8 +28,6 @@ public class WxLoginUserInfoResp {
 
     private String userName;
 
-    private String type;
-
     private String mobile;
 
     private String realname;
