@@ -37,6 +37,10 @@ public class UserInfoContextUtils {
         return getCurrentUserInfo().getTenantId();
     }
 
+    public static String getCurrentTenantName() {
+        return getCurrentUserInfo().getTenantName();
+    }
+
     public static String getCurrentSystemType() {
         return getCurrentUserInfo().getSystemType();
     }

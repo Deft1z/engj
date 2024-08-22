@@ -111,9 +111,9 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.findNewUserCount(startTime, endTime);
     }
 
-    public IPage<BUser> list(UserListParam req) {
-        Page<BUser> page = new Page<>(req.getCurrentPage(), req.getPageSize());
-        return mapper.list(page, req);
+    public IPage<BUser> list(UserListParam param) {
+        Page<BUser> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+        return mapper.list(page, param);
     }
 
     public List<String> findJtCustomerPhones() {

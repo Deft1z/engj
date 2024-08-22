@@ -22,7 +22,7 @@ public class BTenantDao extends ServiceImpl<BTenantMapper, BTenant> {
 
     private final BTenantMapper mapper;
 
-    public IPage<TenantListResult> selectTenantPage(TenantQueryParam param){
+    public IPage<TenantListResult> selectTenantPage(TenantQueryParam param) {
         Page<TenantListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
         return mapper.selectTenantPage(page, param);
     }
@@ -31,5 +31,8 @@ public class BTenantDao extends ServiceImpl<BTenantMapper, BTenant> {
         return mapper.getTenantDictList(tenantId);
     }
 
+    public BTenant getByIdWithDeleted(Integer tenantId) {
+        return mapper.getByIdWithDeleted(tenantId);
+    }
 }
 

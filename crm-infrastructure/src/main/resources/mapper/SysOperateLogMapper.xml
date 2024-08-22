@@ -6,11 +6,28 @@
         <result property="traceId" column="trace_id" jdbcType="VARCHAR"/>
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
         <result property="tenantName" column="tenant_name" jdbcType="VARCHAR"/>
-        <result property="operateId" column="operate_id" jdbcType="INTEGER"/>
-        <result property="operateName" column="operate_name" jdbcType="VARCHAR"/>
+        <result property="operatorId" column="operator_id" jdbcType="INTEGER"/>
+        <result property="operatorName" column="operator_name" jdbcType="VARCHAR"/>
         <result property="operateTime" column="operate_time" jdbcType="TIMESTAMP"/>
         <result property="operateModule" column="operate_module" jdbcType="INTEGER"/>
         <result property="operateBehavior" column="operate_behavior" jdbcType="VARCHAR"/>
     </resultMap>
+
+    <select id="list" resultMap="SysOperateLogMap">
+        select *
+        from sys_operate_log
+        <where>
+            <if test="param.tenantId != null">
+                and tenant_id = #{param.tenantId}
+            </if>
+            <if test="param.operateModule != null">
+                and operate_module = #{param.operateModule}
+            </if>
+            <if test="param.operatorName != null and param.operatorName != ''">
+                and operator_name like CONCAT('%',#{param.operatorName},'%')
+            </if>
+        </where>
+        order by id desc
+    </select>
 </mapper>
 

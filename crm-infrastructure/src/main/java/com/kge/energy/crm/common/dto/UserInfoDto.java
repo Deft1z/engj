@@ -25,6 +25,11 @@ public class UserInfoDto extends CommonUserInfoDto {
     private Integer tenantId;
 
     /**
+     * 租户名称
+     */
+    private String tenantName;
+
+    /**
      * 系统类型：applet、mgr
      */
     private String systemType;

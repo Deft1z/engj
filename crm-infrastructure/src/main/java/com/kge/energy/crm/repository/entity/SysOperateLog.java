@@ -41,12 +41,12 @@ public class SysOperateLog {
     /**
      * 操作人ID
      */
-    private Integer operateId;
+    private Integer operatorId;
 
     /**
      * 操作人名称
      */
-    private String operateName;
+    private String operatorName;
 
     /**
      * 操作时间

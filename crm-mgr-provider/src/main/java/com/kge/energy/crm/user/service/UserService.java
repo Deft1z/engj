@@ -13,18 +13,20 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
+import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.OperateModuleEnums;
-import com.kge.energy.crm.enums.RoleIdEnums;
+import com.kge.energy.crm.enums.*;
 import com.kge.energy.crm.log.service.SysOperateLogService;
+import com.kge.energy.crm.login.SysLoginLogHandleService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -70,6 +72,10 @@ public class UserService {
 
     private final SysOperateLogService sysOperateLogService;
 
+    private final TenantDomainService tenantDomainService;
+
+    private final SysLoginLogHandleService sysLoginLogHandleService;
+
     @Value("${spring.profiles.active}")
     private String env;
 
@@ -108,24 +114,43 @@ public class UserService {
         return MD5.create().digestHex(req.getName() + sSystemConfig.getConfig());
     }
 
-    public UserLoginResp userLogin(UserLoginReq req) {
+    public CommonResponse<UserLoginResp> userLogin(UserLoginReq req) {
+        UserLoginResp userLoginResp = null;
+        BUser bUser = null;
 
-        BUser bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
+        try {
 
-        if (ObjUtil.isNull(bUser)) {
-            throw new BadException(ResponseCode.SHOULD_LOGIN);
+            bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
+
+            if (ObjUtil.isNull(bUser)) {
+                throw new BadException(ResponseCode.SHOULD_LOGIN);
+            }
+
+            // 获取uid关联的租户
+            RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
+
+            String authToken = genToken(bUser);
+
+            userLoginResp = new UserLoginResp()
+                    .setUserId(bUser.getUserId())
+                    .setTenantId(rUserTenant.getOrganizationId())
+                    .setAuthToken(authToken)
+                    .setMsg("login success");
+
+            //记录登录成功日志
+            sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.SUCCESS, null);
+
+            return CommonResponse.suc(userLoginResp);
+
+        } catch (Exception e) {
+            log.error("pc login error: ", e);
+
+            //记录登录失败日志
+            sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
+
+            return CommonResponse.bad(ResponseCode.SHOULD_LOGIN, userLoginResp);
         }
 
-        // 获取uid关联的租户
-        RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
-
-        String authToken = genToken(bUser);
-
-        return new UserLoginResp()
-                .setUserId(bUser.getUserId())
-                .setTenantId(rUserTenant.getOrganizationId())
-                .setAuthToken(authToken)
-                .setMsg("login success");
     }
 
     public CurrentUserInfoResp currentUserInfo() {
@@ -226,6 +251,39 @@ public class UserService {
                 .setTotal(usersPage.getTotal())
                 .setPageSize(usersPage.getSize())
                 .setList(resps);
+    }
+
+
+    /**
+     * 用户详情
+     */
+    public UserDetailResp detail(Integer userId) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        BUser bUser = bUserDao.getById(userId);
+        Assert.notNull(bUser, "用户不存在");
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户用户");
+        }
+
+        String tenantName = tenantDomainService.getTenantName(bUser.getTenantId());
+
+        BOrganization bOrganization = bOrganizationDao.getOrgByUserId(userId);
+        Assert.notNull(bOrganization);
+
+        return new UserDetailResp()
+                .setTenantId(bUser.getTenantId())
+                .setTenantName(tenantName)
+                .setOrganizationId(bOrganization.getOrganizationId())
+                .setOrganizationName(bOrganization.getName())
+                .setUserId(bUser.getUserId())
+                .setName(bUser.getName())
+                .setRealname(bUser.getRealname())
+                .setMobile(bUser.getMobile())
+                .setStatus(bUser.getStatus())
+                .setRemark(bUser.getRemark());
     }
 
     @Transactional
@@ -352,18 +410,25 @@ public class UserService {
 
         List<BRole> bRoles = bRoleDao.listByIds(req.getRoleIds());
         boolean isCurrentTenantRole = bRoles.stream()
-                .allMatch(brole -> ObjUtil.equals(UserInfoContextUtils.getCurrentTenantId(), brole.getTenantId()));
+                .allMatch(brole -> ObjUtil.equals(bUser.getTenantId(), brole.getTenantId()));
         if (AuthVerifyUtils.notSuperAdmin() && !isCurrentTenantRole) {
             throw new ServiceException("非法请求，不允分配其他租户用户角色");
         }
 
         rUserRoleDao.removeByUserId(bUser.getUserId());
 
-        Set<RUserRole> rUserRoles = req.getRoleIds()
-                .stream()
-                .map(roleId -> new RUserRole()
+        // 限定不能同时拥有2种业务角色，后续有需要可考虑是否通过角色类型判断，目前先通过角色编码判断
+        List<String> businessCodes = List.of(RoleEnums.APPLET_USER.getCode(), RoleEnums.JT_CUSTOMER.getCode(), RoleEnums.SUB_COMPANY_CUSTOMER.getCode());
+        List<String> roleCodes = bRoles.stream().map(BRole::getCode).toList();
+        boolean containsAtLesatTwo = roleCodes.size() >= 2 && businessCodes.stream().filter(roleCodes::contains).count() >= 2;
+        if (containsAtLesatTwo) {
+            throw new ServiceException("不能同时分配2种业务角色");
+        }
+
+        Set<RUserRole> rUserRoles = bRoles.stream()
+                .map(role -> new RUserRole()
                         .setUserId(bUser.getUserId())
-                        .setRoleId(roleId)
+                        .setRoleId(role.getRoleId())
                         .setTenantId(bUser.getTenantId())
                 ).collect(Collectors.toSet());
         rUserRoleDao.saveBatch(rUserRoles);

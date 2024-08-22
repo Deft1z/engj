@@ -12,7 +12,6 @@ import lombok.experimental.Accessors;
 @Schema(name = "角色列表响应参数", description = "角色列表响应参数")
 public class RoleListResp {
 
-
     @Schema(description = "角色ID")
     private Integer roleId;
 

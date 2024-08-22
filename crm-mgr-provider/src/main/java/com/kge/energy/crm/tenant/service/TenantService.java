@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.RedisUtils;
@@ -36,7 +35,7 @@ public class TenantService {
 
     private final BTenantDao bTenantDao;
 
-    private final String TENANT_NAME_CACHE_KEY = "tenant:name";
+    private final String TENANT_NAME_CACHE_KEY = "tenant:name:";
 
     private final RedisUtils redisUtils;
 
@@ -112,11 +111,7 @@ public class TenantService {
         String tenantName = redisUtils.get(TENANT_NAME_CACHE_KEY + tenantId);
 
         if (StrUtil.isBlank(tenantName)) {
-            BTenant tenant = new LambdaQueryChainWrapper<>(BTenant.class)
-                    .eq(BTenant::getId, tenantId)
-                    .in(BTenant::getFlag, List.of(1, -1))
-                    .one();
-            bTenantDao.getById(tenantId);
+            BTenant tenant = bTenantDao.getByIdWithDeleted(tenantId);
             Assert.notNull(tenant);
 
             redisUtils.setEx(TENANT_NAME_CACHE_KEY + tenantId, tenant.getName(), 24, TimeUnit.HOURS);
