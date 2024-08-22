@@ -22,4 +22,11 @@ public class ConstParam {
     public static String Processing = "处理中";
     public static String SendBack = "已撤回";
 
+    /* 服务合同状态 */
+    public static String Ready = "未开始";
+    public static String ContractUnderWay = "进行中";
+    public static String ContractDiscontinued = "已终止";
+    public static String RemainToBeEvaluated = "待评价";
+    public static String HasEvaluated = "已评价";
+
 }

@@ -120,5 +120,9 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.findJtCustomerPhones();
     }
 
+    public List<String> findSubCustomerPhones(Integer orgId) {
+        return mapper.findSubCustomerPhones(orgId);
+    }
+
 }
 

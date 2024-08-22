@@ -249,6 +249,23 @@ public class RedisUtils {
     }
 
     /**
+     * 设置ASCII码, 字符串'a'的ASCII码是97, 转为二进制是'01100001', 此方法是将二进制第offset位值变为value
+     *
+     * @param key
+     * @param offset 位置
+     * @param value  值,true为1, false为0
+     * @return
+     */
+    public boolean setBit(String key, long offset, boolean value) {
+        Boolean result = redisTemplate.opsForValue().setBit(key, offset, value);
+        if (result != null) {
+            return result;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * 将值 value 关联到 key ，并将 key 的过期时间设为 timeout
      *
      * @param key
@@ -259,6 +276,22 @@ public class RedisUtils {
      */
     public void setEx(String key, String value, long timeout, TimeUnit unit) {
         redisTemplate.opsForValue().set(key, value, timeout, unit);
+    }
+
+    /**
+     * 只有在 key 不存在时设置 key 的值
+     *
+     * @param key
+     * @param value
+     * @return 之前已经存在返回false, 不存在返回true
+     */
+    public boolean setIfAbsent(String key, String value) {
+        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, value);
+        if (result != null) {
+            return result;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -289,6 +322,21 @@ public class RedisUtils {
      */
     public void multiSet(Map<String, String> maps) {
         redisTemplate.opsForValue().multiSet(maps);
+    }
+
+    /**
+     * 同时设置一个或多个 key-value 对，当且仅当所有给定 key 都不存在
+     *
+     * @param maps
+     * @return 之前已经存在返回false, 不存在返回true
+     */
+    public boolean multiSetIfAbsent(Map<String, String> maps) {
+        Boolean result = redisTemplate.opsForValue().multiSetIfAbsent(maps);
+        if (result != null) {
+            return result;
+        } else {
+            return false;
+        }
     }
 
     /**

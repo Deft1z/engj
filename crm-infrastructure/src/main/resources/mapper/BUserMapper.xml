@@ -38,10 +38,10 @@
     </select>
 
     <select id="getUserByRoleAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
-        select b.`name` AS username, b.realname, b.open_id, a.user_id
+        select b.`name` AS username, b.realname, b.open_id, a.user_id, b.mobile
         from r_user_role a
-                 LEFT JOIN b_user b ON b.user_id = a.user_id
-                 LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
+        LEFT JOIN b_user b ON b.user_id = a.user_id
+        LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
         where b.flag = 1
           and a.role_id = #{roleId}
           AND c.organization_id = #{organizationId}
@@ -68,7 +68,7 @@
         from b_user a
                  LEFT JOIN r_user_tenant b ON b.user_id = a.user_id
         where a.flag != -1
-          AND b.organization_id = #{orgId}s
+          AND b.organization_id = #{orgId}
     </select>
 
     <select id="findUserBindByUid" resultType="com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult">
@@ -153,6 +153,19 @@
           and b.organization_id = 1
           /*集团客服*/
           and c.role_id = 2
+    </select>
+
+    <!--查询二级的客服人员手机号-->
+    <select id="findSubCustomerPhones" resultType="string">
+        select a.mobile
+        from b_user a
+        join r_user_tenant b on b.user_id = a.user_id
+        join r_user_role c on c.user_id = a.user_id
+        where a.flag = 1 and b.flag = 1 and c.flag = 1
+            /*二级公司*/
+          and b.organization_id = #{orgId}
+            /*二级公司客服*/
+          and c.role_id = 3
     </select>
 
 </mapper>

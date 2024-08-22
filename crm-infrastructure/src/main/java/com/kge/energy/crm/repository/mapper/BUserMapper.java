@@ -36,5 +36,7 @@ public interface BUserMapper extends BaseMapper<BUser> {
     IPage<BUser> list(Page<BUser> page, @Param("param") UserListParam param);
 
     List<String> findJtCustomerPhones();
+
+    List<String> findSubCustomerPhones(@Param("orgId") Integer orgId);
 }
 

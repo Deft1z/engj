@@ -4,6 +4,7 @@ import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.workflow.req.ConsultingAddReq;
+import com.kge.energy.crm.workflow.req.ConsultingUpdateReq;
 import com.kge.energy.crm.workflow.req.WfFormFlowReq;
 import com.kge.energy.crm.workflow.req.WfFormReq;
 import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
@@ -47,6 +48,13 @@ public class ConsultingController {
     @ConvertToGoFormats
     public CommonResponse<List<WfFormFlowResp>> getFlowByFormId(@RequestBody WfFormFlowReq req){
         return CommonResponse.suc(consultingService.getFlowByFormId(req));
+    }
+
+    @Operation(summary = "工单操作")
+    @PostMapping(value = "/opt/update")
+    @ConvertToGoFormats
+    public CommonResponse<Boolean> update(@RequestBody @Valid ConsultingUpdateReq req){
+        return CommonResponse.suc(consultingService.update(req));
     }
 
 }
