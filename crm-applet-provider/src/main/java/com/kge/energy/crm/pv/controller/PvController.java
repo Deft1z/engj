@@ -39,6 +39,11 @@ public class PvController {
         return CommonResponse.suc(pvService.commentPv(pvCommentReq));
     }
 
+    /**
+     * @description 小程序端我的 - 光伏项目删除评论接口
+     * @author tangchenghui
+     * @date 2024/8/22 10:40
+     */
     @ConvertToGoFormats
     @PostMapping("/Management/Pv/commnet/del")
     public CommonResponse<Object> commentPvDel(@Validated @RequestBody PvCommentDelReq pvCommentDelReq){

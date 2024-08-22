@@ -23,6 +23,7 @@ import com.kge.energy.crm.repository.entity.RUserLikeComment;
 import com.kge.energy.crm.repository.entityext.result.AppletCommentResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,8 +79,19 @@ public class PvService {
         return cmsComment.getCommentId();
     }
 
+    @Transactional
     public Boolean commentPvDel(PvCommentDelReq pvCommentDelReq){
-        return true;
+        Integer userId = UserInfoContextUtils.getCurrentUserId();
+        CmsComment cmsComment = commentDao.getOne(Wrappers.lambdaQuery(new CmsComment().setCommentId(pvCommentDelReq.getId()).setUserId(userId)));
+        if(ObjectUtil.isNull(cmsComment)){
+            throw new BadException("评论不存在");
+        }
+
+        Boolean lResult = userLikeCommentDao.removeById(new RUserLikeComment().setCommentId(pvCommentDelReq.getId()));
+
+        Boolean cResult = commentDao.removeById(pvCommentDelReq.getId());
+
+        return lResult && cResult;
     }
 
     public boolean likeComment(PvLikeReq pvLikeReq){

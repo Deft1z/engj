@@ -45,6 +45,11 @@ public class CmsComment {
      * 创建时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime createTime; 
+    private LocalDateTime createTime;
+
+    /**
+     * 数据状态：-1-删除，1-正常
+     */
+    private Integer flag;
 }
 

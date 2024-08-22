@@ -1,5 +1,6 @@
 package com.kge.energy.crm.pv.req;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -7,6 +8,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class PvCommentDelReq {
 
+    @NotNull
     private Integer id;
 
 }
