@@ -19,10 +19,7 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.LoginPlatformEnums;
-import com.kge.energy.crm.enums.LoginResultEnums;
-import com.kge.energy.crm.enums.OperateModuleEnums;
-import com.kge.energy.crm.enums.RoleIdEnums;
+import com.kge.energy.crm.enums.*;
 import com.kge.energy.crm.log.service.SysOperateLogService;
 import com.kge.energy.crm.login.SysLoginLogHandleService;
 import com.kge.energy.crm.repository.dao.*;
@@ -413,18 +410,25 @@ public class UserService {
 
         List<BRole> bRoles = bRoleDao.listByIds(req.getRoleIds());
         boolean isCurrentTenantRole = bRoles.stream()
-                .allMatch(brole -> ObjUtil.equals(UserInfoContextUtils.getCurrentTenantId(), brole.getTenantId()));
+                .allMatch(brole -> ObjUtil.equals(bUser.getTenantId(), brole.getTenantId()));
         if (AuthVerifyUtils.notSuperAdmin() && !isCurrentTenantRole) {
             throw new ServiceException("非法请求，不允分配其他租户用户角色");
         }
 
         rUserRoleDao.removeByUserId(bUser.getUserId());
 
-        Set<RUserRole> rUserRoles = req.getRoleIds()
-                .stream()
-                .map(roleId -> new RUserRole()
+        // 限定不能同时拥有2种业务角色，后续有需要可考虑是否通过角色类型判断，目前先通过角色编码判断
+        List<String> businessCodes = List.of(RoleEnums.APPLET_USER.getCode(), RoleEnums.JT_CUSTOMER.getCode(), RoleEnums.SUB_COMPANY_CUSTOMER.getCode());
+        List<String> roleCodes = bRoles.stream().map(BRole::getCode).toList();
+        boolean containsAtLesatTwo = roleCodes.size() >= 2 && businessCodes.stream().filter(roleCodes::contains).count() >= 2;
+        if (containsAtLesatTwo) {
+            throw new ServiceException("不能同时分配2种业务角色");
+        }
+
+        Set<RUserRole> rUserRoles = bRoles.stream()
+                .map(role -> new RUserRole()
                         .setUserId(bUser.getUserId())
-                        .setRoleId(roleId)
+                        .setRoleId(role.getRoleId())
                         .setTenantId(bUser.getTenantId())
                 ).collect(Collectors.toSet());
         rUserRoleDao.saveBatch(rUserRoles);
