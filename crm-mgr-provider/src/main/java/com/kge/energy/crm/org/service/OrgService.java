@@ -47,7 +47,7 @@ public class OrgService {
 
     public List<OrgDictResp> getOrgDictList() {
 
-        List<OrgDictResult> orgDictResults = bOrganizationDao.getOrgDictList();
+        List<OrgDictResult> orgDictResults = bOrganizationDao.getOrgDictList(UserInfoContextUtils.getCurrentTenantId());
 
         return BeanUtil.copyToList(orgDictResults, OrgDictResp.class);
     }

@@ -2,9 +2,7 @@ package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BOrganization;
@@ -41,12 +39,12 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.getOrgByUserId(userId);
     }
 
-    public List<OrgDictResult> getOrgDictList() {
-        return mapper.getOrgDictList();
+    public List<OrgDictResult> getOrgDictList(Integer tenantId) {
+        return mapper.getOrgDictList(tenantId);
     }
 
-    public List<OrgResult> getCompanyList() {
-        return mapper.getCompanyList();
+    public List<OrgResult> getCompanyList(Integer tenantId) {
+        return mapper.getCompanyList(tenantId);
     }
 
     public List<OrgListResult> getOrgList(OrgQueryParam param) {

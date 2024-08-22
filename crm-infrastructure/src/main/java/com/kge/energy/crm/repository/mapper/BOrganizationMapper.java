@@ -1,8 +1,6 @@
 package com.kge.energy.crm.repository.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.param.OrgQueryParam;
@@ -22,9 +20,9 @@ public interface BOrganizationMapper extends BaseMapper<BOrganization> {
 
     BOrganization getOrgByUserId(Integer userId);
 
-    List<OrgDictResult> getOrgDictList();
+    List<OrgDictResult> getOrgDictList(@Param("tenantId") Integer tenantId);
 
-    List<OrgResult> getCompanyList();
+    List<OrgResult> getCompanyList(@Param("tenantId") Integer tenantId);
 
     List<OrgListResult> getOrgList(@Param("param") OrgQueryParam param);
 

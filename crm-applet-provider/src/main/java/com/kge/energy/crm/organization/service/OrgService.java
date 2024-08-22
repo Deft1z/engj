@@ -2,6 +2,7 @@ package com.kge.energy.crm.organization.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Opt;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.organization.req.OrgReq;
 import com.kge.energy.crm.organization.resp.OrgDictResp;
 import com.kge.energy.crm.organization.resp.OrgResp;
@@ -39,7 +40,7 @@ public class OrgService {
         list.add(new OrgResp(5, "物业运营", list5));
         list.add(new OrgResp(2, "城建服务", list2));
 
-        List<OrgResult> orgResultList = organizationDao.getCompanyList();
+        List<OrgResult> orgResultList = organizationDao.getCompanyList(UserInfoContextUtils.getCurrentTenantId());
         orgResultList.forEach(org -> {
             Opt.ofBlankAble(org.getType()).ifPresent(type -> {
                 org.setTypeList(new ArrayList<>());
@@ -64,7 +65,7 @@ public class OrgService {
 
     public List<OrgDictResp> orgDictList() {
 
-        List<OrgDictResult> orgDictResults = organizationDao.getOrgDictList();
+        List<OrgDictResult> orgDictResults = organizationDao.getOrgDictList(UserInfoContextUtils.getCurrentTenantId());
 
         return BeanUtil.copyToList(orgDictResults, OrgDictResp.class);
     }
