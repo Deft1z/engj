@@ -36,14 +36,14 @@ public class SysOperateLogService {
 
     @Lazy
     @Resource
-    private TenantDomainService tenantService;
+    private TenantDomainService tenantDomainService;
 
     public void saveLog(Integer tenantId, OperateModuleEnums operateModuleEnums, String operateBehavior) {
 
         SysOperateLog sysOperateLog = new SysOperateLog()
                 .setTraceId(TraceIdUtils.getCurrentTraceId())
                 .setTenantId(tenantId)
-                .setTenantName(tenantService.getTenantName(tenantId))
+                .setTenantName(tenantDomainService.getTenantName(tenantId))
                 .setOperatorId(UserInfoContextUtils.getCurrentUserId())
                 .setOperatorName(UserInfoContextUtils.getCurrentRealName())
                 .setOperateTime(LocalDateTime.now())
