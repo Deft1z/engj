@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "资源接口")
 @RestController
-@RequestMapping("/resource/interface/list")
+@RequestMapping("/resource/interface")
 @RequiredArgsConstructor
 public class ResourceInterfaceController {
 
