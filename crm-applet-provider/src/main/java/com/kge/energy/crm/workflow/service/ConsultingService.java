@@ -45,7 +45,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -72,6 +71,8 @@ public class ConsultingService {
     private final ScServiceContractDao scServiceContractDao;
 
     private final BUserDao bUserDao;
+
+    private final BRoleDao bRoleDao;
 
     private final BOrganizationDao bOrganizationDao;
 
@@ -102,9 +103,10 @@ public class ConsultingService {
         }
 
         //登录用户信息
-        UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
+        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
 
         //保存工单信息
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
         WfForm wfForm = new WfForm();
         wfForm.setFormTypeId(1);
         wfForm.setContent(JSONUtil.toJsonStr(content));
@@ -112,12 +114,12 @@ public class ConsultingService {
         wfForm.setSubStatus(ConstParam.WaitingForProcessing);
         wfForm.setTimeSubmit(now);
         wfForm.setFlag(1);
-        wfForm.setCreateUserId(currentUserInfo.getUserId().intValue());
+        wfForm.setCreateUserId(operator.getUserId().intValue());
         wfForm.setRemark(req.getRemark());
         //集团总部
         wfForm.setCurrentOrgId(1);
         //集团客服
-        wfForm.setCurrentRoleId(2);
+        wfForm.setCurrentRoleId(currentRoleId);
         wfFormDao.save(wfForm);
 
         //保存流转记录
@@ -127,7 +129,7 @@ public class ConsultingService {
         wfFormFlow.setActionType(ConstParam.FlowStart);
         wfFormFlow.setStatus(ConstParam.FlowStart);
         wfFormFlow.setSubStatus(ConstParam.FlowTagGroup);
-        wfFormFlow.setCreateUserId(currentUserInfo.getUserId().intValue());
+        wfFormFlow.setCreateUserId(operator.getUserId().intValue());
         wfFormFlowDao.save(wfFormFlow);
 
         //todo 使用流程引擎替换现有的流程业务
@@ -193,8 +195,8 @@ public class ConsultingService {
     public Boolean update(ConsultingUpdateReq req) {
         LocalDateTime now = LocalDateTime.now();
         //获取当前登录操作用户信息
-        UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
-        Long operatorUserId = userInfo.getUserId();
+        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
+        Long operatorUserId = operator.getUserId();
 
         Integer formId = req.getFormId();
         String lockKey = redisFront + "form_" + formId;
@@ -222,23 +224,23 @@ public class ConsultingService {
             switch (req.getType()) {
                 case 1:
                     //分派工单：集团客服分派工单给二级公司客服；form表status变为处理中，form表subStatus变为待处理；flow表新增记录status为流转二级公司处理；下一步由二级公司客服处理
-                    assignOrder(req, wfForm, lastFlow.getActionType(), operatorUserId, now);
+                    assignOrder(req, wfForm, lastFlow.getActionType(), operator, now);
                     break;
                 case 2:
                     //回复工单：二级公司客服处理工单，form表status和subStatus变为已处理；flow表新增记录status为已回复
-                    handleOrder(req, wfForm, lastFlow.getActionType(), operatorUserId, now);
+                    handleOrder(req, wfForm, lastFlow.getActionType(), operator, now);
                     break;
                 case 3:
-                    //完成工单：form表status和subStatus变为已终止；flow表新增记录status为已完成
-                    finishOrder(req, wfForm, lastFlow.getActionType(), operatorUserId, now);
+                    //完成工单：form表status和subStatus变为已终止；flow表新增记录status为已完成; 已跟前端确认未使用
+                    finishOrder(req, wfForm, lastFlow.getActionType(), operator, now);
                     break;
                 case 4:
                     //终止工单：form表status和subStatus变为已终止；flow表新增记录status为已完成；关联合同的状态也会变为已终止
-                    terminateOrder(req, wfForm, lastFlow.getActionType(), operatorUserId, now);
+                    terminateOrder(req, wfForm, lastFlow.getActionType(), operator, now);
                     break;
                 case 5:
-                    //撤回工单：二级公司客服驳回给集团客服，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
-                    withdrawOrder(req, wfForm, lastFlow.getActionType(), operatorUserId, userInfo.getRoleCodes(), now);
+                    //撤回工单：1、二级公司客服驳回给集团客服 2、集团客服撤回已到二级公司客服的工单，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
+                    withdrawOrder(req, wfForm, lastFlow.getActionType(), operator, now);
                     break;
                 default:
                     return false;
@@ -250,16 +252,19 @@ public class ConsultingService {
         return true;
     }
 
-    private void assignOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, Long operatorUserId, LocalDateTime now) {
+    private void assignOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowCompanyProcess)) {
             throw new ServiceException("工单已经流转!");
         }
+        Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         String formContent = wfForm.getContent();
         List<RoleUserResult> assignUsers = bUserDao.getUserByRoleAndOrgId(3, req.getCurrentOrgId());
         if (assignUsers.isEmpty()) {
             throw new ServiceException("没有客服角色!");
         }
+        //待二级公司客服处理工单
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
         LambdaUpdateWrapper<WfForm> updateWrapper = Wrappers.<WfForm>update().lambda()
                 .set(WfForm::getStatus, ConstParam.Processing)
@@ -267,7 +272,7 @@ public class ConsultingService {
                 .set(WfForm::getTimeReception, now)
                 .set(WfForm::getModifyUserId, operatorUserId)
                 .set(WfForm::getCurrentOrgId, req.getCurrentOrgId())
-                .set(WfForm::getCurrentRoleId, req.getCurrentRoleId())
+                .set(WfForm::getCurrentRoleId, currentRoleId)
                 .eq(WfForm::getFormId, formId);
         wfFormDao.update(updateWrapper);
         //新增工单流转分派记录
@@ -305,11 +310,14 @@ public class ConsultingService {
         }
     }
 
-    private void handleOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, Long operatorUserId, LocalDateTime now) {
+    private void handleOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowGroupProcess)) {
             throw new ServiceException("工单已经撤回!");
         }
+        Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
+        //二级公司处理工单
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
         LambdaUpdateWrapper<WfForm> updateWrapper = Wrappers.<WfForm>update().lambda()
                 .set(WfForm::getStatus, ConstParam.Processed)
@@ -317,7 +325,7 @@ public class ConsultingService {
                 .set(WfForm::getTimeReception, now)
                 .set(WfForm::getModifyUserId, operatorUserId)
                 .set(WfForm::getCurrentOrgId, req.getCurrentOrgId())
-                .set(WfForm::getCurrentRoleId, req.getCurrentRoleId())
+                .set(WfForm::getCurrentRoleId, currentRoleId)
                 .eq(WfForm::getFormId, formId);
         wfFormDao.update(updateWrapper);
         //新增工单流转处理记录
@@ -333,12 +341,15 @@ public class ConsultingService {
         wfFormFlowDao.save(wfFormFlow);
     }
 
-    private void finishOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, Long operatorUserId, LocalDateTime now) {
+    private void finishOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
             throw new ServiceException("工单已经完成，不能重复完成!");
         }
+        Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         Integer customerUserId = wfForm.getCreateUserId();
+        //后续由集团客服操作完成工单，待定
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
         LambdaUpdateWrapper<WfForm> updateWrapper = Wrappers.<WfForm>update().lambda()
                 .set(WfForm::getStatus, ConstParam.Finished)
@@ -346,7 +357,7 @@ public class ConsultingService {
                 .set(WfForm::getTimeFinished, now)
                 .set(WfForm::getModifyUserId, operatorUserId)
                 .set(WfForm::getCurrentOrgId, req.getCurrentOrgId())
-                .set(WfForm::getCurrentRoleId, req.getCurrentRoleId())
+                .set(WfForm::getCurrentRoleId, currentRoleId)
                 .eq(WfForm::getFormId, formId);
         wfFormDao.update(updateWrapper);
         //新增工单流转完成记录
@@ -380,10 +391,12 @@ public class ConsultingService {
         weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
     }
 
-    private void terminateOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, Long operatorUserId, LocalDateTime now) {
+    private void terminateOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
             throw new ServiceException("工单已经完成或终止，不能重复完成或终止!");
         }
+        Long operatorUserId = operator.getUserId();
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(operator.getRoleCodes().iterator().next(), operator.getTenantId());
         Integer formId = wfForm.getFormId();
         Integer customerUserId = wfForm.getCreateUserId();
         //终止工单
@@ -393,7 +406,7 @@ public class ConsultingService {
                 .set(WfForm::getTimeFinished, now)
                 .set(WfForm::getModifyUserId, operatorUserId)
                 .set(WfForm::getCurrentOrgId, req.getCurrentOrgId())
-                .set(WfForm::getCurrentRoleId, req.getCurrentRoleId())
+                .set(WfForm::getCurrentRoleId, currentRoleId)
                 .eq(WfForm::getFormId, formId);
         wfFormDao.update(wfUpdateWrapper);
         //新增工单流转终止记录
@@ -433,7 +446,7 @@ public class ConsultingService {
         weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
     }
 
-    private void withdrawOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, Long operatorUserId, Set<String> operatorRoleCodes, LocalDateTime now) {
+    private void withdrawOrder(ConsultingUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowHasFeedback)) {
             throw new ServiceException("工单已经回复，不能撤回!");
         }
@@ -443,10 +456,13 @@ public class ConsultingService {
         if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
             throw new ServiceException("工单已完成或终止，不能撤回!");
         }
+        Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         String formContent = wfForm.getContent();
         Integer formCurrentOrgId = wfForm.getCurrentOrgId();
         Integer customerUserId = wfForm.getCreateUserId();
+        //撤回到集团客服处理
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
         LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
                 .set(WfForm::getStatus, ConstParam.WaitingForProcessing)
@@ -454,7 +470,7 @@ public class ConsultingService {
                 .set(WfForm::getTimeReception, now)
                 .set(WfForm::getModifyUserId, operatorUserId)
                 .set(WfForm::getCurrentOrgId, 1)
-                .set(WfForm::getCurrentRoleId, 2)
+                .set(WfForm::getCurrentRoleId, currentRoleId)
                 .eq(WfForm::getFormId, formId);
         wfFormDao.update(wfUpdateWrapper);
         //新增工单流转处撤回记录
@@ -499,7 +515,7 @@ public class ConsultingService {
         weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
 
         //若集团客服撤回工单，需通知二级公司客服
-        if (operatorRoleCodes.contains(RoleEnums.JT_CUSTOMER.toString())) {
+        if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.toString())) {
             msgContentBuilder = new StringBuilder();
             msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
             msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");

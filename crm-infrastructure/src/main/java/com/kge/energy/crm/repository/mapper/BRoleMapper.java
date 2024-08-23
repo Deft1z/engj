@@ -14,5 +14,7 @@ public interface BRoleMapper extends BaseMapper<BRole> {
     List<Integer> roleResource(@Param("roleId") Integer roleId, @Param("systemType") String systemType);
 
     List<BRole> userRole(@Param("userId") Integer userId);
+
+    Integer getRoleIdByCode(@Param("code") String code, @Param("tenantId") Integer tenantId);
 }
 
