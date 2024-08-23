@@ -1,9 +1,9 @@
-package com.kge.energy.crm.complain.resp;
+package com.kge.energy.crm.repository.entityext.result.complain;
 
 import lombok.Data;
 
 @Data
-public class ComplainListResp {
+public class ComplainResult {
 
     /**
      * 投诉记录id
@@ -97,16 +97,15 @@ public class ComplainListResp {
      */
     private String contractName;
 
+    /**
+     * 服务公司
+     */
+    private String serviceCompany;
 
     /**
      * 业务名称
      */
     private String businessName;
-
-    /**
-     * 服务公司
-     */
-    private String serviceCompany;
 
     /**
      * 创建时间
@@ -134,6 +133,11 @@ public class ComplainListResp {
     //private String contractStatus;
 
     /**
+     * 文件路径
+     */
+    private String filepath;
+
+    /**
      * 组织名称
      */
     private String orgName;
@@ -143,8 +147,4 @@ public class ComplainListResp {
      */
     private String realname;
 
-    /**
-     * 文件路径
-     */
-    private String filepath;
 }

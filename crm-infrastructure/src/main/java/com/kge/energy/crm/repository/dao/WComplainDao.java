@@ -1,5 +1,9 @@
 package com.kge.energy.crm.repository.dao;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kge.energy.crm.repository.entityext.param.ComplainListParam;
+import com.kge.energy.crm.repository.entityext.result.complain.ComplainResult;
 import com.kge.energy.crm.repository.mapper.WComplainMapper;
 import com.kge.energy.crm.repository.entity.WComplain;
 import jakarta.annotation.Resource;
@@ -18,6 +22,11 @@ public class WComplainDao extends ServiceImpl<WComplainMapper, WComplain> {
 
     public Long findComplainCount(String startTime, String endTime) {
         return mapper.findNewComplainCount(startTime, endTime);
+    }
+
+    public Page<ComplainResult> getComplainList(ComplainListParam param) {
+        Page<ComplainResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+        return mapper.getComplainList(page, param);
     }
 
 }

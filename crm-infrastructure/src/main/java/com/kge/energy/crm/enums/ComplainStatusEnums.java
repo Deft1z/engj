@@ -32,4 +32,11 @@ public enum ComplainStatusEnums {
                 .orElse(null);
     }
 
+    public static Integer getCodeByDesc(String desc) {
+        return Arrays.stream(values())
+                .filter(e -> Objects.equals(e.getDesc(), desc))
+                .findFirst().map(ComplainStatusEnums::getCode)
+                .orElse(null);
+    }
+
 }
