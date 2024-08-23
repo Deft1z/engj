@@ -14,6 +14,7 @@ import com.kge.energy.crm.repository.entity.BResource;
 import com.kge.energy.crm.repository.entity.BResourceInterface;
 import com.kge.energy.crm.repository.entityext.param.ResourceInterfaceListParam;
 import com.kge.energy.crm.resource.req.ResourceInterfaceAddReq;
+import com.kge.energy.crm.resource.req.ResourceInterfaceDeleteReq;
 import com.kge.energy.crm.resource.req.ResourceInterfaceListReq;
 import com.kge.energy.crm.resource.req.ResourceInterfaceUpdateReq;
 import com.kge.energy.crm.resource.resp.ResourceInterfaceResp;
@@ -116,7 +117,7 @@ public class ResourceInterfaceService {
         return true;
     }
 
-    public Boolean delete(ResourceInterfaceUpdateReq req) {
+    public Boolean delete(ResourceInterfaceDeleteReq req) {
 
         AuthVerifyUtils.mustAdmin();
 

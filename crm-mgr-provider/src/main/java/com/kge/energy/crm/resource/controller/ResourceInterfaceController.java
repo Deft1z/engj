@@ -3,6 +3,7 @@ package com.kge.energy.crm.resource.controller;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.resource.req.ResourceInterfaceAddReq;
+import com.kge.energy.crm.resource.req.ResourceInterfaceDeleteReq;
 import com.kge.energy.crm.resource.req.ResourceInterfaceListReq;
 import com.kge.energy.crm.resource.req.ResourceInterfaceUpdateReq;
 import com.kge.energy.crm.resource.resp.ResourceInterfaceResp;
@@ -47,7 +48,7 @@ public class ResourceInterfaceController {
 
     @Operation(summary = "删除接口")
     @PostMapping("/delete")
-    public CommonResponse<Boolean> delete(@Validated @RequestBody ResourceInterfaceUpdateReq req) {
+    public CommonResponse<Boolean> delete(@Validated @RequestBody ResourceInterfaceDeleteReq req) {
         return CommonResponse.suc(resourceInterfaceService.delete(req));
     }
 }
