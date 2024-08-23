@@ -31,5 +31,73 @@
         where flag != -1 AND create_time between #{startTime} and #{endTime}
     </select>
 
+    <select id="getComplainList" resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
+        SELECT rs.* FROM (
+            (
+                SELECT a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content,
+                    (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
+                    a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
+                    DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+                    JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.businessName')) AS business_name,
+                    d.code AS order_code,
+                    d.status AS order_status,
+                    DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
+                    group_concat( i.filepath SEPARATOR ',' ) AS filepath,
+                    j.realname,
+                    l.name AS org_name
+                FROM w_complain a
+                LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
+                LEFT JOIN sc_service_contract d ON d.service_contract_id = c.consult_id and d.flag != - 1
+                LEFT JOIN wf_form w ON w.form_id = d.form_id
+                LEFT JOIN w_complain_file g ON g.complain_id = a.complain_id
+                LEFT JOIN s_file i ON i.file_id = g.file_id
+                LEFT JOIN b_user j ON j.user_id = a.process_user_id
+                LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
+                LEFT JOIN b_organization l ON l.organization_id = k.organization_id
+                WHERE a.flag != -1 AND a.typef = 1
+                GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,i.filepath,j.realname,l.name
+            )
+            UNION ALL
+            (
+                SELECT a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content,
+                    (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
+                    a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
+                    DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.businessName')) AS business_name,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.code')) AS order_code,
+                    d.status AS order_status,
+                    DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
+                    i.filepath,
+                    j.realname,
+                    l.name AS org_name
+                FROM w_complain a
+                LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
+                LEFT JOIN wf_form d ON d.form_id = c.consult_id and d.flag != -1
+                LEFT JOIN w_complain_file g ON g.complain_id = a.complain_id
+                LEFT JOIN s_file i ON i.file_id = g.file_id
+                LEFT JOIN b_user j ON j.user_id = a.process_user_id
+                LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
+                LEFT JOIN b_organization l ON l.organization_id = k.organization_id
+                WHERE a.flag != -1 and a.typef = 2
+                GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,i.filepath,j.realname,l.name
+            )
+        ) AS rs
+        <where>
+            <if test="param.tenantId != null">
+                and tenant_id = #{param.tenantId}
+            </if>
+            <if test="param.status != null">
+                and rs.status = #{param.status}
+            </if>
+            <if test="param.name != null and param.name != ''">
+                and ( rs.subject like CONCAT('%',#{param.name},'%') or rs.content like CONCAT('%',#{param.name},'%') )
+            </if>
+            <if test="param.createUserId != null">
+                and rs.create_user_id = #{param.createUserId}
+            </if>
+        </where>
+        ORDER BY rs.create_time DESC
+    </select>
+
 </mapper>
 
