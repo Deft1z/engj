@@ -4,17 +4,17 @@ import com.kge.energy.crm.common.page.PageReq;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.List;
-
 /**
  * @author wangjihua
  */
 @Data
 @Accessors(chain = true)
-public class RoleListParam extends PageReq {
+public class ResourceInterfaceListParam extends PageReq {
 
-    private Integer tenantId;
+    private Integer resourceId;
 
-    private List<String> excludeCodes;
+    private String interfaceName;
+
+    private String interfaceUrl;
 
 }
