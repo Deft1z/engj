@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.kge.energy.crm.repository.mapper.SFileMapper">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BResourceInterfaceMapper">
     <resultMap type="com.kge.energy.crm.repository.entity.BResourceInterface" id="BResourceInterfaceMap">
         <result property="id" column="id" jdbcType="INTEGER"/>
         <result property="resourceId" column="resource_id" jdbcType="INTEGER"/>
@@ -14,5 +14,20 @@
         <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="list" resultMap="BResourceInterfaceMap">
+        select *
+        from b_resource_interface
+        where flag = 1
+        <if test="param.resourceId != null">
+            and resource_id = #{param.resourceId}
+        </if>
+        <if test="param.interfaceName != null and param.interfaceName != ''">
+            and interface_name like CONCAT('%',#{param.interfaceName},'%')
+        </if>
+        <if test="param.interfaceUrl != null and param.interfaceUrl != ''">
+            and interface_url like CONCAT('%',#{param.interfaceUrl},'%')
+        </if>
+    </select>
 </mapper>
 
