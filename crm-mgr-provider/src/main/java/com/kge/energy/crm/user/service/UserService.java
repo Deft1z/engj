@@ -230,8 +230,8 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许获取其他租户用户列表信息");
+        if (AuthVerifyUtils.notSuperAdmin()) {
+            req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
         }
 
         UserListParam userListParam = BeanUtil.copyProperties(req, UserListParam.class);
@@ -349,7 +349,7 @@ public class UserService {
                 .setMobile(req.getMobile())
                 .setStatus(req.getStatus())
                 .setRemark(req.getRemark());
-        bUserDao.save(bUser);
+        bUserDao.updateById(bUser);
 
         RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(req.getUserId());
         if (ObjUtil.notEqual(req.getOrganizationId(), rUserTenant.getOrganizationId())) {
