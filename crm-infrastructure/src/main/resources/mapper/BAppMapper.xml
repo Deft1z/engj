@@ -194,7 +194,8 @@
     </select>
 
     <select id="selectAppPage" resultType="com.kge.energy.crm.repository.entityext.result.AppMgrListResult">
-        select ba.app_id, ba.name, ba.bind_type, ba.app_address, ba.interface_address, ba.bind_address, ba.flag, remark
+        select ba.app_id, ba.name, ba.bind_type, ba.app_address, ba.interface_address, ba.bind_address, ba.flag,
+        ba.remark, ba.is_commonly_used
         from b_app ba
         where ba.flag = 1
         <if test="param.name != null and param.name != ''">

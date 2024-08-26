@@ -14,6 +14,6 @@ public class AppMgrListResult {
     private Integer flag;
     private String remark;
 
-    private Boolean commonlyUsed;
+    private Boolean isCommonlyUsed;
 
 }
