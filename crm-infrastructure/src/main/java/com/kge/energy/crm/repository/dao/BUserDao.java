@@ -12,6 +12,7 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.repository.entityext.result.UserListResult;
 import com.kge.energy.crm.repository.mapper.BUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -111,8 +112,8 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.findNewUserCount(startTime, endTime);
     }
 
-    public IPage<BUser> list(UserListParam param) {
-        Page<BUser> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+    public IPage<UserListResult> list(UserListParam param) {
+        Page<UserListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
         return mapper.list(page, param);
     }
 

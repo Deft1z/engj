@@ -8,6 +8,7 @@ import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult;
+import com.kge.energy.crm.repository.entityext.result.UserListResult;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public interface BUserMapper extends BaseMapper<BUser> {
 
     Long findNewUserCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
-    IPage<BUser> list(Page<BUser> page, @Param("param") UserListParam param);
+    IPage<UserListResult> list(Page<UserListResult> page, @Param("param") UserListParam param);
 
     List<String> findJtCustomerPhones();
 

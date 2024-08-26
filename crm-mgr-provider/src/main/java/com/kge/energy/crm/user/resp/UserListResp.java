@@ -26,4 +26,8 @@ public class UserListResp {
 
     @Schema(description = "帐号状态（0正常 1停用）")
     private Integer status;
+
+    @Schema(description = "部门名称")
+    private String organizationName;
+
 }
