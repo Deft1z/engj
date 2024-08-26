@@ -99,5 +99,16 @@
         ORDER BY rs.create_time DESC
     </select>
 
+    <select id="getComplain" resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
+        SELECT a.complain_id, a.subject, a.create_user_id,
+               JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.businessName')) AS contract_name
+        FROM w_complain a
+        LEFT JOIN r_form_consult_complain r ON r.complain_id = a.complain_id
+        LEFT JOIN wf_form w ON w.form_id = r.consult_id
+        WHERE a.flag != -1
+        AND a.complain_id = #{complainId}
+        limit 1
+    </select>
+
 </mapper>
 

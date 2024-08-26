@@ -216,6 +216,7 @@ public class ApplicationService {
                         .setName(app.getName())
                         .setAppAddress(app.getAppAddress())
                         .setBindAddress(app.getBindAddress())
+                        .setCommonlyUsed(app.getCommonlyUsed())
                 ).collect(Collectors.toList());
     }
 }

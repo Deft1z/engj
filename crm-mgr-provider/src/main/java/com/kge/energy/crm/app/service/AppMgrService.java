@@ -12,9 +12,9 @@ import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.OperateModuleEnums;
-import com.kge.energy.crm.log.service.SysOperateLogService;
 import com.kge.energy.crm.external.ct.req.CtAccountUnbindReq;
 import com.kge.energy.crm.external.ct.service.CtService;
+import com.kge.energy.crm.log.service.SysOperateLogService;
 import com.kge.energy.crm.repository.dao.BAppDao;
 import com.kge.energy.crm.repository.dao.BOpenidDao;
 import com.kge.energy.crm.repository.entity.BApp;
@@ -54,8 +54,9 @@ public class AppMgrService {
         }
 
         BApp bApp = BeanUtil.copyProperties(req, BApp.class);
-        bApp.setBindType(0);
-        bApp.setFlag(1);
+        bApp.setBindType(0)
+                .setFlag(1)
+                .setCommonlyUsed(req.getCommonlyUsed());
         bAppDao.save(bApp);
 
         sysOperateLogService.saveLog(
@@ -93,15 +94,15 @@ public class AppMgrService {
         BOpenid bOpenid = bOpenidDao.getOpenId(req.getUserId(), req.getAppId());
 
         // 检查绑定记录
-        if(ObjectUtil.isNull(bOpenid)){
+        if (ObjectUtil.isNull(bOpenid)) {
             throw new BadException("当前账号未绑定该业务系统");
         }
 
-        if(NumberUtil.equals(bOpenid.getBindingState(), Integer.valueOf(0))){
+        if (NumberUtil.equals(bOpenid.getBindingState(), Integer.valueOf(0))) {
             throw new BadException("当前账号未绑定该业务系统");
         }
 
-        if(req.getAppId() <= 1){
+        if (req.getAppId() <= 1) {
             // 获取第三方业务系统地址
             BApp bApp = bAppDao.getById(req.getAppId());
             CtAccountUnbindReq ctAccountUnbindReq = new CtAccountUnbindReq()

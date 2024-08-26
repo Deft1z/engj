@@ -29,4 +29,14 @@ public class ConstParam {
     public static String RemainToBeEvaluated = "待评价";
     public static String HasEvaluated = "已评价";
 
+    public static String CustomerSubmit           = "待处理";
+    public static String GroupCentreProcessing    = "处理中";
+    public static String GroupCentreReturn        = "集团已退回";
+    public static String GroupCentreDistribute    = "集团已分配";
+    public static String CompanyProcessing        = "二级公司处理中";
+    public static String CompanyDistribute        = "二级公司已分配";
+    public static String OperatorProcessing       = "客服处理中";
+    public static String OperatorContractMake     = "签订合同";
+    public static String OperatorContractComplete = "业务员完成合同";
+
 }

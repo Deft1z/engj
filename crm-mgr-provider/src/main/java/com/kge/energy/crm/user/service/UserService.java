@@ -26,6 +26,7 @@ import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.repository.entityext.result.UserListResult;
 import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
@@ -229,12 +230,12 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许获取其他租户用户列表信息");
+        if (AuthVerifyUtils.notSuperAdmin()) {
+            req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
         }
 
         UserListParam userListParam = BeanUtil.copyProperties(req, UserListParam.class);
-        IPage<BUser> usersPage = bUserDao.list(userListParam);
+        IPage<UserListResult> usersPage = bUserDao.list(userListParam);
 
         List<UserListResp> resps = usersPage.getRecords()
                 .stream()
@@ -244,6 +245,7 @@ public class UserService {
                         .setRealname(user.getRealname())
                         .setMobile(user.getMobile())
                         .setStatus(user.getStatus())
+                        .setOrganizationName(user.getOrganizationName())
                 ).collect(Collectors.toList());
 
         return new PageResp<UserListResp>()
@@ -347,7 +349,7 @@ public class UserService {
                 .setMobile(req.getMobile())
                 .setStatus(req.getStatus())
                 .setRemark(req.getRemark());
-        bUserDao.save(bUser);
+        bUserDao.updateById(bUser);
 
         RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(req.getUserId());
         if (ObjUtil.notEqual(req.getOrganizationId(), rUserTenant.getOrganizationId())) {
