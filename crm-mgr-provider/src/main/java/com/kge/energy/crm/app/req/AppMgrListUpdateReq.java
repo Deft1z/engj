@@ -8,17 +8,19 @@ import lombok.Data;
 @Data
 public class AppMgrListUpdateReq {
 
-    @JsonProperty(value = "app_id")
     @NotNull
     private Integer appId;
 
     @NotNull
     private String name;
 
-    @JsonProperty(value = "bind_address")
+    private Integer bindType;
+
     private String bindAddress;
 
-    private String remark;
+    private String appAddress;
+
+    private String interfaceAddress;
 
     @Schema(description = "是否常用")
     private Boolean commonlyUsed;

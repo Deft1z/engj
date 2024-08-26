@@ -16,5 +16,7 @@ public interface WComplainMapper extends BaseMapper<WComplain> {
     public Long findNewComplainCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     public Page<ComplainResult> getComplainList(Page<ComplainResult> page, @Param("param") ComplainListParam param);
+
+    public ComplainResult getComplain(Integer complainId);
 }
 

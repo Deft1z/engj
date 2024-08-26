@@ -29,5 +29,9 @@ public class WComplainDao extends ServiceImpl<WComplainMapper, WComplain> {
         return mapper.getComplainList(page, param);
     }
 
+    public ComplainResult getComplain(Integer complainId) {
+        return mapper.getComplain(complainId);
+    }
+
 }
 
