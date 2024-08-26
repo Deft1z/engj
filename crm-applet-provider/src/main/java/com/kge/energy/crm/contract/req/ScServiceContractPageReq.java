@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "服务合同查询参数")
-public class ScServiceContractReq extends PageReq {
+public class ScServiceContractPageReq extends PageReq {
 
     @Schema(description = "查询参数map")
     private ContracSearchMap searchMap;
