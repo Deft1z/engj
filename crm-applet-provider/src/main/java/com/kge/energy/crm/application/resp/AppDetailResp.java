@@ -24,4 +24,7 @@ public class AppDetailResp {
     @Schema(description = "绑定地址")
     private String bindAddress;
 
+    @Schema(description = "是否常用")
+    private Boolean commonlyUsed;
+
 }
