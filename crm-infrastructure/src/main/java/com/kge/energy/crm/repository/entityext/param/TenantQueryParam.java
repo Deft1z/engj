@@ -5,4 +5,6 @@ import lombok.Data;
 
 @Data
 public class TenantQueryParam extends PageReq {
+
+    private Integer id;
 }

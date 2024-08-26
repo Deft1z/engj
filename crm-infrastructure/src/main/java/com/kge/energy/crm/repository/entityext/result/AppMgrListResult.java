@@ -1,6 +1,5 @@
 package com.kge.energy.crm.repository.entityext.result;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -15,7 +14,6 @@ public class AppMgrListResult {
     private Integer flag;
     private String remark;
 
-    @JsonProperty("commonlyUsed")
-    private Boolean isCommonlyUsed;
+    private Boolean commonlyUsed;
 
 }
