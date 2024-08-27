@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workflow.req;
+package com.kge.energy.crm.external.wechat.applet.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;

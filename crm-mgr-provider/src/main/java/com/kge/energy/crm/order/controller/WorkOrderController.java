@@ -50,13 +50,14 @@ public class WorkOrderController {
         return CommonResponse.suc(workOrderService.getFlowByFormId(req));
     }
 
+
     /**
      * 分派工单 终止工单 处理工单
      */
     @ConvertToGoFormats
     @PostMapping("/workOrderUpdate")
-    public CommonResponse<Integer> workOrderUpdate(WorkOrdeUpdateReq req) {
-        return CommonResponse.suc(workOrderService.workOrderUpdate(req));
+    public CommonResponse<Object> workOrderUpdate(WorkOrdeUpdateReq req) {
+        return workOrderService.workOrderUpdate(req);
 
     }
 
