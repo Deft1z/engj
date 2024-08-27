@@ -179,11 +179,18 @@ public class ScServiceContractService {
 
     @Transactional
     public Boolean addEvaluation(ScServiceContractEvaAddReq req) {
+        //新增评价
         ScContractEvaluate scContractEvaluate = new ScContractEvaluate()
                 .setServiceContractId(req.getServiceContractId())
                         .setEvaluate(req.getEvaluate())
                         .setSatisfaction(req.getSatisfaction());
-        return scContractEvaluateDao.save(scContractEvaluate);
+        boolean saved = scContractEvaluateDao.save(scContractEvaluate);
+        //更新合同状态
+        LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda()
+                .set(ScServiceContract::getStatus, ConstParam.HasEvaluated)
+                .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
+        boolean updated =  scServiceContractDao.update(updateWrapper);
+        return saved && updated;
     }
 
 }
