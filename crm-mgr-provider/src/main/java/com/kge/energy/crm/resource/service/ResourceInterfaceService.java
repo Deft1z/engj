@@ -3,6 +3,7 @@ package com.kge.energy.crm.resource.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.kge.energy.crm.auth.service.AuthDomainService;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -39,6 +40,8 @@ public class ResourceInterfaceService {
     private final SysOperateLogService sysOperateLogService;
 
     private final BResourceInterfaceDao bResourceInterfaceDao;
+
+    private final AuthDomainService authDomainService;
 
 
     /**
@@ -91,6 +94,8 @@ public class ResourceInterfaceService {
                 "新增资源接口【" + bi.getId() + ", " + bi.getInterfaceName() + "】"
         );
 
+        authDomainService.deleteSystemInterfaceCache(bResource.getSystemType());
+
         return true;
     }
 
@@ -108,11 +113,15 @@ public class ResourceInterfaceService {
 
         bResourceInterfaceDao.updateById(bi);
 
-
         sysOperateLogService.saveLog(
                 UserInfoContextUtils.getCurrentTenantId(), OperateModuleEnums.RESOURCE_INTERFACE,
                 "更新资源接口【" + bi.getId() + ", " + bi.getInterfaceName() + "】"
         );
+
+        BResource bResource = bResourceDao.getById(bi.getResourceId());
+        Assert.notNull(bResource, "菜单资源不存在");
+
+        authDomainService.deleteSystemInterfaceCache(bResource.getSystemType());
 
         return true;
     }
@@ -130,6 +139,11 @@ public class ResourceInterfaceService {
                 UserInfoContextUtils.getCurrentTenantId(), OperateModuleEnums.RESOURCE_INTERFACE,
                 "删除资源接口【" + bi.getId() + ", " + bi.getInterfaceName() + "】"
         );
+
+        BResource bResource = bResourceDao.getById(bi.getResourceId());
+        Assert.notNull(bResource, "菜单资源不存在");
+
+        authDomainService.deleteSystemInterfaceCache(bResource.getSystemType());
 
         return true;
     }

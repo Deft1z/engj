@@ -21,6 +21,7 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.external.elink.ElinkService;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
+import com.kge.energy.crm.external.wechat.applet.req.FormStatusChangeMsgReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.repository.dao.*;

@@ -258,6 +258,10 @@
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and !userInfo.roleCodes.contains('applet_user')">
             having user_status = #{listParam.searchMap.status}
         </if>
+        <if test="listParam.searchMap.starttime != null and listParam.searchMap.endtime != null">
+            and a.modify_time >= #{listParam.searchMap.starttime}
+            AND a.modify_time &lt;= #{listParam.searchMap.endtime}
+        </if>
         order by a.modify_time desc
     </select>
 
