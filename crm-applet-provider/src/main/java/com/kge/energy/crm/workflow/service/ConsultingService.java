@@ -167,7 +167,7 @@ public class ConsultingService {
         return code;
     }
 
-    public PageResp<WfFormResp> getFormPage(WfFormReq req) {
+    public PageResp<WfFormResp> getByPage(WfFormReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
 
@@ -199,7 +199,6 @@ public class ConsultingService {
         LocalDateTime now = LocalDateTime.now();
         //获取当前登录操作用户信息
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
-        Long operatorUserId = operator.getUserId();
 
         Integer formId = req.getFormId();
         String lockKey = redisFront + "form_" + formId;

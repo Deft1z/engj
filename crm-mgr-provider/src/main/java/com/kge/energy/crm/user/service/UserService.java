@@ -424,7 +424,7 @@ public class UserService {
         List<String> roleCodes = bRoles.stream().map(BRole::getCode).toList();
         boolean containsAtLesatTwo = roleCodes.size() >= 2 && businessCodes.stream().filter(roleCodes::contains).count() >= 2;
         if (containsAtLesatTwo) {
-            throw new ServiceException("不能同时分配2种业务角色");
+            throw new ServiceException("不能同时分配2种业务角色: 集团客服|二级公司客服|小程序用户");
         }
 
         Set<RUserRole> rUserRoles = bRoles.stream()

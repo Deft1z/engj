@@ -27,7 +27,7 @@ public class ResourceInterfaceAddReq {
     @NotBlank
     private String interfaceUrl;
 
-    @Schema(description = "请求方式（GET POST PUT DELETE", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "请求方式(GET|POST|PUT|DELETE)", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank
     @Pattern(regexp = "GET|POST|PUT|DELETE")
     private String requestMethod;

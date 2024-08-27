@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kge.energy.crm.auth.service.AuthDomainService;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -44,6 +45,8 @@ public class RoleService {
     private final RRoleResourceDao rRoleResourceDao;
 
     private final SysOperateLogService sysOperateLogService;
+
+    private final AuthDomainService authDomainService;
 
     public PageResp<RoleListResp> list(RoleListReq req) {
 
@@ -205,9 +208,14 @@ public class RoleService {
                 "角色关联菜单【" + bRole.getRoleId() + ", " + bRole.getName() + "】"
         );
 
+        authDomainService.deleteSystemInterfaceCache(req.getSystemType());
+
         return true;
     }
 
+    /**
+     * 获取用户角色
+     */
     public UserRoleResp userRole(UserRoleReq req) {
 
         AuthVerifyUtils.mustAdmin();
