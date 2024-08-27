@@ -120,7 +120,7 @@ public class ComplainResult {
     /**
      * 合同编码
      */
-    //private String contractCode;
+    private String contractCode;
 
     /**
      * 订单状态
@@ -130,7 +130,7 @@ public class ComplainResult {
     /**
      * 合同状态
      */
-    //private String contractStatus;
+    private String contractStatus;
 
     /**
      * 文件路径
