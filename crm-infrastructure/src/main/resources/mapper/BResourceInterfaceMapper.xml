@@ -29,5 +29,40 @@
             and interface_url like CONCAT('%',#{param.interfaceUrl},'%')
         </if>
     </select>
+
+    <select id="listBySystemType" resultMap="BResourceInterfaceMap">
+        select bri.*
+        from b_role br,
+             r_role_resource rrr,
+             b_resource bre,
+             b_resource_interface bri
+        where br.flag = 1
+          and rrr.flag = 1
+          and bre.flag = 1
+          and bri.flag = 1
+          and br.role_id = rrr.role_id
+          and bre.resource_id = rrr.resource_id
+          and bre.resource_id = bri.resource_id
+          and bri.status = 0
+          and bre.system_type = #{systemType}
+    </select>
+
+    <select id="listByRole" resultMap="BResourceInterfaceMap">
+        select bri.*
+        from b_role br,
+             r_role_resource rrr,
+             b_resource bre,
+             b_resource_interface bri
+        where br.flag = 1
+          and rrr.flag = 1
+          and bre.flag = 1
+          and bri.flag = 1
+          and br.role_id = rrr.role_id
+          and bre.resource_id = rrr.resource_id
+          and bre.resource_id = bri.resource_id
+          and bri.status = 0
+          and bre.system_type = #{systemType}
+          and br.role_id = #{roleId}
+    </select>
 </mapper>
 

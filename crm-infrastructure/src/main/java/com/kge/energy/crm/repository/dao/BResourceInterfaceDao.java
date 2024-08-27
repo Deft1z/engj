@@ -9,6 +9,8 @@ import com.kge.energy.crm.repository.mapper.BResourceInterfaceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 资源接口表(BResourceInterface)表数据库访问层
  */
@@ -23,6 +25,16 @@ public class BResourceInterfaceDao extends ServiceImpl<BResourceInterfaceMapper,
         Page<BResourceInterface> page = new Page<>(param.getCurrentPage(), param.getPageSize());
 
         return mapper.list(page, param);
+    }
+
+    public List<BResourceInterface> listBySystemType(String systemType) {
+
+        return mapper.listBySystemType(systemType);
+    }
+
+    public List<BResourceInterface> listByRole(String systemType, Integer roleId) {
+
+        return mapper.listByRole(systemType, roleId);
     }
 }
 

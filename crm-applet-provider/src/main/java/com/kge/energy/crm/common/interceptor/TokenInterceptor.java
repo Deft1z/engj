@@ -3,12 +3,14 @@ package com.kge.energy.crm.common.interceptor;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.kge.energy.crm.auth.service.AuthDomainService;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.user.service.UserDomainService;
+import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author wangjihua
@@ -34,6 +39,8 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
+    private final AuthDomainService authDomainService;
+
     @Override
     public int getOrder() {
         return 1000;
@@ -44,6 +51,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
         String method = request.getMethod();
         String url = request.getRequestURI();
+        String systemType = "applet";
         log.info("{} {}", request.getMethod(), url);
 
         if (StrUtil.equalsIgnoreCase(method, "OPTIONS")) {
@@ -69,12 +77,33 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
 
         // 设置用户上下文信息
-        UserInfoDto userInfoDto = putUserInfo("applet", Integer.valueOf(uid));
+        UserInfoDto userInfoDto = putUserInfo(systemType, Integer.valueOf(uid));
         if (CollectionUtil.isEmpty(userInfoDto.getOrganizationList())) {
-            log.error("找不到用户对应的租户ID: {}", userInfoDto.getUserId());
+            log.error("用户无挂靠组织，用户ID: {}", userInfoDto.getUserId());
+        }
+
+        if (!checkPermission(systemType, method, url)) {
+            log.error("用户Id {} 无权限访问接口：{}", uid, url);
+            throw new ServiceException("权限不足");
         }
 
         return true;
+    }
+
+
+    /**
+     * 检查是否有权限请求接口
+     */
+    private boolean checkPermission(String systemType, String method, String url) {
+        if (!authDomainService.isAuthInterface(systemType, method, url)) {
+            return true;
+        }
+
+        Set<Integer> roleIds = UserInfoContextUtils.getCurrentUserInfo().getRoleList().stream()
+                .map(UserInfoDto.Role::getId)
+                .collect(Collectors.toSet());
+
+        return authDomainService.roleHasInterfacePermission(roleIds, systemType, method, url);
     }
 
 
