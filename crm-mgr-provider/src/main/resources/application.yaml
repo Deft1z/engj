@@ -54,6 +54,7 @@ wechat:
     orderStatusChangeTemplate: C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE
     agencyOrderTemplate: TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU
     feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
+    contractFinishTemplate: ExldQ4nH-DN-RYHBRqmTEo153sPr-XswYZ5Buf1bqGU
     wxUrl: ${wechat.common.wxUrl}
     version: developer
     agencyOrderPage: pages/user/order/order

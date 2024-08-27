@@ -8,7 +8,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class ReplyComplainData {
 
-    @JsonProperty("DATA")
+    @JsonProperty("Value")
     private String data;
 
 }

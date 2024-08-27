@@ -39,5 +39,7 @@ public interface BUserMapper extends BaseMapper<BUser> {
     List<String> findJtCustomerPhones();
 
     List<String> findSubCustomerPhones(@Param("orgId") Integer orgId);
+
+    BUser findUserByContractId (Integer scid);
 }
 

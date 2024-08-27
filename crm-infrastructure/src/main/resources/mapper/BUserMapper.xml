@@ -171,5 +171,14 @@
             /*二级公司客服*/
           and c.role_id = 3
     </select>
+
+    <select id="findUserByContractId" resultMap="BUserMap">
+        select b.user_id, b.name, b.remark, b.open_id
+        from b_user b
+        JOIN wf_form wf ON wf.create_user_id = b.user_id
+        JOIN sc_service_contract sc ON sc.form_id = wf.form_id
+        where sc.service_contract_id = #{scid}
+        limit 1
+    </select>
 </mapper>
 
