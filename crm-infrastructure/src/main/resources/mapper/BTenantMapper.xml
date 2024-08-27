@@ -18,6 +18,9 @@
         select bt.id, bt.name, bt.contact_name, bt.contact_mobile, bt.status, bt.create_time
         from b_tenant bt
         where bt.flag = 1
+        <if test="param.id != null">
+            and bt.id = #{param.id}
+        </if>
     </select>
 
     <select id="getTenantDictList" resultType="com.kge.energy.crm.repository.entityext.result.TenantListForOrgResult">

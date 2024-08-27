@@ -140,6 +140,8 @@ public class ConsultingService {
         final String msgTitle = "工单待处理通知";
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.getBusinessName()).append("\n");
+        msgContentBuilder.append("所在地区：").append(content.getArea()).append("\n");
+        msgContentBuilder.append("用电容量(kVA)：").append(content.getElectricityCapacity()).append("\n");
         msgContentBuilder.append("工单编号：").append(content.getCode()).append("\n");
         msgContentBuilder.append("生成时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
         msgContentBuilder.append("客户名称：").append(content.getCustomerName()).append("\n");

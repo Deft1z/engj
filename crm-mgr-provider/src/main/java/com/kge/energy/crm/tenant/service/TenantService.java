@@ -42,8 +42,15 @@ public class TenantService {
     private final SysOperateLogService sysOperateLogService;
 
     public PageResp<TenantListResult> selectPage(QueryTenantReq req) {
-        AuthVerifyUtils.isSuperAdmin();
+
+        AuthVerifyUtils.mustAdmin();
+
         TenantQueryParam param = BeanUtil.copyProperties(req, TenantQueryParam.class);
+
+        if (AuthVerifyUtils.notSuperAdmin()) {
+            param.setId(UserInfoContextUtils.getCurrentTenantId());
+        }
+
         return new PageResp<>(bTenantDao.selectTenantPage(param));
     }
 
