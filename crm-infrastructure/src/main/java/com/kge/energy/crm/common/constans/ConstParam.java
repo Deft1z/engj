@@ -24,6 +24,7 @@ public class ConstParam {
 
     /* 服务合同状态 */
     public static String Ready = "未开始";
+    public static String ContractNotReady = "未开始";
     public static String ContractUnderWay = "进行中";
     public static String ContractDiscontinued = "已终止";
     public static String RemainToBeEvaluated = "待评价";

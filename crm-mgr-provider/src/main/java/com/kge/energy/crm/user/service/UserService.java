@@ -246,7 +246,39 @@ public class UserService {
                         .setMobile(user.getMobile())
                         .setStatus(user.getStatus())
                         .setOrganizationName(user.getOrganizationName())
-                ).collect(Collectors.toList());
+                ).toList();
+
+        return new PageResp<UserListResp>()
+                .setCurrentPage(usersPage.getCurrent())
+                .setTotal(usersPage.getTotal())
+                .setPageSize(usersPage.getSize())
+                .setList(resps);
+    }
+
+    /**
+     * 获取角色的用户列表
+     */
+    public PageResp<UserListResp> listByRole(UserListByRoleReq req) {
+
+        AuthVerifyUtils.mustAdmin();
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户用户");
+        }
+
+        UserListParam userListParam = BeanUtil.copyProperties(req, UserListParam.class);
+        IPage<UserListResult> usersPage = bUserDao.listByRole(userListParam);
+
+        List<UserListResp> resps = usersPage.getRecords()
+                .stream()
+                .map(user -> new UserListResp()
+                        .setUserId(user.getUserId())
+                        .setName(user.getName())
+                        .setRealname(user.getRealname())
+                        .setMobile(user.getMobile())
+                        .setStatus(user.getStatus())
+                        .setOrganizationName(user.getOrganizationName())
+                ).toList();
 
         return new PageResp<UserListResp>()
                 .setCurrentPage(usersPage.getCurrent())
@@ -427,6 +459,8 @@ public class UserService {
             throw new ServiceException("不能同时分配2种业务角色: 集团客服|二级公司客服|小程序用户");
         }
 
+        String roleNames = bRoles.stream().map(BRole::getName).collect(Collectors.joining("、"));
+
         Set<RUserRole> rUserRoles = bRoles.stream()
                 .map(role -> new RUserRole()
                         .setUserId(bUser.getUserId())
@@ -437,12 +471,45 @@ public class UserService {
 
         sysOperateLogService.saveLog(
                 bUser.getTenantId(), OperateModuleEnums.USER,
-                "分配用户角色【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
+                "分配用户角色【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() +
+                        ": " + roleNames + "】"
         );
 
         return true;
     }
 
+
+    /**
+     * 移除用户角色
+     */
+    public Boolean removeRole(RemoveUserRoleReq req) {
+        AuthVerifyUtils.mustAdmin();
+
+        BUser bUser = bUserDao.getById(req.getUserId());
+        Assert.notNull(bUser);
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+            throw new ServiceException("非法请求，不允许操作其他租户用户角色");
+        }
+
+        List<BRole> bRoles = bRoleDao.listByIds(req.getRoleIds());
+        boolean isCurrentTenantRole = bRoles.stream()
+                .allMatch(brole -> ObjUtil.equals(bUser.getTenantId(), brole.getTenantId()));
+        if (AuthVerifyUtils.notSuperAdmin() && !isCurrentTenantRole) {
+            throw new ServiceException("非法请求，不允分配其他租户用户角色");
+        }
+
+        String roleNames = bRoles.stream().map(BRole::getName).collect(Collectors.joining("、"));
+
+        rUserRoleDao.removeByUserAndRoleIds(bUser.getUserId(), req.getRoleIds());
+
+        sysOperateLogService.saveLog(
+                bUser.getTenantId(), OperateModuleEnums.USER,
+                "移除用户角色【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() +
+                        ": " + roleNames + "】"
+        );
+        return true;
+    }
 
     private void checkMobile(String mobile) {
         if (!PhoneUtil.isPhone(mobile)) {
@@ -496,4 +563,5 @@ public class UserService {
 
         return true;
     }
+
 }

@@ -22,6 +22,8 @@ public class WeChatAppletProperties {
 
     private String feebackTemplate;
 
+    private String contractFinishTemplate;
+
     private String wxUrl;
 
     private String version;

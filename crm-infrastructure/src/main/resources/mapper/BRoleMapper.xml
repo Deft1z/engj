@@ -41,16 +41,16 @@
           and bu.user_id = rur.user_id
           and br.role_id = rur.role_id
           and bu.user_id = #{userId}
+          and br.tenant_id = #{tenantId}
     </select>
 
     <select id="getRoleIdByCode" resultType="integer">
         select role_id
         from b_role
         where flag = 1
-        and code = #{code}
-        and tenant_id = #{tenantId}
+          and code = #{code}
+          and tenant_id = #{tenantId}
         limit 1
     </select>
-
 </mapper>
 

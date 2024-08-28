@@ -220,13 +220,17 @@ public class RoleService {
 
         AuthVerifyUtils.mustAdmin();
 
-        List<BRole> bRoles = bRoleDao.userRole(req.getUserId());
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户用户角色");
+        }
+
+        List<BRole> bRoles = bRoleDao.userRole(req.getTenantId(), req.getUserId());
 
         List<UserRoleResp.Role> roles = bRoles.stream()
                 .map(role -> new UserRoleResp.Role()
                         .setName(role.getName())
                         .setRoleId(role.getRoleId()))
-                .collect(Collectors.toList());
+                .toList();
 
         return new UserRoleResp()
                 .setRoles(roles);

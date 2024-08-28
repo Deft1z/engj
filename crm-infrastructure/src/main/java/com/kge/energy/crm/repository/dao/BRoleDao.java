@@ -46,8 +46,8 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
         return mapper.roleResource(roleId, systemType);
     }
 
-    public List<BRole> userRole(Integer userId) {
-        return mapper.userRole(userId);
+    public List<BRole> userRole(Integer tenantId, Integer userId) {
+        return mapper.userRole(tenantId, userId);
     }
 
     public Integer getRoleIdByCode(String code, Integer tenantId) {
