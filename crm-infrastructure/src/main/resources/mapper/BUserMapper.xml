@@ -142,6 +142,38 @@
         </if>
     </select>
 
+    <select id="listByRole" resultType="com.kge.energy.crm.repository.entityext.result.UserListResult">
+        select bu.user_id,bu.name,bu.realname,bu.mobile,bu.status,bo.name organizationName
+        from b_user bu,
+        b_organization bo,
+        r_user_tenant rut,
+        b_role br,
+        r_user_role rur
+        where bu.flag = 1
+        and bo.flag = 1
+        and rut.flag = 1
+        and bu.user_id = rut.user_id
+        and bo.organization_id = rut.organization_id
+        and bu.user_id = rur.user_id
+        and br.role_id = rur.role_id
+        <if test="param.tenantId != null">
+            and bu.tenant_id = #{param.tenantId}
+            and br.tenant_id = #{param.tenantId}
+        </if>
+        <if test="param.roleId != null">
+            and br.role_id = #{param.roleId}
+        </if>
+        <if test="param.name != null and param.name != ''">
+            and bu.name like CONCAT('%',#{param.name},'%')
+        </if>
+        <if test="param.realname != null and param.realname != ''">
+            and bu.realname like CONCAT('%',#{param.realname},'%')
+        </if>
+        <if test="param.mobile != null and param.mobile != ''">
+            and bu.mobile like CONCAT('%',#{param.mobile},'%')
+        </if>
+    </select>
+
     <!--查询集团总部的客服人员手机号-->
     <select id="findJtCustomerPhones" resultType="string">
         select a.mobile
@@ -175,8 +207,8 @@
     <select id="findUserByContractId" resultMap="BUserMap">
         select b.user_id, b.name, b.remark, b.open_id
         from b_user b
-        JOIN wf_form wf ON wf.create_user_id = b.user_id
-        JOIN sc_service_contract sc ON sc.form_id = wf.form_id
+                 JOIN wf_form wf ON wf.create_user_id = b.user_id
+                 JOIN sc_service_contract sc ON sc.form_id = wf.form_id
         where sc.service_contract_id = #{scid}
         limit 1
     </select>

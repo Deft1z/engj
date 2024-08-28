@@ -77,6 +77,12 @@ public class UserController {
         return CommonResponse.suc(userService.list(req));
     }
 
+    @Operation(summary = "获取角色的用户列表")
+    @PostMapping("/user/listByRole")
+    public CommonResponse<PageResp<UserListResp>> listByRole(@Validated @RequestBody UserListByRoleReq req) {
+        return CommonResponse.suc(userService.listByRole(req));
+    }
+
     @Operation(summary = "用户详情")
     @GetMapping("/user/detail/{userId}")
     public CommonResponse<UserDetailResp> detail(@PathVariable("userId") Integer userId) {
@@ -105,6 +111,12 @@ public class UserController {
     @PostMapping("/user/assignRole")
     public CommonResponse<Boolean> assignRole(@Validated @RequestBody AssignUserRoleReq req) {
         return CommonResponse.suc(userService.assignRole(req));
+    }
+
+    @Operation(summary = "移除用户角色")
+    @PostMapping("/user/removeRole")
+    public CommonResponse<Boolean> removeRole(@Validated @RequestBody RemoveUserRoleReq req) {
+        return CommonResponse.suc(userService.removeRole(req));
     }
 
     @Operation(summary = "重置密码")

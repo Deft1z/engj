@@ -117,6 +117,11 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.list(page, param);
     }
 
+    public IPage<UserListResult> listByRole(UserListParam param) {
+        Page<UserListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+        return mapper.listByRole(page, param);
+    }
+
     public List<String> findJtCustomerPhones() {
         return mapper.findJtCustomerPhones();
     }
@@ -125,7 +130,7 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.findSubCustomerPhones(orgId);
     }
 
-    public BUser findUserByContractId (Integer scid) {
+    public BUser findUserByContractId(Integer scid) {
         return mapper.findUserByContractId(scid);
     }
 
