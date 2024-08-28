@@ -13,6 +13,9 @@ import lombok.experimental.Accessors;
 @Schema(name = "获取用户角色请求参数", description = "获取用户角色请求参数")
 public class UserRoleReq {
 
+    @Schema(description = "租户id", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Integer tenantId;
+
     @Schema(description = "用户ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private Integer userId;
