@@ -12,6 +12,8 @@ public class WxUserWorkOrderParam extends PageReq {
 
     private Integer userId;
 
+    private Integer tenantId;
+
     private Set<String> roleCodes;
 
     private WorkOrderListParam.SearchMapBean searchMap;

@@ -66,6 +66,7 @@ public class ScServiceContractService {
         //设置userId、roleId
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
         wxUserWorkOrderParam.setUserId(currentUserInfo.getUserId().intValue());
+        wxUserWorkOrderParam.setTenantId(currentUserInfo.getTenantId());
         //集团客服jt_customer，可查看全部服务合同
         //二级公司客服sub_company_customer，仅可查看自己创建的服务合同
         wxUserWorkOrderParam.setRoleCodes(currentUserInfo.getRoleCodes());
@@ -107,7 +108,8 @@ public class ScServiceContractService {
                 .setStatus(ConstParam.Ready)
                 .setFlag(1)
                 .setCreateUserId(operator.getUserId().intValue())
-                .setRemark(req.getRemark());
+                .setRemark(req.getRemark())
+                .setTenantId(operator.getTenantId());
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
             scServiceContract.setServiceUnit(req.getServiceUnit());
         }
@@ -132,7 +134,8 @@ public class ScServiceContractService {
                 .setTimeAction(now)
                 .setActionType(ConstParam.FlowCompanyContract)
                 .setActionContent(req.getRemark())
-                .setStatus(ConstParam.FlowCompanyContract);
+                .setStatus(ConstParam.FlowCompanyContract)
+                .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         return true;
@@ -182,14 +185,15 @@ public class ScServiceContractService {
         //新增评价
         ScContractEvaluate scContractEvaluate = new ScContractEvaluate()
                 .setServiceContractId(req.getServiceContractId())
-                        .setEvaluate(req.getEvaluate())
-                        .setSatisfaction(req.getSatisfaction());
+                .setEvaluate(req.getEvaluate())
+                .setSatisfaction(req.getSatisfaction())
+                .setTenantId(UserInfoContextUtils.getCurrentTenantId());
         boolean saved = scContractEvaluateDao.save(scContractEvaluate);
         //更新合同状态
         LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda()
                 .set(ScServiceContract::getStatus, ConstParam.HasEvaluated)
                 .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-        boolean updated =  scServiceContractDao.update(updateWrapper);
+        boolean updated = scServiceContractDao.update(updateWrapper);
         return saved && updated;
     }
 

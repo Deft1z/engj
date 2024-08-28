@@ -136,6 +136,7 @@
         from w_complain a
         left join (<include refid="extend_complain_info"/>) as b on b.complain_id = a.complain_id
         where a.flag = 1
+          and a.tenant_id = #{userInfo.tenantId}
         <if test="userInfo.roleCodes != null and userInfo.roleCodes.contains('applet_user')">
             and a.create_user_id = #{userInfo.userId}
         </if>

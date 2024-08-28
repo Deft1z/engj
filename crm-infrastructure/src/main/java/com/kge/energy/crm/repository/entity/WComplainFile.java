@@ -1,9 +1,13 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 投诉附件(WComplainFile)实体类
@@ -23,6 +27,11 @@ public class WComplainFile {
     private Integer complainId; 
 
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime modifyTime; 
+    private LocalDateTime modifyTime;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 

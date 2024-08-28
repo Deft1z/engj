@@ -36,8 +36,10 @@ public interface BUserMapper extends BaseMapper<BUser> {
 
     IPage<UserListResult> list(Page<UserListResult> page, @Param("param") UserListParam param);
 
-    List<String> findJtCustomerPhones();
+    List<String> findJtCustomerPhones(@Param("tenantId") Integer tenantId);
 
-    List<String> findSubCustomerPhones(@Param("orgId") Integer orgId);
+    List<String> findSubCustomerPhones(@Param("orgId") Integer orgId, @Param("tenantId") Integer tenantId);
+
+    List<RoleUserResult> getUserByRoleCodeAndOrgId(@Param("roleCode") String roleCode, @Param("organizationId") Integer organizationId, @Param("tenantId") Integer tenantId);
 }
 

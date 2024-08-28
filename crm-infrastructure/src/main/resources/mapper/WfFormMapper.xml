@@ -236,6 +236,7 @@
         LEFT JOIN b_user e ON e.user_id = g.user_id
         LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
         where a.flag != -1
+            and a.tenant_id = #{userInfo.tenantId}
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleCodes.contains('applet_user')">
             and a.sub_status = #{listParam.searchMap.status}
         </if>
@@ -280,14 +281,16 @@
                 /*管理员和集团客服可查看全部数据*/
             </when>
             <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
-                join wf_form w on w.form_id = wf.form_id
+                join wf_form w on w.flag =1 and w.form_id = wf.form_id
             </when>
             <otherwise>
                 join wf_form w on w.flag =1 and w.form_id = wf.form_id
                 join b_user b ON b.flag = 1 and json_unquote(JSON_EXTRACT(w.content , '$.mobile')) = b.mobile
             </otherwise>
         </choose>
-        where wf.form_id = #{formId}
+        where wf.flag = 1
+            and wf.form_id = #{formId}
+            and wf.tenant_id = #{userInfo.tenantId}
         <choose>
             <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
                 /*管理员和集团客服可查看全部数据*/
