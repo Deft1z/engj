@@ -46,5 +46,6 @@ public interface BUserMapper extends BaseMapper<BUser> {
 
     BUser findUserByContractId(Integer scid);
 
+    IPage<BUser> findAppletUser(Page<BUser> page, @Param("tenantId") Integer tenantId, @Param("name") String name);
 }
 
