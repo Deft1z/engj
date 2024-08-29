@@ -3,7 +3,6 @@ package com.kge.energy.crm.order.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -29,7 +28,6 @@ import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.req.contract.CreateContractReq;
 import com.kge.energy.crm.order.req.contract.UpdateProjectTimeReq;
 import com.kge.energy.crm.order.resp.ContractResp;
-import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.ScServiceContractDao;
 import com.kge.energy.crm.repository.dao.WfFormDao;
@@ -40,7 +38,6 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
-import com.kge.energy.crm.repository.entityext.result.FormResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -116,6 +113,7 @@ public class ContractService {
         contract.setCreateUserId(userInfoDto.getUserId().intValue());
         contract.setServiceUnit(userInfoDto.getRoleCodes().contains(JT_CUSTOMER.getCode()) ?
                 req.getServiceUnit() : userInfoDto.getOrganizationList().get(0).getId());
+        contract.setTenantId(userInfoDto.getTenantId());
         scServiceContractDao.save(contract);
 
         //更新form
@@ -134,7 +132,8 @@ public class ContractService {
                 .setTimeAction(now)
                 .setActionContent(ConstParam.FlowCompanyContract)
                 .setActionContent(req.getContent())
-                .setStatus(ConstParam.FlowCompanyContract);
+                .setStatus(ConstParam.FlowCompanyContract)
+                .setTenantId(userInfoDto.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         return CommonResponse.suc(true);
@@ -154,7 +153,7 @@ public class ContractService {
     }
 
     @Transactional
-    private CommonResponse<Object> updateStartTime(UpdateProjectTimeReq req) {
+    protected CommonResponse<Object> updateStartTime(UpdateProjectTimeReq req) {
         if(StrUtil.isBlank(req.getProjectTime())){
             return CommonResponse.bad(ResponseCode.PARAM_NOT_VALID, null);
         }
@@ -169,7 +168,7 @@ public class ContractService {
     }
 
     @Transactional
-    private CommonResponse<Object> updateFinishTime(UpdateProjectTimeReq req) {
+    protected CommonResponse<Object> updateFinishTime(UpdateProjectTimeReq req) {
         LocalDateTime now = LocalDateTime.now();
 
         if(StrUtil.isBlank(req.getProjectTime())){

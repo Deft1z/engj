@@ -34,13 +34,13 @@ import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -72,9 +72,16 @@ public class WorkOrderService {
      * 工单列表
      */
     public PageResp<FormResp> list(WorkOrderListReq req) {
-
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
+
+        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+            req.setTenantId(userInfoDto.getTenantId());
+        }
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户信息");
+        }
 
         IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
         WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
@@ -161,7 +168,8 @@ public class WorkOrderService {
                 .setTimeReception(LocalDateTime.now())
                 .setModifyUserId(Math.toIntExact(userInfoDto.getUserId()))
                 .setCurrentOrgId(req.getCurrentOrgId())
-                .setCurrentRoleId(req.getCurrentRoleId());
+                .setCurrentRoleId(req.getCurrentRoleId())
+                .setTenantId(userInfoDto.getTenantId());
         wfFormDao.updateById(form);
 
         WfFormFlow wfFormFlow = new WfFormFlow()
@@ -170,7 +178,8 @@ public class WorkOrderService {
                 .setActionType(ConstParam.FlowCompanyProcess)
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowCompanyProcess)
-                .setCreateUserId(Math.toIntExact(userInfoDto.getUserId()));
+                .setCreateUserId(Math.toIntExact(userInfoDto.getUserId()))
+                .setTenantId(userInfoDto.getTenantId());
         if (ObjUtil.equals(req.getLevel(), 1)) {
             wfFormFlow.setStatus(ConstParam.FlowTagGroup);
         } else {
@@ -200,7 +209,8 @@ public class WorkOrderService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowHasFeedback)
                 .setCreateUserId(userInfoDto.getUserId().intValue())
-                .setSubStatus(req.getLevel() == 1 ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub);
+                .setSubStatus(req.getLevel() == 1 ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
+                .setTenantId(userInfoDto.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
@@ -256,7 +266,8 @@ public class WorkOrderService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowFinished)
                 .setCreateUserId(userInfoDto.getUserId().intValue())
-                .setSubStatus(req.getLevel() == 1 ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub);
+                .setSubStatus(req.getLevel() == 1 ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
+                .setTenantId(userInfoDto.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
@@ -313,7 +324,8 @@ public class WorkOrderService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowFinished)
                 .setCreateUserId(userInfoDto.getUserId().intValue())
-                .setSubStatus(req.getLevel() == 1 ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub);
+                .setSubStatus(req.getLevel() == 1 ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
+                .setTenantId(userInfoDto.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //终止合同
@@ -375,7 +387,8 @@ public class WorkOrderService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowGroupProcess)
                 .setCreateUserId(userInfoDto.getUserId().intValue())
-                .setSubStatus(ConstParam.FlowTagGroup);
+                .setSubStatus(ConstParam.FlowTagGroup)
+                .setTenantId(userInfoDto.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户

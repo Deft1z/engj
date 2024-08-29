@@ -1,6 +1,7 @@
 package com.kge.energy.crm.workflow.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.PhoneUtil;
@@ -56,8 +57,6 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Slf4j
 public class ConsultingService {
-
-    public static final String FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND = "yyyy-MM-dd HH:mm:ss";
 
     private static final String WORK_CODE_CACHE_KEY_PREFIX = "crm_order_code:";
 
@@ -149,7 +148,7 @@ public class ConsultingService {
         msgContentBuilder.append("所在地区：").append(content.getArea()).append("\n");
         msgContentBuilder.append("用电容量(kVA)：").append(content.getElectricityCapacity()).append("\n");
         msgContentBuilder.append("工单编号：").append(content.getCode()).append("\n");
-        msgContentBuilder.append("生成时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+        msgContentBuilder.append("生成时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
         msgContentBuilder.append("客户名称：").append(content.getCustomerName()).append("\n");
         msgContentBuilder.append("客户手机：").append(content.getMobile()).append("\n");
         msgContentBuilder.append("备注：").append(req.getRemark());
@@ -179,6 +178,8 @@ public class ConsultingService {
 
         IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
         WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
+        //限制数据查询范围，设置租户id
+        workOrderListParam.setTenantId(UserInfoContextUtils.getCurrentTenantId());
         log.info("==> workOrderListParam= {}", workOrderListParam);
 
         IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
@@ -302,7 +303,7 @@ public class ConsultingService {
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
         msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-        msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+        msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
         msgContentBuilder.append("客户名称：").append(content.get("customerName")).append("\n");
         msgContentBuilder.append("客户手机：").append(content.get("mobile")).append("\n");
         String activeProfile = env.getProperty("spring.profiles.active");
@@ -393,7 +394,7 @@ public class ConsultingService {
                 .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
                 .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
                 .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.FlowFinished))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))));
+                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))));
         SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
                 .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
                 .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
@@ -449,7 +450,7 @@ public class ConsultingService {
                 .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
                 .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
                 .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.FlowFinished))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))));
+                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))));
         SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
                 .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
                 .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
@@ -504,7 +505,7 @@ public class ConsultingService {
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
         msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-        msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+        msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
         msgContentBuilder.append("派发公司：").append(content.get("companyName")).append("\n");
         msgContentBuilder.append("撤回原因：").append(req.getContent());
         //获取集团客服人员手机号
@@ -520,7 +521,7 @@ public class ConsultingService {
                 .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
                 .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
                 .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.SendBack))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))));
+                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))));
         SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
                 .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
                 .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
@@ -533,7 +534,7 @@ public class ConsultingService {
             msgContentBuilder = new StringBuilder();
             msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
             msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-            msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+            msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
             msgContentBuilder.append("撤回人员：").append(RoleEnums.JT_CUSTOMER.getDesc()).append("\n");
             msgContentBuilder.append("撤回原因：").append(req.getContent());
             //获取二级公司客服人员手机号

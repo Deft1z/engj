@@ -1,9 +1,10 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * w_complain_flow 投诉反馈流程(WComplainFlow)实体类
@@ -44,6 +45,11 @@ public class WComplainFlow {
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
     private LocalDateTime modifyTime; 
 
-    private String remark; 
+    private String remark;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 

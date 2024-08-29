@@ -5,11 +5,13 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.complain.req.ComplainListReq;
 import com.kge.energy.crm.complain.req.ComplainReplyReq;
@@ -28,6 +30,7 @@ import com.kge.energy.crm.repository.entity.WComplain;
 import com.kge.energy.crm.repository.entity.WComplainFlow;
 import com.kge.energy.crm.repository.entityext.param.ComplainListParam;
 import com.kge.energy.crm.repository.entityext.result.complain.ComplainResult;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -50,10 +53,17 @@ public class ComplainService {
     private final WeChatAppletProperties wechatAppletProperties;
     private final BUserDao bUserDao;
 
-    public PageResp<ComplainListResp> getComplainList(ComplainListReq complainListReq) {
+    public PageResp<ComplainListResp> getComplainList(ComplainListReq req) {
+        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+            req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
+        }
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户信息");
+        }
 
-        ComplainListParam complainListParam = BeanUtil.copyProperties(complainListReq, ComplainListParam.class);
-        Opt.ofNullable(complainListReq.getSearchMap()).ifPresent(map -> {
+        ComplainListParam complainListParam = BeanUtil.copyProperties(req, ComplainListParam.class);
+        Opt.ofNullable(req.getSearchMap()).ifPresent(map -> {
             Opt.ofBlankAble(map.getName()).ifPresent(complainListParam::setName);
             Opt.ofNullable(map.getStatus()).ifPresent(status -> complainListParam.setStatus(ComplainStatusEnums.getCodeByDesc(status)));
         });
@@ -95,7 +105,8 @@ public class ComplainService {
                 .setTimeAction(nowLocalDateTime)
                 .setUserId(userId)
                 .setActionType(ConstParam.FlowHasFeedback)
-                .setStatus(ConstParam.CompanyProcessing);
+                .setStatus(ConstParam.CompanyProcessing)
+                .setTenantId(UserInfoContextUtils.getCurrentTenantId());
         Boolean wComplainFlowCreateResult = wComplainFlowDao.save(wComplainFlow);
 
         if(!(wComplainUndateResult && wComplainFlowCreateResult)){
@@ -109,7 +120,7 @@ public class ComplainService {
     }
 
     @Async
-    private void sendReplyMessage(ComplainReplyReq complainReplyReq, WComplain wComplain, Date sendDate) {
+    protected void sendReplyMessage(ComplainReplyReq complainReplyReq, WComplain wComplain, Date sendDate) {
         CompletableFuture.runAsync(() -> {
             try{
                 ComplainResult complainResult = wComplainDao.getComplain(wComplain.getComplainId());

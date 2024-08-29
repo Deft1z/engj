@@ -134,7 +134,10 @@
                 and b.create_user_id = #{userInfo.userId}
             </if>
             <if test="userInfo.roleId != null and userInfo.roleId == 3 and userInfo.organizationList.size > 0">
-                and a.current_org_id = #{userInfo.organizationList[0].id}
+                and a.current_org_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
             </if>
             <if test="userInfo.roleId != null and userInfo.roleId == 5">
                 a.create_user_id = #{userInfo.userId}
@@ -236,7 +239,9 @@
         LEFT JOIN b_user e ON e.user_id = g.user_id
         LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
         where a.flag != -1
-            and a.tenant_id = #{userInfo.tenantId}
+        <if test="listParam.tenantId != null">
+            and a.tenant_id = #{listParam.tenantId}
+        </if>
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleCodes.contains('applet_user')">
             and a.sub_status = #{listParam.searchMap.status}
         </if>
@@ -247,7 +252,10 @@
             and json_unquote(json_extract(a.content, '$.businessName')) like CONCAT('%', #{listParam.searchMap.businessName}, '%')
         </if>
         <if test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
-            and a.current_org_id = #{userInfo.organizationList[0].id}
+            and a.current_org_id in
+            <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                #{org.id}
+            </foreach>
         </if>
         <if test="userInfo.roleCodes != null and userInfo.roleCodes.contains('applet_user')">
             and a.create_user_id = #{userInfo.userId}
@@ -290,7 +298,9 @@
         </choose>
         where wf.flag = 1
             and wf.form_id = #{formId}
+        <if test="userInfo.tenantId != null and !userInfo.roleCodes.contains('super_admin')">
             and wf.tenant_id = #{userInfo.tenantId}
+        </if>
         <choose>
             <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
                 /*管理员和集团客服可查看全部数据*/

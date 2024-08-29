@@ -19,6 +19,8 @@ public class WorkOrderListReq extends PageReq {
 
     private Integer formTypeId;
 
+    private Integer tenantId;
+
     private SearchMapBean searchMap;
 
     @Data
