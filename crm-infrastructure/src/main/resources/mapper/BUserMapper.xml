@@ -178,10 +178,10 @@
     <select id="findJtCustomerPhones" resultType="string">
         select a.mobile
         from b_user a
-        join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
-        join b_organization c on c.flag = 1 and c.organization_id = b.organization_id
-        join r_user_role d on d.flag =1 and d.user_id = a.user_id
-        join b_role e on e.flag =1 and e.role_id = d.role_id
+                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
+                 join b_organization c on c.flag = 1 and c.organization_id = b.organization_id
+                 join r_user_role d on d.flag = 1 and d.user_id = a.user_id
+                 join b_role e on e.flag = 1 and e.role_id = d.role_id
         where a.flag = 1
             /*集团总部*/
           and c.parent_organization_id is null
@@ -194,9 +194,9 @@
     <select id="findSubCustomerPhones" resultType="string">
         select a.mobile
         from b_user a
-        join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
-        join r_user_role c on c.flag = 1 and c.user_id = a.user_id
-        join b_role d on d.flag =1 and d.role_id = c.role_id
+                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
+                 join r_user_role c on c.flag = 1 and c.user_id = a.user_id
+                 join b_role d on d.flag = 1 and d.role_id = c.role_id
         where a.flag = 1
             /*二级公司*/
           and b.organization_id = #{orgId}
@@ -208,10 +208,10 @@
     <select id="getUserByRoleCodeAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
         select bu.`name` as username, bu.realname, bu.open_id, bu.user_id, bu.mobile
         from b_user bu
-        join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
-        join b_role br on br.flag = 1 and br.role_id = rur.role_id
-        join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
-        join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
+                 join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
+                 join b_role br on br.flag = 1 and br.role_id = rur.role_id
+                 join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+                 join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
         where bu.flag = 1
           and bu.tenant_id = #{tenantId}
           and br.code = #{roleCode}
@@ -225,6 +225,26 @@
                  JOIN sc_service_contract sc ON sc.form_id = wf.form_id
         where sc.service_contract_id = #{scid}
         limit 1
+    </select>
+
+    <select id="findAppletUser" resultMap="BUserMap">
+        select bu.*
+        from b_user bu,b_role br,r_user_role rrr
+        where bu.flag = 1
+        and br.flag = 1
+        and rrr.flag = 1
+        and bu.user_id = rrr.user_id
+        and br.role_id = rrr.role_id
+        and br.code = 'applet_user'
+        <if test="tenantId != null">
+            and bu.tenant_id = #{tenantId}
+        </if>
+        <if test="name != null and name != ''">
+            and (bu.name like CONCAT('%',#{name},'%')
+            or bu.realname like CONCAT('%',#{name},'%')
+            or bu.mobile like CONCAT('%',#{name},'%')
+            )
+        </if>
     </select>
 </mapper>
 

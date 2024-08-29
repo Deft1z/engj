@@ -11,6 +11,7 @@ import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.CommonResponse;
@@ -218,9 +219,37 @@ public class UserService {
         return authToken;
     }
 
-    public WxUserListResp findWxUserList(WxUserListReq req) {
-        IPage<BUser> users = bUserDao.findAllWxUser(req.getSearchMap().getName(), req.getCurrentPage(), req.getPageSize());
-        return new WxUserListResp(users.getCurrent(), users.getSize(), users.getTotal(), users.getRecords());
+    public PageResp<WxUserListResp> findAppletUser(WxUserListReq req) {
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+            req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
+        }
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户信息");
+        }
+
+        Page<BUser> page = new Page<>(req.getCurrentPage(), req.getPageSize());
+
+        IPage<BUser> users = bUserDao.findAppletUser(page, req.getTenantId(), req.getSearchMap().getName());
+
+        List<WxUserListResp> list = users.getRecords()
+                .stream()
+                .map(item -> new WxUserListResp()
+                        .setUserId(item.getUserId())
+                        .setRealname(item.getRealname())
+                        .setMobile(item.getMobile())
+                        .setCompany(item.getCompany())
+                        .setAddress(item.getAddress())
+                        .setRemark(item.getRemark())
+                        .setTenantId(item.getTenantId())
+                ).toList();
+
+        return new PageResp<WxUserListResp>()
+                .setCurrentPage(users.getCurrent())
+                .setPageSize(users.getSize())
+                .setTotal(users.getTotal())
+                .setList(list);
     }
 
     /**

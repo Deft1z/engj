@@ -67,8 +67,8 @@ public class UserController {
      */
     @ConvertToGoFormats
     @PostMapping("/baseDataBack/userBackMrg/wxUser/load")
-    public CommonResponse<WxUserListResp> currentWxUserList(@RequestBody WxUserListReq req) {
-        return CommonResponse.suc(userService.findWxUserList(req));
+    public CommonResponse<PageResp<WxUserListResp>> findAppletUser(@RequestBody WxUserListReq req) {
+        return CommonResponse.suc(userService.findAppletUser(req));
     }
 
     @Operation(summary = "获取租户或部门下的用户列表")
