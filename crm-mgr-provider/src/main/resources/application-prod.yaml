@@ -2,7 +2,7 @@ server:
   port: 9050
 
 mysql:
-  host: 172.16.17.157
+  host: 172.16.17.167
   port: 3306
   dbname: ntcrm_prod
   username: ntcrmProd
@@ -11,7 +11,7 @@ mysql:
 spring:
   data:
     redis:
-      host: 172.16.17.157
+      host: 172.16.17.167
       port: 6379
       password: nftzcrmR@1113
       database: 13
