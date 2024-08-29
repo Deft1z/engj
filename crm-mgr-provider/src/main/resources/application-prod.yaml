@@ -13,6 +13,7 @@ spring:
     redis:
       host: 172.16.17.157
       port: 6379
+      password: nftzcrmR@1113
       database: 13
       front: engjkfxcx_prod_
 
