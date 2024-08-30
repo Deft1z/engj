@@ -53,5 +53,13 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
     public Integer getRoleIdByCode(String code, Integer tenantId) {
         return mapper.getRoleIdByCode(code, tenantId);
     }
+
+    public BRole getTenantRoleByCode(Integer tenantId, String code) {
+        LambdaQueryWrapper<BRole> wrapper = new LambdaQueryWrapper<BRole>()
+                .eq(BRole::getTenantId, tenantId)
+                .eq(BRole::getCode, code);
+
+        return mapper.selectOne(wrapper);
+    }
 }
 

@@ -203,7 +203,6 @@
              , DATE_FORMAT(a.time_finished, '%Y-%m-%d %T') AS time_finished
              , a.flag
              , a.remark
-             , e.`realname`
              , d.`name` AS org_name,
             <choose>
                 <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
@@ -233,10 +232,8 @@
             </choose>
         from wf_form a
         LEFT JOIN wf_form_flow b ON b.form_id = a.form_id AND b.create_user_id = #{userInfo.userId}
-        LEFT JOIN wf_form_flow g ON g.form_id = a.form_id AND (g.action_type = '添加合同' OR g.action_type = '已完成' OR g.action_type = '已回复') AND g.create_user_id = #{userInfo.userId}
         LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
         LEFT JOIN b_organization d ON d.organization_id = a.current_org_id
-        LEFT JOIN b_user e ON e.user_id = g.user_id
         LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
         where a.flag != -1
         <if test="listParam.tenantId != null">
@@ -272,7 +269,7 @@
             and a.modify_time &gt;= #{listParam.searchMap.starttime}
             and a.modify_time &lt;= #{listParam.searchMap.endtime}
         </if>
-        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.flag,a.remark, e.`realname`, d.`name`, `user_status`
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.flag,a.remark, d.`name`, `user_status`
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and !userInfo.roleCodes.contains('applet_user')">
             having user_status = #{listParam.searchMap.status}
         </if>
