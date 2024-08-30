@@ -142,43 +142,109 @@
         </if>
     </select>
 
+    <select id="listByRole" resultType="com.kge.energy.crm.repository.entityext.result.UserListResult">
+        select bu.user_id,bu.name,bu.realname,bu.mobile,bu.status,bo.name organizationName
+        from b_user bu,
+        b_organization bo,
+        r_user_tenant rut,
+        b_role br,
+        r_user_role rur
+        where bu.flag = 1
+        and bo.flag = 1
+        and rut.flag = 1
+        and bu.user_id = rut.user_id
+        and bo.organization_id = rut.organization_id
+        and bu.user_id = rur.user_id
+        and br.role_id = rur.role_id
+        <if test="param.tenantId != null">
+            and bu.tenant_id = #{param.tenantId}
+            and br.tenant_id = #{param.tenantId}
+        </if>
+        <if test="param.roleId != null">
+            and br.role_id = #{param.roleId}
+        </if>
+        <if test="param.name != null and param.name != ''">
+            and bu.name like CONCAT('%',#{param.name},'%')
+        </if>
+        <if test="param.realname != null and param.realname != ''">
+            and bu.realname like CONCAT('%',#{param.realname},'%')
+        </if>
+        <if test="param.mobile != null and param.mobile != ''">
+            and bu.mobile like CONCAT('%',#{param.mobile},'%')
+        </if>
+    </select>
+
     <!--查询集团总部的客服人员手机号-->
     <select id="findJtCustomerPhones" resultType="string">
         select a.mobile
         from b_user a
-                 join r_user_tenant b on b.user_id = a.user_id
-                 join r_user_role c on c.user_id = a.user_id
+                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
+                 join b_organization c on c.flag = 1 and c.organization_id = b.organization_id
+                 join r_user_role d on d.flag = 1 and d.user_id = a.user_id
+                 join b_role e on e.flag = 1 and e.role_id = d.role_id
         where a.flag = 1
-          and b.flag = 1
-          and c.flag = 1
             /*集团总部*/
-          and b.organization_id = 1
+          and c.parent_organization_id is null
             /*集团客服*/
-          and c.role_id = 2
+          and e.code = 'jt_customer'
+          and a.tenant_id = #{tenantId}
     </select>
 
     <!--查询二级的客服人员手机号-->
     <select id="findSubCustomerPhones" resultType="string">
         select a.mobile
         from b_user a
-                 join r_user_tenant b on b.user_id = a.user_id
-                 join r_user_role c on c.user_id = a.user_id
+                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
+                 join r_user_role c on c.flag = 1 and c.user_id = a.user_id
+                 join b_role d on d.flag = 1 and d.role_id = c.role_id
         where a.flag = 1
-          and b.flag = 1
-          and c.flag = 1
             /*二级公司*/
           and b.organization_id = #{orgId}
             /*二级公司客服*/
-          and c.role_id = 3
+          and d.code = 'sub_company_customer'
+          and a.tenant_id = #{tenantId}
+    </select>
+
+    <select id="getUserByRoleCodeAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
+        select bu.`name` as username, bu.realname, bu.open_id, bu.user_id, bu.mobile
+        from b_user bu
+                 join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
+                 join b_role br on br.flag = 1 and br.role_id = rur.role_id
+                 join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+                 join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
+        where bu.flag = 1
+          and bu.tenant_id = #{tenantId}
+          and br.code = #{roleCode}
+          and bo.organization_id = #{organizationId}
     </select>
 
     <select id="findUserByContractId" resultMap="BUserMap">
         select b.user_id, b.name, b.remark, b.open_id
         from b_user b
-        JOIN wf_form wf ON wf.create_user_id = b.user_id
-        JOIN sc_service_contract sc ON sc.form_id = wf.form_id
+                 JOIN wf_form wf ON wf.create_user_id = b.user_id
+                 JOIN sc_service_contract sc ON sc.form_id = wf.form_id
         where sc.service_contract_id = #{scid}
         limit 1
+    </select>
+
+    <select id="findAppletUser" resultMap="BUserMap">
+        select bu.*
+        from b_user bu,b_role br,r_user_role rrr
+        where bu.flag = 1
+        and br.flag = 1
+        and rrr.flag = 1
+        and bu.user_id = rrr.user_id
+        and br.role_id = rrr.role_id
+        and br.code = 'applet_user'
+        <if test="tenantId != null">
+            and bu.tenant_id = #{tenantId}
+        </if>
+        <if test="name != null and name != ''">
+            and (bu.name like CONCAT('%',#{name},'%')
+            or bu.realname like CONCAT('%',#{name},'%')
+            or bu.mobile like CONCAT('%',#{name},'%')
+            )
+        </if>
     </select>
 </mapper>
 

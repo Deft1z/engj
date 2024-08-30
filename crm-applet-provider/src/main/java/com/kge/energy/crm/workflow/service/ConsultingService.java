@@ -1,6 +1,7 @@
 package com.kge.energy.crm.workflow.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.PhoneUtil;
@@ -30,7 +31,10 @@ import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
-import com.kge.energy.crm.workflow.req.*;
+import com.kge.energy.crm.workflow.req.ConsultingAddReq;
+import com.kge.energy.crm.workflow.req.ConsultingUpdateReq;
+import com.kge.energy.crm.workflow.req.WfFormFlowReq;
+import com.kge.energy.crm.workflow.req.WfFormReq;
 import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
 import com.kge.energy.crm.workflow.resp.WfFormResp;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -53,8 +57,6 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Slf4j
 public class ConsultingService {
-
-    public static final String FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND = "yyyy-MM-dd HH:mm:ss";
 
     private static final String WORK_CODE_CACHE_KEY_PREFIX = "crm_order_code:";
 
@@ -121,6 +123,8 @@ public class ConsultingService {
         wfForm.setCurrentOrgId(1);
         //集团客服
         wfForm.setCurrentRoleId(currentRoleId);
+        //租户
+        wfForm.setTenantId(operator.getTenantId());
         wfFormDao.save(wfForm);
 
         //保存流转记录
@@ -131,6 +135,7 @@ public class ConsultingService {
         wfFormFlow.setStatus(ConstParam.FlowStart);
         wfFormFlow.setSubStatus(ConstParam.FlowTagGroup);
         wfFormFlow.setCreateUserId(operator.getUserId().intValue());
+        wfFormFlow.setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //todo 使用流程引擎替换现有的流程业务
@@ -143,12 +148,12 @@ public class ConsultingService {
         msgContentBuilder.append("所在地区：").append(content.getArea()).append("\n");
         msgContentBuilder.append("用电容量(kVA)：").append(content.getElectricityCapacity()).append("\n");
         msgContentBuilder.append("工单编号：").append(content.getCode()).append("\n");
-        msgContentBuilder.append("生成时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+        msgContentBuilder.append("生成时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
         msgContentBuilder.append("客户名称：").append(content.getCustomerName()).append("\n");
         msgContentBuilder.append("客户手机：").append(content.getMobile()).append("\n");
         msgContentBuilder.append("备注：").append(req.getRemark());
         //获取集团客服人员手机号
-        List<String> phones = bUserDao.findJtCustomerPhones();
+        List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
         sendElinkMsg(phones, msgTitle, msgContentBuilder.toString());
 
         return true;
@@ -173,6 +178,8 @@ public class ConsultingService {
 
         IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
         WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
+        //限制数据查询范围，设置租户id
+        workOrderListParam.setTenantId(UserInfoContextUtils.getCurrentTenantId());
         log.info("==> workOrderListParam= {}", workOrderListParam);
 
         IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
@@ -210,13 +217,14 @@ public class ConsultingService {
             }
 
             //工单校验
-            WfForm wfForm = wfFormDao.getById(formId);
+            WfForm wfForm = wfFormDao.getOne(Wrappers.<WfForm>lambdaQuery().eq(WfForm::getFormId, formId).eq(WfForm::getTenantId, operator.getTenantId()));
             if (wfForm == null) {
                 throw new ServiceException("工单不存在!");
             }
             //获取工单流转记录，时间倒序取最新的记录
             LambdaQueryWrapper<WfFormFlow> queryWrapper = Wrappers.<WfFormFlow>lambdaQuery()
                     .eq(WfFormFlow::getFormId, formId)
+                    .eq(WfFormFlow::getTenantId, operator.getTenantId())
                     .orderByDesc(WfFormFlow::getCreateTime);
             List<WfFormFlow> flows = wfFormFlowDao.list(queryWrapper);
             WfFormFlow lastFlow = flows.get(0);
@@ -261,7 +269,7 @@ public class ConsultingService {
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         String formContent = wfForm.getContent();
-        List<RoleUserResult> assignUsers = bUserDao.getUserByRoleAndOrgId(3, req.getCurrentOrgId());
+        List<RoleUserResult> assignUsers = bUserDao.getUserByRoleCodeAndOrgId(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), req.getCurrentOrgId(), operator.getTenantId());
         if (assignUsers.isEmpty()) {
             throw new ServiceException("没有客服角色!");
         }
@@ -286,7 +294,8 @@ public class ConsultingService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowCompanyProcess)
                 .setCreateUserId(operatorUserId.intValue())
-                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub);
+                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
+                .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
         //发送elink消息通知，通知二级公司客服
         final String msgTitle = "工单待处理通知";
@@ -294,7 +303,7 @@ public class ConsultingService {
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
         msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-        msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+        msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
         msgContentBuilder.append("客户名称：").append(content.get("customerName")).append("\n");
         msgContentBuilder.append("客户手机：").append(content.get("mobile")).append("\n");
         String activeProfile = env.getProperty("spring.profiles.active");
@@ -339,7 +348,8 @@ public class ConsultingService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowHasFeedback)
                 .setCreateUserId(operatorUserId.intValue())
-                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub);
+                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
+                .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
     }
 
@@ -371,7 +381,8 @@ public class ConsultingService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowFinished)
                 .setCreateUserId(operatorUserId.intValue())
-                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub);
+                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
+                .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
@@ -383,7 +394,7 @@ public class ConsultingService {
                 .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
                 .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
                 .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.FlowFinished))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))));
+                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))));
         SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
                 .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
                 .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
@@ -420,7 +431,8 @@ public class ConsultingService {
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowFinished)
                 .setCreateUserId(operatorUserId.intValue())
-                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub);
+                .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
+                .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
         //终止合同
         LambdaUpdateWrapper<ScServiceContract> sscUpdateWrapper = Wrappers.<ScServiceContract>update().lambda()
@@ -438,7 +450,7 @@ public class ConsultingService {
                 .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
                 .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
                 .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.FlowFinished))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))));
+                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))));
         SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
                 .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
                 .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
@@ -483,7 +495,8 @@ public class ConsultingService {
                 .setActionType(ConstParam.FlowGroupProcess)
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowGroupProcess)
-                .setCreateUserId(operatorUserId.intValue());
+                .setCreateUserId(operatorUserId.intValue())
+                .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送elink消息，通知集团客服
@@ -492,11 +505,11 @@ public class ConsultingService {
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
         msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-        msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+        msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
         msgContentBuilder.append("派发公司：").append(content.get("companyName")).append("\n");
         msgContentBuilder.append("撤回原因：").append(req.getContent());
         //获取集团客服人员手机号
-        List<String> phones = bUserDao.findJtCustomerPhones();
+        List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
         sendElinkMsg(phones, msgTitle, msgContentBuilder.toString());
 
         //发送微信小程序消息，通知客户
@@ -508,7 +521,7 @@ public class ConsultingService {
                 .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
                 .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
                 .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.SendBack))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))));
+                .setHandleTime(new FormStatusChangeMsgReq.Value(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))));
         SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
                 .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
                 .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
@@ -521,13 +534,12 @@ public class ConsultingService {
             msgContentBuilder = new StringBuilder();
             msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
             msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-            msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND))).append("\n");
+            msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
             msgContentBuilder.append("撤回人员：").append(RoleEnums.JT_CUSTOMER.getDesc()).append("\n");
             msgContentBuilder.append("撤回原因：").append(req.getContent());
             //获取二级公司客服人员手机号
-            phones = bUserDao.findSubCustomerPhones(formCurrentOrgId);
+            phones = bUserDao.findSubCustomerPhones(formCurrentOrgId, operator.getTenantId());
             sendElinkMsg(phones, msgTitle, msgContentBuilder.toString());
-
         }
     }
 

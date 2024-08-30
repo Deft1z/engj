@@ -70,6 +70,9 @@
                 and c.create_user_id = #{listParam.userId}
             </otherwise>
         </choose>
+        <if test="listParam.tenantId != null">
+            and a.tenant_id = #{listParam.tenantId}
+        </if>
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
             and a.status = #{listParam.searchMap.status}
         </if>

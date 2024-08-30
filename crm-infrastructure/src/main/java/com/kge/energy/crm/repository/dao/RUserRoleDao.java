@@ -7,6 +7,8 @@ import com.kge.energy.crm.repository.mapper.RUserRoleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
+
 /**
  * 用户角色关系(RUserRole)表数据库访问层
  */
@@ -19,6 +21,13 @@ public class RUserRoleDao extends ServiceImpl<RUserRoleMapper, RUserRole> {
     public int removeByUserId(Integer userId) {
         LambdaUpdateWrapper wrapper = new LambdaUpdateWrapper<>(RUserRole.class)
                 .eq(RUserRole::getUserId, userId);
+        return mapper.delete(wrapper);
+    }
+
+    public int removeByUserAndRoleIds(Integer userId, Set<Integer> roleIds) {
+        LambdaUpdateWrapper wrapper = new LambdaUpdateWrapper<>(RUserRole.class)
+                .eq(RUserRole::getUserId, userId)
+                .in(RUserRole::getRoleId, roleIds);
         return mapper.delete(wrapper);
     }
 }

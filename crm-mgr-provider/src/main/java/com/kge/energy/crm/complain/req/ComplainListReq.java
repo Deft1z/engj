@@ -7,5 +7,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ComplainListReq extends PageReq {
+
+    private Integer tenantId;
+
     private ComplainListSearchMap searchMap;
 }

@@ -24,4 +24,6 @@ public class UserListParam extends PageReq {
     private String mobile;
 
     private Integer status;
+
+    private Integer roleId;
 }

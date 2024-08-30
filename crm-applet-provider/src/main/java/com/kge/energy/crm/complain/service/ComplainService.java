@@ -70,19 +70,22 @@ public class ComplainService {
                 .setCreateUserId(user.getUserId())
                 .setOrganizationId(req.getOrganizationId())
                 .setStatus(0)
-                .setFlag(1);
+                .setFlag(1)
+                .setTenantId(userInfo.getTenantId());
         wComplainDao.save(wComplain);
         //保存附件
         for (Integer fileId: req.getFileIds()){
             WComplainFile wComplainFile = new WComplainFile()
                     .setComplainId(wComplain.getComplainId())
-                    .setFileId(fileId);
+                    .setFileId(fileId)
+                    .setTenantId(userInfo.getTenantId());
             wComplainFileDao.save(wComplainFile);
         }
         //新增投诉关联记录
         RFormConsultComplain rFormConsultComplain = new RFormConsultComplain()
                 .setConsultId(req.getFormId())
-                .setComplainId(wComplain.getComplainId());
+                .setComplainId(wComplain.getComplainId())
+                .setTenantId(userInfo.getTenantId());
         rFormConsultComplainDao.save(rFormConsultComplain);
 
         //todo 是否发送消息通知处理投诉，原go项目的代码已注释，暂不实现

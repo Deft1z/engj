@@ -67,14 +67,20 @@ public class UserController {
      */
     @ConvertToGoFormats
     @PostMapping("/baseDataBack/userBackMrg/wxUser/load")
-    public CommonResponse<WxUserListResp> currentWxUserList(@RequestBody WxUserListReq req) {
-        return CommonResponse.suc(userService.findWxUserList(req));
+    public CommonResponse<PageResp<WxUserListResp>> findAppletUser(@RequestBody WxUserListReq req) {
+        return CommonResponse.suc(userService.findAppletUser(req));
     }
 
     @Operation(summary = "获取租户或部门下的用户列表")
     @PostMapping("/user/list")
     public CommonResponse<PageResp<UserListResp>> list(@Validated @RequestBody UserListReq req) {
         return CommonResponse.suc(userService.list(req));
+    }
+
+    @Operation(summary = "获取角色的用户列表")
+    @PostMapping("/user/listByRole")
+    public CommonResponse<PageResp<UserListResp>> listByRole(@Validated @RequestBody UserListByRoleReq req) {
+        return CommonResponse.suc(userService.listByRole(req));
     }
 
     @Operation(summary = "用户详情")
@@ -105,6 +111,12 @@ public class UserController {
     @PostMapping("/user/assignRole")
     public CommonResponse<Boolean> assignRole(@Validated @RequestBody AssignUserRoleReq req) {
         return CommonResponse.suc(userService.assignRole(req));
+    }
+
+    @Operation(summary = "移除用户角色")
+    @PostMapping("/user/removeRole")
+    public CommonResponse<Boolean> removeRole(@Validated @RequestBody RemoveUserRoleReq req) {
+        return CommonResponse.suc(userService.removeRole(req));
     }
 
     @Operation(summary = "重置密码")

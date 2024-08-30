@@ -44,7 +44,7 @@
                     DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
                     group_concat( i.filepath SEPARATOR ',' ) AS filepath,
                     j.realname,
-                    l.name AS org_name
+                    l.name AS org_name, a.tenant_id
                 FROM w_complain a
                 LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
                 LEFT JOIN sc_service_contract d ON d.service_contract_id = c.consult_id and d.flag != - 1
@@ -69,7 +69,7 @@
                     DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
                     i.filepath,
                     j.realname,
-                    l.name AS org_name
+                    l.name AS org_name, a.tenant_id
                 FROM w_complain a
                 LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
                 LEFT JOIN wf_form d ON d.form_id = c.consult_id and d.flag != -1
@@ -136,9 +136,23 @@
         from w_complain a
         left join (<include refid="extend_complain_info"/>) as b on b.complain_id = a.complain_id
         where a.flag = 1
-        <if test="userInfo.roleCodes != null and userInfo.roleCodes.contains('applet_user')">
-            and a.create_user_id = #{userInfo.userId}
+        <if test="userInfo.tenantId != null">
+            and a.tenant_id = #{userInfo.tenantId}
         </if>
+        <choose>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
+                /*管理员和集团客服可查看全部数据*/
+            </when>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+                and a.organization_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
         <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
             and (a.`subject` like concat('%', #{listParam.searchMap.name}, '%') or a.content like concat('%', #{listParam.searchMap.name}, '%'))
         </if>

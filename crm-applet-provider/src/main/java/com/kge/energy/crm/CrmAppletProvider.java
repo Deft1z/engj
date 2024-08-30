@@ -26,8 +26,6 @@ public class CrmAppletProvider {
                           Application:       {} is running Success!
                           Local URL:         http://localhost:{}{}
                           Document:          http://localhost:{}{}/doc.html
-                          Document UserName: {}
-                          Document Password: {}
                           =========================================================
                         """,
                 env.getProperty("spring.application.name"),

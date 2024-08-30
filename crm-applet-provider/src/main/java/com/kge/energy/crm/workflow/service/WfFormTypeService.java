@@ -2,6 +2,7 @@ package com.kge.energy.crm.workflow.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.WfFormTypeDao;
 import com.kge.energy.crm.repository.entity.WfFormType;
 import com.kge.energy.crm.workflow.resp.WfFormTypeTreeResp;
@@ -26,6 +27,7 @@ public class WfFormTypeService {
     public List<WfFormTypeTreeResp> getFormTypeTree() {
         //获取工单服务类型
         LambdaQueryWrapper<WfFormType> wrapper = Wrappers.<WfFormType>lambdaQuery()
+                .eq(WfFormType::getTenantId, UserInfoContextUtils.getCurrentTenantId())
                 .orderByAsc(WfFormType::getFormTypeId);
         List<WfFormType> list = wfFormTypeDao.list(wrapper);
 

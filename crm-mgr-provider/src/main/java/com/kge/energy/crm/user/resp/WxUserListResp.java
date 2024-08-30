@@ -1,25 +1,24 @@
 package com.kge.energy.crm.user.resp;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.kge.energy.crm.repository.entity.BUser;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.List;
-
 @Data
 @Accessors(chain = true)
-@AllArgsConstructor
 public class WxUserListResp {
 
-    private Long CurrentPage;
+    private Integer userId;
 
-    private Long PageSize;
+    private String realname;
 
-    private Long Total;
+    private String mobile;
 
-    @JsonProperty("list")
-    private List<BUser> UserList;
+    private String company;
+
+    private String address;
+
+    private String remark;
+
+    private Integer tenantId;
 
 }
