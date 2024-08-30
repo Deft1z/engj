@@ -231,7 +231,7 @@ public class UserService {
 
         Page<BUser> page = new Page<>(req.getCurrentPage(), req.getPageSize());
 
-        IPage<BUser> users = bUserDao.findAppletUser(page, req.getTenantId(), req.getSearchMap().getName());
+        IPage<BUser> users = bUserDao.findAppletUser(page, req.getTenantId(), req.getName());
 
         List<WxUserListResp> list = users.getRecords()
                 .stream()
