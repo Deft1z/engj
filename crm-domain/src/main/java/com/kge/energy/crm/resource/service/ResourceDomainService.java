@@ -35,7 +35,9 @@ public class ResourceDomainService {
 
         SystemResourceParam param = BeanUtil.toBean(req, SystemResourceParam.class);
 
-        List<BResource> bResourceList = bResourceDao.getSystemResources(param);
+        List<BResource> bResourceList = bResourceDao.getSystemResources(param)
+                .stream().distinct().toList();
+        ;
 
         return converToResourceListResp(bResourceList);
     }
@@ -47,7 +49,8 @@ public class ResourceDomainService {
 
         UserResourceParam param = BeanUtil.toBean(req, UserResourceParam.class);
 
-        List<BResource> bResourceList = bResourceDao.getUserResources(param);
+        List<BResource> bResourceList = bResourceDao.getUserResources(param)
+                .stream().distinct().toList();
 
         return converToResourceListResp(bResourceList);
     }

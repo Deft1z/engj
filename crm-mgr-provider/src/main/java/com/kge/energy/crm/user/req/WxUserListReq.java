@@ -1,29 +1,18 @@
 package com.kge.energy.crm.user.req;
 
+import com.kge.energy.crm.common.page.PageReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.Map;
-
 @Data
 @Accessors(chain = true)
-public class WxUserListReq {
-
-    private Long CurrentPage = 1L;
-
-    private Long PageSize = 10L;
+public class WxUserListReq extends PageReq {
 
     @Schema(description = "租户ID")
     private Integer tenantId;
 
-    private Map<String, String> Sort;
+    @Schema(description = "搜索参数")
+    private String name;
 
-    private SearchMapBean searchMap;
-
-    @Data
-    @Accessors(chain = true)
-    public static class SearchMapBean {
-        private String name;
-    }
 }

@@ -26,7 +26,7 @@ spring:
       connectionTimeout: 30000 # 获取连接超时时间（毫秒）
       autoCommit: true # 自动提交
       validationTimeout: 5000 # 连接验证超时时间（毫秒）
-      leakDetectionThreshold: 60000 # 检测连接泄露的阈值（毫秒）
+      leakDetectionThreshold: 180000 # 检测连接泄露的阈值（毫秒）
       isolateInternalQueries: false # 是否对内部查询使用独立的连接
       allowPoolSuspension: false # 是否允许暂停连接池
       readOnly: false # 连接是否只读
