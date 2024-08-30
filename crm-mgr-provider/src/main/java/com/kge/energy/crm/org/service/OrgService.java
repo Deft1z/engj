@@ -94,7 +94,7 @@ public class OrgService {
         if (isSuperAdmin) {
             //超管是否筛选租户的情况
             Opt.ofNullable(req.getTenantId()).ifPresentOrElse(param::setTenantId, () -> param.setTenantId(null));
-            param.setOrgIds(bOrganizationDao.getRootOrgList().stream().map(BOrganization::getOrganizationId).toList());
+            param.setOrgIds(bOrganizationDao.getRootOrgList(null).stream().map(BOrganization::getOrganizationId).toList());
         }
 
         return convertToOrgTree(bOrganizationDao.getAllOrgList(param));

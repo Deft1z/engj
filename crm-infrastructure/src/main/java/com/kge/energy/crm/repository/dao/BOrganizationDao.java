@@ -1,6 +1,7 @@
 package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -65,10 +66,22 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.getAllOrgList(param);
     }
 
-    public List<BOrganization> getRootOrgList() {
+    public List<BOrganization> getRootOrgList(Integer tenantId) {
         LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
                 .isNull(BOrganization::getParentOrganizationId);
+
+        if (ObjUtil.isNotNull(tenantId)) {
+            wrapper.eq(BOrganization::getTenantId, tenantId);
+        }
+
         return mapper.selectList(wrapper);
+    }
+
+    public BOrganization findByTenantOrgName(Integer tenantId, String name) {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getTenantId, tenantId)
+                .eq(BOrganization::getName, name);
+        return mapper.selectOne(wrapper);
     }
 }
 

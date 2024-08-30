@@ -16,6 +16,7 @@ import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.LoginPlatformEnums;
 import com.kge.energy.crm.enums.LoginResultEnums;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.enums.UserTypeEnums;
 import com.kge.energy.crm.external.elink.ElinkService;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
@@ -24,10 +25,8 @@ import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.resp.SendSubscribeResp;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.login.SysLoginLogHandleService;
-import com.kge.energy.crm.repository.dao.BUserDao;
-import com.kge.energy.crm.repository.dao.RUserRoleDao;
-import com.kge.energy.crm.repository.entity.BUser;
-import com.kge.energy.crm.repository.entity.RUserRole;
+import com.kge.energy.crm.repository.dao.*;
+import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.SendMessageReq;
@@ -74,6 +73,9 @@ public class WeChatLoginService {
     private final ElinkService elinkService;
 
     private final Environment env;
+    private final BOrganizationDao bOrganizationDao;
+    private final BRoleDao bRoleDao;
+    private final RUserTenantDao rUserTenantDao;
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
@@ -101,6 +103,7 @@ public class WeChatLoginService {
 //        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
 //            throw new BadException(appletLoginResp.getErrMsg());
 //        }
+
             user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
             if (ObjectUtil.isNotNull(user)) {
@@ -110,14 +113,8 @@ public class WeChatLoginService {
                 stringRedisTemplate.opsForHash().increment(key, hashKey, 1);
 
             } else {
-                //注册用户
-                BUser bUser = new BUser().setOpenId(appletLoginResp.getOpenId()).setFlag(1).setType("社会客户").setMobile(req.getMobile());
-                bUserDao.save(bUser);
-
-                RUserRole rRole = new RUserRole().setRoleId(5).setUserId(bUser.getUserId()).setCreateUserId(bUser.getUserId());
-                rUserRoleDao.save(rRole);
-
-                user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
+                // 新用户默认挂靠到南投-未挂靠组织下
+                user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
             }
 
             String token = userDomainService.genToken(user, false);
@@ -142,8 +139,43 @@ public class WeChatLoginService {
             throw new RuntimeException(e);
         }
 
-
     }
+
+    /**
+     * 新用户默认挂靠到南投-未挂靠组织下,没有未挂靠组织就挂到南投下
+     */
+    private BUser saveNewUser(String openId, String mobile) {
+
+        Integer defaultTenantId = 1;
+
+        BUser bUser = new BUser()
+                .setOpenId(openId)
+                .setMobile(mobile)
+                .setStatus(0)
+                .setFlag(1)
+                .setTenantId(defaultTenantId);
+        bUserDao.save(bUser);
+
+        BRole bRole = bRoleDao.getTenantRoleByCode(defaultTenantId, RoleEnums.APPLET_USER.getCode());
+        RUserRole rRole = new RUserRole()
+                .setRoleId(bRole.getRoleId())
+                .setUserId(bUser.getUserId())
+                .setCreateUserId(bUser.getUserId());
+        rUserRoleDao.save(rRole);
+
+        BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "未挂靠组织");
+        bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
+
+        RUserTenant rUserTenant = new RUserTenant()
+                .setUserId(bUser.getUserId())
+                .setOrganizationId(bOrganization.getOrganizationId())
+                .setTenantId(bUser.getTenantId())
+                .setFlag(1);
+        rUserTenantDao.save(rUserTenant);
+
+        return bUser;
+    }
+
 
     @Async
     public void sendLeaderOnlineMsg(BUser user) {
