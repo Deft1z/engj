@@ -160,7 +160,8 @@ public class WeChatLoginService {
         RUserRole rRole = new RUserRole()
                 .setRoleId(bRole.getRoleId())
                 .setUserId(bUser.getUserId())
-                .setCreateUserId(bUser.getUserId());
+                .setCreateUserId(bUser.getUserId())
+                .setTenantId(bUser.getTenantId());
         rUserRoleDao.save(rRole);
 
         BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "未挂靠组织");
