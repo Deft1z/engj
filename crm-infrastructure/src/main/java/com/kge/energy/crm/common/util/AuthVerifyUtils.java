@@ -1,5 +1,6 @@
 package com.kge.energy.crm.common.util;
 
+import cn.hutool.core.collection.CollUtil;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.platform.framework.common.exception.ServiceException;
 
@@ -43,6 +44,14 @@ public class AuthVerifyUtils {
         if (!isSuperAdmin()) {
             throw new ServiceException("当前用户非超级管理员用户");
         }
+    }
+
+    /**
+     * 是否仅是小程序用户
+     */
+    public static boolean isOnlyAppletUser() {
+        return CollUtil.size(UserInfoContextUtils.getCurrentUserInfo().getRoleCodes()) == 1
+                && isContainsRole(RoleEnums.APPLET_USER.getCode());
     }
 
     public static void mustTenantAdmin() {

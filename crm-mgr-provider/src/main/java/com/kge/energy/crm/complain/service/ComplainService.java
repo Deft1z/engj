@@ -69,7 +69,7 @@ public class ComplainService {
         });
 
         //小程序用户只能看自己提的投诉单
-        if(UserInfoContextUtils.getCurrentUserInfo().getRoleCodes().contains("applet_user")){
+        if(AuthVerifyUtils.isOnlyAppletUser()){
             complainListParam.setCreateUserId(UserInfoContextUtils.getCurrentUserId());
         }
 
