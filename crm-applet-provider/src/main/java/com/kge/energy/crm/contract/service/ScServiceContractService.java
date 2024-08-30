@@ -67,7 +67,7 @@ public class ScServiceContractService {
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
         wxUserWorkOrderParam.setUserId(currentUserInfo.getUserId().intValue());
         wxUserWorkOrderParam.setTenantId(currentUserInfo.getTenantId());
-        //集团客服jt_customer，可查看全部服务合同
+        //超管super_admin和集团客服jt_customer，可查看全部服务合同
         //二级公司客服sub_company_customer，仅可查看自己创建的服务合同
         wxUserWorkOrderParam.setRoleCodes(currentUserInfo.getRoleCodes());
         IPage<ContractResult> pages = scServiceContractDao.contractPageByUserIdLoad(reqIpage, wxUserWorkOrderParam);

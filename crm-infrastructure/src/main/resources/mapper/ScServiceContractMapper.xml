@@ -60,7 +60,7 @@
         LEFT JOIN b_user d ON d.user_id = c.create_user_id
         where a.flag = 1
         <choose>
-            <when test="listParam.roleCodes != null and listParam.roleCodes.contains('jt_customer')">
+            <when test="listParam.roleCodes != null and userInfo.roleCodes.contains('super_admin') or listParam.roleCodes.contains('jt_customer')">
                 and 1 = 1
             </when>
             <when test="listParam.roleCodes != null and listParam.roleCodes.contains('sub_company_customer')">

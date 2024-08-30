@@ -161,7 +161,7 @@ public class ConsultingService {
 
     private String genOrderCode() {
         //生成工单编号 yyyyMMdd+4位随机数
-        String dateStr = DateFormatUtils.format(Calendar.getInstance().getTime(), "yyyyMMdd");
+        String dateStr = DateFormatUtils.format(Calendar.getInstance().getTime(), DatePattern.PURE_DATE_PATTERN);
         String randomStr = RandomUtil.randomString(4);
         String code = dateStr + randomStr;
         boolean isExistCode = redisUtils.hasKey(WORK_CODE_CACHE_KEY_PREFIX + code);
