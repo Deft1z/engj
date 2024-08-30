@@ -242,6 +242,20 @@
         <if test="listParam.tenantId != null">
             and a.tenant_id = #{listParam.tenantId}
         </if>
+        <choose>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
+                /*管理员和集团客服可查看全部数据*/
+            </when>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+                and a.current_org_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleCodes.contains('applet_user')">
             and a.sub_status = #{listParam.searchMap.status}
         </if>
@@ -251,25 +265,16 @@
         <if test="listParam.searchMap.businessName != null and listParam.searchMap.businessName != ''">
             and json_unquote(json_extract(a.content, '$.businessName')) like CONCAT('%', #{listParam.searchMap.businessName}, '%')
         </if>
-        <if test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
-            and a.current_org_id in
-            <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
-                #{org.id}
-            </foreach>
-        </if>
-        <if test="userInfo.roleCodes != null and userInfo.roleCodes.contains('applet_user')">
-            and a.create_user_id = #{userInfo.userId}
-        </if>
         <if test="listParam.searchMap.onlyMe != null and listParam.searchMap.onlyMe != ''">
             and b.create_user_id = #{userInfo.userId}
+        </if>
+        <if test="listParam.searchMap.starttime != null and listParam.searchMap.endtime != null">
+            and a.modify_time &gt;= #{listParam.searchMap.starttime}
+            and a.modify_time &lt;= #{listParam.searchMap.endtime}
         </if>
         group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.flag,a.remark, e.`realname`, d.`name`, `user_status`
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and !userInfo.roleCodes.contains('applet_user')">
             having user_status = #{listParam.searchMap.status}
-        </if>
-        <if test="listParam.searchMap.starttime != null and listParam.searchMap.endtime != null">
-            and a.modify_time >= #{listParam.searchMap.starttime}
-            AND a.modify_time &lt;= #{listParam.searchMap.endtime}
         </if>
         order by a.modify_time desc
     </select>

@@ -139,9 +139,20 @@
         <if test="userInfo.tenantId != null">
             and a.tenant_id = #{userInfo.tenantId}
         </if>
-        <if test="userInfo.roleCodes != null and userInfo.roleCodes.contains('applet_user')">
-            and a.create_user_id = #{userInfo.userId}
-        </if>
+        <choose>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
+                /*管理员和集团客服可查看全部数据*/
+            </when>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+                and a.organization_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
         <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
             and (a.`subject` like concat('%', #{listParam.searchMap.name}, '%') or a.content like concat('%', #{listParam.searchMap.name}, '%'))
         </if>
