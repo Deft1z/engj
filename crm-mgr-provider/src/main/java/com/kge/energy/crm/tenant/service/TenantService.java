@@ -107,7 +107,7 @@ public class TenantService {
     }
 
     public List<TenantListForOrgResult> getTenantDictList() {
-        AuthVerifyUtils.mustAdmin();
+        //AuthVerifyUtils.mustAdmin();
         return AuthVerifyUtils.isSuperAdmin() ?
                 bTenantDao.getTenantDictList(null) :
                 bTenantDao.getTenantDictList(UserInfoContextUtils.getCurrentTenantId());
