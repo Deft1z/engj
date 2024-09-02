@@ -56,7 +56,7 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/order/update")
-    public CommonResponse<Object> workOrderUpdate(WorkOrdeUpdateReq req) {
+    public CommonResponse<Object> workOrderUpdate(@Validated @RequestBody WorkOrdeUpdateReq req) {
         return workOrderService.workOrderUpdate(req);
 
     }
