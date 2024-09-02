@@ -55,7 +55,7 @@ public class WorkOrderController {
      * 分派工单 终止工单 处理工单
      */
     @ConvertToGoFormats
-    @PostMapping("/workOrderUpdate")
+    @PostMapping("/order/update")
     public CommonResponse<Object> workOrderUpdate(WorkOrdeUpdateReq req) {
         return workOrderService.workOrderUpdate(req);
 

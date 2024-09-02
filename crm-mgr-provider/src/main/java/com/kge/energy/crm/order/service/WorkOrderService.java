@@ -37,11 +37,13 @@ import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author wangjihua
@@ -214,24 +216,7 @@ public class WorkOrderService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
-        Long operatorUserId = userInfoDto.getUserId();
-        Integer customerUserId = form.getCreateUserId();
-        BUser customer = bUserDao.getById(customerUserId);
-        //服务单位人员信息
-        BOrganization serviceOrg = bOrganizationDao.getById(req.getCurrentOrgId());
-        BUser servicePerson = bUserDao.getById(operatorUserId);
-        FormStatusChangeMsgReq formStatusChangeMsgReq = new FormStatusChangeMsgReq()
-                .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
-                .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
-                .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.FlowHasFeedback))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(LocalDateTimeUtil.format(now, DatePattern.NORM_DATETIME_FORMATTER)));
-        SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
-                .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setToUserOpenId(customer.getOpenId())
-                .setData(formStatusChangeMsgReq);
-
-        weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
+        sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.FlowHasFeedback);
 
         return CommonResponse.suc(true);
     }
@@ -271,24 +256,7 @@ public class WorkOrderService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
-        Long operatorUserId = userInfoDto.getUserId();
-        Integer customerUserId = form.getCreateUserId();
-        BUser customer = bUserDao.getById(customerUserId);
-        //服务单位人员信息
-        BOrganization serviceOrg = bOrganizationDao.getById(req.getCurrentOrgId());
-        BUser servicePerson = bUserDao.getById(operatorUserId);
-        FormStatusChangeMsgReq formStatusChangeMsgReq = new FormStatusChangeMsgReq()
-                .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
-                .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
-                .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.FlowFinished))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(LocalDateTimeUtil.format(now, DatePattern.NORM_DATETIME_FORMATTER)));
-        SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
-                .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setToUserOpenId(customer.getOpenId())
-                .setData(formStatusChangeMsgReq);
-
-        weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
+        sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.FlowFinished);
 
         return CommonResponse.suc(true);
     }
@@ -336,24 +304,7 @@ public class WorkOrderService {
         scServiceContractDao.update(sscUpdateWrapper);
 
         //发送微信小程序消息，通知客户
-        Long operatorUserId = userInfoDto.getUserId();
-        Integer customerUserId = form.getCreateUserId();
-        BUser customer = bUserDao.getById(customerUserId);
-        //服务单位人员信息
-        BOrganization serviceOrg = bOrganizationDao.getById(req.getCurrentOrgId());
-        BUser servicePerson = bUserDao.getById(operatorUserId);
-        FormStatusChangeMsgReq formStatusChangeMsgReq = new FormStatusChangeMsgReq()
-                .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
-                .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
-                .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.Finished))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(LocalDateTimeUtil.format(now, DatePattern.NORM_DATETIME_FORMATTER)));
-        SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
-                .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setToUserOpenId(customer.getOpenId())
-                .setData(formStatusChangeMsgReq);
-
-        weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
+        sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.Finished);
 
         return CommonResponse.suc(true);
     }
@@ -392,25 +343,36 @@ public class WorkOrderService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
-        Long operatorUserId = userInfoDto.getUserId();
-        Integer customerUserId = form.getCreateUserId();
-        BUser customer = bUserDao.getById(customerUserId);
-        //服务单位人员信息
-        BOrganization serviceOrg = bOrganizationDao.getById(req.getCurrentOrgId());
-        BUser servicePerson = bUserDao.getById(operatorUserId);
-        FormStatusChangeMsgReq formStatusChangeMsgReq = new FormStatusChangeMsgReq()
-                .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
-                .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
-                .setStatus(new FormStatusChangeMsgReq.Value(ConstParam.SendBack))
-                .setHandleTime(new FormStatusChangeMsgReq.Value(LocalDateTimeUtil.format(now, DatePattern.NORM_DATETIME_FORMATTER)));
-        SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
-                .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
-                .setToUserOpenId(customer.getOpenId())
-                .setData(formStatusChangeMsgReq);
-
-        weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
+        sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.SendBack);
 
         return CommonResponse.suc(true);
+    }
+
+    @Async
+    private void sendFormStatusChangeMsg(WorkOrdeUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {
+        CompletableFuture.runAsync(() -> {
+            try{
+                Long operatorUserId = userInfoDto.getUserId();
+                Integer customerUserId = form.getCreateUserId();
+                BUser customer = bUserDao.getById(customerUserId);
+                //服务单位人员信息
+                BOrganization serviceOrg = bOrganizationDao.getById(req.getCurrentOrgId());
+                BUser servicePerson = bUserDao.getById(operatorUserId);
+                FormStatusChangeMsgReq formStatusChangeMsgReq = new FormStatusChangeMsgReq()
+                        .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
+                        .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
+                        .setStatus(new FormStatusChangeMsgReq.Value(status))
+                        .setHandleTime(new FormStatusChangeMsgReq.Value(LocalDateTimeUtil.format(sendTime, DatePattern.NORM_DATETIME_FORMATTER)));
+                SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
+                        .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
+                        .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
+                        .setToUserOpenId(customer.getOpenId())
+                        .setData(formStatusChangeMsgReq);
+
+                weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
+            }catch (Exception e){
+                log.error("sendFormStatusChangeMsg {} error: ", status, e);
+            }
+        });
     }
 }
