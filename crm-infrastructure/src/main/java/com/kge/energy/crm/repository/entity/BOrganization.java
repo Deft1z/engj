@@ -104,5 +104,10 @@ public class BOrganization {
      * 状态,0-停用 1-正常
      */
     private Integer status;
+
+    /**
+     * ecc组织code
+     */
+    private String eccOrgCode;
 }
 

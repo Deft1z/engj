@@ -10,14 +10,12 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.LoginPlatformEnums;
 import com.kge.energy.crm.enums.LoginResultEnums;
 import com.kge.energy.crm.enums.RoleEnums;
-import com.kge.energy.crm.enums.UserTypeEnums;
 import com.kge.energy.crm.external.elink.ElinkService;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
@@ -34,7 +32,6 @@ import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
-import com.kge.platform.framework.common.enums.IsDeleteFlagEnums;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -160,7 +157,8 @@ public class WeChatLoginService {
         RUserRole rRole = new RUserRole()
                 .setRoleId(bRole.getRoleId())
                 .setUserId(bUser.getUserId())
-                .setCreateUserId(bUser.getUserId());
+                .setCreateUserId(bUser.getUserId())
+                .setTenantId(bUser.getTenantId());
         rUserRoleDao.save(rRole);
 
         BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "未挂靠组织");
@@ -223,9 +221,12 @@ public class WeChatLoginService {
             throw new BadException("获取用户手机号码失败");
         }
 
-        //更新用户绑定手机号码
-        String token = updateMobileByUserId(UserInfoContextUtils.getCurrentUserId(),
-                getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber(), req.getOpenid());
+        BUser bUser = new LambdaQueryChainWrapper<>(BUser.class)
+                .eq(BUser::getMobile, getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber())
+                .eq(BUser::getOpenId, req.getOpenid())
+                .one();
+
+        String token = userDomainService.genToken(bUser, false);
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
                 .setTimestamp(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())
@@ -244,67 +245,6 @@ public class WeChatLoginService {
                 .setToken(token);
     }
 
-
-    /**
-     * todo: 此段逻辑有点复杂，后续需要优化
-     */
-    private String updateMobileByUserId(Integer userId, String mobile, String openId) {
-        BUser bUser = new LambdaQueryChainWrapper<>(BUser.class)
-                .eq(BUser::getMobile, mobile)
-                .eq(BUser::getType, UserTypeEnums.SYSTEM_USERS.getDesc()).one();
-
-        if (ObjUtil.isNotNull(bUser) && ObjUtil.notEqual(bUser.getUserId(), 0)) {
-            //将系统账号绑定openid
-            bUser.setOpenId(openId);
-            bUserDao.updateById(bUser);
-
-            //将小程序账号置为-1
-            new LambdaUpdateChainWrapper<>(BUser.class)
-                    .set(BUser::getFlag, IsDeleteFlagEnums.YES)
-                    .eq(BUser::getUserId, userId)
-                    .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
-                    .update();
-
-            return userDomainService.genToken(bUser, false);
-
-        } else {
-
-            BUser bUser1 = new LambdaQueryChainWrapper<>(BUser.class)
-                    .eq(BUser::getMobile, mobile)
-                    .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
-                    .in(BUser::getOpenId, "", null)
-                    .one();
-
-            if (ObjUtil.isNotNull(bUser1) && ObjUtil.notEqual(bUser1.getUserId(), 0)) {
-                //将新小程序账号置为-1
-                new LambdaUpdateChainWrapper<>(BUser.class)
-                        .set(BUser::getFlag, IsDeleteFlagEnums.YES)
-                        .eq(BUser::getUserId, userId)
-                        .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
-                        .notIn(BUser::getOpenId, "", null)
-                        .in(BUser::getMobile, null, "")
-                        .update();
-
-                new LambdaUpdateChainWrapper<>(BUser.class)
-                        .set(BUser::getOpenId, openId)
-                        .eq(BUser::getMobile, mobile)
-                        .in(BUser::getType, UserTypeEnums.SOCIAL_CUSTOMERS.getDesc(), UserTypeEnums.LEADER.getDesc())
-                        .update();
-
-                return userDomainService.genToken(bUser1, false);
-
-            } else {
-
-                new LambdaUpdateChainWrapper<>(BUser.class)
-                        .set(BUser::getMobile, mobile)
-                        .eq(BUser::getUserId, userId)
-                        .update();
-
-                return "";
-            }
-        }
-
-    }
 
     /**
      * 获取登陆用户信息

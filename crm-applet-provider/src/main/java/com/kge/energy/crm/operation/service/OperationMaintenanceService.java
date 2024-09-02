@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
+import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
@@ -18,9 +19,12 @@ import com.kge.energy.crm.repository.entityext.result.PatrolRecordResp;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +39,10 @@ public class OperationMaintenanceService {
 
     private final OmReportDao omReportDao;
 
+    //集团领导
+    @Value("${group.leaderPhones}")
+    private String[] leaderPhones;
+
     /**
      * 获取运维托管列表
      * @param eccReq
@@ -46,14 +54,34 @@ public class OperationMaintenanceService {
             throw new BadException(ResponseCode.AUTHORITY_FAIL);
         }
 
-        String currentUserPhone = userInfoDto.getMobile();
-        Optional.ofNullable(eccReq.getCondition()).ifPresent(condition -> condition.setFirstPartyContactsPhone(currentUserPhone));
+        //手机号搜索判断逻辑
+        String searchPhone = eccReq.getCondition().getFirstPartyContactsPhone();
 
+        //默认看当前用户手机号关联的数据
+        String currentUserPhone = userInfoDto.getMobile();
         List<BUser> userList = userService.findByPhone(currentUserPhone);
         List<Integer> userIdList = userList.stream().map(BUser::getUserId).toList();
-        String sharePhone = userService.findShareUser(userIdList, 3);
-        if(StrUtil.isNotBlank(sharePhone)){
-            eccReq.getCondition().setFirstPartyContactsPhone(sharePhone);
+        String firstPartyContactsPhone = userService.findShareUser(userIdList, 3);
+
+
+        List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));
+
+        if(StrUtil.isBlank(searchPhone)){
+            if(AuthVerifyUtils.isSuperAdmin() || leaderPhoneList.contains(currentUserPhone)){
+                //超管和集团领导看所有
+                eccReq.getCondition().setFirstPartyContactsPhone("");
+            } else {
+                //其他用户看关联的，没有关联的看自己的
+                eccReq.getCondition().setFirstPartyContactsPhone((StrUtil.isBlank(firstPartyContactsPhone) ? currentUserPhone : firstPartyContactsPhone));
+            }
+        } else {
+            if(AuthVerifyUtils.isSuperAdmin() || leaderPhoneList.contains(currentUserPhone)){
+                //超管和集团领导看所有
+                eccReq.getCondition().setFirstPartyContactsPhone(searchPhone);
+            } else {
+                //其他用户不能搜索别人的手机号
+                eccReq.getCondition().setFirstPartyContactsPhone((StrUtil.equals(searchPhone, firstPartyContactsPhone) ? searchPhone : currentUserPhone));
+            }
         }
 
         EccResp<EccPageData<EccMaintenance>> eccResp = eccService.getMaintenanceList(eccReq);
