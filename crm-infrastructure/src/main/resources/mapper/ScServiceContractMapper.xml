@@ -32,27 +32,27 @@
 
     <select id="contractPageByUserIdLoad" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
         select a.service_contract_id,
-               a.form_id,
-               a.company,
-               a.`name`,
-               a.`code`,
-               ROUND(a.amount, 2)                            as amount,
-               a.project_code,
-               DATE_FORMAT(a.signing_time, '%Y-%m-%d')       AS signing_time,
-               DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
-               DATE_FORMAT(a.service_end_time, '%Y-%m-%d')   AS service_end_time,
-               a.service_unit,
-               DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
-               DATE_FORMAT(a.project_end_time, '%Y-%m-%d')   AS project_end_time,
-               a.content,
-               a.OWNER,
-               a.pm,
-               a.flag,
-               a.`status`,
-               b.NAME                                        AS service_provider,
-               a.service_unit                                AS organization_id,
-               g.satisfaction,
-               g.evaluate
+        a.form_id,
+        a.company,
+        a.`name`,
+        a.`code`,
+        ROUND(a.amount, 2) as amount,
+        a.project_code,
+        DATE_FORMAT(a.signing_time, '%Y-%m-%d') AS signing_time,
+        DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
+        DATE_FORMAT(a.service_end_time, '%Y-%m-%d') AS service_end_time,
+        a.service_unit,
+        DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
+        DATE_FORMAT(a.project_end_time, '%Y-%m-%d') AS project_end_time,
+        a.content,
+        a.OWNER,
+        a.pm,
+        a.flag,
+        a.`status`,
+        b.NAME AS service_provider,
+        a.service_unit AS organization_id,
+        g.satisfaction,
+        g.evaluate
         from sc_service_contract a
         LEFT JOIN b_organization b ON b.organization_id = a.service_unit
         LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
@@ -114,32 +114,23 @@
     </select>
 
     <select id="findContractNum" resultType="java.lang.Long">
-        SELECT
-            count(*)
-        FROM
-            sc_service_contract
-        WHERE
-            form_id = ANY (
-                SELECT
-                    form_id
-                FROM
-                    wf_form
-                WHERE
-                    create_user_id = ANY (
-                        SELECT b.user_id from b_user b
-                        LEFT JOIN r_user_role r ON r.user_id = b.user_id
-                        LEFT JOIN l_user_token l on l.user_id = b.user_id
-                        WHERE
-                            l.modify_time BETWEEN #{startTime} AND #{endTime}
-                        AND r.role_id = 5)
-            )
+        SELECT count(*)
+        FROM sc_service_contract
+        WHERE form_id = ANY (SELECT form_id
+                             FROM wf_form
+                             WHERE create_user_id = ANY (SELECT b.user_id
+                                                         from b_user b
+                                                                  LEFT JOIN r_user_role r ON r.user_id = b.user_id
+                                                                  LEFT JOIN l_user_token l on l.user_id = b.user_id
+                                                         WHERE l.modify_time BETWEEN #{startTime} AND #{endTime}
+                                                           AND r.role_id = 5))
     </select>
 
     <select id="findNewContractCount" resultType="java.lang.Long">
         SELECT count(1)
         FROM sc_service_contract
-        WHERE flag != -1 AND create_time between #{startTime} and #{endTime}
+        WHERE flag != -1
+          AND create_time between #{startTime} and #{endTime}
     </select>
-
 </mapper>
 

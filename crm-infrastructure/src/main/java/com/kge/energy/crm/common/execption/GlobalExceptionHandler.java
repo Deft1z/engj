@@ -28,21 +28,11 @@ public class GlobalExceptionHandler {
             ServiceException.class,
             MethodArgumentNotValidException.class,
             ConstraintViolationException.class,
-            IllegalArgumentException.class
+            IllegalArgumentException.class,
+            Exception.class
     })
     public <T> CommonResponse<T> handleServiceException(Exception e) {
         return errorResult(ResponseCode.UNKNOWN.getCode(), e.getMessage(), null, e);
-    }
-
-    @ExceptionHandler(value = {
-            Exception.class
-    })
-    public <T> CommonResponse<T> handleUnknowxception(Exception e) {
-        return errorResult(ResponseCode.UNKNOWN, e);
-    }
-
-    public <T> CommonResponse<T> errorResult(ResponseCode responseCode, Exception e) {
-        return errorResult(responseCode.getCode(), responseCode.getMsg(), responseCode.getShowType(), e);
     }
 
     public <T> CommonResponse<T> errorResult(Integer code, String msg, String showType, Exception e) {
