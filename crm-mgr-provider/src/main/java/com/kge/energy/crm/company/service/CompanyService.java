@@ -2,6 +2,7 @@ package com.kge.energy.crm.company.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.company.resp.CompanyResp;
@@ -35,18 +36,21 @@ public class CompanyService {
             // 拷贝parameter中的属性到CompanyResp中
             BeanUtil.copyProperties(parameter, item, CopyOptions.create().setFieldMapping(mapping));
 
-            switch (parameter.getServiceType()) {
-                case 1 -> item.setServiceTypeString("电建服务");
-                case 2 -> item.setServiceTypeString("城建服务");
-                case 3 -> item.setServiceTypeString("工程咨询设计");
-                case 4 -> item.setServiceTypeString("科技服务和智慧能源");
-                case 5 -> item.setServiceTypeString("物业运营");
-                default -> item.setServiceTypeString("");
-            }
+            Opt.ofNullable(parameter).ifPresent(p -> {
+                switch (parameter.getServiceType()) {
+                    case 1 -> item.setServiceTypeString("电建服务");
+                    case 2 -> item.setServiceTypeString("城建服务");
+                    case 3 -> item.setServiceTypeString("工程咨询设计");
+                    case 4 -> item.setServiceTypeString("科技服务和智慧能源");
+                    case 5 -> item.setServiceTypeString("物业运营");
+                    default -> item.setServiceTypeString("");
+                }
 
-            if (StrUtil.isNotBlank(parameter.getType())) {
-                item.setTagList(parameter.getType().split(","));
-            }
+                if (StrUtil.isNotBlank(parameter.getType())) {
+                    item.setTagList(parameter.getType().split(","));
+                }
+            });
+
         }
 
         Page<CompanyResp> res = new Page<>();

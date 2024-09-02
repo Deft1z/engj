@@ -19,6 +19,7 @@ public class FormResult {
     private String timeSubmit;
     private String timeReception;
     private String timeFinished;
+    private String modifyTime;
     private Integer currentOrgId;
     private Integer currentRoleId;
     private Integer flag;

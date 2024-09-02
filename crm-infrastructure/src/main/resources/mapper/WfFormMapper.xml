@@ -201,6 +201,7 @@
              , DATE_FORMAT(a.time_submit, '%Y-%m-%d %T') AS time_submit
              , DATE_FORMAT(a.time_reception, '%Y-%m-%d %T') AS time_reception
              , DATE_FORMAT(a.time_finished, '%Y-%m-%d %T') AS time_finished
+             , DATE_FORMAT(a.modify_time, '%Y-%m-%d %T') AS modify_time
              , a.flag
              , a.remark
              , d.`name` AS org_name,
@@ -269,7 +270,7 @@
             and a.modify_time &gt;= #{listParam.searchMap.starttime}
             and a.modify_time &lt;= #{listParam.searchMap.endtime}
         </if>
-        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.flag,a.remark, d.`name`, `user_status`
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`, `user_status`
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and !userInfo.roleCodes.contains('applet_user')">
             having user_status = #{listParam.searchMap.status}
         </if>
