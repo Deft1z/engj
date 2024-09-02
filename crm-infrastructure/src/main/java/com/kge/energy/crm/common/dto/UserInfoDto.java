@@ -45,6 +45,11 @@ public class UserInfoDto extends CommonUserInfoDto {
     private String wxOpenId;
 
     /**
+     * 岗位职级
+     */
+    private String jobLevel;
+
+    /**
      * 角色列表
      */
     private List<Role> roleList;

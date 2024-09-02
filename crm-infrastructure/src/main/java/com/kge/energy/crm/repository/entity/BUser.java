@@ -70,6 +70,11 @@ public class BUser {
     private String address;
 
     /**
+     * 岗位职级
+     */
+    private String jobLevel;
+
+    /**
      * 帐号状态（0正常 1停用）
      */
     private Integer status;

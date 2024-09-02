@@ -57,6 +57,7 @@ public class UserDomainService {
         userInfoDto.setSystemType(systemType);
         userInfoDto.setMobile(user.getMobile());
         userInfoDto.setWxOpenId(user.getOpenId());
+        userInfoDto.setJobLevel(user.getJobLevel());
 
         List<UserInfoDto.Role> userRoles = bUserDao.getUserRoles(systemType, user.getUserId());
         userInfoDto.setRoleList(userRoles);

@@ -13,6 +13,7 @@
         <result property="openId" column="open_id" jdbcType="VARCHAR"/>
         <result property="company" column="company" jdbcType="VARCHAR"/>
         <result property="address" column="address" jdbcType="VARCHAR"/>
+        <result property="jobLevel" column="job_level" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
