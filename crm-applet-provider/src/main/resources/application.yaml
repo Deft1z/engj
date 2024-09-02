@@ -82,7 +82,7 @@ auth:
       - ${server.servlet.context-path}/doc.html
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
-      - /applet/wechat/login
+      - ${server.servlet.context-path}/wechat/login
 
 epcpv:
   allregions: api/v1/pv/project/dim/regions

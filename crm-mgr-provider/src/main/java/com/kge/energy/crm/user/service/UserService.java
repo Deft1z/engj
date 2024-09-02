@@ -360,7 +360,7 @@ public class UserService {
 
         checkMobile(req.getMobile());
 
-        checkExistedUser(req);
+        checkAddExistedUser(req);
 
         BUser bUser = new BUser()
                 .setTenantId(req.getTenantId())
@@ -399,6 +399,8 @@ public class UserService {
 
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
+
+        checkUpdateExistedUser(req, bUser);
 
         if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许编辑其他租户用户");
@@ -547,7 +549,7 @@ public class UserService {
     }
 
 
-    private void checkExistedUser(AddUserReq req) {
+    private void checkAddExistedUser(AddUserReq req) {
 
         boolean existed = new LambdaQueryChainWrapper<>(BUser.class)
                 .eq(BUser::getName, req.getName())
@@ -557,6 +559,27 @@ public class UserService {
         }
 
         existed = new LambdaQueryChainWrapper<>(BUser.class)
+                .eq(BUser::getRealname, req.getRealname())
+                .eq(BUser::getMobile, req.getMobile())
+                .exists();
+        if (existed) {
+            throw new ServiceException("用户已经存在");
+        }
+    }
+
+
+    private void checkUpdateExistedUser(UpdateUserReq req, BUser bUser) {
+
+        boolean existed = new LambdaQueryChainWrapper<>(BUser.class)
+                .ne(BUser::getUserId, req.getUserId())
+                .eq(BUser::getName, req.getName())
+                .exists();
+        if (existed) {
+            throw new ServiceException("用户已经存在");
+        }
+
+        existed = new LambdaQueryChainWrapper<>(BUser.class)
+                .ne(BUser::getUserId, req.getUserId())
                 .eq(BUser::getRealname, req.getRealname())
                 .eq(BUser::getMobile, req.getMobile())
                 .exists();
