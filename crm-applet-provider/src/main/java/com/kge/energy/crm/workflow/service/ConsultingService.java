@@ -144,13 +144,13 @@ public class ConsultingService {
         //发送消息，通知集团客服
         final String msgTitle = "工单待处理通知";
         StringBuilder msgContentBuilder = new StringBuilder();
-        msgContentBuilder.append("工单名称：").append(content.getBusinessName()).append("\n");
-        msgContentBuilder.append("所在地区：").append(content.getArea()).append("\n");
-        msgContentBuilder.append("用电容量(kVA)：").append(content.getElectricityCapacity()).append("\n");
-        msgContentBuilder.append("工单编号：").append(content.getCode()).append("\n");
-        msgContentBuilder.append("生成时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
-        msgContentBuilder.append("客户名称：").append(content.getCustomerName()).append("\n");
-        msgContentBuilder.append("客户手机：").append(content.getMobile()).append("\n");
+        msgContentBuilder.append("工单名称：").append(content.getBusinessName()).append("\\n");
+        msgContentBuilder.append("所在地区：").append(content.getArea()).append("\\n");
+        msgContentBuilder.append("用电容量(kVA)：").append(content.getElectricityCapacity()).append("\\n");
+        msgContentBuilder.append("工单编号：").append(content.getCode()).append("\\n");
+        msgContentBuilder.append("生成时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
+        msgContentBuilder.append("客户名称：").append(content.getCustomerName()).append("\\n");
+        msgContentBuilder.append("客户手机：").append(content.getMobile()).append("\\n");
         msgContentBuilder.append("备注：").append(req.getRemark());
         //获取集团客服人员手机号
         List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
@@ -301,11 +301,11 @@ public class ConsultingService {
         final String msgTitle = "工单待处理通知";
         JSONObject content = JSONUtil.parseObj(formContent);
         StringBuilder msgContentBuilder = new StringBuilder();
-        msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
-        msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-        msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
-        msgContentBuilder.append("客户名称：").append(content.get("customerName")).append("\n");
-        msgContentBuilder.append("客户手机：").append(content.get("mobile")).append("\n");
+        msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
+        msgContentBuilder.append("工单编号：").append(content.get("code")).append("\\n");
+        msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
+        msgContentBuilder.append("客户名称：").append(content.get("customerName")).append("\\n");
+        msgContentBuilder.append("客户手机：").append(content.get("mobile")).append("\\n");
         String activeProfile = env.getProperty("spring.profiles.active");
         for (RoleUserResult user : assignUsers) {
             if (PhoneUtil.isPhone(user.getMobile())) {
@@ -503,10 +503,10 @@ public class ConsultingService {
         final String msgTitle = "工单撤回通知";
         JSONObject content = JSONUtil.parseObj(formContent);
         StringBuilder msgContentBuilder = new StringBuilder();
-        msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
-        msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-        msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
-        msgContentBuilder.append("派发公司：").append(content.get("companyName")).append("\n");
+        msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
+        msgContentBuilder.append("工单编号：").append(content.get("code")).append("\\n");
+        msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
+        msgContentBuilder.append("派发公司：").append(content.get("companyName")).append("\\n");
         msgContentBuilder.append("撤回原因：").append(req.getContent());
         //获取集团客服人员手机号
         List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
@@ -532,10 +532,10 @@ public class ConsultingService {
         //若集团客服撤回工单，需通知二级公司客服
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.toString())) {
             msgContentBuilder = new StringBuilder();
-            msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\n");
-            msgContentBuilder.append("工单编号：").append(content.get("code")).append("\n");
-            msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\n");
-            msgContentBuilder.append("撤回人员：").append(RoleEnums.JT_CUSTOMER.getDesc()).append("\n");
+            msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
+            msgContentBuilder.append("工单编号：").append(content.get("code")).append("\\n");
+            msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
+            msgContentBuilder.append("撤回人员：").append(RoleEnums.JT_CUSTOMER.getDesc()).append("\\n");
             msgContentBuilder.append("撤回原因：").append(req.getContent());
             //获取二级公司客服人员手机号
             phones = bUserDao.findSubCustomerPhones(formCurrentOrgId, operator.getTenantId());
