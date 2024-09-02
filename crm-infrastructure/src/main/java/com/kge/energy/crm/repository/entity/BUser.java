@@ -40,11 +40,6 @@ public class BUser {
     private LocalDateTime passwdModifyTime;
 
     /**
-     * 用户类型
-     */
-    private String type;
-
-    /**
      * 小程序显示名称
      */
     private String realname;
