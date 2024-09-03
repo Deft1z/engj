@@ -10,6 +10,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -114,7 +115,7 @@ public class WeChatLoginService {
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
             }
 
-            String token = userDomainService.genToken(user, false);
+            String token = userDomainService.genToken(user, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
 
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, null);
@@ -217,16 +218,40 @@ public class WeChatLoginService {
     public WeChatPhoneNumberResp phoneNumber(PhoneNumberReq req) {
 
         GetUserPhoneNumberResp getUserPhoneNumberResp = weChatAppletInfraService.getUserPhoneNumber(req.getCode(), req.getOpenid());
-        if (ObjUtil.isNull(getUserPhoneNumberResp) || ObjUtil.notEqual(getUserPhoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
+        if (ObjectUtil.isNull(getUserPhoneNumberResp) || ObjectUtil.notEqual(getUserPhoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
             throw new BadException("获取用户手机号码失败");
         }
 
-        BUser bUser = new LambdaQueryChainWrapper<>(BUser.class)
-                .eq(BUser::getMobile, getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber())
+        List<BUser> userList = new LambdaQueryChainWrapper<>(BUser.class)
                 .eq(BUser::getOpenId, req.getOpenid())
-                .one();
+                .list();
+        String mobile = getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber();
+        BUser bUser;
 
-        String token = userDomainService.genToken(bUser, false);
+        if (CollUtil.isEmpty(userList)) {
+            throw new BadException("用户不存在");
+        }
+
+        // openid 只存在一个用户，且手机号为空
+        if (userList.size() == 1 && ObjectUtil.isNull(userList.get(0).getMobile())) {
+            bUser = userList.get(0);
+            bUser.setMobile(mobile);
+            bUserDao.updateById(bUser);
+
+        } else {
+            // 匹配 openid、手机号用户
+            bUser = userList.stream()
+                    .filter(user -> ObjectUtil.equal(user.getMobile(), mobile))
+                    .findFirst()
+                    .orElse(null);
+
+            // 不存在该 openid、手机号用户则新建用户
+            if (ObjectUtil.isNull(bUser)) {
+                bUser = saveNewUser(req.getOpenid(), mobile);
+            }
+        }
+
+        String token = userDomainService.genToken(bUser, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
                 .setTimestamp(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())
