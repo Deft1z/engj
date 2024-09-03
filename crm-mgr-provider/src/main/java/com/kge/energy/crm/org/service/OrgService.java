@@ -115,16 +115,18 @@ public class OrgService {
         }
 
         BOrganization parentOrganization = bOrganizationDao.getById(addOrgReq.getParentOrganizationId());
-        if (!NumberUtil.equals(parentOrganization.getLevel(), Integer.valueOf(1))) {
-            if (ObjectUtil.isNull(parentOrganization)) {
-                throw new ServiceException("上级组织不存在");
-            }
+        if(!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(parentOrganization)){
+            throw new ServiceException("上级组织不存在");
         }
 
 
         BOrganization organization = BeanUtil.copyProperties(addOrgReq, BOrganization.class);
-        organization.setLevel(Opt.ofNullable(parentOrganization.getLevel()).orElse(0) + 1);
-        organization.setEccOrgCode(parentOrganization.getEccOrgCode());
+        Opt.ofNullable(parentOrganization).ifPresentOrElse(p -> {
+            organization.setLevel(Opt.ofNullable(parentOrganization.getLevel()).orElse(0) + 1);
+            organization.setEccOrgCode(parentOrganization.getEccOrgCode());
+        }, () -> {
+            organization.setLevel(1);
+        });
         organization.setFlag(1);
         bOrganizationDao.save(organization);
 
@@ -153,21 +155,23 @@ public class OrgService {
             throw new ServiceException("只能修改当前租户的组织");
         }
 
-        BOrganization pold = null;
-        if (!NumberUtil.equals(old.getLevel(), Integer.valueOf(1))) {
-            pold = bOrganizationDao.getById(updateOrgReq.getParentOrganizationId());
-            if (ObjectUtil.isNull(pold)) {
-                throw new ServiceException("上级组织结构不存在");
-            }
+        BOrganization pold = bOrganizationDao.getById(updateOrgReq.getParentOrganizationId());
+        if(!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(pold)){
+            throw new ServiceException("上级组织不存在");
         }
 
         //非超管用户，只能挂靠自己租户的组织
-        if (!AuthVerifyUtils.isSuperAdmin() && !NumberUtil.equals(pold.getTenantId(), UserInfoContextUtils.getCurrentTenantId())) {
-            throw new ServiceException("只能挂靠当前租户的组织");
-        }
+        Opt.ofNullable(pold).ifPresent(p -> {
+            if (!AuthVerifyUtils.isSuperAdmin() && !NumberUtil.equals(p.getTenantId(), UserInfoContextUtils.getCurrentTenantId())) {
+                throw new ServiceException("只能挂靠当前租户的组织");
+            }
+        });
+
 
         BeanUtil.copyProperties(updateOrgReq, old);
-        old.setEccOrgCode(pold.getEccOrgCode());
+        Opt.ofNullable(pold).ifPresent(p -> {
+            old.setEccOrgCode(pold.getEccOrgCode());
+        });
         bOrganizationDao.saveOrUpdate(old);
 
         sysOperateLogService.saveLog(
