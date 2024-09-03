@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PhoneUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
@@ -91,7 +91,7 @@ public class UserService {
 
         List<RoleUserResult> roleUserResults;
 
-        if (UserInfoContextUtils.getCurrentUserInfo().getRoleList().stream().anyMatch(role -> ObjUtil.equals(role.getId(), RoleIdEnums.SYSTEM_ADMINISTRATOR.getCode()))) {
+        if (UserInfoContextUtils.getCurrentUserInfo().getRoleList().stream().anyMatch(role -> ObjectUtil.equals(role.getId(), RoleIdEnums.SYSTEM_ADMINISTRATOR.getCode()))) {
             roleUserResults = bUserDao.getUserByRoleId(req.getRoleId());
         } else {
             BOrganization bOrganization = bOrganizationDao.getOrgByUserId(userId);
@@ -106,7 +106,7 @@ public class UserService {
 
         BUser bUser = bUserDao.findOneByName(req.getName());
 
-        if (ObjUtil.isNotNull(bUser)) {
+        if (ObjectUtil.isNotNull(bUser)) {
             return bUser.getPasswdSalt();
         }
 
@@ -124,7 +124,7 @@ public class UserService {
 
             bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
 
-            if (ObjUtil.isNull(bUser)) {
+            if (ObjectUtil.isNull(bUser)) {
                 throw new BadException(ResponseCode.SHOULD_LOGIN);
             }
 
@@ -159,7 +159,7 @@ public class UserService {
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
 
-        if (ObjUtil.isNull(userInfoDto)) {
+        if (ObjectUtil.isNull(userInfoDto)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }
 
@@ -199,7 +199,7 @@ public class UserService {
 
         LUserToken lUserToken = lUserTokenDao.findByUid(user.getUserId());
 
-        if (ObjUtil.isNotNull(lUserToken) && ObjUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
+        if (ObjectUtil.isNotNull(lUserToken) && ObjectUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
 
             //如果是dev环境不删除旧的token
             if (!StrUtil.equals(env, "dev")) {
@@ -221,11 +221,11 @@ public class UserService {
 
     public PageResp<WxUserListResp> findAppletUser(WxUserListReq req) {
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.isNull(req.getTenantId())) {
             req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
         }
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许查看其他租户信息");
         }
 
@@ -291,7 +291,7 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许查看其他租户用户");
         }
 
@@ -327,7 +327,7 @@ public class UserService {
         BUser bUser = bUserDao.getById(userId);
         Assert.notNull(bUser, "用户不存在");
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许查看其他租户用户");
         }
 
@@ -354,7 +354,7 @@ public class UserService {
 
         AuthVerifyUtils.mustAdmin();
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许添加其他租户用户");
         }
 
@@ -402,7 +402,7 @@ public class UserService {
 
         checkUpdateExistedUser(req, bUser);
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许编辑其他租户用户");
         }
 
@@ -415,7 +415,7 @@ public class UserService {
         bUserDao.updateById(bUser);
 
         RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(req.getUserId());
-        if (ObjUtil.notEqual(req.getOrganizationId(), rUserTenant.getOrganizationId())) {
+        if (ObjectUtil.notEqual(req.getOrganizationId(), rUserTenant.getOrganizationId())) {
             rUserTenantDao.removeById(rUserTenant);
             rUserTenantDao.save(new RUserTenant()
                     .setUserId(bUser.getUserId())
@@ -442,7 +442,7 @@ public class UserService {
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许删除其他租户用户");
         }
 
@@ -469,13 +469,13 @@ public class UserService {
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允分配其他租户用户角色");
         }
 
         List<BRole> bRoles = bRoleDao.listByIds(req.getRoleIds());
         boolean isCurrentTenantRole = bRoles.stream()
-                .allMatch(brole -> ObjUtil.equals(bUser.getTenantId(), brole.getTenantId()));
+                .allMatch(brole -> ObjectUtil.equals(bUser.getTenantId(), brole.getTenantId()));
         if (AuthVerifyUtils.notSuperAdmin() && !isCurrentTenantRole) {
             throw new ServiceException("非法请求，不允分配其他租户用户角色");
         }
@@ -519,13 +519,13 @@ public class UserService {
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许操作其他租户用户角色");
         }
 
         List<BRole> bRoles = bRoleDao.listByIds(req.getRoleIds());
         boolean isCurrentTenantRole = bRoles.stream()
-                .allMatch(brole -> ObjUtil.equals(bUser.getTenantId(), brole.getTenantId()));
+                .allMatch(brole -> ObjectUtil.equals(bUser.getTenantId(), brole.getTenantId()));
         if (AuthVerifyUtils.notSuperAdmin() && !isCurrentTenantRole) {
             throw new ServiceException("非法请求，不允分配其他租户用户角色");
         }
@@ -559,7 +559,6 @@ public class UserService {
         }
 
         existed = new LambdaQueryChainWrapper<>(BUser.class)
-                .eq(BUser::getRealname, req.getRealname())
                 .eq(BUser::getMobile, req.getMobile())
                 .exists();
         if (existed) {
@@ -577,15 +576,14 @@ public class UserService {
         if (existed) {
             throw new ServiceException("用户已经存在");
         }
-
-        existed = new LambdaQueryChainWrapper<>(BUser.class)
-                .ne(BUser::getUserId, req.getUserId())
-                .eq(BUser::getRealname, req.getRealname())
-                .eq(BUser::getMobile, req.getMobile())
-                .exists();
-        if (existed) {
-            throw new ServiceException("用户已经存在");
-        }
+//
+//        existed = new LambdaQueryChainWrapper<>(BUser.class)
+//                .ne(BUser::getUserId, req.getUserId())
+//                .eq(BUser::getMobile, req.getMobile())
+//                .exists();
+//        if (existed) {
+//            throw new ServiceException("用户已经存在");
+//        }
     }
 
 
@@ -599,7 +597,7 @@ public class UserService {
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
+        if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许操作其他租户用户");
         }
 
