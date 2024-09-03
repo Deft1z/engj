@@ -217,14 +217,38 @@ public class WeChatLoginService {
     public WeChatPhoneNumberResp phoneNumber(PhoneNumberReq req) {
 
         GetUserPhoneNumberResp getUserPhoneNumberResp = weChatAppletInfraService.getUserPhoneNumber(req.getCode(), req.getOpenid());
-        if (ObjUtil.isNull(getUserPhoneNumberResp) || ObjUtil.notEqual(getUserPhoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
+        if (ObjectUtil.isNull(getUserPhoneNumberResp) || ObjectUtil.notEqual(getUserPhoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
             throw new BadException("获取用户手机号码失败");
         }
 
-        BUser bUser = new LambdaQueryChainWrapper<>(BUser.class)
-                .eq(BUser::getMobile, getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber())
+        List<BUser> userList = new LambdaQueryChainWrapper<>(BUser.class)
                 .eq(BUser::getOpenId, req.getOpenid())
-                .one();
+                .list();
+        String mobile = getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber();
+        BUser bUser;
+
+        if (CollUtil.isEmpty(userList)) {
+            throw new BadException("用户不存在");
+        }
+
+        // openid 只存在一个用户，且手机号为空
+        if (userList.size() == 1 && ObjectUtil.isNull(userList.get(0).getMobile())) {
+            bUser = userList.get(0);
+            bUser.setMobile(mobile);
+            bUserDao.updateById(bUser);
+
+        } else {
+            // 匹配 openid、手机号用户
+            bUser = userList.stream()
+                    .filter(user -> ObjectUtil.equal(user.getMobile(), mobile))
+                    .findFirst()
+                    .orElse(null);
+
+            // 不存在该 openid、手机号用户则新建用户
+            if (ObjectUtil.isNull(bUser)) {
+                bUser = saveNewUser(req.getOpenid(), mobile);
+            }
+        }
 
         String token = userDomainService.genToken(bUser, false);
 
