@@ -10,7 +10,7 @@ import lombok.Data;
 public class AddOrgReq {
 
     @Schema(description = "上级组织id")
-    @NotNull
+//    @NotNull
     private Integer parentOrganizationId;
 
     @Schema(description = "组织名称")

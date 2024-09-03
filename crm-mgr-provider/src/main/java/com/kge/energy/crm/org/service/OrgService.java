@@ -6,6 +6,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -102,7 +103,11 @@ public class OrgService {
 
     @Transactional
     public Boolean add(AddOrgReq addOrgReq) {
-        AuthVerifyUtils.mustAdmin();
+        //AuthVerifyUtils.mustAdmin();
+
+        if(!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(addOrgReq.getParentOrganizationId())){
+            throw new ServiceException("权限不足");
+        }
 
         //非超管用户，只能建自己租户的组织
         if (!AuthVerifyUtils.isSuperAdmin() && !NumberUtil.equals(addOrgReq.getTenantId(), UserInfoContextUtils.getCurrentTenantId())) {
