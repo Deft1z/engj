@@ -1,4 +1,4 @@
-package com.kge.energy.crm.enums.complain;
+package com.kge.energy.crm.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

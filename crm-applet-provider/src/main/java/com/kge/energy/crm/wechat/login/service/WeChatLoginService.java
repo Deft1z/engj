@@ -10,6 +10,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -114,7 +115,7 @@ public class WeChatLoginService {
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
             }
 
-            String token = userDomainService.genToken(user, false);
+            String token = userDomainService.genToken(user, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
 
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, null);
@@ -250,7 +251,7 @@ public class WeChatLoginService {
             }
         }
 
-        String token = userDomainService.genToken(bUser, false);
+        String token = userDomainService.genToken(bUser, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
                 .setTimestamp(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())

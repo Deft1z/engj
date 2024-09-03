@@ -16,7 +16,7 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.complain.req.ComplainListReq;
 import com.kge.energy.crm.complain.req.ComplainReplyReq;
 import com.kge.energy.crm.complain.resp.ComplainListResp;
-import com.kge.energy.crm.enums.complain.ComplainStatusEnums;
+import com.kge.energy.crm.enums.ComplainStatusEnums;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.req.complain.ReplyComplainData;

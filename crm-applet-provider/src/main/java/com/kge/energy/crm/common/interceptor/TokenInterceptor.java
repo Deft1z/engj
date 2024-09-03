@@ -4,10 +4,12 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.auth.service.AuthDomainService;
+import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
+import com.kge.energy.crm.common.util.RedisUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -16,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final RedisUtils redisUtils;
 
     private final UserDomainService userDomainService;
 
@@ -66,12 +67,13 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
             return true;
         }
 
-        String authToken = request.getHeader("Authorization");
+        String authToken = request.getHeader(TokenConstant.HEADER_KEY);
         if (StrUtil.isBlank(authToken)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }
 
-        String uid = stringRedisTemplate.opsForValue().get(authProperties.getToken().getRedisFront() + authToken);
+        String tokenKey = authProperties.getToken().getRedisFront() + authToken;
+        String uid = redisUtils.get(tokenKey);
         if (StrUtil.isBlank(uid)) {
             throw new BadException(ResponseCode.TOKEN_FAIL);
         }
@@ -86,6 +88,9 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
             log.error("用户Id {} 无权限访问接口：{}", uid, url);
             throw new ServiceException("权限不足");
         }
+
+        // 续期
+        redisUtils.expire(tokenKey, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT);
 
         return true;
     }
