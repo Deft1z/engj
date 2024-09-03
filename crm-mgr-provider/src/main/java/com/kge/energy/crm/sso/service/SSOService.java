@@ -1,5 +1,6 @@
 package com.kge.energy.crm.sso.service;
 
+import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.external.iam.resp.IamCheckTicket;
@@ -44,7 +45,7 @@ public class SSOService {
         BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new BadException(ResponseCode.SHOULD_LOGIN));
 
         SSOResp resp = new SSOResp();
-        resp.setToken(userDomainService.genToken(user, true));
+        resp.setToken(userDomainService.genToken(user, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true));
         resp.setUserId(user.getUserId());
 
         return resp;
