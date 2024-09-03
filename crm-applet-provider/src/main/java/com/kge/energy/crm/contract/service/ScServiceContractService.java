@@ -151,6 +151,17 @@ public class ScServiceContractService {
             if (!locked) {
                 throw new ServiceException("合同已锁定，请勿同时操作!");
             }
+            LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
+                    .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
+            ScServiceContract contract = scServiceContractDao.getOne(queryWrapper);
+            if (contract == null) {
+                throw new ServiceException("合同不存在!");
+            }
+            //数据时间校验
+            if (contract.getProjectStartTime().isAfter(req.getProjectEndTime())) {
+                throw new ServiceException("项目开始时间不能早于项目结束时间!");
+            }
+
             LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda()
                     .set(ScServiceContract::getProjectEndTime, req.getProjectEndTime())
                     .set(ScServiceContract::getStatus, ConstParam.RemainToBeEvaluated)
@@ -163,14 +174,29 @@ public class ScServiceContractService {
 
     @Transactional
     public Boolean updateProjTime(ScServiceContractProjTimeUpdReq req) {
+        LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
+                .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
+        ScServiceContract contract = scServiceContractDao.getOne(queryWrapper);
+        if (contract == null) {
+            throw new ServiceException("合同不存在!");
+        }
+
         LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda();
         switch (req.getMode()) {
             case 0:
+                //数据时间校验
+                if (contract.getSigningTime().isAfter(req.getProjectTime().atStartOfDay())) {
+                    throw new ServiceException("项目开始时间不能早于合同签订时间!");
+                }
                 updateWrapper.set(ScServiceContract::getProjectStartTime, req.getProjectTime())
                         .set(ScServiceContract::getStatus, ConstParam.ContractUnderWay)
                         .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
                 return scServiceContractDao.update(updateWrapper);
             case 1:
+                //数据时间校验
+                if (contract.getProjectStartTime().isAfter(req.getProjectTime().atStartOfDay())) {
+                    throw new ServiceException("项目结束时间不能早于项目开始时间!");
+                }
                 updateWrapper.set(ScServiceContract::getProjectEndTime, req.getProjectTime())
                         .set(ScServiceContract::getStatus, ConstParam.RemainToBeEvaluated)
                         .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
