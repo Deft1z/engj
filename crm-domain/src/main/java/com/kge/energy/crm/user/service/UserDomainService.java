@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -88,8 +87,6 @@ public class UserDomainService {
         String authToken = IdUtil.fastSimpleUUID();
         String authTokenKeyPrefix = authProperties.getToken().getRedisFront();
 
-        LocalDateTime expiredTime = LocalDateTime.now().plusHours(121);
-
         redisUtils.setEx(authTokenKeyPrefix + authToken, String.valueOf(user.getUserId()), expiredTimeout, expiredTimeUnit);
 
         LUserToken lUserToken = lUserTokenDao.findByUid(user.getUserId());
@@ -97,22 +94,16 @@ public class UserDomainService {
         if (ObjectUtil.isNotNull(lUserToken)) {
 
             //如果是dev环境不删除旧的token
-            if (!StrUtil.equals(env, "dev")) {
+            if (!StrUtil.equals(env, "dev") && deleteLastToken) {
                 redisUtils.delete(authProperties.getToken().getRedisFront() + lUserToken.getLoginToken());
             }
 
-            lUserToken.setLoginToken(authToken)
-                    .setLoginExpiredTime(expiredTime);
+            lUserToken.setLoginToken(authToken);
             lUserTokenDao.updateById(lUserToken);
-
-            if (deleteLastToken) {
-                redisUtils.delete(authTokenKeyPrefix + lUserToken.getLoginToken());
-            }
 
         } else {
             lUserTokenDao.save(new LUserToken()
                     .setUserId(user.getUserId())
-                    .setLoginExpiredTime(expiredTime)
                     .setLoginToken(authToken)
             );
         }
