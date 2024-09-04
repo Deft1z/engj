@@ -107,7 +107,7 @@ public class ContractService {
         //新增合同
         ScServiceContract contract = BeanUtil.copyProperties(req, ScServiceContract.class);
         Opt.ofBlankAble(req.getAmount()).ifPresent(a -> contract.setAmount(NumberUtil.round(Double.parseDouble(a), 2).doubleValue()));
-        Opt.ofBlankAble(req.getSigningTime()).ifPresent(s -> contract.setSigningTime(LocalDateTimeUtil.parse(s)));
+        Opt.ofBlankAble(req.getSigningTime()).ifPresent(s -> contract.setSigningTime(LocalDateTimeUtil.parse(s, DatePattern.NORM_DATE_PATTERN)));
         contract.setStatus(ConstParam.ContractNotReady);
         contract.setFlag(1);
         contract.setCreateUserId(userInfoDto.getUserId().intValue());
