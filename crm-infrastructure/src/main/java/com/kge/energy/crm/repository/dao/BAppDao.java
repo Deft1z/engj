@@ -6,25 +6,21 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.AppMgrListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
-import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.repository.mapper.*;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 接入应用(BApp)表数据库访问层
@@ -82,7 +78,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 内部绑定列表
      */
-    public List<OpenIdModelList> newList(Integer page, Integer limit, Integer appId, String name, String mobile) {
+    public List<OpenIdModelList> newList(Integer page, Integer limit, Integer appId, String mobile, String name) {
 
         // OpenIdModelList
 

@@ -5,24 +5,17 @@ import cn.hutool.core.lang.Assert;
 import com.kge.energy.crm.app.req.*;
 import com.kge.energy.crm.app.resp.*;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
-import com.kge.energy.crm.common.net.ResponseCode;
-import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BAppDao;
 import com.kge.energy.crm.repository.entity.BApp;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
-import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.repository.entityext.result.OpenIdModelList;
 import com.kge.energy.crm.repository.entityext.result.OpenShareModelList;
 import com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 
@@ -86,6 +79,10 @@ public class AppService {
      * 微信客户小程序 -> 绑定的第三方应用 -> 绑定应用选择列表
      */
     public ListResp listNew(Integer page, Integer limit,  Integer appid, String mobile, String name) {
+        //该方法后面userK.getAppid() == 1时写死了当已绑定光伏appid=1时，同时返回电房appid=2的记录，实际数据库关联表并无appid=2的关联记录，所以可认为当查询appid=2时即是查appid=1
+        if (appid != null && appid.equals(2)) {
+            appid = 1;
+        }
         List<OpenIdModelList> users = bAppDao.newList(page, limit, appid, mobile, name);
         Integer total = bAppDao.newListCount(appid, mobile, name);
         if (users.size() == 0) {
