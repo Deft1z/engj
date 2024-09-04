@@ -17,4 +17,29 @@ public class Condition {
      * 类型
      */
     private String[] riskRates;
+
+    /**
+     * 施工单位
+     */
+    private String sysCompanyCode;
+
+    /**
+     * 合同/项目名称
+     */
+    private String keyword;
+
+    /**
+     * 合格/不合格
+     */
+    private String remarkC;
+
+    /**
+     * 开始时间
+     */
+    private String startDate;
+
+    /**
+     * 结束时间
+     */
+    private String endDate;
 }
