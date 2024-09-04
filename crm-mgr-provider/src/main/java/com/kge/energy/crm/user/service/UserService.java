@@ -235,6 +235,7 @@ public class UserService {
                         .setMobile(user.getMobile())
                         .setStatus(user.getStatus())
                         .setOrganizationName(user.getOrganizationName())
+                        .setTenantId(user.getTenantId())
                 ).toList();
 
         return new PageResp<UserListResp>()

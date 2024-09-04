@@ -21,4 +21,6 @@ public class UserListResult {
     private Integer status;
 
     private String organizationName;
+
+    private Integer tenantId;
 }

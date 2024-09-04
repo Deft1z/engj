@@ -30,4 +30,7 @@ public class UserListResp {
     @Schema(description = "部门名称")
     private String organizationName;
 
+    @Schema(description = "租户ID")
+    private Integer tenantId;
+
 }

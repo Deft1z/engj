@@ -95,12 +95,18 @@
     </select>
 
     <select id="findNewUserNum" resultType="java.lang.Long">
-        SELECT count(b.user_id)
-        FROM b_user b
-                 LEFT JOIN r_user_role r ON r.user_id = b.user_id
-                 LEFT JOIN l_user_token l on l.user_id = b.user_id
-        WHERE l.modify_time BETWEEN #{startTime} AND #{endTime}
-          AND r.role_id = 5
+        select count(u.user_id)
+        from b_user u,
+             b_role r,
+             r_user_role ur
+        where u.flag = 1
+          and r.flag = 1
+          and ur.flag = 1
+          and u.user_id = ur.user_id
+          and r.role_id = ur.role_id
+          and u.tenant_id = r.tenant_id
+          and r.code = 'applet_user'
+          and u.create_time BETWEEN #{startTime} AND #{endTime}
     </select>
 
     <select id="findNewUserCount" resultType="java.lang.Long">
@@ -119,7 +125,7 @@
     </select>
 
     <select id="list" resultType="com.kge.energy.crm.repository.entityext.result.UserListResult">
-        select bu.user_id,bu.name,bu.realname,bu.mobile,bu.status,bo.name organizationName
+        select bu.user_id,bu.name,bu.realname,bu.mobile,bu.status,bo.name organizationName,bu.tenant_id
         from b_user bu,
         b_organization bo,
         r_user_tenant rut

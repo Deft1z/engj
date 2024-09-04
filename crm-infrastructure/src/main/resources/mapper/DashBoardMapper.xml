@@ -129,6 +129,7 @@
             from sc_service_contract ssc
             <if test="area != null and area != ''">
                 join wf_form wf ON ssc.form_id = wf.form_id
+                AND wf.flag = 1
             </if>
             where
                 date_format(ssc.create_time, '%Y-%m') between date_format(#{startTime}, '%Y-%m') and date_format(#{endTime} , '%Y-%m')
