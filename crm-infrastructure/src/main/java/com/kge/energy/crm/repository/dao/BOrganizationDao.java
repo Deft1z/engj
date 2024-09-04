@@ -83,5 +83,19 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
                 .eq(BOrganization::getName, name);
         return mapper.selectOne(wrapper);
     }
+
+    public String getEccOrgCode(Integer orgId) {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getOrganizationId, orgId);
+        return mapper.selectOne(wrapper).getEccOrgCode();
+    }
+
+    public List<BOrganization> getEccOrgList() {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getParentOrganizationId, 1)
+                .isNotNull(BOrganization::getEccOrgCode)
+                .orderByAsc(BOrganization::getEccOrgCode);
+        return mapper.selectList(wrapper);
+    }
 }
 

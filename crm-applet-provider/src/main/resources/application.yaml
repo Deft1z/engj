@@ -15,7 +15,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname:test}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname:test}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
     username: ${mysql.username}
     password: ${mysql.password}
     hikari:

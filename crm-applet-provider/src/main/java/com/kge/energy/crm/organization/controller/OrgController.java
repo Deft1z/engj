@@ -2,6 +2,8 @@ package com.kge.energy.crm.organization.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.energy.crm.external.ecc.resp.EccOrgResp;
+import com.kge.energy.crm.external.ecc.service.EccService;
 import com.kge.energy.crm.organization.req.OrgReq;
 import com.kge.energy.crm.organization.resp.OrgDictResp;
 import com.kge.energy.crm.organization.resp.OrgResp;
@@ -21,6 +23,8 @@ public class OrgController {
 
     private final OrgService orgService;
 
+    private final EccService eccService;
+
     /**
      * @description 小程序端获取服务商接口
      * @author tangchenghui
@@ -38,5 +42,10 @@ public class OrgController {
     @PostMapping("/baseData/organizationMrg/orgDictList/load")
     public CommonResponse<List<OrgDictResp>> orgDictList() {
         return CommonResponse.suc(orgService.orgDictList());
+    }
+
+    @PostMapping("/baseData/getEccOrgList")
+    public CommonResponse<List<EccOrgResp>> getEccOrgList() {
+        return CommonResponse.suc(eccService.getEccOrgList());
     }
 }

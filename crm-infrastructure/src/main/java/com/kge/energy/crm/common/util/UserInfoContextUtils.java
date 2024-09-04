@@ -1,7 +1,10 @@
 package com.kge.energy.crm.common.util;
 
+import cn.hutool.core.collection.CollUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.platform.framework.common.util.CommonUserInfoContextUtils;
+
+import java.util.List;
 
 /**
  * 用户上下文工具类
@@ -43,6 +46,14 @@ public class UserInfoContextUtils {
 
     public static String getCurrentSystemType() {
         return getCurrentUserInfo().getSystemType();
+    }
+
+    public static Integer getCurrentOrgId() {
+        List<UserInfoDto.Organization> organizationList = getCurrentUserInfo().getOrganizationList();
+        if(CollUtil.isEmpty(organizationList)){
+            return null;
+        }
+        return organizationList.get(0).getId();
     }
 
 

@@ -29,6 +29,8 @@ wechat:
 ecc:
   appId: ntwx001
   appSecret: h9r2e2nd5bipf6z
+  baseUrl: https://ecc.nftz:8181
+  maintenanceListUrl: /publicApi/maintenance/list
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420

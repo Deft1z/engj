@@ -1,6 +1,7 @@
 package com.kge.energy.crm.common.util;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.platform.framework.common.exception.ServiceException;
 
@@ -73,5 +74,10 @@ public class AuthVerifyUtils {
         return UserInfoContextUtils.getCurrentUserInfo()
                 .getRoleCodes()
                 .contains(roleCode);
+    }
+
+    public static boolean isGreaterOrEqualBLevel() {
+        String jobLevel = UserInfoContextUtils.getCurrentUserInfo().getJobLevel();
+        return StrUtil.equals(jobLevel, "A") || StrUtil.equals(jobLevel, "B");
     }
 }
