@@ -9,6 +9,11 @@ public class TokenConstant {
 
     public static final String HEADER_KEY = "Authorization";
 
+    /**
+     * 存储最后一次登录的token，格式：token:last:systemType:userId
+     */
+    public static final String LAST_TOKEN_CACHE_KEY = "auth:token:last:%s:%s";
+
     public static final long PC_EXPIRED_TIMEOUT = 1L;
 
     public static final TimeUnit PC_EXPIRED_TIMEUNIT = TimeUnit.HOURS;

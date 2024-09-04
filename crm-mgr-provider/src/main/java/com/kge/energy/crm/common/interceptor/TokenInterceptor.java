@@ -11,6 +11,7 @@ import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.RedisUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.SystemTypeEnum;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
@@ -51,7 +52,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
         String method = request.getMethod();
         String url = request.getRequestURI();
-        String systemType = "mgr";
+        String systemType = SystemTypeEnum.MGR.getCode();
         log.info("{} {}", method, url);
 
         if (StrUtil.equalsIgnoreCase(method, "OPTIONS")) {

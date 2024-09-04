@@ -119,7 +119,7 @@ public class UserService {
             // 获取uid关联的租户
             RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
 
-            String authToken = userDomainService.genToken(bUser, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true);
+            String authToken = userDomainService.genToken(bUser, SystemTypeEnum.MGR, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true);
 
             userLoginResp = new UserLoginResp()
                     .setUserId(bUser.getUserId())
