@@ -47,24 +47,31 @@ public class FileInfraService {
             throw new ServiceException("获取文件MD5值异常");
         }
 
-//        Map<String, Object> paramMap = new HashMap<>();
-//        paramMap.put("sign", md5Code);
-//        paramMap.put("file", multipartFile);
+        // 创建临时文件
+        File tempFile = null;
+        String filePath;
 
-        File file = new File("D:\\test.png");
-        multipartFile.transferTo(file);
+        try {
+            tempFile = new File(System.getProperty("java.io.tmpdir"), multipartFile.getOriginalFilename());
+            multipartFile.transferTo(tempFile);
 
-        HttpRequest post = HttpUtil.createPost(fileProperty.getUpload().getUploadUrl());
-        post.header(Header.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA_VALUE);
-        post.form("sign", md5Code);
-        post.form("file", file);
+            HttpRequest post = HttpUtil.createPost(fileProperty.getUpload().getUploadUrl());
+            post.header(Header.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA_VALUE);
+            post.form("sign", md5Code);
+            post.form("file", tempFile);
 
-        String response = post.execute().body();//HttpUtil.post(fileProperty.getUpload().getUploadUrl(), paramMap);
+            String response = post.execute().body();
 
-        log.info("上传文件 name: {}, md5Code: {}, 响应结果：{}", multipartFile.getOriginalFilename(), md5Code, response);
+            log.info("上传文件 name: {}, md5Code: {}, 响应结果：{}", multipartFile.getOriginalFilename(), md5Code, response);
 
-        String filePath = JSONUtil.parseObj(response).getStr("data");
-        Assert.hasLength(filePath, "文件路径不存在");
+            filePath = JSONUtil.parseObj(response).getStr("data");
+            Assert.hasLength(filePath, "文件路径不存在");
+
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
 
         return filePath;
     }
