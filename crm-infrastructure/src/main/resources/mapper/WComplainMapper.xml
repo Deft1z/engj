@@ -55,7 +55,7 @@
                 LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
                 LEFT JOIN b_organization l ON l.organization_id = k.organization_id
                 WHERE a.flag != -1 AND a.typef = 1
-                GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,i.filepath,j.realname,l.name
+                GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,j.realname,l.name
             )
             UNION ALL
             (
@@ -67,7 +67,7 @@
                     JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.code')) AS order_code,
                     d.status AS order_status,
                     DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
-                    i.filepath,
+                    group_concat( i.filepath SEPARATOR ',' ) AS filepath,
                     j.realname,
                     l.name AS org_name, a.tenant_id
                 FROM w_complain a
@@ -79,7 +79,7 @@
                 LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
                 LEFT JOIN b_organization l ON l.organization_id = k.organization_id
                 WHERE a.flag != -1 and a.typef = 2
-                GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,i.filepath,j.realname,l.name
+                GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name
             )
         ) AS rs
         <where>
