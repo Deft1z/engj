@@ -197,10 +197,10 @@
         join sc_service_contract d on d.service_contract_id = c.consult_id
         left join wf_form w on w.form_id = d.form_id
         left join w_complain_file g on g.complain_id = a.complain_id
-        left join s_file i on i.file_id = g.file_id
-        left join b_user j on j.user_id = a.process_user_id
-        left join r_user_tenant k on k.user_id = j.user_id
-        left join b_organization l on l.organization_id = k.organization_id
+        left join s_file i on i.flag = 1 and i.file_id = g.file_id
+        left join b_user j on j.flag = 1 and j.user_id = a.process_user_id
+        left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
+        left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
         where a.typef = 1 and d.flag = 1 and a.flag = 1
         group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, d.code, d.status, a.create_time, i.filepath, j.realname, l.name
         union all
@@ -231,10 +231,10 @@
         join r_form_consult_complain c on c.complain_id = a.complain_id
         join wf_form d on d.form_id = c.consult_id
         left join w_complain_file g on g.complain_id = a.complain_id
-        left join s_file i on i.file_id = g.file_id
-        left join b_user j on j.user_id = a.process_user_id
-        left join r_user_tenant k on k.user_id = j.user_id
-        left join b_organization l on l.organization_id = k.organization_id
+        left join s_file i on i.flag = 1 and i.file_id = g.file_id
+        left join b_user j on j.flag = 1 and j.user_id = a.process_user_id
+        left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
+        left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
         where a.typef = 2 and d.flag = 1 and a.flag = 1
         group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, i.filepath, j.realname, l.name
     </sql>

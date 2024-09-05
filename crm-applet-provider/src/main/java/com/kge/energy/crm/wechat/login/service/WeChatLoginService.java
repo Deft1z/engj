@@ -37,13 +37,13 @@ import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,7 +71,6 @@ public class WeChatLoginService {
     private final SysLoginLogHandleService sysLoginLogHandleService;
     private final ElinkService elinkService;
 
-    private final Environment env;
     private final BOrganizationDao bOrganizationDao;
     private final BRoleDao bRoleDao;
     private final RUserTenantDao rUserTenantDao;
@@ -84,6 +83,9 @@ public class WeChatLoginService {
 
     @Value("${loginAttention.sendee}")
     private String[] sendee;
+
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
 
     /**
      * 首页微信登录获取openid
@@ -117,6 +119,9 @@ public class WeChatLoginService {
             }
 
             String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
+
+            user.setLastLoginTime(LocalDateTime.now());
+            bUserDao.updateById(user);
 
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, null);
@@ -181,7 +186,6 @@ public class WeChatLoginService {
     public void sendLeaderOnlineMsg(BUser user) {
 
         CompletableFuture.runAsync(() -> {
-            String activeProfile = env.getProperty("spring.profiles.active");
             if (activeProfile.contains("dev")) {
                 return;
             }
@@ -193,13 +197,14 @@ public class WeChatLoginService {
             }
 
             if (CollUtil.contains(leaderPhoneList, user.getMobile())) {
+                String header = activeProfile.contains("prod") ? "e能管家小程序领导登录提醒" : "e能管家小程序（体验版）领导登录提醒";
                 String msg = "领导名字：" + user.getRealname() + "\\n" +
                         "手机号：" + user.getMobile() + "\\n" +
-                        "登录时间：" + DateUtil.now() +
+                        "登录时间：" + DateUtil.now() + "\\n" +
                         "请重点关注！！！";
 
                 for (String sendPhone : sendeeList) {
-                    String msgContent = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), "e能管家小程序领导登录提醒", msg, sendPhone);
+                    String msgContent = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), header, msg, sendPhone);
                     try {
                         elinkService.pushElinkMsg(msgContent);
                     } catch (Exception e) {
@@ -237,7 +242,6 @@ public class WeChatLoginService {
         if (userList.size() == 1 && ObjectUtil.isNull(userList.get(0).getMobile())) {
             bUser = userList.get(0);
             bUser.setMobile(mobile);
-            bUserDao.updateById(bUser);
 
         } else {
             // 匹配 openid、手机号用户
@@ -253,6 +257,9 @@ public class WeChatLoginService {
         }
 
         String token = userDomainService.genToken(bUser, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
+
+        bUser.setLastLoginTime(LocalDateTime.now());
+        bUserDao.updateById(bUser);
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
                 .setTimestamp(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())
