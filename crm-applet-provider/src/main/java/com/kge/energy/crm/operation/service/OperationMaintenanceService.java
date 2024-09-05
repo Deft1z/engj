@@ -67,7 +67,7 @@ public class OperationMaintenanceService {
         //获取当前用户ecc org code, 处理施工单位筛选条件
         String eccOrgCode = bOrganizationDao.getEccOrgCode(UserInfoContextUtils.getCurrentOrgId());
         if(StrUtil.isBlank(eccReq.getCondition().getSysCompanyCode())){
-            if(!AuthVerifyUtils.isSuperAdmin() || !leaderPhoneList.contains(currentUserPhone)){
+            if(!AuthVerifyUtils.isSuperAdmin() && !leaderPhoneList.contains(currentUserPhone)){
                 eccReq.getCondition().setSysCompanyCode(eccOrgCode);
             }
         }
