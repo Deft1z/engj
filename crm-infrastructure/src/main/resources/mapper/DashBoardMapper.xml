@@ -156,7 +156,7 @@
             ROUND(contract_num / order_num * 100, 2) AS order_trans_rate
         from (
             <!-- 查询活跃客户数量 -->
-            select count(u.user_id)
+            select count(u.user_id) AS active_user_num
             from b_user u,
                 b_role r,
                 r_user_role ur
