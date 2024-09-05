@@ -8,6 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface DashBoardMapper {
+
     DashBoardStatistic selectStatistic(DashBoardParam param);
 
     List<DashBoardOrderContract> selectOrderContractList(DashBoardParam param);
