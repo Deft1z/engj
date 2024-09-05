@@ -202,7 +202,7 @@
         left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
         left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
         where a.typef = 1 and d.flag = 1 and a.flag = 1
-        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, d.code, d.status, a.create_time, i.filepath, j.realname, l.name
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, d.code, d.status, a.create_time, j.realname, l.name
         union all
         /* typef=2 业务工单投诉 */
         select a.complain_id
@@ -236,7 +236,7 @@
         left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
         left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
         where a.typef = 2 and d.flag = 1 and a.flag = 1
-        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, i.filepath, j.realname, l.name
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name
     </sql>
 
 </mapper>
