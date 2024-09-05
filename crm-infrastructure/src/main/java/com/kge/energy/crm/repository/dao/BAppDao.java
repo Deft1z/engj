@@ -316,5 +316,9 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         LambdaQueryWrapper<BApp> wrapper = Wrappers.<BApp>lambdaQuery().eq(BApp::getName, name).ne(BApp::getAppId, appId);
         return mapper.selectCount(wrapper);
     }
+
+    public IPage<BindUserResult> getBindUsers(Page<BindUserResult> page, Integer appId, String mobile, String name){
+        return mapper.getBindUsers(page, appId, mobile, name);
+    }
 }
 

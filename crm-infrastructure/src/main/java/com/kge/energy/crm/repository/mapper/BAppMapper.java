@@ -1,12 +1,11 @@
 package com.kge.energy.crm.repository.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.repository.entity.BApp;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kge.energy.crm.repository.entityext.param.AppMgrListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
-import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import org.apache.ibatis.annotations.Param;
 
@@ -82,6 +81,8 @@ public interface BAppMapper extends BaseMapper<BApp> {
      * @date 2024/8/15 17:38
     */
     IPage<AppMgrListResult> selectAppPage(Page<AppMgrListResult> page, @Param("param") AppMgrListParam param);
+
+    IPage<BindUserResult> getBindUsers(Page<BindUserResult> page, @Param("appId") Integer appId, @Param("mobile") String mobile, @Param("name") String name);
 
 }
 

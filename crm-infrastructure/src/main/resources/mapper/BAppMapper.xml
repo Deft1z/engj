@@ -38,6 +38,73 @@
         </where>
     </select>
 
+    <resultMap id="BindUserMap" type="com.kge.energy.crm.repository.entityext.result.BindUserResult">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="realname" column="realname" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <collection property="relateApp" ofType="com.kge.energy.crm.repository.entityext.result.BindUserResult$RelateApp"
+        column="{openidIds=openid_ids, userId=user_id}" select="getRelateApps"/>
+    </resultMap>
+
+    <resultMap id="BindUserRelateAppMap" type="com.kge.energy.crm.repository.entityext.result.BindUserResult$RelateApp">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="openidId" column="openid_id" jdbcType="INTEGER"/>
+        <result property="appId" column="app_id" jdbcType="INTEGER"/>
+        <result property="appName" column="app_name" jdbcType="VARCHAR"/>
+        <collection property="relateProject" ofType="com.kge.energy.crm.repository.entityext.result.BindUserResult$RelateProject">
+            <result property="projectId" column="project_id" jdbcType="INTEGER"/>
+            <result property="projectName" column="project_name" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <!-- 用于覆盖原go开发团队的管理绑定列表实现 -->
+    <select id="getBindUsers" resultMap="BindUserMap">
+        select group_concat(bo.openid_id) as openid_ids, bu.user_id, bu.realname, bu.mobile
+        from b_openid bo
+        join b_user bu on bo.user_id = bu.user_id
+        where bo.binding_state = 1
+          and bo.flag = 1
+          and bu.flag = 1
+        <if test="appId != null and appId > 0">
+            and bo.app_id = #{appId}
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and bu.mobile = #{mobile}
+        </if>
+        <if test="name != null and name != ''">
+            and bu.realname like concat('%',#{name},'%')
+        </if>
+        group by bu.user_id, bu.realname, bu.mobile
+        order by bu.user_id
+    </select>
+
+    <select id="getRelateApps" resultMap="BindUserRelateAppMap">
+        select * from (
+            select bo.user_id, bo.openid_id, ba.app_id, ba.`name` app_name, bp.project_id, bp.name project_name
+            from b_app ba
+            join b_openid bo on bo.flag = 1 and bo.app_id = ba.app_id
+            left join r_openid_project rop on rop.open_id = bo.openid_id
+            left join b_project bp on bp.flag = 1 and bp.project_id = rop.project_id
+            where ba.flag = 1
+              and bo.openid_id in (${openidIds})
+              and bo.user_id = #{userId}
+            group by bo.user_id, bo.openid_id, ba.app_id, ba.`name`, bp.project_id, bp.name
+            /**特殊处理：当app_id=1时，同时会有app_id=2的记录，为原go开发团队写死的业务层面的逻辑*/
+            union all
+            select bo.user_id, bo.openid_id, 2 app_id, (select `name` from b_app where app_id = 2) app_name, bp.project_id, bp.name project_name
+            from b_app ba
+            join b_openid bo on bo.flag = 1 and bo.app_id = ba.app_id
+            left join r_openid_project rop on rop.open_id = bo.openid_id
+            left join b_project bp on bp.flag = 1 and bp.project_id = rop.project_id
+            where ba.flag = 1
+              and ba.app_id = 1
+              and bo.openid_id in (${openidIds})
+              and bo.user_id = #{userId}
+            group by bo.user_id, bo.openid_id, ba.app_id, ba.`name`, bp.project_id, bp.name
+        ) t
+        order by app_id
+    </select>
+
     <select id="userOpenId" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
         SELECT b_openid.user_id as uid FROM b_openid LEFT JOIN b_user ON b_openid.user_id = b_user.user_id
         <where>
