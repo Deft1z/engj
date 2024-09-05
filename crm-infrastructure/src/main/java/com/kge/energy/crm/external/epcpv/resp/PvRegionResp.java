@@ -11,7 +11,7 @@ public class PvRegionResp {
     private String name;
     private String projectnum;
     private String capacity;
-    private String capacityPer;
+    private String capacityper;
     private String projectper;
     private String owncapacity;
     private String owncapacityper;

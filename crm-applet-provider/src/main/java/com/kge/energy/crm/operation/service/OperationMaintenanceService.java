@@ -1,5 +1,6 @@
 package com.kge.energy.crm.operation.service;
 
+import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -102,6 +103,18 @@ public class OperationMaintenanceService {
         }
 
         EccResp<EccPageData<EccMaintenance>> eccResp = eccService.getMaintenanceList(eccReq);
+        Opt.ofNullable(eccResp)
+                .map(EccResp::getData)
+                .map(EccPageData::getList)
+                .map(list -> {
+                    list.forEach(e -> {
+                        if(StrUtil.isBlank(e.getContractName())){
+                            e.setContractName(e.getPrjName());
+                        }
+                        Opt.ofBlankAble(e.getTaskName()).ifPresent(t -> e.setTaskName(StrUtil.replace(t,",", "")));
+                    });
+                    return list;
+                });
 
         // 转换attachment中的路径
 //        Optional.ofNullable(eccResp)
