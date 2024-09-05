@@ -83,11 +83,11 @@ public class OrgService {
         OrgQueryParam param = BeanUtil.copyProperties(req, OrgQueryParam.class);
         param.setOrgIds(new ArrayList<>());
 
-        //如果是租户管理员，只能看到自己租户的组织
+        //如果是租户管理员，只能看到自己租户下的组织
         boolean isTenantAdmin = AuthVerifyUtils.isTenantAdmin();
         if (isTenantAdmin) {
             param.setTenantId(UserInfoContextUtils.getCurrentTenantId());
-            param.setOrgIds(UserInfoContextUtils.getCurrentUserInfo().getOrganizationList().stream().map(UserInfoDto.Organization::getId).toList());
+            param.setOrgIds(bOrganizationDao.getRootOrgList(UserInfoContextUtils.getCurrentTenantId()).stream().map(BOrganization::getOrganizationId).toList());
         }
 
         //如果是超管，可以看全部

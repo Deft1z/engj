@@ -118,12 +118,18 @@
         FROM sc_service_contract
         WHERE form_id = ANY (SELECT form_id
                              FROM wf_form
-                             WHERE create_user_id = ANY (SELECT b.user_id
-                                                         from b_user b
-                                                                  LEFT JOIN r_user_role r ON r.user_id = b.user_id
-                                                                  LEFT JOIN l_user_token l on l.user_id = b.user_id
-                                                         WHERE l.modify_time BETWEEN #{startTime} AND #{endTime}
-                                                           AND r.role_id = 5))
+                             WHERE create_user_id = ANY (select u.user_id
+                                                         from b_user u,
+                                                              b_role r,
+                                                              r_user_role ur
+                                                         where u.flag = 1
+                                                           and r.flag = 1
+                                                           and ur.flag = 1
+                                                           and u.user_id = ur.user_id
+                                                           and r.role_id = ur.role_id
+                                                           and u.tenant_id = r.tenant_id
+                                                           and r.code = 'applet_user'
+                                                           and u.last_login_time BETWEEN #{startTime} AND #{endTime}))
     </select>
 
     <select id="findNewContractCount" resultType="java.lang.Long">

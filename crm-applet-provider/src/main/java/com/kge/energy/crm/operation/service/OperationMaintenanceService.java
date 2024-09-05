@@ -104,19 +104,19 @@ public class OperationMaintenanceService {
         EccResp<EccPageData<EccMaintenance>> eccResp = eccService.getMaintenanceList(eccReq);
 
         // 转换attachment中的路径
-        Optional.ofNullable(eccResp)
-                .map(EccResp::getData)
-                .map(EccPageData::getList)
-                .map(list -> {
-                    list.forEach(e ->
-                            e.setAttactments(
-                                    e.getAttactments().stream()
-                                            .map(attachment -> attachment.setUrl(attachment.getUrl().replace(eccProperties.getBaseUrl(), "")))
-                                            .collect(Collectors.toList())
-                            )
-                    );
-                    return list;
-                });
+//        Optional.ofNullable(eccResp)
+//                .map(EccResp::getData)
+//                .map(EccPageData::getList)
+//                .map(list -> {
+//                    list.forEach(e ->
+//                            e.setAttactments(
+//                                    e.getAttactments().stream()
+//                                            .map(attachment -> attachment.setUrl(attachment.getUrl().replace(eccProperties.getBaseUrl(), "")))
+//                                            .collect(Collectors.toList())
+//                            )
+//                    );
+//                    return list;
+//                });
 
         return eccResp;
     }

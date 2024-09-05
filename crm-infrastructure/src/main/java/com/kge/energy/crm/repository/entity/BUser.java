@@ -80,6 +80,11 @@ public class BUser {
     private Integer flag;
 
     /**
+     * 最后一次登录时间
+     */
+    private LocalDateTime lastLoginTime;
+
+    /**
      * 创建用户ID
      */
     @TableField(fill = FieldFill.INSERT)

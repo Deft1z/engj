@@ -60,4 +60,4 @@ group:
 file:
   upload:
     allow-types: jpg,jpeg,png,pdf
-    upload-url: http://172.16.17.137:9230/fileservice/resourceManage/file/manage/upload
+    upload-url: http://172.16.17.137:9230/resourceManage/file/manage/upload

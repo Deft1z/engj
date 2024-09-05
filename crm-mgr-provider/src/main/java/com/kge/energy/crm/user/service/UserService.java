@@ -121,6 +121,9 @@ public class UserService {
 
             String authToken = userDomainService.genToken(bUser, SystemTypeEnum.MGR, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true);
 
+            bUser.setLastLoginTime(LocalDateTime.now());
+            bUserDao.updateById(bUser);
+
             userLoginResp = new UserLoginResp()
                     .setUserId(bUser.getUserId())
                     .setTenantId(rUserTenant.getOrganizationId())
@@ -235,6 +238,7 @@ public class UserService {
                         .setMobile(user.getMobile())
                         .setStatus(user.getStatus())
                         .setOrganizationName(user.getOrganizationName())
+                        .setTenantId(user.getTenantId())
                 ).toList();
 
         return new PageResp<UserListResp>()
