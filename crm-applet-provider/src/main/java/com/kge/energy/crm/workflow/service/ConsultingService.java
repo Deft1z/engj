@@ -42,7 +42,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +62,8 @@ public class ConsultingService {
     @Value("${spring.data.redis.front}")
     private String redisFront;
 
-    private final Environment env;
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
 
     private final WeChatAppletProperties weChatAppletProperties;
 
@@ -142,7 +142,7 @@ public class ConsultingService {
 
 
         //发送消息，通知集团客服
-        final String msgTitle = "工单待处理通知";
+        final String msgTitle = activeProfile.contains("prod") ? "工单待处理通知" : "工单待处理通知（体验版）";
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.getBusinessName()).append("\\n");
         msgContentBuilder.append("所在地区：").append(content.getArea()).append("\\n");
@@ -298,7 +298,7 @@ public class ConsultingService {
                 .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
         //发送elink消息通知，通知二级公司客服
-        final String msgTitle = "工单待处理通知";
+        final String msgTitle = activeProfile.contains("prod") ? "工单待处理通知" : "工单待处理通知（体验版）";
         JSONObject content = JSONUtil.parseObj(formContent);
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
@@ -306,7 +306,7 @@ public class ConsultingService {
         msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
         msgContentBuilder.append("客户名称：").append(content.get("customerName")).append("\\n");
         msgContentBuilder.append("客户手机：").append(content.get("mobile")).append("\\n");
-        String activeProfile = env.getProperty("spring.profiles.active");
+
         for (RoleUserResult user : assignUsers) {
             if (PhoneUtil.isPhone(user.getMobile())) {
                 String msgContent = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), msgTitle, msgContentBuilder.toString(), user.getMobile());
@@ -500,7 +500,7 @@ public class ConsultingService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送elink消息，通知集团客服
-        final String msgTitle = "工单撤回通知";
+        final String msgTitle = activeProfile.contains("prod") ? "工单撤回通知" : "工单撤回通知（体验版）";
         JSONObject content = JSONUtil.parseObj(formContent);
         StringBuilder msgContentBuilder = new StringBuilder();
         msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
@@ -545,7 +545,6 @@ public class ConsultingService {
 
     private void sendElinkMsg(List<String> phones, String msgTitle, String msgContent) {
         //获取当前环境
-        String activeProfile = env.getProperty("spring.profiles.active");
         for (String phone : phones) {
             if (PhoneUtil.isPhone(phone)) {
                 String msgBody = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), msgTitle, msgContent, phone);
