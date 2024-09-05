@@ -33,7 +33,6 @@ public class FileInfraService {
     @SneakyThrows
     public String uploadFile(MultipartFile multipartFile) {
 
-
         String fileType = FileUtil.extName(multipartFile.getOriginalFilename());
 
         if (!Arrays.asList(fileProperty.getUpload().getAllowTypes().split(",")).contains(fileType)) {
@@ -62,7 +61,7 @@ public class FileInfraService {
 
             String response = post.execute().body();
 
-            log.info("上传文件 name: {}, md5Code: {}, 响应结果：{}", multipartFile.getOriginalFilename(), md5Code, response);
+            log.info("上传文件 name: {}, md5Code: {}, 响应结果：{}", tempFile.getName(), md5Code, response);
 
             filePath = JSONUtil.parseObj(response).getStr("data");
             Assert.hasLength(filePath, "文件路径不存在");
