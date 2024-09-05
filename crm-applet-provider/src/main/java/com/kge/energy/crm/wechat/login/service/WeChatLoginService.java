@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -117,6 +118,9 @@ public class WeChatLoginService {
             }
 
             String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
+
+            user.setLastLoginTime(LocalDateTime.now());
+            bUserDao.updateById(user);
 
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, null);
@@ -237,7 +241,6 @@ public class WeChatLoginService {
         if (userList.size() == 1 && ObjectUtil.isNull(userList.get(0).getMobile())) {
             bUser = userList.get(0);
             bUser.setMobile(mobile);
-            bUserDao.updateById(bUser);
 
         } else {
             // 匹配 openid、手机号用户
@@ -253,6 +256,9 @@ public class WeChatLoginService {
         }
 
         String token = userDomainService.genToken(bUser, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
+
+        bUser.setLastLoginTime(LocalDateTime.now());
+        bUserDao.updateById(bUser);
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
                 .setTimestamp(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())

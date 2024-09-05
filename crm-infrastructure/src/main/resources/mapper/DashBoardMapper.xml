@@ -156,33 +156,48 @@
             ROUND(contract_num / order_num * 100, 2) AS order_trans_rate
         from (
             <!-- 查询活跃客户数量 -->
-            select count(*) AS active_user_num
-            from b_user user
-            left join r_user_role rur on rur.user_id = user.user_id
-            left join l_user_token token on token.user_id = user.user_id
-            where
-                token.modify_time between #{startTime} and #{endTime}
-                and rur.role_id = 5
+            select count(u.user_id)
+            from b_user u,
+                b_role r,
+                r_user_role ur
+            where u.flag = 1
+                and r.flag = 1
+                and ur.flag = 1
+                and u.user_id = ur.user_id
+                and r.role_id = ur.role_id
+                and u.tenant_id = r.tenant_id
+                and r.code = 'applet_user'
+                and u.last_login_time BETWEEN #{startTime} AND #{endTime}
         ) active_user, (
             <!-- 查询下单咨询数量 -->
-            select count(*) AS order_num
-            from b_user user
-            left join r_user_role rur on rur.user_id = user.user_id
-            left join l_user_token token on token.user_id = user.user_id
-            where
-                token.modify_time between #{startTime} and #{endTime}
-                and rur.role_id = 5
-                and user.user_id = any(select create_user_id from wf_form)
+            select count(u.user_id) AS order_num
+            from b_user u,
+                b_role r,
+                r_user_role ur
+            where u.flag = 1
+                and r.flag = 1
+                and ur.flag = 1
+                and u.user_id = ur.user_id
+                and r.role_id = ur.role_id
+                and u.tenant_id = r.tenant_id
+                and r.code = 'applet_user'
+                and u.last_login_time BETWEEN #{startTime} AND #{endTime}
+                and u.user_id = any(select create_user_id from wf_form)
         ) `order`, (
             <!-- 查询提交合同数量 -->
-            select count(*) AS contract_num
-            from b_user user
-            left join r_user_role rur on rur.user_id = user.user_id
-            left join l_user_token token on token.user_id = user.user_id
-            where
-                token.modify_time between #{startTime} and #{endTime}
-                and rur.role_id = 5
-                and user.user_id = any(
+            select count(u.user_id) AS contract_num
+            from b_user u,
+                b_role r,
+                r_user_role ur
+            where u.flag = 1
+                and r.flag = 1
+                and ur.flag = 1
+                and u.user_id = ur.user_id
+                and r.role_id = ur.role_id
+                and u.tenant_id = r.tenant_id
+                and r.code = 'applet_user'
+                and u.last_login_time BETWEEN #{startTime} AND #{endTime}
+                and u.user_id = any(
                     select create_user_id
                     from wf_form
                     where form_id = any(select form_id from sc_service_contract)
