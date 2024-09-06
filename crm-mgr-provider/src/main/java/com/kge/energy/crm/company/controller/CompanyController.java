@@ -1,6 +1,7 @@
 package com.kge.energy.crm.company.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.company.req.CompanyEditReq;
@@ -24,6 +25,7 @@ public class CompanyController {
     /**
      * 分页查询公司列表
      */
+    @ConvertToGoFormats
     @PostMapping("/companyList/load")
     public CommonResponse<PageResp<CompanyResp>> getPage(@Validated @RequestBody CompanyReq req) {
         CompanyParam param = BeanUtil.copyProperties(req, CompanyParam.class);

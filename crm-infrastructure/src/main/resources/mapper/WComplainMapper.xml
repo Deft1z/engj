@@ -31,5 +31,213 @@
         where flag != -1 AND create_time between #{startTime} and #{endTime}
     </select>
 
+    <select id="getComplainList" resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
+        SELECT rs.* FROM (
+            (
+                SELECT a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content,
+                    (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
+                    a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
+                    DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+                    JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.businessName')) AS business_name,
+                    d.code AS order_code,
+                    d.status AS order_status,
+                    DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
+                    group_concat( i.filepath SEPARATOR ',' ) AS filepath,
+                    j.realname,
+                    l.name AS org_name, a.tenant_id
+                FROM w_complain a
+                LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
+                LEFT JOIN sc_service_contract d ON d.service_contract_id = c.consult_id and d.flag != - 1
+                LEFT JOIN wf_form w ON w.form_id = d.form_id
+                LEFT JOIN w_complain_file g ON g.complain_id = a.complain_id
+                LEFT JOIN s_file i ON i.file_id = g.file_id
+                LEFT JOIN b_user j ON j.user_id = a.process_user_id
+                LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
+                LEFT JOIN b_organization l ON l.organization_id = k.organization_id
+                WHERE a.flag != -1 AND a.typef = 1
+                GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,j.realname,l.name
+            )
+            UNION ALL
+            (
+                SELECT a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content,
+                    (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
+                    a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
+                    DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.businessName')) AS business_name,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.code')) AS order_code,
+                    d.status AS order_status,
+                    DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
+                    group_concat( i.filepath SEPARATOR ',' ) AS filepath,
+                    j.realname,
+                    l.name AS org_name, a.tenant_id
+                FROM w_complain a
+                LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
+                LEFT JOIN wf_form d ON d.form_id = c.consult_id and d.flag != -1
+                LEFT JOIN w_complain_file g ON g.complain_id = a.complain_id
+                LEFT JOIN s_file i ON i.file_id = g.file_id
+                LEFT JOIN b_user j ON j.user_id = a.process_user_id
+                LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
+                LEFT JOIN b_organization l ON l.organization_id = k.organization_id
+                WHERE a.flag != -1 and a.typef = 2
+                GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name
+            )
+        ) AS rs
+        <where>
+            <if test="param.tenantId != null">
+                and tenant_id = #{param.tenantId}
+            </if>
+            <if test="param.status != null">
+                and rs.status = #{param.status}
+            </if>
+            <if test="param.name != null and param.name != ''">
+                and ( rs.subject like CONCAT('%',#{param.name},'%') or rs.content like CONCAT('%',#{param.name},'%') )
+            </if>
+            <if test="param.createUserId != null">
+                and rs.create_user_id = #{param.createUserId}
+            </if>
+        </where>
+        ORDER BY rs.create_time DESC
+    </select>
+
+    <select id="getComplain" resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
+        SELECT a.complain_id, a.subject, a.create_user_id,
+               JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.businessName')) AS contract_name
+        FROM w_complain a
+        LEFT JOIN r_form_consult_complain r ON r.complain_id = a.complain_id
+        LEFT JOIN wf_form w ON w.form_id = r.consult_id
+        WHERE a.flag != -1
+        AND a.complain_id = #{complainId}
+        limit 1
+    </select>
+
+    <select id="getComplainListForWx" resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
+        select a.complain_id
+            , a.user_id
+            , a.typef
+            , a.`subject`
+            , a.content
+            , (select name from b_organization where organization_id = a.organization_id) as service_company
+            , a.company
+            , a.contacts
+            , a.phone
+            , a.address
+            , a.`status`
+            , a.feedback
+            , a.process_user_id
+            , date_format(a.process_time, '%Y-%m-%d %T') as process_time
+            , a.flag
+            , b.order_code
+            , b.business_name
+            , b.order_status
+            , b.create_time
+            , b.filepath
+            , b.realname
+            , b.org_name
+        from w_complain a
+        left join (<include refid="extend_complain_info"/>) as b on b.complain_id = a.complain_id
+        where a.flag = 1
+        <if test="userInfo.tenantId != null">
+            and a.tenant_id = #{userInfo.tenantId}
+        </if>
+        <choose>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
+                /*管理员和集团客服可查看全部数据*/
+            </when>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+                and a.organization_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+        <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+            and (a.`subject` like concat('%', #{listParam.searchMap.name}, '%') or a.content like concat('%', #{listParam.searchMap.name}, '%'))
+        </if>
+        <if test="listParam.searchMap.starttime != null and listParam.searchMap.starttime != '' and listParam.searchMap.endtime != null and listParam.searchMap.endtime != ''">
+            and a.modify_time &gt;= #{listParam.searchMap.starttime} AND a.modify_time &lt;= #{listParam.searchMap.endtime}
+        </if>
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
+          <choose>
+            <when test="listParam.searchMap.status == '待处理'">and a.status = 0</when>
+            <when test="listParam.searchMap.status == '已完成'">and a.status = 2</when>
+          </choose>
+        </if>
+        order by a.create_time desc
+    </select>
+
+    <sql id="extend_complain_info">
+        /* typef=1 服务合同投诉 */
+        select a.complain_id
+            , a.user_id
+            , a.typef
+            , a.subject
+            , a.content
+            , (select name from b_organization where organization_id = a.organization_id) as service_company
+            , a.company
+            , a.contacts
+            , a.phone
+            , a.address
+            , a.status
+            , a.feedback
+            , a.process_user_id
+            , date_format(a.process_time, '%Y-%m-%d %T') AS process_time
+            , a.flag
+            , json_unquote(json_extract(w.content, '$.businessName')) AS business_name
+            , d.code AS order_code
+            , d.status AS order_status
+            , date_format( a.create_time, '%Y-%m-%d %T' ) AS create_time
+            , group_concat( i.filepath separator ',' ) AS filepath
+            , j.realname
+            , l.name AS org_name
+        from w_complain a
+        join r_form_consult_complain c on c.complain_id = a.complain_id
+        join sc_service_contract d on d.service_contract_id = c.consult_id
+        left join wf_form w on w.form_id = d.form_id
+        left join w_complain_file g on g.complain_id = a.complain_id
+        left join s_file i on i.flag = 1 and i.file_id = g.file_id
+        left join b_user j on j.flag = 1 and j.user_id = a.process_user_id
+        left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
+        left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
+        where a.typef = 1 and d.flag = 1 and a.flag = 1
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, d.code, d.status, a.create_time, j.realname, l.name
+        union all
+        /* typef=2 业务工单投诉 */
+        select a.complain_id
+            , a.user_id
+            , a.typef
+            , a.subject
+            , a.content
+            , (select name from b_organization where organization_id = a.organization_id) as service_company
+            , a.company
+            , a.contacts
+            , a.phone
+            , a.address
+            , a.status
+            , a.feedback
+            , a.process_user_id
+            , date_format(a.process_time, '%Y-%m-%d %T') AS process_time
+            , a.flag
+            , json_unquote(json_extract(d.content, '$.businessName')) AS business_name
+            , json_unquote(json_extract(d.content, '$.code')) AS order_code
+            , d.status AS order_status
+            , date_format( a.create_time, '%Y-%m-%d %T' ) AS create_time
+            , group_concat( i.filepath separator ',' ) AS filepath
+            , j.realname
+            , l.name AS org_name
+        from w_complain a
+        join r_form_consult_complain c on c.complain_id = a.complain_id
+        join wf_form d on d.form_id = c.consult_id
+        left join w_complain_file g on g.complain_id = a.complain_id
+        left join s_file i on i.flag = 1 and i.file_id = g.file_id
+        left join b_user j on j.flag = 1 and j.user_id = a.process_user_id
+        left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
+        left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
+        where a.typef = 2 and d.flag = 1 and a.flag = 1
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name
+    </sql>
+
 </mapper>
 

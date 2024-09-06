@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class SendSubscribeReq {
+public class SendSubscribeReq<T> {
 
     /**
      * 所需下发的订阅模板id
@@ -35,7 +35,7 @@ public class SendSubscribeReq {
      * 模板内容，格式形如 { "key1": { "value": any }, "key2": { "value": any } }的object
      */
     @NotBlank
-    private String data;
+    private T data;
 
     /**
      * 跳转小程序类型：developer为开发版；trial为体验版；formal为正式版；默认为正式版

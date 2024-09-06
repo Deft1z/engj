@@ -21,17 +21,16 @@ auth:
     redis-front: ntcrm_test_token_
 
 wechat:
-  appId: wx00c47c0f09ea4612
-  appSecret: ee6576d61d20ba65286739ea977a6096
-  orderStatusChangeTemplate: C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE
-  agencyOrderTemplate: TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU
-  feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
-  wxUrl: http://172.16.17.147:9011/vcheck
-  version: formal
+  common:
+    wxUrl: http://172.16.17.147:9011/vcheck
+  applet:
+    version: trial
 
 ecc:
   appId: ntwx001
   appSecret: h9r2e2nd5bipf6z
+  baseUrl: https://ecc.nftz:8181
+  maintenanceListUrl: /publicApi/maintenance/list
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
@@ -49,3 +48,16 @@ epcpv:
 
 edata:
   baseUrl: http://localhost:9252
+
+loginAttention:
+  leaderPhones: 18613028815,13702470083
+  sendee: 13702470083,13288012316
+
+group:
+  # 集团领导
+  leaderPhones: 13609607618,18602040440,13602838462,13609733222,13318834979,13318818688,18666620068,13924119780,15018777423,13825051033,13570460363,13570377089,15013033335,13380020913,13527798953,13600007818
+
+file:
+  upload:
+    allow-types: jpg,jpeg,png,pdf
+    upload-url: http://172.16.17.137:9230/resourceManage/file/manage/upload

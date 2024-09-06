@@ -32,40 +32,54 @@
 
     <select id="contractPageByUserIdLoad" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
         select a.service_contract_id,
-               a.form_id,
-               a.company,
-               a.`name`,
-               a.`code`,
-               ROUND(a.amount, 2)                            as amount,
-               a.project_code,
-               DATE_FORMAT(a.signing_time, '%Y-%m-%d')       AS signing_time,
-               DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
-               DATE_FORMAT(a.service_end_time, '%Y-%m-%d')   AS service_end_time,
-               a.service_unit,
-               DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
-               DATE_FORMAT(a.project_end_time, '%Y-%m-%d')   AS project_end_time,
-               a.content,
-               a.OWNER,
-               a.pm,
-               a.flag,
-               a.`status`,
-               b.NAME                                        AS service_provider,
-               g.satisfaction,
-               g.evaluate
+        a.form_id,
+        a.company,
+        a.`name`,
+        a.`code`,
+        ROUND(a.amount, 2) as amount,
+        a.project_code,
+        DATE_FORMAT(a.signing_time, '%Y-%m-%d') AS signing_time,
+        DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
+        DATE_FORMAT(a.service_end_time, '%Y-%m-%d') AS service_end_time,
+        a.service_unit,
+        DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
+        DATE_FORMAT(a.project_end_time, '%Y-%m-%d') AS project_end_time,
+        a.content,
+        a.OWNER,
+        a.pm,
+        a.flag,
+        a.`status`,
+        b.NAME AS service_provider,
+        a.service_unit AS organization_id,
+        g.satisfaction,
+        g.evaluate
         from sc_service_contract a
-                 LEFT JOIN b_organization b ON b.organization_id = a.service_unit
-                 LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
-                 LEFT JOIN wf_form c ON c.form_id = a.form_id
-                 LEFT JOIN b_user d ON d.user_id = c.create_user_id
-        <where>
-            c.create_user_id = #{listParam.userId} AND a.flag = 1
-            <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
-                and a.status = #{listParam.searchMap.status}
-            </if>
-            <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
-                and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
-            </if>
-        </where>
+        LEFT JOIN b_organization b ON b.organization_id = a.service_unit
+        LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
+        LEFT JOIN wf_form c ON c.form_id = a.form_id
+        LEFT JOIN b_user d ON d.user_id = c.create_user_id
+        where a.flag = 1
+        <choose>
+            <when test="listParam.roleCodes != null and listParam.roleCodes.contains('super_admin') or listParam.roleCodes.contains('jt_customer')">
+                and 1 = 1
+            </when>
+            <when test="listParam.roleCodes != null and listParam.roleCodes.contains('sub_company_customer')">
+                and a.create_user_id = #{listParam.userId}
+            </when>
+            <otherwise>
+                and c.create_user_id = #{listParam.userId}
+            </otherwise>
+        </choose>
+        <if test="listParam.tenantId != null">
+            and a.tenant_id = #{listParam.tenantId}
+        </if>
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
+            and a.status = #{listParam.searchMap.status}
+        </if>
+        <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+            and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
+        </if>
+        order by a.modify_time DESC
     </select>
 
     <select id="form" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
@@ -100,32 +114,29 @@
     </select>
 
     <select id="findContractNum" resultType="java.lang.Long">
-        SELECT
-            count(*)
-        FROM
-            sc_service_contract
-        WHERE
-            form_id = ANY (
-                SELECT
-                    form_id
-                FROM
-                    wf_form
-                WHERE
-                    create_user_id = ANY (
-                        SELECT b.user_id from b_user b
-                        LEFT JOIN r_user_role r ON r.user_id = b.user_id
-                        LEFT JOIN l_user_token l on l.user_id = b.user_id
-                        WHERE
-                            l.modify_time BETWEEN #{startTime} AND #{endTime}
-                        AND r.role_id = 5)
-            )
+        SELECT count(*)
+        FROM sc_service_contract
+        WHERE form_id = ANY (SELECT form_id
+                             FROM wf_form
+                             WHERE create_user_id = ANY (select u.user_id
+                                                         from b_user u,
+                                                              b_role r,
+                                                              r_user_role ur
+                                                         where u.flag = 1
+                                                           and r.flag = 1
+                                                           and ur.flag = 1
+                                                           and u.user_id = ur.user_id
+                                                           and r.role_id = ur.role_id
+                                                           and u.tenant_id = r.tenant_id
+                                                           and r.code = 'applet_user'
+                                                           and u.last_login_time BETWEEN #{startTime} AND #{endTime}))
     </select>
 
     <select id="findNewContractCount" resultType="java.lang.Long">
         SELECT count(1)
         FROM sc_service_contract
-        WHERE flag != -1 AND create_time between #{startTime} and #{endTime}
+        WHERE flag != -1
+          AND create_time between #{startTime} and #{endTime}
     </select>
-
 </mapper>
 

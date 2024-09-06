@@ -1,34 +1,31 @@
 package com.kge.energy.crm.user.controller;
 
+import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
-import com.kge.energy.crm.resource.resp.ResourceListResp;
+import com.kge.energy.crm.user.req.UpdateWxUserReq;
 import com.kge.energy.crm.user.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 用户登录接口
- *
- * @author zqy
+ * @author wangjihua
  */
+@Tag(name = "用户模块")
 @RestController
-@RequestMapping("/base/user")
+@RequestMapping
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    /**
-     * 当前登录用户菜单
-     */
-    @PostMapping("/currentUserResources")
-    public CommonResponse<ResourceListResp> currentUserResources() {
-//        return CommonResponse.suc(userService.currentUserResources());
-        return null;
+    @PostMapping("/baseData/userMrg/wxUser/update")
+    @ConvertToGoFormats
+    public CommonResponse<Boolean> updateWxUser(@Validated @RequestBody UpdateWxUserReq req) {
+        return CommonResponse.suc(userService.updateWxUser(req));
     }
 }
-
-
-

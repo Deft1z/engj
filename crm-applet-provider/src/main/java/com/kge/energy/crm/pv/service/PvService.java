@@ -13,11 +13,8 @@ import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsCondition;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.external.epcpv.req.EpcpvInfoReq;
 import com.kge.energy.crm.external.epcpv.service.EpcpvService;
-import com.kge.energy.crm.pv.req.PvCommentReq;
-import com.kge.energy.crm.pv.req.PvDetailReq;
-import com.kge.energy.crm.pv.req.PvInfoReq;
+import com.kge.energy.crm.pv.req.*;
 import com.kge.energy.crm.external.epcpv.property.EpcpvProperties;
-import com.kge.energy.crm.pv.req.PvLikeReq;
 import com.kge.energy.crm.pv.resp.AppletCommentResp;
 import com.kge.energy.crm.repository.dao.CmsCommentDao;
 import com.kge.energy.crm.repository.dao.RUserLikeCommentDao;
@@ -26,6 +23,7 @@ import com.kge.energy.crm.repository.entity.RUserLikeComment;
 import com.kge.energy.crm.repository.entityext.result.AppletCommentResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +77,21 @@ public class PvService {
         commentDao.save(cmsComment);
 
         return cmsComment.getCommentId();
+    }
+
+    @Transactional
+    public Boolean commentPvDel(PvCommentDelReq pvCommentDelReq){
+        Integer userId = UserInfoContextUtils.getCurrentUserId();
+        CmsComment cmsComment = commentDao.getOne(Wrappers.lambdaQuery(new CmsComment().setCommentId(pvCommentDelReq.getId()).setUserId(userId)));
+        if(ObjectUtil.isNull(cmsComment)){
+            throw new BadException("评论不存在");
+        }
+
+        Boolean lResult = userLikeCommentDao.removeById(new RUserLikeComment().setCommentId(pvCommentDelReq.getId()));
+
+        Boolean cResult = commentDao.removeById(pvCommentDelReq.getId());
+
+        return lResult && cResult;
     }
 
     public boolean likeComment(PvLikeReq pvLikeReq){

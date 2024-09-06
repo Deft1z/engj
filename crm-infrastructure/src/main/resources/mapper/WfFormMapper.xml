@@ -81,6 +81,7 @@
         a.form_id,
         a.status,
         a.sub_status,
+        a.current_org_id AS organization_id,
         DATE_FORMAT(a.time_submit, '%Y-%m-%d %T') AS time_submit,
         DATE_FORMAT(a.time_reception, '%Y-%m-%d %T') AS time_reception,
         DATE_FORMAT(a.time_finished, '%Y-%m-%d %T') AS time_finished,
@@ -133,7 +134,10 @@
                 and b.create_user_id = #{userInfo.userId}
             </if>
             <if test="userInfo.roleId != null and userInfo.roleId == 3 and userInfo.organizationList.size > 0">
-                and a.current_org_id = #{userInfo.organizationList[0].id}
+                and a.current_org_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
             </if>
             <if test="userInfo.roleId != null and userInfo.roleId == 5">
                 a.create_user_id = #{userInfo.userId}
@@ -162,21 +166,163 @@
     </select>
 
     <select id="findOrderNum" resultType="java.lang.Long">
-        select count(*) from wf_form where create_user_id = any(SELECT
-                b.user_id
-            FROM
-                b_user b
-                    LEFT JOIN r_user_role r ON r.user_id = b.user_id
-                    LEFT JOIN l_user_token l on l.user_id = b.user_id
-            WHERE
-                l.modify_time BETWEEN #{startTime} AND #{endTime}
-              AND r.role_id = 5)
+        select count(*)
+        from wf_form
+        where create_user_id = any (select u.user_id
+                                    from b_user u,
+                                         b_role r,
+                                         r_user_role ur
+                                    where u.flag = 1
+                                      and r.flag = 1
+                                      and ur.flag = 1
+                                      and u.user_id = ur.user_id
+                                      and r.role_id = ur.role_id
+                                      and u.tenant_id = r.tenant_id
+                                      and r.code = 'applet_user'
+                                      and u.last_login_time BETWEEN #{startTime} AND #{endTime})
     </select>
 
     <select id="findNewConsultingCount" resultType="java.lang.Long">
         select count(1) AS new_consulting_count
         from wf_form a
         where a.flag != -1 AND a.create_time between #{startTime} and #{endTime}
+    </select>
+
+    <!--微信小程序工单列表-->
+    <select id="findListForWx" resultType="com.kge.energy.crm.repository.entityext.result.FormResult">
+        select json_unquote(json_extract(a.content, '$.businessName')) AS business_name
+             , json_unquote(json_extract(a.content, '$.area')) AS area
+             , json_unquote(json_extract(a.content, '$.companyName')) AS company_Name
+             , json_unquote(json_extract(a.content, '$.detailedAddress')) AS detailed_address
+             , json_unquote(json_extract(a.content, '$.customerName')) AS customer_name
+             , json_unquote(json_extract(a.content, '$.mobile')) AS mobile
+             , json_unquote(json_extract(a.content, '$.code')) AS code
+             , json_unquote(json_extract(a.content, '$.voltageLevel')) AS voltage_level
+             , json_unquote(json_extract(a.content, '$.electricityCapacity')) AS electricity_capacity
+             , a.form_id
+             , a.status
+             , a.sub_status
+             , a.current_org_id AS organization_id
+             , DATE_FORMAT(a.time_submit, '%Y-%m-%d %T') AS time_submit
+             , DATE_FORMAT(a.time_reception, '%Y-%m-%d %T') AS time_reception
+             , DATE_FORMAT(a.time_finished, '%Y-%m-%d %T') AS time_finished
+             , DATE_FORMAT(a.modify_time, '%Y-%m-%d %T') AS modify_time
+             , a.flag
+             , a.remark
+             , d.`name` AS org_name,
+            <choose>
+                <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
+                    (case
+                        when a.`status` = '处理中' or a.`status` = '已处理' then '已处理'
+                        else (case when a.`status` = '已终止' then '已终止' else '待处理' end)
+                    end) as user_status
+                </when>
+                <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer')">
+                    (case
+                        when (a.`status` = '处理中' and a.`sub_status` = '待处理')  then '待处理'
+                        else (case when a.`status` = '已终止' then '已终止' else '已处理' end)
+                    end) AS user_status
+                </when>
+                <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('applet_user')">
+                    (case
+                        when a.`sub_status` = '待处理' then '待处理'
+                        else (case when a.`status` = '已终止' then '已终止' else '已处理' end)
+                    end) AS user_status
+                </when>
+                <otherwise>
+                    (case
+                        when a.`sub_status` = '待处理'  then '待处理'
+                        else (case when a.`status` = '已终止' then '已终止' else '已处理' end)
+                    end) AS user_status
+                </otherwise>
+            </choose>
+        from wf_form a
+        LEFT JOIN wf_form_flow b ON b.form_id = a.form_id AND b.create_user_id = #{userInfo.userId}
+        LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
+        LEFT JOIN b_organization d ON d.organization_id = a.current_org_id
+        LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
+        where a.flag != -1
+        <if test="listParam.tenantId != null">
+            and a.tenant_id = #{listParam.tenantId}
+        </if>
+        <choose>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
+                /*管理员和集团客服可查看全部数据*/
+            </when>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+                and a.current_org_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleCodes.contains('applet_user')">
+            and a.sub_status = #{listParam.searchMap.status}
+        </if>
+        <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+            and (json_unquote(json_extract(a.content, '$.code')) like CONCAT('%', #{listParam.searchMap.name}, '%') or json_unquote(json_extract(a.content, '$.businessName')) like CONCAT('%', #{listParam.searchMap.name}, '%'))
+        </if>
+        <if test="listParam.searchMap.businessName != null and listParam.searchMap.businessName != ''">
+            and json_unquote(json_extract(a.content, '$.businessName')) like CONCAT('%', #{listParam.searchMap.businessName}, '%')
+        </if>
+        <if test="listParam.searchMap.onlyMe != null and listParam.searchMap.onlyMe != ''">
+            and b.create_user_id = #{userInfo.userId}
+        </if>
+        <if test="listParam.searchMap.starttime != null and listParam.searchMap.endtime != null">
+            and a.modify_time &gt;= #{listParam.searchMap.starttime}
+            and a.modify_time &lt;= #{listParam.searchMap.endtime}
+        </if>
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`, `user_status`
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and !userInfo.roleCodes.contains('applet_user')">
+            having user_status = #{listParam.searchMap.status}
+        </if>
+        order by a.modify_time desc
+    </select>
+
+    <select id="getFlowByFormIdForWx" resultType="com.kge.energy.crm.repository.entityext.result.FlowResult">
+        select wf.form_flow_id,
+               wf.form_id,
+               DATE_FORMAT(wf.time_action, '%Y-%m-%d %T') AS time_action,
+               wf.user_id,
+               wf.action_type,
+               wf.action_content,
+               wf.status,
+               wf.sub_status
+        from wf_form_flow wf
+        <choose>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
+                /*管理员和集团客服可查看全部数据*/
+            </when>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+                join wf_form w on w.flag =1 and w.form_id = wf.form_id
+            </when>
+            <otherwise>
+                join wf_form w on w.flag =1 and w.form_id = wf.form_id
+                join b_user b ON b.flag = 1 and json_unquote(JSON_EXTRACT(w.content , '$.mobile')) = b.mobile
+            </otherwise>
+        </choose>
+        where wf.flag = 1
+            and wf.form_id = #{formId}
+        <if test="userInfo.tenantId != null and !userInfo.roleCodes.contains('super_admin')">
+            and wf.tenant_id = #{userInfo.tenantId}
+        </if>
+        <choose>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
+                /*管理员和集团客服可查看全部数据*/
+            </when>
+            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+                and w.current_org_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                and b.user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
     </select>
 
 </mapper>

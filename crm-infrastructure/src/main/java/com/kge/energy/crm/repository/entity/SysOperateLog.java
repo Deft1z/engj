@@ -26,12 +26,12 @@ public class SysOperateLog {
     /**
      * 链路追踪编号
      */
-    private Long traceId;
+    private String traceId;
 
     /**
      * 租户ID
      */
-    private Long tenantId;
+    private Integer tenantId;
 
     /**
      * 租户名
@@ -41,12 +41,12 @@ public class SysOperateLog {
     /**
      * 操作人ID
      */
-    private String operateId;
+    private Integer operatorId;
 
     /**
      * 操作人名称
      */
-    private String operateName;
+    private String operatorName;
 
     /**
      * 操作时间

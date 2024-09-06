@@ -14,5 +14,12 @@
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <select id="getShareBind" resultType="com.kge.energy.crm.repository.entityext.result.OpenidShareBindResult">
+        SELECT bo.user_id as uid, bo.app_id as appid, bo.openid_id as openid
+        FROM b_openid_share as bos
+        INNER JOIN b_openid as bo ON bos.share_openid_id  = bo.openid_id
+        WHERE (bos.user_id= #{uid} AND bos.flag =1)
+    </select>
+
 </mapper>
 

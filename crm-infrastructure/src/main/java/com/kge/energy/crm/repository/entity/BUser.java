@@ -40,11 +40,6 @@ public class BUser {
     private LocalDateTime passwdModifyTime;
 
     /**
-     * 用户类型
-     */
-    private String type;
-
-    /**
      * 小程序显示名称
      */
     private String realname;
@@ -70,6 +65,11 @@ public class BUser {
     private String address;
 
     /**
+     * 岗位职级
+     */
+    private String jobLevel;
+
+    /**
      * 帐号状态（0正常 1停用）
      */
     private Integer status;
@@ -78,6 +78,11 @@ public class BUser {
      * 软删除标识
      */
     private Integer flag;
+
+    /**
+     * 最后一次登录时间
+     */
+    private LocalDateTime lastLoginTime;
 
     /**
      * 创建用户ID

@@ -15,24 +15,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/wechat/chart")
 @RequiredArgsConstructor
 public class WeChatChartController {
     private final WeChatChartService weChatChartService;
 
-    @PostMapping("/wechat/chart/UserChart")
+    @PostMapping("/UserChart")
     @ConvertToGoFormats
     public CommonResponse<WeChatChartResp> getUserChart(@Valid @RequestBody WeChatChartReq req) {
         return CommonResponse.suc(weChatChartService.getUserChart(req));
     }
 
-    @PostMapping("/wechat/chart/evaluateChart")
+    @PostMapping("/evaluateChart")
     @ConvertToGoFormats
     public CommonResponse<WeChatEvaluateResp> findEvaluateNum() {
         return CommonResponse.suc(weChatChartService.findEvaluateNum());
     }
 
-    @PostMapping("/wechat/chart/statistics")
+    @PostMapping("/statistics")
     @ConvertToGoFormats
     public CommonResponse<WeChatStatisticsResp> getStatistics(@Valid @RequestBody WeChatChartReq req) {
         return CommonResponse.suc(weChatChartService.getStatistics(req));

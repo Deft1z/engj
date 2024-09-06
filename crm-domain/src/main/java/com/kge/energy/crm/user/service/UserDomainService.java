@@ -2,21 +2,26 @@ package com.kge.energy.crm.user.service;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
+import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.execption.BadException;
+import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
+import com.kge.energy.crm.common.util.RedisUtils;
+import com.kge.energy.crm.enums.SystemTypeEnum;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BUserDao;
-import com.kge.energy.crm.repository.dao.LUserTokenDao;
 import com.kge.energy.crm.repository.entity.BUser;
-import com.kge.energy.crm.repository.entity.LUserToken;
+import com.kge.energy.crm.tenant.service.TenantDomainService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author wangjihua
@@ -31,27 +36,37 @@ public class UserDomainService {
 
     private final BOrganizationDao bOrganizationDao;
 
-    private final LUserTokenDao lUserTokenDao;
+    private final RedisUtils redisUtils;
 
-    private final StringRedisTemplate stringRedisTemplate;
+    @Value("${spring.profiles.active}")
+    private String env;
 
-    public BUser getBUserById(int id) {
-        return bUserDao.getById(id);
-    }
+    private final TenantDomainService tenantDomainService;
 
-    public UserInfoDto findUserInfoDto(BUser bUser) {
+    public UserInfoDto findUserInfoDto(String systemType, Integer userId) {
 
-        UserInfoDto userInfoDto = bUserDao.findUserInfoDto(bUser.getUserId());
-        if (ObjUtil.isNull(userInfoDto)) {
-            return null;
+        BUser user = bUserDao.getById(userId);
+        if (ObjUtil.isNull(user)) {
+            throw new BadException(ResponseCode.TOKEN_FAIL);
         }
 
-        // todo：重构后改为查数据库
-        userInfoDto.setRoleList(
-                List.of(new UserInfoDto.Role().setId(userInfoDto.getRoleId()).setName(userInfoDto.getRoleName()))
-        );
+        UserInfoDto userInfoDto = new UserInfoDto();
+        userInfoDto.setUserId(Long.valueOf(user.getUserId()));
+        userInfoDto.setUserName(user.getName());
+        userInfoDto.setRealname(user.getRealname());
+        userInfoDto.setTenantId(user.getTenantId());
+        userInfoDto.setTenantName(tenantDomainService.getTenantName(user.getTenantId()));
+        userInfoDto.setSystemType(systemType);
+        userInfoDto.setMobile(user.getMobile());
+        userInfoDto.setWxOpenId(user.getOpenId());
+        userInfoDto.setJobLevel(user.getJobLevel());
 
-        List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrOrgs(bUser.getUserId());
+        List<UserInfoDto.Role> userRoles = bUserDao.getUserRoles(systemType, user.getUserId());
+        userInfoDto.setRoleList(userRoles);
+
+        userInfoDto.setRoleCodes(userRoles.stream().map(UserInfoDto.Role::getCode).collect(Collectors.toSet()));
+
+        List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrgs(user.getUserId());
         userInfoDto.setOrganizationList(orgs);
 
         return userInfoDto;
@@ -64,35 +79,26 @@ public class UserDomainService {
      * @param deleteLastToken 是否删除用户之前的令牌。
      * @return 新生成的认证令牌。
      */
-    public String genToken(@Nonnull BUser user, boolean deleteLastToken) {
+    public String genToken(@Nonnull BUser user, SystemTypeEnum systemTypeEnum,
+                           long expiredTimeout, TimeUnit expiredTimeUnit, boolean deleteLastToken) {
 
         String authToken = IdUtil.fastSimpleUUID();
         String authTokenKeyPrefix = authProperties.getToken().getRedisFront();
 
-        LocalDateTime expiredTime = LocalDateTime.now().plusHours(121);
+        redisUtils.setEx(authTokenKeyPrefix + authToken, String.valueOf(user.getUserId()), expiredTimeout, expiredTimeUnit);
 
-        stringRedisTemplate.opsForValue()
-                .set(authTokenKeyPrefix + authToken, String.valueOf(user.getUserId()), 121, TimeUnit.HOURS);
+        String lastTokenKey = String.format(TokenConstant.LAST_TOKEN_CACHE_KEY, systemTypeEnum.getCode(), user.getUserId());
+        String lastToken = redisUtils.get(lastTokenKey);
 
-        LUserToken lUserToken = lUserTokenDao.findByUid(user.getUserId());
-
-        if (ObjUtil.isNotNull(lUserToken) && ObjUtil.notEqual(lUserToken.getUserTokenId(), 0)) {
-
-            lUserToken.setLoginToken(authToken)
-                    .setLoginExpiredTime(expiredTime);
-            lUserTokenDao.updateById(lUserToken);
-
-            if (deleteLastToken) {
-                stringRedisTemplate.delete(authTokenKeyPrefix + lUserToken.getLoginToken());
+        if (StrUtil.isNotBlank(lastToken)) {
+            //如果是dev环境不删除旧的token
+            if (!StrUtil.equals(env, "dev") && deleteLastToken) {
+                redisUtils.delete(authTokenKeyPrefix + lastToken);
             }
-
-        } else {
-            lUserTokenDao.save(new LUserToken()
-                    .setUserId(user.getUserId())
-                    .setLoginExpiredTime(expiredTime)
-                    .setLoginToken(authToken)
-            );
         }
+
+        redisUtils.setEx(lastTokenKey, authToken, expiredTimeout + 2, expiredTimeUnit);
+
         return authToken;
     }
 }

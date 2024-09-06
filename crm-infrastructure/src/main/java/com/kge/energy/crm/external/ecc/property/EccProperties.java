@@ -13,4 +13,8 @@ public class EccProperties {
 
     private String appSecret;
 
+    private String baseUrl;
+
+    private String maintenanceListUrl;
+
 }

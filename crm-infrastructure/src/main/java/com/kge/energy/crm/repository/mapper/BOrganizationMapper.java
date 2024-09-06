@@ -3,8 +3,11 @@ package com.kge.energy.crm.repository.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BOrganization;
+import com.kge.energy.crm.repository.entityext.param.OrgQueryParam;
 import com.kge.energy.crm.repository.entityext.result.OrgDictResult;
+import com.kge.energy.crm.repository.entityext.result.OrgListResult;
 import com.kge.energy.crm.repository.entityext.result.OrgResult;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -13,12 +16,18 @@ import java.util.List;
  */
 public interface BOrganizationMapper extends BaseMapper<BOrganization> {
 
-    List<UserInfoDto.Organization> findUserInfoDtoOrOrgs(Integer userId);
+    List<UserInfoDto.Organization> findUserInfoDtoOrgs(Integer userId);
 
     BOrganization getOrgByUserId(Integer userId);
 
-    List<OrgDictResult> getOrgDictList();
+    List<OrgDictResult> getOrgDictList(@Param("tenantId") Integer tenantId);
 
-    List<OrgResult> getCompanyList();
+    List<OrgResult> getCompanyList(@Param("tenantId") Integer tenantId);
+
+    List<OrgListResult> getOrgList(@Param("param") OrgQueryParam param);
+
+    Integer getTopLevel(Integer tenantId);
+
+    List<OrgListResult> getAllOrgList(@Param("param") OrgQueryParam param);
 }
 

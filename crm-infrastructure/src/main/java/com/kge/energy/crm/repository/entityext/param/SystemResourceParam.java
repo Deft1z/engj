@@ -15,9 +15,5 @@ public class SystemResourceParam {
      */
     private String systemType;
 
-    /**
-     * 租户id
-     */
-    private Integer tenantId;
 
 }

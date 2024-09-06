@@ -1,8 +1,9 @@
 package com.kge.energy.crm.repository.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
 
 /**
  * sc_contract_evaluate 服务合同评价(ScContractEvaluate)实体类
@@ -33,6 +34,11 @@ public class ScContractEvaluate {
     /**
      * 评价
      */
-    private String evaluate; 
+    private String evaluate;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 

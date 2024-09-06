@@ -2,27 +2,22 @@ package com.kge.energy.crm.user.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
-import com.kge.energy.crm.user.req.RoleUserReq;
-import com.kge.energy.crm.user.req.UserLoginReq;
-import com.kge.energy.crm.user.req.UserSaltReq;
-import com.kge.energy.crm.user.req.WxUserListReq;
-import com.kge.energy.crm.user.resp.CurrentUserInfoResp;
-import com.kge.energy.crm.user.resp.RoleUserResp;
-import com.kge.energy.crm.user.resp.UserLoginResp;
-import com.kge.energy.crm.user.resp.WxUserListResp;
+import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.user.req.*;
+import com.kge.energy.crm.user.resp.*;
 import com.kge.energy.crm.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * @author wangjihua
  */
+@Tag(name = "用户模块")
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
@@ -55,7 +50,7 @@ public class UserController {
     @ConvertToGoFormats
     @PostMapping("/base/user/login")
     public CommonResponse<UserLoginResp> userLogin(@Validated @RequestBody UserLoginReq req) {
-        return CommonResponse.suc(userService.userLogin(req));
+        return userService.userLogin(req);
     }
 
     /**
@@ -72,7 +67,62 @@ public class UserController {
      */
     @ConvertToGoFormats
     @PostMapping("/baseDataBack/userBackMrg/wxUser/load")
-    public CommonResponse<WxUserListResp> currentWxUserList(@RequestBody WxUserListReq req) {
-        return CommonResponse.suc(userService.findWxUserList(req));
+    public CommonResponse<PageResp<WxUserListResp>> findAppletUser(@RequestBody WxUserListReq req) {
+        return CommonResponse.suc(userService.findAppletUser(req));
     }
+
+    @Operation(summary = "获取租户或部门下的用户列表")
+    @PostMapping("/user/list")
+    public CommonResponse<PageResp<UserListResp>> list(@Validated @RequestBody UserListReq req) {
+        return CommonResponse.suc(userService.list(req));
+    }
+
+    @Operation(summary = "获取角色的用户列表")
+    @PostMapping("/user/listByRole")
+    public CommonResponse<PageResp<UserListResp>> listByRole(@Validated @RequestBody UserListByRoleReq req) {
+        return CommonResponse.suc(userService.listByRole(req));
+    }
+
+    @Operation(summary = "用户详情")
+    @GetMapping("/user/detail/{userId}")
+    public CommonResponse<UserDetailResp> detail(@PathVariable("userId") Integer userId) {
+        return CommonResponse.suc(userService.detail(userId));
+    }
+
+    @Operation(summary = "新增用户")
+    @PostMapping("/user/add")
+    public CommonResponse<Boolean> add(@Validated @RequestBody AddUserReq req) {
+        return CommonResponse.suc(userService.add(req));
+    }
+
+    @Operation(summary = "编辑用户")
+    @PostMapping("/user/update")
+    public CommonResponse<Boolean> update(@Validated @RequestBody UpdateUserReq req) {
+        return CommonResponse.suc(userService.update(req));
+    }
+
+    @Operation(summary = "删除用户")
+    @PostMapping("/user/delete")
+    public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteUserReq req) {
+        return CommonResponse.suc(userService.delete(req));
+    }
+
+    @Operation(summary = "分配用户角色")
+    @PostMapping("/user/assignRole")
+    public CommonResponse<Boolean> assignRole(@Validated @RequestBody AssignUserRoleReq req) {
+        return CommonResponse.suc(userService.assignRole(req));
+    }
+
+    @Operation(summary = "移除用户角色")
+    @PostMapping("/user/removeRole")
+    public CommonResponse<Boolean> removeRole(@Validated @RequestBody RemoveUserRoleReq req) {
+        return CommonResponse.suc(userService.removeRole(req));
+    }
+
+    @Operation(summary = "重置密码")
+    @PostMapping("/user/resetPwd")
+    public CommonResponse<Boolean> resetPwd(@Validated @RequestBody ResetPwdReq req) {
+        return CommonResponse.suc(userService.resetPwd(req));
+    }
+
 }

@@ -4,10 +4,7 @@ import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.organization.req.OrgReq;
-import com.kge.energy.crm.pv.req.PvCommentReq;
-import com.kge.energy.crm.pv.req.PvDetailReq;
-import com.kge.energy.crm.pv.req.PvInfoReq;
-import com.kge.energy.crm.pv.req.PvLikeReq;
+import com.kge.energy.crm.pv.req.*;
 import com.kge.energy.crm.pv.service.PvService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +23,7 @@ public class PvController {
      * @date 2024/7/31 17:28
     */
     @ConvertToGoFormats
-    @GetMapping("/Management/Pv/all")
+    @PostMapping("/Management/Pv/all")
     public CommonResponse<Object> getAllPvInfo(@RequestBody PvInfoReq pvInfoReq){
         return CommonResponse.suc(pvService.getAllPvInfo(pvInfoReq));
     }
@@ -43,6 +40,17 @@ public class PvController {
     }
 
     /**
+     * @description 小程序端我的 - 光伏项目删除评论接口
+     * @author tangchenghui
+     * @date 2024/8/22 10:40
+     */
+    @ConvertToGoFormats
+    @PostMapping("/Management/Pv/commnet/del")
+    public CommonResponse<Object> commentPvDel(@Validated @RequestBody PvCommentDelReq pvCommentDelReq){
+        return CommonResponse.suc(pvService.commentPvDel(pvCommentDelReq));
+    }
+
+    /**
      * @description 小程序端我的 - 光伏项目点赞评论接口
      * @author tangchenghui
      * @date 2024/8/1 10:40
@@ -54,7 +62,7 @@ public class PvController {
     }
 
     @ConvertToGoFormats
-    @GetMapping("/Management/Pv/detail")
+    @PostMapping("/Management/Pv/detail")
     public CommonResponse<Object> commentPv(@Validated @RequestBody PvDetailReq req){
         return CommonResponse.suc(pvService.getProjectDetailsList(req));
     }

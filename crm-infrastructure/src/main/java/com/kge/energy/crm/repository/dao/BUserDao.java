@@ -3,14 +3,15 @@ package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BUser;
+import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.repository.entityext.result.UserListResult;
 import com.kge.energy.crm.repository.mapper.BUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -39,9 +40,10 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
     }
 
 
-    public UserInfoDto findUserInfoDto(Integer userId) {
+    public List<UserInfoDto.Role> getUserRoles(String systemType, Integer userId) {
+        Assert.notBlank(systemType, "systemType must not be null or blank");
         Assert.notNull(userId, "userId must not be null");
-        return mapper.findUserInfoDto(userId);
+        return mapper.getUserRoles(systemType, userId);
     }
 
     public List<RoleUserResult> getUserByRoleId(Integer roleId) {
@@ -74,20 +76,8 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.selectOne(wrapper);
     }
 
-    public IPage<BUser> findAllWxUser(String name, Long currentPage, Long pageSize) {
-        QueryWrapper<BUser> wrapper = Wrappers.query();
-        // 封装分页信息
-        if (currentPage == null || pageSize == null) {
-            currentPage = 1L;
-            pageSize = 10L;
-        }
-        Page<BUser> page = new Page<>(currentPage, pageSize);
-        wrapper.and(w -> w.eq("type", "社会客户").or().eq("type", "领导"));
-        if (name == null) {
-            return mapper.selectPage(page, wrapper);
-        }
-        wrapper.like("name", name).or().eq("mobile", name).or().like("realname", name).or().like("company", name);
-        return mapper.selectPage(page, wrapper);
+    public IPage<BUser> findAppletUser(Page<BUser> page, Integer tenantId, String name) {
+        return mapper.findAppletUser(page, tenantId, name);
     }
 
     public List<BUser> findByPhone(String phone) {
@@ -97,16 +87,43 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.selectList(wrapper);
     }
 
-    public String findShareUser(List<Integer> userIdList, Integer appid){
+    public String findShareUser(List<Integer> userIdList, Integer appid) {
         return mapper.findShareUser(userIdList, appid);
     }
 
-    public Long findNewUserNum(String startTime, String endTime){
+    public Long findNewUserNum(String startTime, String endTime) {
         return mapper.findNewUserNum(startTime, endTime);
     }
 
-    public Long findNewUserCount(String startTime, String endTime){
+    public Long findNewUserCount(String startTime, String endTime) {
         return mapper.findNewUserCount(startTime, endTime);
     }
+
+    public IPage<UserListResult> list(UserListParam param) {
+        Page<UserListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+        return mapper.list(page, param);
+    }
+
+    public IPage<UserListResult> listByRole(UserListParam param) {
+        Page<UserListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
+        return mapper.listByRole(page, param);
+    }
+
+    public List<String> findJtCustomerPhones(Integer tenantId) {
+        return mapper.findJtCustomerPhones(tenantId);
+    }
+
+    public List<String> findSubCustomerPhones(Integer orgId, Integer tenantId) {
+        return mapper.findSubCustomerPhones(orgId, tenantId);
+    }
+
+    public List<RoleUserResult> getUserByRoleCodeAndOrgId(String roleCode, Integer organizationId, Integer tenantId) {
+        return mapper.getUserByRoleCodeAndOrgId(roleCode, organizationId, tenantId);
+    }
+
+    public BUser findUserByContractId(Integer scid) {
+        return mapper.findUserByContractId(scid);
+    }
+
 }
 

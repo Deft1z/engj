@@ -20,9 +20,17 @@ auth:
   token:
     redis-front: ntcrm_test_token_
 
+wechat:
+  common:
+    wxUrl: http://172.16.17.147:9011/vcheck
+  applet:
+    version: trial
+
 ecc:
   appId: ntwx001
   appSecret: h9r2e2nd5bipf6z
+  baseUrl: https://ecc.nftz:8181
+  maintenanceListUrl: /publicApi/maintenance/list
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
@@ -37,3 +45,7 @@ epcpv:
   stagestat: api/v1/pv/project/stage/stat
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
+
+group:
+  # 集团领导
+  leaderPhones: 13609607618,18602040440,13602838462,13609733222,13318834979,13318818688,18666620068,13924119780,15018777423,13825051033,13570460363,13570377089,15013033335,13380020913,13527798953,13600007818

@@ -1,5 +1,6 @@
 package com.kge.energy.crm.external.ecc.service;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.HexUtil;
@@ -8,8 +9,11 @@ import cn.hutool.json.JSONUtil;
 import com.kge.energy.crm.external.ecc.property.EccProperties;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
+import com.kge.energy.crm.external.ecc.resp.EccOrgResp;
 import com.kge.energy.crm.external.ecc.resp.EccPageData;
 import com.kge.energy.crm.external.ecc.resp.EccResp;
+import com.kge.energy.crm.repository.dao.BOrganizationDao;
+import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.platform.framework.web.util.RestUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -21,17 +25,19 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 @Service
 @RequiredArgsConstructor
 public class EccService {
-    public final String ECC_PREFIX = "https://ecc.nftz:8181";
 
     private final EccProperties eccProperties;
 
+    private final BOrganizationDao bOrganizationDao;
+
     public EccResp<EccPageData<EccMaintenance>> getMaintenanceList(EccReq req) throws NoSuchAlgorithmException {
-        String url = ECC_PREFIX + "/publicApi/maintenance/list";
+        String url = eccProperties.getBaseUrl() + eccProperties.getMaintenanceListUrl();
 
         // 构造ecc接口请求头
         // 生成timestamp
@@ -60,7 +66,12 @@ public class EccService {
     }
 
     public Resource getFile(String filePath) {
-        String url = ECC_PREFIX + filePath;
+        String url = eccProperties.getBaseUrl() + filePath;
         return RestUtils.instance().getForEntity(url, Resource.class).getBody();
+    }
+
+    public List<EccOrgResp> getEccOrgList() {
+        List<BOrganization> bOrganizationList = bOrganizationDao.getEccOrgList();
+        return BeanUtil.copyToList(bOrganizationList, EccOrgResp.class);
     }
 }

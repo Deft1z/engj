@@ -3,6 +3,7 @@ package com.kge.energy.crm.resource.req;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -38,7 +39,8 @@ public class UpdateResourceReq {
     @Schema(description = "资源地址")
     private String path;
 
-    @Schema(description = "资源地址类型：system、file、app、link")
+    @Schema(description = "资源地址类型：system、file、bapp、link")
+    @Pattern(regexp = "system|file|bapp|liink")
     private String pathType;
 
     @Schema(description = "图标编码")

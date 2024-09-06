@@ -18,10 +18,6 @@ public class AddRoleReq {
     @NotNull
     private Integer tenantId;
 
-    @Schema(description = "系统类型：applet、mgr", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
-    private String systemType;
-
     @Schema(description = "角色名称", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank
     private String name;

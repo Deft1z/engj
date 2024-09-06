@@ -7,11 +7,6 @@
         <result property="resourceName" column="resource_name" jdbcType="VARCHAR"/>
         <result property="resourceCode" column="resource_code" jdbcType="VARCHAR"/>
         <result property="resourceType" column="resource_type" jdbcType="VARCHAR"/>
-        <result property="referResourceId" column="refer_resource_id" jdbcType="INTEGER"/>
-        <result property="level" column="level" jdbcType="INTEGER"/>
-        <result property="type" column="type" jdbcType="VARCHAR"/>
-        <result property="name" column="name" jdbcType="VARCHAR"/>
-        <result property="displayName" column="display_name" jdbcType="VARCHAR"/>
         <result property="sort" column="sort" jdbcType="INTEGER"/>
         <result property="path" column="path" jdbcType="VARCHAR"/>
         <result property="pathType" column="path_type" jdbcType="VARCHAR"/>
@@ -25,61 +20,17 @@
         <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
-        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
     </resultMap>
 
-    <select id="findPermission" resultType="com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult">
-        select a.resource_id,
-        a.parent_resource_id,
-        a.name,
-        a.level,
-        b.auth_read,
-        b.auth_write,
-        b.auth_delete,
-        b.auth_audit
-        from b_resource a
-        JOIN r_role_resource b ON b.resource_id = a.resource_id
-        JOIN r_user_role c ON c.role_id = b.role_id
-        where a.name in
-        <foreach collection="urls" open="(" close=")" item="item" separator=",">
-            #{item}
-        </foreach>
-        AND c.user_id = #{userId}
-    </select>
-
-    <select id="findMenu" resultType="com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult">
-        select DISTINCT a.resource_id,
-                        a.refer_resource_id,
-                        a.parent_resource_id,
-                        a.level,
-                        a.type,
-                        a.name,
-                        a.display_name,
-                        a.sort,
-                        a.flag,
-                        b.auth_read,
-                        b.auth_write,
-                        b.auth_delete,
-                        b.auth_audit
-        from b_resource a
-                 LEFT JOIN r_role_resource b ON b.resource_id = a.resource_id
-                 LEFT JOIN r_user_role c ON c.role_id = b.role_id
-        where a.flag IN (1, 2)
-          AND c.user_id = #{userId}
-        Order by a.sort ASC
-    </select>
 
     <select id="getSystemResources" resultMap="BResourceMap">
         select *
         from b_resource
         where flag = 1
-        and tenant_id is not null
         <if test="systemType != null and systemType != ''">
             and system_type = #{systemType}
         </if>
-        <if test="tenantId != null">
-            and tenant_id = #{tenantId}
-        </if>
+        and resource_id > 499
         order by sort
     </select>
 
@@ -93,11 +44,13 @@
           and ur.flag = 1
           and r.resource_id = rr.resource_id
           and ur.role_id = rr.role_id
+          and r.status = 0
           and rr.tenant_id = #{tenantId}
           and rr.tenant_id = #{tenantId}
           and ur.tenant_id = #{tenantId}
           and r.system_type = #{systemType}
           and ur.user_id = #{userId}
+          and r.resource_id > 499
         order by r.sort
     </select>
 </mapper>

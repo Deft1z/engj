@@ -6,6 +6,8 @@ import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.order.req.ContractReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
+import com.kge.energy.crm.order.req.contract.CreateContractReq;
+import com.kge.energy.crm.order.req.contract.UpdateProjectTimeReq;
 import com.kge.energy.crm.order.resp.ContractResp;
 import com.kge.energy.crm.order.service.ContractService;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
@@ -44,5 +46,23 @@ public class ContractController {
     @PostMapping("/contractPageByUserIdLoad")
     public CommonResponse<PageResp<ContractResult>> contractPageByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
         return CommonResponse.suc(contractService.contractPageByUserIdLoad(req));
+    }
+
+    /**
+     * 添加合同
+     */
+    @ConvertToGoFormats
+    @PostMapping("/form/insert")
+    public CommonResponse<Object> contractAdd(@Validated @RequestBody CreateContractReq req) {
+        return contractService.contractAdd(req);
+    }
+
+    /**
+     * 填写合同开工，竣工时间
+     */
+    @ConvertToGoFormats
+    @PostMapping("/projectTime/update")
+    public CommonResponse<Object> projectTimeEdit(@Validated @RequestBody UpdateProjectTimeReq req) {
+        return contractService.projectTimeEdit(req);
     }
 }

@@ -18,11 +18,20 @@ public class CurrentUserInfoResp {
 
     private String userName;
 
-    private Integer roleId;
-
-    private String roleName;
+    private List<Role> roleList;
 
     private List<OrganizationListBean> organizationList;
+
+    @Data
+    @Accessors(chain = true)
+    public static class Role {
+
+        private Integer id;
+
+        private String name;
+
+        private String code;
+    }
 
     @NoArgsConstructor
     @Data
@@ -31,7 +40,6 @@ public class CurrentUserInfoResp {
         private Integer id;
 
         private String name;
-        
-        private String authCode;
+
     }
 }
