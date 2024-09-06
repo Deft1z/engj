@@ -124,7 +124,7 @@ public class WeChatLoginService {
             bUserDao.updateById(user);
 
             //记录登录成功日志
-            sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, null);
+            sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.SUCCESS, null);
 
             //发送领导登录通知
             sendLeaderOnlineMsg(user);
