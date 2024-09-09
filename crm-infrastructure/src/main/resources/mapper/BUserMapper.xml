@@ -226,6 +226,7 @@
                  join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
                  join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
         where bu.flag = 1
+          and bu.status = 0
           and bu.tenant_id = #{tenantId}
           and br.code = #{roleCode}
           and bo.organization_id = #{organizationId}

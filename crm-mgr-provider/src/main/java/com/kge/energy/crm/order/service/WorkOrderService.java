@@ -17,6 +17,7 @@ import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.FormStatusChangeMsgReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
@@ -34,6 +35,7 @@ import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
+import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -159,9 +161,9 @@ public class WorkOrderService {
         }
         //流转工单
         //查询所选组织是否有客服角色
-        List<BUser> users = bUserDao.findUserByCurrentOrgId(req.getCurrentOrgId());
-        if (CollectionUtil.isEmpty(users)) {
-            return CommonResponse.suc(4001);
+        List<RoleUserResult> assignUsers = bUserDao.getUserByRoleCodeAndOrgId(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), req.getCurrentOrgId(), userInfoDto.getTenantId());
+        if (assignUsers.isEmpty()) {
+            throw new ServiceException("没有客服角色!");
         }
 
         WfForm form = wfFormDao.getById(req.getFormId());
