@@ -22,7 +22,7 @@ public class SFileDao extends ServiceImpl<SFileMapper, SFile> {
         Wrapper<SFile> wrapper = new LambdaQueryWrapper<SFile>()
                 .eq(SFile::getFilepath, filePath);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 }
 

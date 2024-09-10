@@ -23,24 +23,29 @@ public class IamService {
     public IamResp<IamCheckTicket> checkTicket(String ticket) {
         String url = IAM_PREFIX + "/checkTicket";
 
-        IamCheckTicketReq req = new IamCheckTicketReq(APP_KEY, DigestUtil.md5Hex(APP_KEY + ticket + SECRET_KEY));
+        IamCheckTicketReq req = new IamCheckTicketReq()
+                .setTicket(ticket)
+                .setAppKey(APP_KEY)
+                .setSign(DigestUtil.md5Hex(APP_KEY + ticket + SECRET_KEY));
 
         Object resObj = RestUtils.postForObject(url, req, Object.class);
-        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>() {}, false);
+        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>() {
+        }, false);
     }
 
     /**
      * 根据token获取用户详细信息
      */
-    public IamResp<IamUserBean> getUserForToken(String ticket, String token) {
+    public IamResp<IamUserBean> getUserForToken(String token) {
         String url = IAM_PREFIX + "/getUserForToken";
 
         IamGetUserReq req = new IamGetUserReq();
         req.setToken(token);
-        req.setSign(DigestUtil.md5Hex(APP_KEY + ticket + SECRET_KEY));
+        req.setSign(DigestUtil.md5Hex(APP_KEY + token + SECRET_KEY));
         req.setAppKey(APP_KEY);
 
         Object resObj = RestUtils.postForObject(url, req, Object.class);
-        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>() {}, false);
+        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>() {
+        }, false);
     }
 }

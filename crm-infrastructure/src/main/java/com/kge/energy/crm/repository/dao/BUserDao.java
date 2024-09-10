@@ -36,7 +36,7 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
                 .eq(BUser::getOpenId, openId);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 
 
@@ -66,14 +66,13 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
                 .eq(BUser::getName, name);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 
     public BUser getUserByMobile(String mobile) {
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
-                .eq(BUser::getMobile, mobile)
-                .eq(BUser::getFlag, 1);
-        return mapper.selectOne(wrapper);
+                .eq(BUser::getMobile, mobile);
+        return mapper.selectOne(wrapper, false);
     }
 
     public IPage<BUser> findAppletUser(Page<BUser> page, Integer tenantId, String name) {

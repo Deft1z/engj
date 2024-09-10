@@ -1,5 +1,6 @@
 package com.kge.energy.crm.sso.service;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
@@ -31,17 +32,18 @@ public class SSOService {
     private final BUserDao bUserDao;
 
     public SSOResp auth(SSOReq req) {
+
         IamResp<IamCheckTicket> ict = iamService.checkTicket(req.getTicket());
-        if (ict.getCode() != 0) {
-            throw new BadException(ResponseCode.AUTHORITY_FAIL);
+        if (ObjectUtil.notEqual(ict.getCode(), IamResp.SUCCESS_CODE)) {
+            throw new BadException(ict.getMsg());
         }
 
         String token = Optional.ofNullable(ict.getData().getToken()).orElseThrow(() -> new BadException(ResponseCode.UNKNOWN));
 
         // 根据token获取用户信息
-        IamResp<IamUserBean> iub = iamService.getUserForToken(req.getTicket(), token);
-        if (iub.getCode() != 0) {
-            throw new BadException(ResponseCode.UNKNOWN);
+        IamResp<IamUserBean> iub = iamService.getUserForToken(token);
+        if (ObjectUtil.notEqual(iub.getCode(), IamResp.SUCCESS_CODE)) {
+            throw new BadException(iub.getMsg());
         }
 
         String phone = Optional.ofNullable(iub.getData().getPhone()).orElseThrow(() -> new BadException(ResponseCode.UNKNOWN));
