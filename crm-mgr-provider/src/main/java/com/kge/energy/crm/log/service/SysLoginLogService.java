@@ -42,6 +42,7 @@ public class SysLoginLogService {
         SysLoginLogListParam param = BeanUtil.copyProperties(sysLoginLogListReq, SysLoginLogListParam.class);
 
         Page<SysLoginLog> page = sysLoginLogDao.list(param);
+
         List<SysLoginLogListResp> list = page.getRecords()
                 .stream()
                 .map(log -> {

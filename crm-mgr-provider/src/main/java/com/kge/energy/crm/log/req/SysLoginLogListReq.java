@@ -17,4 +17,7 @@ public class SysLoginLogListReq extends PageReq {
 
     @Schema(description = "登录平台，1-微信小程序, 2-pc")
     private Integer loginPlatform;
+
+    @Schema(description = "登录结果，0-失败, 1-成功")
+    private Integer loginResult;
 }
