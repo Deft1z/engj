@@ -249,15 +249,9 @@
     </select>
 
     <select id="getAppAvatarList" resultType="com.kge.energy.crm.repository.entityext.result.AppAvatarListResult">
-        SELECT filepath, a.app_id as appid
+        SELECT a.app_id as appid
         from b_app a
-                 LEFT JOIN cms_block_content c ON c.app_id = a.app_id
-                 LEFT JOIN cms_block cb ON cb.block_id = c.block_id
-                 LEFT JOIN s_file d ON d.file_id = c.image_url
-        WHERE c.flag = 1
-          AND cb.flag = 1
-          AND c.app_id > 0
-          AND cb.type = '家园模块'
+        WHERE a.flag = 1
     </select>
 
     <select id="selectAppPage" resultType="com.kge.energy.crm.repository.entityext.result.AppMgrListResult">
