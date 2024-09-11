@@ -8,8 +8,8 @@ import com.kge.energy.crm.application.req.AppUnbindReq;
 import com.kge.energy.crm.application.resp.AppDetailResp;
 import com.kge.energy.crm.application.service.ApplicationService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.repository.entityext.result.AppListResult;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -40,8 +40,8 @@ public class ApplicationController {
      */
     @ConvertToGoFormats
     @PostMapping("/applicationMrg/applicationList/currentUserAppListLoad")
-    public CommonResponse<List<AppListResult>> getAppList() {
-        return CommonResponse.suc(applicationService.getAppList());
+    public CommonResult<List<AppListResult>> getAppList() {
+        return CommonResult.suc(applicationService.getAppList());
     }
 
     /**
@@ -51,25 +51,25 @@ public class ApplicationController {
      */
     @ConvertToGoFormats
     @PostMapping("/bindingMgr/info/update")
-    public CommonResponse<Boolean> unbindApp(@Validated @RequestBody AppUnbindReq appUnbindReq) {
-        return CommonResponse.suc(applicationService.unbindApp(appUnbindReq));
+    public CommonResult<Boolean> unbindApp(@Validated @RequestBody AppUnbindReq appUnbindReq) {
+        return CommonResult.suc(applicationService.unbindApp(appUnbindReq));
     }
 
     @ConvertToGoFormats
     @PostMapping("/bindingMgr/info/insert")
-    public CommonResponse<Boolean> bindApp(@Validated @RequestBody AppBindReq appBindReq) {
-        return CommonResponse.suc(applicationService.bindApp(appBindReq));
+    public CommonResult<Boolean> bindApp(@Validated @RequestBody AppBindReq appBindReq) {
+        return CommonResult.suc(applicationService.bindApp(appBindReq));
     }
 
     @ConvertToGoFormats
     @PostMapping("/tokenMgr/info/load")
-    public CommonResponse<Object> getAppToken(@Validated @RequestBody AppTokenReq appTokenReq) throws NoSuchAlgorithmException, JsonProcessingException {
+    public CommonResult<Object> getAppToken(@Validated @RequestBody AppTokenReq appTokenReq) throws NoSuchAlgorithmException, JsonProcessingException {
         return applicationService.getAppToken(appTokenReq);
     }
 
     @Operation(summary = "获取APP详情信息")
     @PostMapping("/detail")
-    public CommonResponse<List<AppDetailResp>> getAppDetail(@Validated @RequestBody AppDetailReq appTokenReq) {
-        return CommonResponse.suc(applicationService.getAppDetail(appTokenReq));
+    public CommonResult<List<AppDetailResp>> getAppDetail(@Validated @RequestBody AppDetailReq appTokenReq) {
+        return CommonResult.suc(applicationService.getAppDetail(appTokenReq));
     }
 }

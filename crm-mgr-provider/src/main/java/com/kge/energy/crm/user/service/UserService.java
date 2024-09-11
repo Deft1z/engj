@@ -12,8 +12,6 @@ import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapp
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
@@ -30,6 +28,7 @@ import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.platform.framework.common.exception.ServiceException;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -104,7 +103,7 @@ public class UserService {
         return MD5.create().digestHex(req.getName() + sSystemConfig.getConfig());
     }
 
-    public CommonResponse<UserLoginResp> userLogin(UserLoginReq req) {
+    public CommonResult<UserLoginResp> userLogin(UserLoginReq req) {
         UserLoginResp userLoginResp = null;
         BUser bUser = null;
 
@@ -113,7 +112,7 @@ public class UserService {
             bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
 
             if (ObjectUtil.isNull(bUser)) {
-                throw new BadException(ResponseCode.SHOULD_LOGIN);
+                throw new ServiceException(ResponseCode.SHOULD_LOGIN.getCode(), ResponseCode.SHOULD_LOGIN.getMsg());
             }
 
             // 获取uid关联的租户
@@ -133,7 +132,7 @@ public class UserService {
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.SUCCESS, null);
 
-            return CommonResponse.suc(userLoginResp);
+            return CommonResult.suc(userLoginResp);
 
         } catch (Exception e) {
             log.error("pc login error: ", e);
@@ -141,7 +140,7 @@ public class UserService {
             //记录登录失败日志
             sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
 
-            return CommonResponse.bad(ResponseCode.SHOULD_LOGIN, userLoginResp);
+            return CommonResult.fail(ResponseCode.SHOULD_LOGIN.getCode(), ResponseCode.SHOULD_LOGIN.getMsg(), userLoginResp);
         }
 
     }
@@ -151,11 +150,11 @@ public class UserService {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
 
         if (ObjectUtil.isNull(userInfoDto)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
+            throw new ServiceException(ResponseCode.TOKEN_FAIL.getCode(), ResponseCode.TOKEN_FAIL.getMsg());
         }
 
         if (CollectionUtil.isEmpty(userInfoDto.getOrganizationList())) {
-            throw new BadException("找不到用户对应的租户ID");
+            throw new ServiceException("找不到用户对应的租户ID");
         }
 
         List<CurrentUserInfoResp.Role> roles = userInfoDto.getRoleList()

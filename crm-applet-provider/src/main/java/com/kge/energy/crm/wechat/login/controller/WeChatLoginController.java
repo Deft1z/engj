@@ -1,13 +1,13 @@
 package com.kge.energy.crm.wechat.login.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.energy.crm.wechat.login.service.WeChatLoginService;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,8 +32,8 @@ public class WeChatLoginController {
      */
     @PostMapping("/wechat/login")
     @ConvertToGoFormats
-    public CommonResponse<WeChatLoginResp> login(@RequestBody WeChatLoginReq req) {
-        return CommonResponse.suc(weChatLoginService.login(req));
+    public CommonResult<WeChatLoginResp> login(@RequestBody WeChatLoginReq req) {
+        return CommonResult.suc(weChatLoginService.login(req));
     }
 
     /**
@@ -41,8 +41,8 @@ public class WeChatLoginController {
      */
     @PostMapping("/baseData/wechat/phoneNumber")
     @ConvertToGoFormats
-    public CommonResponse<WeChatPhoneNumberResp> phoneNumber(@Validated @RequestBody PhoneNumberReq req) {
-        return CommonResponse.suc(weChatLoginService.phoneNumber(req));
+    public CommonResult<WeChatPhoneNumberResp> phoneNumber(@Validated @RequestBody PhoneNumberReq req) {
+        return CommonResult.suc(weChatLoginService.phoneNumber(req));
     }
 
     /**
@@ -50,8 +50,8 @@ public class WeChatLoginController {
      */
     @PostMapping("/baseData/wechat/userInfo")
     @ConvertToGoFormats
-    public CommonResponse<WxLoginUserInfoResp> getWxLoginUserInfo() {
-        return CommonResponse.suc(weChatLoginService.getWxLoginUserInfo());
+    public CommonResult<WxLoginUserInfoResp> getWxLoginUserInfo() {
+        return CommonResult.suc(weChatLoginService.getWxLoginUserInfo());
     }
 
 

@@ -9,7 +9,6 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -69,7 +68,7 @@ public class ComplainService {
         });
 
         //小程序用户只能看自己提的投诉单
-        if(AuthVerifyUtils.isOnlyAppletUser()){
+        if (AuthVerifyUtils.isOnlyAppletUser()) {
             complainListParam.setCreateUserId(UserInfoContextUtils.getCurrentUserId());
         }
 
@@ -93,7 +92,7 @@ public class ComplainService {
         LocalDateTime nowLocalDateTime = LocalDateTimeUtil.of(now);
 
         //更新投诉单状态
-        WComplain wComplain =  wComplainDao.getById(complainReplyReq.getComplainId());
+        WComplain wComplain = wComplainDao.getById(complainReplyReq.getComplainId());
         wComplain.setFeedback(complainReplyReq.getFeedback())
                 .setStatus(ComplainStatusEnums.FINISH.getCode())
                 .setProcessTime(nowLocalDateTime)
@@ -109,8 +108,8 @@ public class ComplainService {
                 .setTenantId(UserInfoContextUtils.getCurrentTenantId());
         Boolean wComplainFlowCreateResult = wComplainFlowDao.save(wComplainFlow);
 
-        if(!(wComplainUndateResult && wComplainFlowCreateResult)){
-            throw new BadException("投诉回复失败，请联系管理员");
+        if (!(wComplainUndateResult && wComplainFlowCreateResult)) {
+            throw new ServiceException("投诉回复失败，请联系管理员");
         }
 
         //发送消息通知
@@ -122,7 +121,7 @@ public class ComplainService {
     @Async
     protected void sendReplyMessage(ComplainReplyReq complainReplyReq, WComplain wComplain, Date sendDate) {
         CompletableFuture.runAsync(() -> {
-            try{
+            try {
                 ComplainResult complainResult = wComplainDao.getComplain(wComplain.getComplainId());
                 BUser toUser = bUserDao.getById(complainResult.getCreateUserId());
 
@@ -141,7 +140,7 @@ public class ComplainService {
 
                 weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
 
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("sendReplyMessage error: ", e);
             }
         });

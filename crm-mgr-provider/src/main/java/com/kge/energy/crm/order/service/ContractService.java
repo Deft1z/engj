@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -38,6 +37,8 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
+import com.kge.platform.framework.common.exception.ServiceException;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -80,7 +81,7 @@ public class ContractService {
     public PageResp<ContractResult> contractPageByUserIdLoad(WxUserWorkOrderReq req) {
         IPage<WxUserWorkOrderParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
         WxUserWorkOrderParam wxUserWorkOrderParam = BeanUtil.copyProperties(req, WxUserWorkOrderParam.class);
-        System.out.println("wxUserWorkOrderParam = " +wxUserWorkOrderParam);
+        System.out.println("wxUserWorkOrderParam = " + wxUserWorkOrderParam);
         IPage<ContractResult> pages = scServiceContractDao.contractPageByUserIdLoad(reqIpage, wxUserWorkOrderParam);
         List<ContractResult> resps = BeanUtil.copyToList(pages.getRecords(), ContractResult.class);
         return new PageResp<ContractResult>()
@@ -92,14 +93,14 @@ public class ContractService {
     }
 
     @Transactional
-    public CommonResponse<Object> contractAdd(CreateContractReq req) {
+    public CommonResult<Object> contractAdd(CreateContractReq req) {
         LocalDateTime now = LocalDateTime.now();
 
         LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
                 .eq(ScServiceContract::getCode, req.getCode());
         long count = scServiceContractDao.count(queryWrapper);
-        if(count > 0) {
-            return CommonResponse.suc("contract_code_repeat");
+        if (count > 0) {
+            return CommonResult.suc("contract_code_repeat");
         }
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
@@ -136,10 +137,10 @@ public class ContractService {
                 .setTenantId(userInfoDto.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 
-    public CommonResponse<Object> projectTimeEdit(UpdateProjectTimeReq req) {
+    public CommonResult<Object> projectTimeEdit(UpdateProjectTimeReq req) {
         return switch (req.getMode()) {
 
             //开工时间
@@ -148,14 +149,14 @@ public class ContractService {
             //竣工时间
             case 1 -> updateFinishTime(req);
 
-            default -> CommonResponse.bad(ResponseCode.PARAM_NOT_VALID, null);
+            default -> throw new ServiceException(ResponseCode.PARAM_NOT_VALID.getMsg());
         };
     }
 
     @Transactional
-    protected CommonResponse<Object> updateStartTime(UpdateProjectTimeReq req) {
-        if(StrUtil.isBlank(req.getProjectTime())){
-            return CommonResponse.bad(ResponseCode.PARAM_NOT_VALID, null);
+    protected CommonResult<Object> updateStartTime(UpdateProjectTimeReq req) {
+        if (StrUtil.isBlank(req.getProjectTime())) {
+            return CommonResult.fail(ResponseCode.PARAM_NOT_VALID);
         }
 
         LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>lambdaUpdate()
@@ -164,15 +165,15 @@ public class ContractService {
                 .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
         scServiceContractDao.update(updateWrapper);
 
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 
     @Transactional
-    protected CommonResponse<Object> updateFinishTime(UpdateProjectTimeReq req) {
+    protected CommonResult<Object> updateFinishTime(UpdateProjectTimeReq req) {
         LocalDateTime now = LocalDateTime.now();
 
-        if(StrUtil.isBlank(req.getProjectTime())){
-            return CommonResponse.bad(ResponseCode.PARAM_NOT_VALID, null);
+        if (StrUtil.isBlank(req.getProjectTime())) {
+            throw new ServiceException(ResponseCode.PARAM_NOT_VALID.getMsg());
         }
 
         ScServiceContract scServiceContract = scServiceContractDao.getById(req.getServiceContractId());
@@ -180,12 +181,12 @@ public class ContractService {
         scServiceContractDao.updateById(scServiceContract);
 
         LocalDateTime projectEndTime = LocalDateTimeUtil.parse(req.getProjectTime(), DatePattern.NORM_DATE_PATTERN);
-        if(!projectEndTime.isAfter(now)){
+        if (!projectEndTime.isAfter(now)) {
             BUser bUser = bUserDao.findUserByContractId(req.getServiceContractId());
-            if(ObjectUtil.isNotNull(bUser)){
+            if (ObjectUtil.isNotNull(bUser)) {
                 scServiceContract.setStatus(ConstParam.RemainToBeEvaluated);
                 boolean updateResult = scServiceContractDao.updateById(scServiceContract);
-                if(updateResult){
+                if (updateResult) {
                     ContractFinishMsgReq contractFinishMsgReq = new ContractFinishMsgReq()
                             .setName(new ContractFinishValueReq().setValue(scServiceContract.getName()))
                             .setRemark(new ContractFinishValueReq().setValue(scServiceContract.getRemark()));
@@ -199,6 +200,6 @@ public class ContractService {
             }
         }
 
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 }

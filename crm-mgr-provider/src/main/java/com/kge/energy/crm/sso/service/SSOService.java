@@ -2,7 +2,6 @@ package com.kge.energy.crm.sso.service;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.constans.TokenConstant;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.enums.SystemTypeEnum;
 import com.kge.energy.crm.external.iam.resp.IamCheckTicket;
@@ -15,6 +14,7 @@ import com.kge.energy.crm.sso.req.SSOReq;
 import com.kge.energy.crm.sso.resp.SSOResp;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.user.service.UserService;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,21 +35,21 @@ public class SSOService {
 
         IamResp<IamCheckTicket> ict = iamService.checkTicket(req.getTicket());
         if (ObjectUtil.notEqual(ict.getCode(), IamResp.SUCCESS_CODE)) {
-            throw new BadException(ict.getMsg());
+            throw new ServiceException(ict.getMsg());
         }
 
-        String token = Optional.ofNullable(ict.getData().getToken()).orElseThrow(() -> new BadException(ResponseCode.UNKNOWN));
+        String token = Optional.ofNullable(ict.getData().getToken()).orElseThrow(() -> new ServiceException(ResponseCode.UNKNOWN.getMsg()));
 
         // 根据token获取用户信息
         IamResp<IamUserBean> iub = iamService.getUserForToken(token);
         if (ObjectUtil.notEqual(iub.getCode(), IamResp.SUCCESS_CODE)) {
-            throw new BadException(iub.getMsg());
+            throw new ServiceException(iub.getMsg());
         }
 
-        String phone = Optional.ofNullable(iub.getData().getPhone()).orElseThrow(() -> new BadException(ResponseCode.UNKNOWN));
+        String phone = Optional.ofNullable(iub.getData().getPhone()).orElseThrow(() -> new ServiceException(ResponseCode.UNKNOWN.getMsg()));
 
         // 开始匹配用户手机号
-        BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new BadException(ResponseCode.SHOULD_LOGIN));
+        BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new ServiceException(ResponseCode.SHOULD_LOGIN.getCode(), ResponseCode.SHOULD_LOGIN.getMsg()));
 
         SSOResp resp = new SSOResp();
         resp.setToken(userDomainService.genToken(user, SystemTypeEnum.MGR, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true));

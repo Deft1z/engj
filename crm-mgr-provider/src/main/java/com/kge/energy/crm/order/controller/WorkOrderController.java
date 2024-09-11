@@ -1,7 +1,6 @@
 package com.kge.energy.crm.order.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
 import com.kge.energy.crm.order.req.WorkOrdeUpdateReq;
@@ -10,6 +9,7 @@ import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,8 +36,8 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/order")
-    public CommonResponse<PageResp<FormResp>> list(@Validated @RequestBody WorkOrderListReq req) {
-        return CommonResponse.suc(workOrderService.list(req));
+    public CommonResult<PageResp<FormResp>> list(@Validated @RequestBody WorkOrderListReq req) {
+        return CommonResult.suc(workOrderService.list(req));
     }
 
 
@@ -46,8 +46,8 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/getFlowByFormId")
-    public CommonResponse<List<FlowResp>> getFlowByFormId(@Validated @RequestBody GetFlowByFormIdReq req) {
-        return CommonResponse.suc(workOrderService.getFlowByFormId(req));
+    public CommonResult<List<FlowResp>> getFlowByFormId(@Validated @RequestBody GetFlowByFormIdReq req) {
+        return CommonResult.suc(workOrderService.getFlowByFormId(req));
     }
 
 
@@ -56,7 +56,7 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/order/update")
-    public CommonResponse<Object> workOrderUpdate(@Validated @RequestBody WorkOrdeUpdateReq req) {
+    public CommonResult<Object> workOrderUpdate(@Validated @RequestBody WorkOrdeUpdateReq req) {
         return workOrderService.workOrderUpdate(req);
 
     }
@@ -66,11 +66,11 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/workOrderByUserIdLoad")
-    public CommonResponse<PageResp<FormResp>> workOrderByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
-        System.out.println("req = "+req);
-        System.out.println("req = "+req.getUserId());
-        System.out.println("req = "+req.getCurrentPage());
-        return CommonResponse.suc(workOrderService.getWxUserOrder(req));
+    public CommonResult<PageResp<FormResp>> workOrderByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
+        System.out.println("req = " + req);
+        System.out.println("req = " + req.getUserId());
+        System.out.println("req = " + req.getCurrentPage());
+        return CommonResult.suc(workOrderService.getWxUserOrder(req));
 
     }
 }

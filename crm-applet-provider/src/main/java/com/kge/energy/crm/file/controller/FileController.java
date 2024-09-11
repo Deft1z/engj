@@ -1,8 +1,8 @@
 package com.kge.energy.crm.file.controller;
 
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.file.resp.UploadFileResp;
 import com.kge.energy.crm.file.service.FileService;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class FileController {
 
     @Operation(summary = "上传文件")
     @PostMapping("/external/file/uploadFileProxy")
-    public CommonResponse<UploadFileResp> uploadFileProxy(@RequestParam("file") MultipartFile file) {
-        return CommonResponse.suc(fileService.uploadFileProxy(file));
+    public CommonResult<UploadFileResp> uploadFileProxy(@RequestParam("file") MultipartFile file) {
+        return CommonResult.suc(fileService.uploadFileProxy(file));
     }
 
 }

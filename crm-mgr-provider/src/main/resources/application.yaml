@@ -186,9 +186,6 @@ knife4j:
     # Basic认证密码
     password: Kge@2024!
 
-framework:
-  global-exception-handler: false
-
 file:
   upload:
     allow-types: jpg,jpeg,png,pdf

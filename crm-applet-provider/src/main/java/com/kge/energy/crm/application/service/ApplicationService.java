@@ -15,8 +15,6 @@ import com.kge.energy.crm.application.req.AppUnbindReq;
 import com.kge.energy.crm.application.resp.AppDetailResp;
 import com.kge.energy.crm.application.resp.AppTokenResp;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.ct.req.CtTokenReq;
@@ -28,6 +26,8 @@ import com.kge.energy.crm.repository.entity.BApp;
 import com.kge.energy.crm.repository.entity.BOpenid;
 import com.kge.energy.crm.repository.entityext.result.AppAvatarListResult;
 import com.kge.energy.crm.repository.entityext.result.AppListResult;
+import com.kge.platform.framework.common.exception.ServiceException;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -81,11 +81,11 @@ public class ApplicationService {
         BOpenid openid = openidDao.getOpenId(UserInfoContextUtils.getCurrentUserId(), appUnbindReq.getAppId());
 
         if (ObjectUtil.isNull(openid)) {
-            throw new BadException(7, "当前账号未绑定该业务系统", "messagebox");
+            throw new ServiceException("当前账号未绑定该业务系统");
         }
 
         if (openid.getBindingState() != 1) {
-            throw new BadException(7, "当前账号未绑定该业务系统", "messagebox");
+            throw new ServiceException("当前账号未绑定该业务系统");
         }
 
         int result = openidDao.logicDeleteOpenId(openid.getOpenidId());
@@ -95,7 +95,7 @@ public class ApplicationService {
         return true;
     }
 
-    public CommonResponse<Object> getAppToken(AppTokenReq appTokenReq) throws NoSuchAlgorithmException, JsonProcessingException {
+    public CommonResult<Object> getAppToken(AppTokenReq appTokenReq) throws NoSuchAlgorithmException, JsonProcessingException {
         AppTokenResp appTokenResp = new AppTokenResp();
 
         // 2024-04-19临时解决多对多问题
@@ -117,13 +117,13 @@ public class ApplicationService {
                         .setFlag(1);
                 openidDao.save(newOpenId);
                 appTokenResp.setOpenId(newOpenId.getOpenidId().toString());
-                return new CommonResponse<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
+                return new CommonResult<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
             }
         } else {
             shareOpenId = bOpenid.getOpenidId();
             if (NumberUtil.equals(bOpenid.getBindingState(), Integer.valueOf(0))) {
                 appTokenResp.setOpenId(bOpenid.getOpenidId().toString());
-                return new CommonResponse<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
+                return new CommonResult<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
             }
         }
 
@@ -135,7 +135,7 @@ public class ApplicationService {
 
         if (!jsonObject.containsKey("ret")) {
             log.error("响应未找到ret字段,{}", jsonObject.toString());
-            return CommonResponse.suc("用户不存在");
+            return CommonResult.suc("用户不存在");
         }
         String ret = jsonObject.getStr("ret");
         if (StrUtil.equals("4005", ret)) {
@@ -143,25 +143,25 @@ public class ApplicationService {
             bOpenid.setBindingState(0);
             openidDao.updateById(bOpenid);
             appTokenResp.setOpenId(bOpenid.getOpenidId().toString());
-            return new CommonResponse<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
+            return new CommonResult<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
         } else {
             if (!StrUtil.equals("0", ret)) {
-                return CommonResponse.suc(jsonObject.getStr("msg"));
+                return CommonResult.suc(jsonObject.getStr("msg"));
             }
         }
 
         if (!jsonObject.containsKey("data")) {
             log.error("响应未找到data字段,{}", jsonObject.toString());
-            return CommonResponse.suc("用户不存在");
+            return CommonResult.suc("用户不存在");
         }
         JSONObject data = jsonObject.getJSONObject("data");
         if (!data.containsKey("token")) {
             log.error("响应未找到token字段,{}", jsonObject.toString());
-            throw new BadException("应用出现错误");
+            throw new ServiceException("应用出现错误");
         }
 
         appTokenResp = JSONUtil.toBean(data, AppTokenResp.class);
-        return CommonResponse.suc(appTokenResp);
+        return CommonResult.suc(appTokenResp);
     }
 
     public Boolean bindApp(AppBindReq appBindReq) {

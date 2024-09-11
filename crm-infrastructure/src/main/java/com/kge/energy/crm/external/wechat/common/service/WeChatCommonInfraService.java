@@ -2,10 +2,10 @@ package com.kge.energy.crm.external.wechat.common.service;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.external.wechat.applet.req.StableAccessTokenReq;
 import com.kge.energy.crm.external.wechat.applet.resp.StableAccessTokenResp;
 import com.kge.energy.crm.external.wechat.common.property.WeChatCommonProperties;
+import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.web.util.RestUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class WeChatCommonInfraService {
 
         StableAccessTokenResp resp = getStableAccessToken(appId, appSecret);
         if (ObjUtil.isNull(resp)) {
-            throw new BadException("获取微信调用凭证失败");
+            throw new ServiceException("获取微信调用凭证失败");
         }
 
         accessToken = resp.getAccessToken();

@@ -5,7 +5,6 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.RedisUtils;
@@ -14,6 +13,7 @@ import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.tenant.service.TenantDomainService;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,7 +47,7 @@ public class UserDomainService {
 
         BUser user = bUserDao.getById(userId);
         if (ObjUtil.isNull(user)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
+            throw new ServiceException(ResponseCode.TOKEN_FAIL.getCode(), ResponseCode.TOKEN_FAIL.getMsg());
         }
 
         UserInfoDto userInfoDto = new UserInfoDto();

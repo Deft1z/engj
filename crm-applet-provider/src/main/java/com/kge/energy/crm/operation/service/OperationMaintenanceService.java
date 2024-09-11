@@ -4,7 +4,6 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -17,10 +16,11 @@ import com.kge.energy.crm.external.ecc.service.EccService;
 import com.kge.energy.crm.operation.req.PatrolRecordReq;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.OmReportDao;
+import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import com.kge.energy.crm.repository.entityext.result.PatrolRecordResp;
-import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.user.service.UserService;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,13 +50,14 @@ public class OperationMaintenanceService {
 
     /**
      * 获取运维托管列表
+     *
      * @param eccReq
      * @return
      */
     public EccResp<EccPageData<EccMaintenance>> getRecordList(EccReq eccReq) throws NoSuchAlgorithmException {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-        if(ObjectUtil.isNull(userInfoDto)){
-            throw new BadException(ResponseCode.AUTHORITY_FAIL);
+        if (ObjectUtil.isNull(userInfoDto)) {
+            throw new ServiceException(ResponseCode.AUTHORITY_FAIL.getMsg());
         }
 
         List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));
@@ -67,8 +66,8 @@ public class OperationMaintenanceService {
 
         //获取当前用户ecc org code, 处理施工单位筛选条件
         String eccOrgCode = bOrganizationDao.getEccOrgCode(UserInfoContextUtils.getCurrentOrgId());
-        if(StrUtil.isBlank(eccReq.getCondition().getSysCompanyCode())){
-            if(!AuthVerifyUtils.isSuperAdmin() && !leaderPhoneList.contains(currentUserPhone)){
+        if (StrUtil.isBlank(eccReq.getCondition().getSysCompanyCode())) {
+            if (!AuthVerifyUtils.isSuperAdmin() && !leaderPhoneList.contains(currentUserPhone)) {
                 eccReq.getCondition().setSysCompanyCode(eccOrgCode);
             }
         }
@@ -83,8 +82,8 @@ public class OperationMaintenanceService {
         List<Integer> userIdList = userList.stream().map(BUser::getUserId).toList();
         String firstPartyContactsPhone = userService.findShareUser(userIdList, 3);
 
-        if(StrUtil.isBlank(searchPhone)){
-            if(AuthVerifyUtils.isSuperAdmin() || leaderPhoneList.contains(currentUserPhone) || AuthVerifyUtils.isGreaterOrEqualBLevel()){
+        if (StrUtil.isBlank(searchPhone)) {
+            if (AuthVerifyUtils.isSuperAdmin() || leaderPhoneList.contains(currentUserPhone) || AuthVerifyUtils.isGreaterOrEqualBLevel()) {
                 //超管和集团领导看所有, 公司B级以上领导看自己公司的(已由eccOrgCode控制数据范围)
                 eccReq.getCondition().setFirstPartyContactsPhone("");
             } else {
@@ -92,7 +91,7 @@ public class OperationMaintenanceService {
                 eccReq.getCondition().setFirstPartyContactsPhone((StrUtil.isBlank(firstPartyContactsPhone) ? currentUserPhone : firstPartyContactsPhone));
             }
         } else {
-            if(AuthVerifyUtils.isSuperAdmin() || leaderPhoneList.contains(currentUserPhone) || AuthVerifyUtils.isGreaterOrEqualBLevel()){
+            if (AuthVerifyUtils.isSuperAdmin() || leaderPhoneList.contains(currentUserPhone) || AuthVerifyUtils.isGreaterOrEqualBLevel()) {
                 //超管和集团领导看所有, 公司B级以上领导看自己公司的(已由eccOrgCode控制数据范围)
                 eccReq.getCondition().setFirstPartyContactsPhone(searchPhone);
             } else {
@@ -108,10 +107,10 @@ public class OperationMaintenanceService {
                 .map(EccPageData::getList)
                 .map(list -> {
                     list.forEach(e -> {
-                        if(StrUtil.isBlank(e.getContractName())){
+                        if (StrUtil.isBlank(e.getContractName())) {
                             e.setContractName(e.getPrjName());
                         }
-                        Opt.ofBlankAble(e.getTaskName()).ifPresent(t -> e.setTaskName(StrUtil.replace(t,",", "")));
+                        Opt.ofBlankAble(e.getTaskName()).ifPresent(t -> e.setTaskName(StrUtil.replace(t, ",", "")));
                     });
                     return list;
                 });
@@ -136,10 +135,11 @@ public class OperationMaintenanceService {
 
     /**
      * 获取运维服务内容
+     *
      * @param patrolRecordReq
      * @return
      */
-    public PatrolRecordResp getPatrolRecordInfo(PatrolRecordReq patrolRecordReq){
+    public PatrolRecordResp getPatrolRecordInfo(PatrolRecordReq patrolRecordReq) {
         OperationParam param = new OperationParam();
         param.setPatrolRecordCode(patrolRecordReq.getPatrolRecordCode());
         return omReportDao.getPatrolRecordInfo(param);

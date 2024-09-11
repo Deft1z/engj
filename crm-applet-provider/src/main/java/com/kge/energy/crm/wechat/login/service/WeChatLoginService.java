@@ -12,7 +12,6 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.LoginPlatformEnums;
 import com.kge.energy.crm.enums.LoginResultEnums;
@@ -31,6 +30,7 @@ import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,11 +95,11 @@ public class WeChatLoginService {
             //请求微信接口
             LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
             if (StrUtil.isBlank(appletLoginResp.getOpenId())) {
-                throw new BadException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
+                throw new ServiceException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
             }
             // 现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}
 //        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
-//            throw new BadException(appletLoginResp.getErrMsg());
+//            throw new ServiceException(appletLoginResp.getErrMsg());
 //        }
 
             user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
@@ -222,7 +222,7 @@ public class WeChatLoginService {
 
         GetUserPhoneNumberResp getUserPhoneNumberResp = weChatAppletInfraService.getUserPhoneNumber(req.getCode(), req.getOpenid());
         if (ObjectUtil.isNull(getUserPhoneNumberResp) || ObjectUtil.notEqual(getUserPhoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
-            throw new BadException("获取用户手机号码失败");
+            throw new ServiceException("获取用户手机号码失败");
         }
 
         List<BUser> userList = new LambdaQueryChainWrapper<>(BUser.class)
@@ -232,7 +232,7 @@ public class WeChatLoginService {
         BUser bUser;
 
         if (CollUtil.isEmpty(userList)) {
-            throw new BadException("用户不存在");
+            throw new ServiceException("用户不存在");
         }
 
         // openid 只存在一个用户，且手机号为空

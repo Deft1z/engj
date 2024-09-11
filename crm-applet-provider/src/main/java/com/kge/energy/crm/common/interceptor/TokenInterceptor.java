@@ -6,7 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.auth.service.AuthDomainService;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.RedisUtils;
@@ -70,13 +69,13 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
         String authToken = request.getHeader(TokenConstant.HEADER_KEY);
         if (StrUtil.isBlank(authToken)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
+            throw new ServiceException(ResponseCode.TOKEN_FAIL.getCode(), ResponseCode.TOKEN_FAIL.getMsg());
         }
 
         String tokenKey = authProperties.getToken().getRedisFront() + authToken;
         String uid = redisUtils.get(tokenKey);
         if (StrUtil.isBlank(uid)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
+            throw new ServiceException(ResponseCode.TOKEN_FAIL.getCode(), ResponseCode.TOKEN_FAIL.getMsg());
         }
 
         // 设置用户上下文信息
@@ -120,7 +119,7 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
 
         UserInfoDto userInfoDto = userDomainService.findUserInfoDto(systemType, userId);
         if (ObjUtil.isNull(userInfoDto)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
+            throw new ServiceException(ResponseCode.TOKEN_FAIL.getCode(), ResponseCode.TOKEN_FAIL.getMsg());
         }
 
         UserInfoContextUtils.putUserInfo(userInfoDto);

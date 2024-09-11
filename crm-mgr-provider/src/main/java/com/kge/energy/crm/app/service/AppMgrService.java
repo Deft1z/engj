@@ -8,7 +8,6 @@ import com.kge.energy.crm.app.req.AppMgrListAddReq;
 import com.kge.energy.crm.app.req.AppMgrListReq;
 import com.kge.energy.crm.app.req.AppMgrListUpdateReq;
 import com.kge.energy.crm.app.req.InfoUnbindReq;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.OperateModuleEnums;
@@ -21,6 +20,7 @@ import com.kge.energy.crm.repository.entity.BApp;
 import com.kge.energy.crm.repository.entity.BOpenid;
 import com.kge.energy.crm.repository.entityext.param.AppMgrListParam;
 import com.kge.energy.crm.repository.entityext.result.AppMgrListResult;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ public class AppMgrService {
     public Boolean appFormInsert(AppMgrListAddReq req) {
         Long count = bAppDao.getCountByName(req.getName());
         if (count > 0L) {
-            throw new BadException("应用重名");
+            throw new ServiceException("应用重名");
         }
 
         BApp bApp = BeanUtil.copyProperties(req, BApp.class);
@@ -71,12 +71,12 @@ public class AppMgrService {
     public Boolean appFormUpdate(AppMgrListUpdateReq req) {
         BApp bApp = bAppDao.getById(req.getAppId());
         if (ObjectUtil.isNull(bApp)) {
-            throw new BadException("应用不存在");
+            throw new ServiceException("应用不存在");
         }
 
         Long count = bAppDao.getOtherCountByIdAndName(req.getAppId(), req.getName());
         if (count > 0L) {
-            throw new BadException("应用重名");
+            throw new ServiceException("应用重名");
         }
 
         BeanUtil.copyProperties(req, bApp);
@@ -95,11 +95,11 @@ public class AppMgrService {
 
         // 检查绑定记录
         if (ObjectUtil.isNull(bOpenid)) {
-            throw new BadException("当前账号未绑定该业务系统");
+            throw new ServiceException("当前账号未绑定该业务系统");
         }
 
         if (NumberUtil.equals(bOpenid.getBindingState(), Integer.valueOf(0))) {
-            throw new BadException("当前账号未绑定该业务系统");
+            throw new ServiceException("当前账号未绑定该业务系统");
         }
 
         if (req.getAppId() <= 1) {

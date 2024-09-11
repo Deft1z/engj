@@ -1,9 +1,9 @@
 package com.kge.energy.crm.workflow.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.workflow.resp.WfFormTypeTreeResp;
 import com.kge.energy.crm.workflow.service.WfFormTypeService;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,8 @@ public class WfFormTypeController {
     @Operation(summary = "获取工单服务类型树")
     @PostMapping(value = "/base/service/list")
     @ConvertToGoFormats
-    public CommonResponse<List<WfFormTypeTreeResp>> getFormTypeTree(){
-        return CommonResponse.suc(wfFormTypeService.getFormTypeTree());
+    public CommonResult<List<WfFormTypeTreeResp>> getFormTypeTree() {
+        return CommonResult.suc(wfFormTypeService.getFormTypeTree());
     }
 
 }

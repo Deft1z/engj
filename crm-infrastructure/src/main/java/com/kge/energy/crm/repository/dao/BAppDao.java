@@ -7,14 +7,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.kge.energy.crm.common.execption.BadException;
-import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.AppMgrListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.repository.mapper.*;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,13 +48,6 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         List<WxUserAppResult> res = mapper.contractPageByUserIdLoad(wxUserAppParam);
         return res;
     }
-    /**
-     *  含有分页功能呢
-     public IPage<WxUserAppResult> contractPageByUserIdLoad(IPage<WxUserAppParam> reqIpage,  WxUserAppParam wxUserAppParam) {
-        IPage<WxUserAppResult> res = mapper.contractPageByUserIdLoad(reqIpage,wxUserAppParam);
-        return res;
-     }
-     */
 
     /**
      * 小程序客户 -> 获取绑定应用的选择列表
@@ -83,7 +75,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         // OpenIdModelList
 
         // 获取用户对应openid的列表
-        List<OpenIdModelList> resultU = mapper.userOpenId(appId, mobile, name,(page-1)*limit, limit);
+        List<OpenIdModelList> resultU = mapper.userOpenId(appId, mobile, name, (page - 1) * limit, limit);
         int nullFlag = 0;
         if (resultU.size() < 1) {
             nullFlag = 1;
@@ -104,7 +96,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
             nullFlag = 1;
         }
         List<OpenIdModelList> users = new ArrayList<>();
-        if (nullFlag == 0){
+        if (nullFlag == 0) {
             users = result;
         }
         return users;
@@ -137,14 +129,14 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     public List<OpenShareModelList> FindBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
         int nullFlag = 0; // 判断记录和总数是否为0
         // 获取绑定记录的列表
-        List<OpenShareModelList> result = mapper.FindBindList(page,mobile,name,ids,(page-1)*limit, limit);
+        List<OpenShareModelList> result = mapper.FindBindList(page, mobile, name, ids, (page - 1) * limit, limit);
         // 获取绑定记录的列表（总数）
-        List<OpenShareModelList> resultCount = mapper.FindBindListCount(mobile,name,ids);
+        List<OpenShareModelList> resultCount = mapper.FindBindListCount(mobile, name, ids);
         if (result.size() < 1 || resultCount.size() < 1) {
             nullFlag = 1;
         }
         List<OpenShareModelList> openShareModelList = new ArrayList<>();
-        if (nullFlag == 0){
+        if (nullFlag == 0) {
             openShareModelList = result;
         }
         return openShareModelList;
@@ -156,7 +148,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
      */
     public Integer FindBindListCount(String mobile, String name, List<Integer> ids) {
         // 获取绑定记录的列表（总数）
-        List<OpenShareModelList> resultCount = mapper.FindBindListCount(mobile,name,ids);
+        List<OpenShareModelList> resultCount = mapper.FindBindListCount(mobile, name, ids);
         return resultCount.size();
     }
 
@@ -165,7 +157,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
      */
     public List<OpenIdModelList> FindByUidAndOid(List<Integer> uids, List<Integer> ids) {
         // 查找对应的用户组织关系
-        List<OpenIdModelList> result = mapper.FindByUidAndOid(uids,ids);
+        List<OpenIdModelList> result = mapper.FindByUidAndOid(uids, ids);
         return result;
     }
 
@@ -237,7 +229,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     public int CancelAll(List<Integer> openIds) {
         LambdaUpdateWrapper<BOpenidShare> wrapper = Wrappers.<BOpenidShare>update().lambda()
                 .set(BOpenidShare::getFlag, -1)
-                .in(BOpenidShare::getShareOpenidId,openIds);
+                .in(BOpenidShare::getShareOpenidId, openIds);
         int resultInt = bOpenidShareMapper.update(wrapper);
         if (resultInt == 0) {
             return 0;
@@ -250,7 +242,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
      */
     public BUser FindUserByMobile(String mobile) {
         LambdaUpdateWrapper<BUser> wrapper = Wrappers.<BUser>update().lambda()
-                .like(BUser::getMobile,mobile);
+                .like(BUser::getMobile, mobile);
         List<BUser> users = bUserMapper.selectList(wrapper);
         if (users.size() == 0) {
             return null;
@@ -272,28 +264,25 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     @Transactional
     public Boolean bindApp(Integer uid, Integer openid) {
         if (uid == UserInfoContextUtils.getCurrentUserId()) {
-            throw new BadException(ResponseCode.PARAM_NOT_VALID);
+            throw new ServiceException("非当前用户");
         }
         LambdaUpdateWrapper<BOpenid> wrapper = Wrappers.<BOpenid>update().lambda()
-                .set(BOpenid::getFlag,-1)
-                .eq(BOpenid::getUserId,uid);
+                .set(BOpenid::getFlag, -1)
+                .eq(BOpenid::getUserId, uid);
         bOpenidMapper.update(wrapper);
         BOpenidShare bOpenidShare = new BOpenidShare();
         bOpenidShare.setUserId(uid);
         bOpenidShare.setShareOpenidId(openid);
         bOpenidShare.setFlag(1);
-        int insertId = bOpenidShareMapper.insert(bOpenidShare);
-        if (insertId > 0){
-            return true;
-        }
-        throw new BadException(ResponseCode.DB_INSERT_FAIL);
+        bOpenidShareMapper.insert(bOpenidShare);
+        return true;
     }
 
     /**
      * @description 小程序我的->获取业务系统列表
      * @author tangchenghui
      * @date 2024/7/29 15:28
-    */
+     */
     public List<AppListResult> getAppListByUserId(Integer userId) {
         return mapper.getAppListByUserId(userId);
     }
@@ -302,22 +291,22 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         return mapper.getAppAvatarList();
     }
 
-    public IPage<AppMgrListResult> selectAppPage(AppMgrListParam param){
+    public IPage<AppMgrListResult> selectAppPage(AppMgrListParam param) {
         Page<AppMgrListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
         return mapper.selectAppPage(page, param);
     }
 
-    public Long getCountByName(String name){
+    public Long getCountByName(String name) {
         LambdaQueryWrapper<BApp> wrapper = Wrappers.<BApp>lambdaQuery().eq(BApp::getName, name);
         return mapper.selectCount(wrapper);
     }
 
-    public Long getOtherCountByIdAndName(Integer appId, String name){
+    public Long getOtherCountByIdAndName(Integer appId, String name) {
         LambdaQueryWrapper<BApp> wrapper = Wrappers.<BApp>lambdaQuery().eq(BApp::getName, name).ne(BApp::getAppId, appId);
         return mapper.selectCount(wrapper);
     }
 
-    public IPage<BindUserResult> getBindUsers(Page<BindUserResult> page, Integer appId, String mobile, String name){
+    public IPage<BindUserResult> getBindUsers(Page<BindUserResult> page, Integer appId, String mobile, String name) {
         return mapper.getBindUsers(page, appId, mobile, name);
     }
 }

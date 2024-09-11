@@ -1,8 +1,8 @@
 package com.kge.energy.crm.resource.controller;
 
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.resource.resp.ResourceListResp;
 import com.kge.energy.crm.resource.service.ResourceService;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class ResourceController {
 
     @Operation(summary = "当前登录用户菜单")
     @GetMapping("/currentUserResource")
-    public CommonResponse<ResourceListResp> currentUserResource() {
-        return CommonResponse.suc(resourceService.currentUserResource());
+    public CommonResult<ResourceListResp> currentUserResource() {
+        return CommonResult.suc(resourceService.currentUserResource());
     }
 }

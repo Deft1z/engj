@@ -13,7 +13,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -37,6 +36,7 @@ import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.platform.framework.common.exception.ServiceException;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -111,7 +111,7 @@ public class WorkOrderService {
      * 暂时不重构，待上流程引擎
      */
     @Transactional
-    public CommonResponse<Object> workOrderUpdate(WorkOrdeUpdateReq req) {
+    public CommonResult<Object> workOrderUpdate(WorkOrdeUpdateReq req) {
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
 
@@ -131,7 +131,7 @@ public class WorkOrderService {
             //撤回工单
             case 5 -> withdrawOrder(req, userInfoDto);
 
-            default -> CommonResponse.suc(false);
+            default -> CommonResult.suc(false);
         };
 
     }
@@ -153,11 +153,11 @@ public class WorkOrderService {
                 .setTotal(pages.getTotal());
     }
 
-    private CommonResponse<Object> assignOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
+    private CommonResult<Object> assignOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
         //检查工单是否已经流转 (工单分配)
         List<WfFormFlow> fms = wfFormFlowService.selectFlowByFormIdAndActionType(req.getFormId(), ConstParam.FlowCompanyProcess);
         if (CollectionUtil.isNotEmpty(fms)) {
-            return CommonResponse.suc(4000);
+            return CommonResult.suc(4000);
         }
         //流转工单
         //查询所选组织是否有客服角色
@@ -190,10 +190,10 @@ public class WorkOrderService {
             wfFormFlow.setStatus(ConstParam.FlowTagSub);
         }
         wfFormFlowDao.save(wfFormFlow);
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 
-    private CommonResponse<Object> handleOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
+    private CommonResult<Object> handleOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
         LocalDateTime now = LocalDateTime.now();
 
         WfForm form = wfFormDao.getById(req.getFormId());
@@ -201,7 +201,7 @@ public class WorkOrderService {
                 .setSubStatus(ConstParam.Processed)
                 .setTimeReception(now)
                 .setModifyUserId(userInfoDto.getUserId().intValue());
-        if(!AuthVerifyUtils.isSuperAdmin()){
+        if (!AuthVerifyUtils.isSuperAdmin()) {
             form.setCurrentOrgId(req.getCurrentOrgId()).setCurrentRoleId(req.getCurrentRoleId());
         }
         wfFormDao.updateById(form);
@@ -220,10 +220,10 @@ public class WorkOrderService {
         //发送微信小程序消息，通知客户
         sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.FlowHasFeedback);
 
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 
-    private CommonResponse<Object> finishOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
+    private CommonResult<Object> finishOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
         LocalDateTime now = LocalDateTime.now();
 
         //检查工单是否已经完成
@@ -231,8 +231,8 @@ public class WorkOrderService {
                 .eq(WfFormFlow::getFormId, req.getFormId())
                 .eq(WfFormFlow::getActionType, ConstParam.FlowFinished);
         long count = wfFormFlowDao.count(queryWrapper);
-        if(count > 0){
-            return CommonResponse.suc(4002);
+        if (count > 0) {
+            return CommonResult.suc(4002);
         }
 
         // 完成工单
@@ -260,10 +260,10 @@ public class WorkOrderService {
         //发送微信小程序消息，通知客户
         sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.FlowFinished);
 
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 
-    private CommonResponse<Object> terminateOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
+    private CommonResult<Object> terminateOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
         LocalDateTime now = LocalDateTime.now();
 
         //检查工单是否已经终止 （工单终止）
@@ -271,8 +271,8 @@ public class WorkOrderService {
                 .eq(WfFormFlow::getFormId, req.getFormId())
                 .eq(WfFormFlow::getActionType, ConstParam.FlowFinished);
         long count = wfFormFlowDao.count(queryWrapper);
-        if(count > 0){
-            return CommonResponse.suc(4003);
+        if (count > 0) {
+            return CommonResult.suc(4003);
         }
 
         // 终止工单
@@ -308,10 +308,10 @@ public class WorkOrderService {
         //发送微信小程序消息，通知客户
         sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.Finished);
 
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 
-    private CommonResponse<Object> withdrawOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
+    private CommonResult<Object> withdrawOrder(WorkOrdeUpdateReq req, UserInfoDto userInfoDto) {
         LocalDateTime now = LocalDateTime.now();
 
         //检查工单是否已经撤回
@@ -319,8 +319,8 @@ public class WorkOrderService {
                 .eq(WfFormFlow::getFormId, req.getFormId())
                 .eq(WfFormFlow::getActionType, ConstParam.FlowGroupProcess);
         long count = wfFormFlowDao.count(queryWrapper);
-        if(count > 0){
-            return CommonResponse.suc(4004);
+        if (count > 0) {
+            return CommonResult.suc(4004);
         }
 
         // 撤回工单
@@ -347,13 +347,13 @@ public class WorkOrderService {
         //发送微信小程序消息，通知客户
         sendFormStatusChangeMsg(req, userInfoDto, form, now, ConstParam.SendBack);
 
-        return CommonResponse.suc(true);
+        return CommonResult.suc(true);
     }
 
     @Async
     private void sendFormStatusChangeMsg(WorkOrdeUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {
         CompletableFuture.runAsync(() -> {
-            try{
+            try {
                 Long operatorUserId = userInfoDto.getUserId();
                 Integer customerUserId = form.getCreateUserId();
                 BUser customer = bUserDao.getById(customerUserId);
@@ -372,7 +372,7 @@ public class WorkOrderService {
                         .setData(formStatusChangeMsgReq);
 
                 weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("sendFormStatusChangeMsg {} error: ", status, e);
             }
         });
