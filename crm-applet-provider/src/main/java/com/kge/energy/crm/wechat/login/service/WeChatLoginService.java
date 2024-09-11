@@ -19,17 +19,14 @@ import com.kge.energy.crm.enums.LoginResultEnums;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.enums.SystemTypeEnum;
 import com.kge.energy.crm.external.elink.ElinkService;
-import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
-import com.kge.energy.crm.external.wechat.applet.resp.SendSubscribeResp;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.login.SysLoginLogHandleService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
-import com.kge.energy.crm.wechat.login.req.SendMessageReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
@@ -316,25 +313,4 @@ public class WeChatLoginService {
                         ).collect(Collectors.toList()));
     }
 
-    /**
-     * 发送订阅消息
-     */
-    public Boolean sendMessage(SendMessageReq req) {
-
-        SendSubscribeReq sendSubscribeReq = new SendSubscribeReq()
-                .setTemplateId(req.getTemplateId())
-                .setPage(req.getPage())
-                .setToUserOpenId(req.getToUserOpenId())
-                .setData(req.getData())
-                .setPage(req.getPage())
-                .setMiniprogramState(req.getMiniprogramState());
-
-        SendSubscribeResp sendSubscribeResp = weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
-
-        if (ObjUtil.notEqual(sendSubscribeResp.getErrCode(), SendSubscribeResp.SUCCESS_CODE)) {
-            return false;
-        }
-
-        return true;
-    }
 }

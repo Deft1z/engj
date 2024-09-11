@@ -3,7 +3,6 @@ package com.kge.energy.crm.wechat.login.controller;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
-import com.kge.energy.crm.wechat.login.req.SendMessageReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
@@ -55,15 +54,6 @@ public class WeChatLoginController {
         return CommonResponse.suc(weChatLoginService.getWxLoginUserInfo());
     }
 
-
-    /**
-     * 发送订阅消息（已弃用）
-     */
-//    @PostMapping("/baseData/wechat/sendMessage")
-//    @ConvertToGoFormats
-    public CommonResponse<Boolean> sendMessage(@Validated @RequestBody SendMessageReq req) {
-        return CommonResponse.suc(weChatLoginService.sendMessage(req));
-    }
 
 }
 

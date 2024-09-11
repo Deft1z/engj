@@ -16,7 +16,6 @@ import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.platform.framework.web.util.RestUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -62,12 +61,8 @@ public class EccService {
         headers.add("Authorization", authorization);
 
         Object resObj = RestUtils.postForObject(url, headers, req, Object.class);
-        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>() {}, false);
-    }
-
-    public Resource getFile(String filePath) {
-        String url = eccProperties.getBaseUrl() + filePath;
-        return RestUtils.instance().getForEntity(url, Resource.class).getBody();
+        return JSONUtil.toBean(JSONUtil.parse(resObj), new TypeReference<>() {
+        }, false);
     }
 
     public List<EccOrgResp> getEccOrgList() {

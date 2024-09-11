@@ -45,25 +45,6 @@ public class AppService {
         List<WxUserAppResp> resps = BeanUtil.copyToList(bAppDao.contractPageByUserIdLoad(wxUserAppParam), WxUserAppResp.class);
         return resps;
     }
-    /**  含有分页功能
-     public PageResp<WxUserAppResp> contractPageByUserIdLoad(WxUserAppReq req) {
-     UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-     Assert.notNull(userInfoDto);
-     if (req.getPageSize() == null || req.getCurrentPage() == null) {
-     req.setPageSize(1L);
-     req.setCurrentPage(10L);
-     }
-     IPage<WxUserAppParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
-     WxUserAppParam wxUserAppParam = BeanUtil.copyProperties(req, WxUserAppParam.class);
-     IPage<WxUserAppResult> pages = bAppDao.contractPageByUserIdLoad(reqIpage,wxUserAppParam);
-     List<WxUserAppResp> resps = BeanUtil.copyToList(pages.getRecords(), WxUserAppResp.class);
-     return new PageResp<WxUserAppResp>()
-     .setList(resps)
-     .setCurrentPage(pages.getCurrent())
-     .setPageSize(pages.getSize())
-     .setTotal(pages.getTotal());
-     }
-     */
 
     /**
      * 微信客户小程序 -> 绑定的第三方应用 -> 绑定应用选择列表

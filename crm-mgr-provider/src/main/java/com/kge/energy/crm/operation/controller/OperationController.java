@@ -10,8 +10,9 @@ import com.kge.energy.crm.operation.resp.OperationDetailResp;
 import com.kge.energy.crm.operation.service.OperationService;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
@@ -53,12 +54,4 @@ public class OperationController {
         );
     }
 
-    /**
-     * 查看附件
-     */
-    // TODO 当前url地址为临时命名，待前端修改时再确定url地址命名
-    @GetMapping("/omBack/file/test/{*filePath}")
-    public Resource getFile(@PathVariable("filePath") String filePath) {
-        return eccService.getFile(filePath);
-    }
 }
