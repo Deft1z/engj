@@ -112,7 +112,7 @@ public class UserService {
             bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
 
             if (ObjectUtil.isNull(bUser)) {
-                throw new ServiceException(ResponseCode.SHOULD_LOGIN.getCode(), ResponseCode.SHOULD_LOGIN.getMsg());
+                throw new ServiceException("登录失败");
             }
 
             // 获取uid关联的租户
@@ -140,7 +140,7 @@ public class UserService {
             //记录登录失败日志
             sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
 
-            return CommonResult.fail(ResponseCode.SHOULD_LOGIN.getCode(), ResponseCode.SHOULD_LOGIN.getMsg(), userLoginResp);
+            throw new ServiceException("登录失败");
         }
 
     }

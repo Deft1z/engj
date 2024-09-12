@@ -6,7 +6,6 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsCondition;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
@@ -95,7 +94,7 @@ public class PvService {
     public boolean likeComment(PvLikeReq pvLikeReq) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         if (ObjectUtil.isNull(userInfoDto)) {
-            throw new ServiceException(ResponseCode.AUTHORITY_FAIL.getMsg());
+            throw new ServiceException("权限不足");
         }
 
         CmsComment cmsComment = commentDao.getById(pvLikeReq.getId());

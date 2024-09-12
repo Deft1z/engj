@@ -3,7 +3,6 @@ package com.kge.energy.crm.msg.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.msg.req.UserMsgListReq;
@@ -30,7 +29,7 @@ public class UserMsgService {
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         if (ObjectUtil.isNull(userInfoDto)) {
-            throw new ServiceException(ResponseCode.AUTHORITY_FAIL.getMsg());
+            throw new ServiceException("权限不足");
         }
         param.setUserId(userInfoDto.getUserId());
 

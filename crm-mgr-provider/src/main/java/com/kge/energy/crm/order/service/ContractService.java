@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
@@ -149,14 +148,14 @@ public class ContractService {
             //竣工时间
             case 1 -> updateFinishTime(req);
 
-            default -> throw new ServiceException(ResponseCode.PARAM_NOT_VALID.getMsg());
+            default -> throw new ServiceException("参数验证失败");
         };
     }
 
     @Transactional
     protected CommonResult<Object> updateStartTime(UpdateProjectTimeReq req) {
         if (StrUtil.isBlank(req.getProjectTime())) {
-            return CommonResult.fail(ResponseCode.PARAM_NOT_VALID);
+            return CommonResult.fail("参数验证失败");
         }
 
         LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>lambdaUpdate()
@@ -173,7 +172,7 @@ public class ContractService {
         LocalDateTime now = LocalDateTime.now();
 
         if (StrUtil.isBlank(req.getProjectTime())) {
-            throw new ServiceException(ResponseCode.PARAM_NOT_VALID.getMsg());
+            throw new ServiceException("参数验证失败");
         }
 
         ScServiceContract scServiceContract = scServiceContractDao.getById(req.getServiceContractId());
