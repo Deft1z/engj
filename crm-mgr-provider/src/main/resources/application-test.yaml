@@ -25,6 +25,7 @@ wechat:
     wxUrl: http://172.16.17.147:9011/vcheck
   applet:
     version: trial
+    envVersion: trial
 
 ecc:
   appId: ntwx001

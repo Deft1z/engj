@@ -1,5 +1,6 @@
 package com.kge.energy.crm.external.wechat.applet.service;
 
+import cn.hutool.json.JSONObject;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.GetUserPhoneNumberReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
@@ -73,6 +74,19 @@ public class WeChatAppletInfraService {
         String url = String.format("%s/cgi-bin/message/subscribe/send?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
 
         return RestUtils.postForObject(url, req, SendSubscribeResp.class);
+    }
+
+    public JSONObject getUrlLink(String path) {
+        String url = String.format("%s/wxa/generate_urllink?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
+
+        JSONObject req = new JSONObject();
+        req.set("path", path);
+        req.set("query", "userid=1&username=a");
+        req.set("expire_type", 1);
+        req.set("expire_interval", 1);
+        req.set("env_version", "trial");
+        JSONObject rs = RestUtils.postForObject(url, req, JSONObject.class);
+        return rs;
     }
 
 }
