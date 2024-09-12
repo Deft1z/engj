@@ -2,7 +2,6 @@ package com.kge.energy.crm.sso.service;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.constans.TokenConstant;
-import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.enums.SystemTypeEnum;
 import com.kge.energy.crm.external.iam.resp.IamCheckTicket;
 import com.kge.energy.crm.external.iam.resp.IamResp;
@@ -38,7 +37,7 @@ public class SSOService {
             throw new ServiceException(ict.getMsg());
         }
 
-        String token = Optional.ofNullable(ict.getData().getToken()).orElseThrow(() -> new ServiceException(ResponseCode.UNKNOWN.getMsg()));
+        String token = Optional.ofNullable(ict.getData().getToken()).orElseThrow(() -> new ServiceException("token不存在"));
 
         // 根据token获取用户信息
         IamResp<IamUserBean> iub = iamService.getUserForToken(token);
@@ -46,10 +45,10 @@ public class SSOService {
             throw new ServiceException(iub.getMsg());
         }
 
-        String phone = Optional.ofNullable(iub.getData().getPhone()).orElseThrow(() -> new ServiceException(ResponseCode.UNKNOWN.getMsg()));
+        String phone = Optional.ofNullable(iub.getData().getPhone()).orElseThrow(() -> new ServiceException("手机号码不存在"));
 
         // 开始匹配用户手机号
-        BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new ServiceException(ResponseCode.SHOULD_LOGIN.getCode(), ResponseCode.SHOULD_LOGIN.getMsg()));
+        BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new ServiceException("登录失败"));
 
         SSOResp resp = new SSOResp();
         resp.setToken(userDomainService.genToken(user, SystemTypeEnum.MGR, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true));

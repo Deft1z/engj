@@ -4,7 +4,6 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.ecc.property.EccProperties;
@@ -57,7 +56,7 @@ public class OperationMaintenanceService {
     public EccResp<EccPageData<EccMaintenance>> getRecordList(EccReq eccReq) throws NoSuchAlgorithmException {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         if (ObjectUtil.isNull(userInfoDto)) {
-            throw new ServiceException(ResponseCode.AUTHORITY_FAIL.getMsg());
+            throw new ServiceException("权限不足");
         }
 
         List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));

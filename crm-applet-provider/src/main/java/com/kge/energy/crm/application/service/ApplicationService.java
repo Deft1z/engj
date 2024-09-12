@@ -15,7 +15,6 @@ import com.kge.energy.crm.application.req.AppUnbindReq;
 import com.kge.energy.crm.application.resp.AppDetailResp;
 import com.kge.energy.crm.application.resp.AppTokenResp;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.ct.req.CtTokenReq;
 import com.kge.energy.crm.external.ct.service.CtService;
@@ -117,13 +116,13 @@ public class ApplicationService {
                         .setFlag(1);
                 openidDao.save(newOpenId);
                 appTokenResp.setOpenId(newOpenId.getOpenidId().toString());
-                return new CommonResult<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
+                throw new ServiceException("当前账号未绑定该业务系统，请先进行绑定");
             }
         } else {
             shareOpenId = bOpenid.getOpenidId();
             if (NumberUtil.equals(bOpenid.getBindingState(), Integer.valueOf(0))) {
                 appTokenResp.setOpenId(bOpenid.getOpenidId().toString());
-                return new CommonResult<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
+                throw new ServiceException("当前账号未绑定该业务系统，请先进行绑定");
             }
         }
 
@@ -143,7 +142,7 @@ public class ApplicationService {
             bOpenid.setBindingState(0);
             openidDao.updateById(bOpenid);
             appTokenResp.setOpenId(bOpenid.getOpenidId().toString());
-            return new CommonResult<>(ResponseCode.SUC.getCode(), "当前账号未绑定该业务系统，请先进行绑定", "messagebox", appTokenResp);
+            throw new ServiceException("当前账号未绑定该业务系统，请先进行绑定");
         } else {
             if (!StrUtil.equals("0", ret)) {
                 return CommonResult.suc(jsonObject.getStr("msg"));
