@@ -4,7 +4,9 @@ import cn.hutool.core.lang.Opt;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.repository.entity.BOpenidShare;
+import com.kge.energy.crm.repository.entityext.param.CmsCommentParam;
 import com.kge.energy.crm.repository.entityext.result.AppletCommentResult;
+import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
 import com.kge.energy.crm.repository.mapper.CmsCommentMapper;
 import com.kge.energy.crm.repository.entity.CmsComment;
 import jakarta.annotation.Resource;
@@ -52,6 +54,10 @@ public class CmsCommentDao extends ServiceImpl<CmsCommentMapper, CmsComment> {
                 .gt(CmsComment::getLikeNumber, 0);
         int resultInt = mapper.update(wrapper);
         return resultInt != 0;
+    }
+
+    public List<CmsCommentResult> getCmsCommentList(CmsCommentParam param) {
+        return mapper.getCmsCommentList(param);
     }
 
 }

@@ -1,12 +1,11 @@
 package com.kge.energy.crm.workflow.controller;
 
+import com.kge.energy.crm.comment.req.WfFormCommentReq;
+import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.controller.ComplainController;
-import com.kge.energy.crm.workflow.req.ConsultingAddReq;
-import com.kge.energy.crm.workflow.req.ConsultingUpdateReq;
-import com.kge.energy.crm.workflow.req.WfFormFlowReq;
-import com.kge.energy.crm.workflow.req.WfFormReq;
+import com.kge.energy.crm.workflow.req.*;
 import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
 import com.kge.energy.crm.workflow.resp.WfFormResp;
 import com.kge.energy.crm.workflow.service.ConsultingService;
@@ -31,6 +30,8 @@ public class ConsultingController {
     private final ConsultingService consultingService;
 
     private final ComplainController complainController;
+
+    private final CmsCommentService cmsCommentService;
 
     @Operation(summary = "创建业务工单")
     @PostMapping(value = "/opt/insert")
@@ -72,6 +73,12 @@ public class ConsultingController {
     @ConvertToGoFormats
     public CommonResult<Boolean> update(@RequestBody @Valid ConsultingUpdateReq req) {
         return CommonResult.suc(consultingService.update(req));
+    }
+
+    @Operation(summary = "工单节点评论")
+    @PostMapping(value = "/addComment")
+    public CommonResult<Boolean> addComment(@RequestBody @Valid WfFormCommentReq req) {
+        return CommonResult.suc(cmsCommentService.addWfFormFlowComment(req));
     }
 
 }

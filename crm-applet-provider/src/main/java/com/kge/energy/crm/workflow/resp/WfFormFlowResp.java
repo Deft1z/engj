@@ -1,8 +1,11 @@
 package com.kge.energy.crm.workflow.resp;
 
+import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -41,5 +44,8 @@ public class WfFormFlowResp {
 
     @Schema(description = "更新用户id")
     private Integer modifyUserId;
+
+    @Schema(description = "评论列表")
+    private List<CmsCommentResult> commentList;
     
 }

@@ -1,5 +1,7 @@
 package com.kge.energy.crm.order.controller;
 
+import com.kge.energy.crm.comment.req.WfFormCommentReq;
+import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
@@ -10,6 +12,8 @@ import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
 import com.kge.platform.framework.common.net.CommonResult;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +34,8 @@ import java.util.List;
 public class WorkOrderController {
 
     private final WorkOrderService workOrderService;
+
+    private final CmsCommentService cmsCommentService;
 
     /**
      * 工单列表
@@ -72,5 +78,11 @@ public class WorkOrderController {
         System.out.println("req = " + req.getCurrentPage());
         return CommonResult.suc(workOrderService.getWxUserOrder(req));
 
+    }
+
+    @Operation(summary = "工单节点评论")
+    @PostMapping(value = "/addComment")
+    public CommonResult<Boolean> addComment(@RequestBody @Valid WfFormCommentReq req) {
+        return CommonResult.suc(cmsCommentService.addWfFormFlowComment(req));
     }
 }
