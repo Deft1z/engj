@@ -25,11 +25,11 @@ public class TokenConstant {
     /*
     * 连续登录失败次数限制
     * */
-    public static final int MAX_LOGIN_ERROR_TIMES = 5;
+    public static final int MAX_LOGIN_ERROR_COUNT = 5;
 
     public static final long LOGIN_ERROR_BAN_TIME = 1;
 
     public static final TimeUnit LOGIN_ERROR_BAN_TIMEUNIT = TimeUnit.HOURS;
 
-    public static final String LOGIN_ERROR_CACHE_KEY = "login:error:%s";
+    public static final String LOGIN_ERROR_COUNT_CACHE_KEY = "login:error:count%s";
 }

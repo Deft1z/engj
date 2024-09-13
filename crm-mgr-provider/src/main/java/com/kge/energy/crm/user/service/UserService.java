@@ -107,36 +107,34 @@ public class UserService {
     }
 
     public CommonResult<UserLoginResp> userLogin(UserLoginReq req) {
-        UserLoginResp userLoginResp = null;
         BUser bUser = null;
-        String loginNameToken = "";
 
         try {
             //校验账号登录次数
-            loginNameToken = TokenConstant.LOGIN_ERROR_CACHE_KEY + req.getName();
-            if(redisUtils.hasKey(loginNameToken) && Integer.parseInt(redisUtils.get(loginNameToken)) == TokenConstant.MAX_LOGIN_ERROR_TIMES){
-                throw new ServiceException("账号已冻结，请联系上级管理员");
+            String loginErrorCountCacheKey = String.format(TokenConstant.LOGIN_ERROR_COUNT_CACHE_KEY,req.getName());
+            if(redisUtils.hasKey(loginErrorCountCacheKey) && Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT){
+                throw new ServiceException("账号已冻结");
             }
 
             bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
 
             if (ObjectUtil.isNull(bUser)) {
                 //首次登录失败
-                if(!redisUtils.hasKey(loginNameToken)){
-                    redisUtils.setEx(loginNameToken,"1",TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                if(!redisUtils.hasKey(loginErrorCountCacheKey)){
+                    redisUtils.setEx(loginErrorCountCacheKey,"1",TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
                 }else{
-                    redisUtils.incrBy(loginNameToken,1);
+                    redisUtils.incrBy(loginErrorCountCacheKey,1);
                     //达到登录次数限制
-                    if(Integer.parseInt(redisUtils.get(loginNameToken)) == TokenConstant.MAX_LOGIN_ERROR_TIMES){
-                        redisUtils.expire(loginNameToken,TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                    if(Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT){
+                        redisUtils.expire(loginErrorCountCacheKey,TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
                     }
-                    throw new ServiceException("账号已冻结，请联系上级管理员");
+                    throw new ServiceException("账号已冻结");
                 }
                 throw new ServiceException("登录失败");
             }
 
             //账号密码正确 删除key
-            redisUtils.delete(loginNameToken);
+            redisUtils.delete(loginErrorCountCacheKey);
 
             // 获取uid关联的租户
             RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
@@ -146,7 +144,7 @@ public class UserService {
             bUser.setLastLoginTime(LocalDateTime.now());
             bUserDao.updateById(bUser);
 
-            userLoginResp = new UserLoginResp()
+            UserLoginResp userLoginResp =  new UserLoginResp()
                     .setUserId(bUser.getUserId())
                     .setTenantId(rUserTenant.getOrganizationId())
                     .setAuthToken(authToken)
