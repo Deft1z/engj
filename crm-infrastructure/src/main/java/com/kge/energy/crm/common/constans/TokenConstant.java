@@ -23,7 +23,7 @@ public class TokenConstant {
     public static final TimeUnit APPLET_EXPIRED_TIMEUNIT = TimeUnit.HOURS;
 
     /*
-    * 连续登录失败次数限制
+    * 连续登录失败次数
     * */
     public static final int MAX_LOGIN_ERROR_COUNT = 5;
 

@@ -124,7 +124,7 @@ public class UserService {
                     redisUtils.setEx(loginErrorCountCacheKey,"1",TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
                 }else{
                     redisUtils.incrBy(loginErrorCountCacheKey,1);
-                    //达到登录次数限制
+                    //达到失败次数限制
                     if(Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT){
                         redisUtils.expire(loginErrorCountCacheKey,TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
                     }
