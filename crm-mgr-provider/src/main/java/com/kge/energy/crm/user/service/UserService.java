@@ -15,6 +15,7 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.common.util.RedisUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.*;
 import com.kge.energy.crm.log.service.SysOperateLogService;
@@ -67,6 +68,8 @@ public class UserService {
 
     private final UserDomainService userDomainService;
 
+    private final RedisUtils redisUtils;
+
 
     public BUser getUserByMobile(String mobile) {
         return bUserDao.getUserByMobile(mobile);
@@ -106,14 +109,34 @@ public class UserService {
     public CommonResult<UserLoginResp> userLogin(UserLoginReq req) {
         UserLoginResp userLoginResp = null;
         BUser bUser = null;
+        String loginNameToken = "";
 
         try {
+            //校验账号登录次数
+            loginNameToken = TokenConstant.LOGIN_ERROR_CACHE_KEY + req.getName();
+            if(redisUtils.hasKey(loginNameToken) && Integer.parseInt(redisUtils.get(loginNameToken)) == TokenConstant.MAX_LOGIN_ERROR_TIMES){
+                throw new ServiceException("账号已冻结，请联系上级管理员");
+            }
 
             bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
 
             if (ObjectUtil.isNull(bUser)) {
+                //首次登录失败
+                if(!redisUtils.hasKey(loginNameToken)){
+                    redisUtils.setEx(loginNameToken,"1",TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                }else{
+                    redisUtils.incrBy(loginNameToken,1);
+                    //达到登录次数限制
+                    if(Integer.parseInt(redisUtils.get(loginNameToken)) == TokenConstant.MAX_LOGIN_ERROR_TIMES){
+                        redisUtils.expire(loginNameToken,TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                    }
+                    throw new ServiceException("账号已冻结，请联系上级管理员");
+                }
                 throw new ServiceException("登录失败");
             }
+
+            //账号密码正确 删除key
+            redisUtils.delete(loginNameToken);
 
             // 获取uid关联的租户
             RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
