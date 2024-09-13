@@ -2,6 +2,8 @@ package com.kge.energy.crm.external.ecc.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.json.JSONObject;
@@ -23,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -67,6 +70,11 @@ public class EccService {
 
     public List<EccOrgResp> getEccOrgList() {
         List<BOrganization> bOrganizationList = bOrganizationDao.getEccOrgList();
-        return BeanUtil.copyToList(bOrganizationList, EccOrgResp.class);
+        List<String> eccOrgCodeList = Arrays.asList("A16","A01","A25","A18","A07","A34","A04");
+        return bOrganizationList
+                .stream()
+                .filter(bOrganization -> eccOrgCodeList.contains(bOrganization.getEccOrgCode()))
+                .map(bOrganization -> BeanUtil.copyProperties(bOrganization, EccOrgResp.class))
+                .toList();
     }
 }
