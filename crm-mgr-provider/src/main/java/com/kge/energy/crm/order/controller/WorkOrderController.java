@@ -11,7 +11,11 @@ import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
+import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
+import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,8 +50,8 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/order")
-    public CommonResult<PageResp<FormResp>> list(@Validated @RequestBody WorkOrderListReq req) {
-        return CommonResult.suc(workOrderService.list(req));
+    public CommonResult<PageResp<WfFormPageResp>> getByPage(@Validated @RequestBody WfFormPageReq req) {
+        return CommonResult.suc(workOrderCommonService.getByPage(req));
     }
 
 
@@ -56,8 +60,8 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/getFlowByFormId")
-    public CommonResult<List<FlowResp>> getFlowByFormId(@Validated @RequestBody GetFlowByFormIdReq req) {
-        return CommonResult.suc(workOrderService.getFlowByFormId(req));
+    public CommonResult<List<WfFormFlowResp>> getFlowByFormId(@Validated @RequestBody WfFormFlowReq req) {
+        return CommonResult.suc(workOrderCommonService.getFlowByFormId(req));
     }
 
 

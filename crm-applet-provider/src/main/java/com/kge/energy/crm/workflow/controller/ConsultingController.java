@@ -5,11 +5,14 @@ import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.controller.ComplainController;
+import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
+import com.kge.energy.crm.workOrder.req.WfFormPageReq;
+import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
 import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
 import com.kge.energy.crm.workflow.req.*;
-import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
-import com.kge.energy.crm.workflow.resp.WfFormResp;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.energy.crm.workflow.service.ConsultingService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,14 +43,14 @@ public class ConsultingController {
     @Operation(summary = "创建业务工单")
     @PostMapping(value = "/opt/insert")
     @ConvertToGoFormats
-    public CommonResult<Boolean> save(@RequestBody @Valid ConsultingAddReq req) {
-        return CommonResult.suc(consultingService.save(req));
+    public CommonResult<Boolean> save(@RequestBody @Valid WorkOrderAddReq req) {
+        return CommonResult.suc(workOrderCommonService.addWorkOrder(req));
     }
 
     @Operation(summary = "获取工单列表")
     @PostMapping(value = "/getFormPage")
     @ConvertToGoFormats
-    public CommonResult getFormPage(@RequestBody @Valid WfFormReq req) {
+    public CommonResult getFormPage(@RequestBody @Valid WfFormPageReq req) {
         //原go项目接口使用工单类型id区分业务工单和投诉工单，但响应的数据字段完全不同，为了接口文档能准确生成请求和响应参数，拆分原go业务代码逻辑，此接口的目的单纯只为兼容原接口的地址
         //业务工单formTypeId=2调用 ConsultingController.getByPage
         //投诉工单formTypeId=1调用 ComplainController.getByPage
@@ -61,15 +64,15 @@ public class ConsultingController {
     @Operation(summary = "分页获取工单列表")
     @PostMapping(value = "/getByPage")
     @ConvertToGoFormats
-    public CommonResult<PageResp<WfFormResp>> getByPage(@RequestBody WfFormReq req) {
-        return CommonResult.suc(consultingService.getByPage(req));
+    public CommonResult<PageResp<WfFormPageResp>> getByPage(@RequestBody WfFormPageReq req) {
+        return CommonResult.suc(workOrderCommonService.getByPage(req));
     }
 
     @Operation(summary = "获取当前工单流程的流转情况")
     @PostMapping(value = "/getFlowByFormId")
     @ConvertToGoFormats
     public CommonResult<List<WfFormFlowResp>> getFlowByFormId(@RequestBody WfFormFlowReq req) {
-        return CommonResult.suc(consultingService.getFlowByFormId(req));
+        return CommonResult.suc(workOrderCommonService.getFlowByFormId(req));
     }
 
     @Operation(summary = "工单操作")

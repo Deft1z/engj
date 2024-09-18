@@ -17,7 +17,7 @@ import com.kge.energy.crm.repository.entity.WComplain;
 import com.kge.energy.crm.repository.entity.WComplainFile;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.complain.ComplainResult;
-import com.kge.energy.crm.workflow.req.WfFormReq;
+import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class ComplainService {
 
     private final BUserDao bUserDao;
 
-    public PageResp<ComplainFormResp> getByPage(WfFormReq req) {
+    public PageResp<ComplainFormResp> getByPage(WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
 
         Page<WorkOrderListParam> page = new Page<>(req.getCurrentPage(), req.getPageSize());
