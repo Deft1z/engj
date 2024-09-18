@@ -5,6 +5,8 @@ import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.controller.ComplainController;
+import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
 import com.kge.energy.crm.workflow.req.*;
 import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
 import com.kge.energy.crm.workflow.resp.WfFormResp;
@@ -32,6 +34,8 @@ public class ConsultingController {
     private final ComplainController complainController;
 
     private final CmsCommentService cmsCommentService;
+
+    private final WorkOrderCommonService workOrderCommonService;
 
     @Operation(summary = "创建业务工单")
     @PostMapping(value = "/opt/insert")
@@ -71,8 +75,8 @@ public class ConsultingController {
     @Operation(summary = "工单操作")
     @PostMapping(value = "/opt/update")
     @ConvertToGoFormats
-    public CommonResult<Boolean> update(@RequestBody @Valid ConsultingUpdateReq req) {
-        return CommonResult.suc(consultingService.update(req));
+    public CommonResult<Boolean> update(@RequestBody @Valid WorkOrderUpdateReq req) {
+        return CommonResult.suc(workOrderCommonService.updateWorkOrder(req));
     }
 
     @Operation(summary = "工单节点评论")

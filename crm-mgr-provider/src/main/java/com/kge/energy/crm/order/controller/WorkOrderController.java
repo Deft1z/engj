@@ -11,6 +11,8 @@ import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
+import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -37,6 +39,8 @@ public class WorkOrderController {
 
     private final CmsCommentService cmsCommentService;
 
+    private final WorkOrderCommonService workOrderCommonService;
+
     /**
      * 工单列表
      */
@@ -62,8 +66,8 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/order/update")
-    public CommonResult<Object> workOrderUpdate(@Validated @RequestBody WorkOrdeUpdateReq req) {
-        return workOrderService.workOrderUpdate(req);
+    public CommonResult<Object> workOrderUpdate(@Validated @RequestBody WorkOrderUpdateReq req) {
+        return CommonResult.suc(workOrderCommonService.updateWorkOrder(req));
 
     }
 
