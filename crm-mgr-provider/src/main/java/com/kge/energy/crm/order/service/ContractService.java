@@ -130,7 +130,7 @@ public class ContractService {
         WfFormFlow wfFormFlow = new WfFormFlow().setFormId(req.getFormId())
                 .setUserId(userInfoDto.getUserId().intValue())
                 .setTimeAction(now)
-                .setActionContent(ConstParam.FlowCompanyContract)
+                .setActionType(ConstParam.FlowCompanyContract)
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowCompanyContract)
                 .setTenantId(userInfoDto.getTenantId());

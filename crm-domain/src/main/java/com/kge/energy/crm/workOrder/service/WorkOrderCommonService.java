@@ -407,6 +407,7 @@ public class WorkOrderCommonService {
         return true;
     }
 
+    //撤回工单：1、二级公司客服退回给集团客服 2、集团客服撤回已到二级公司客服的工单，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
     private Boolean withdrawOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowHasFeedback)) {
             throw new ServiceException("工单已经回复，不能撤回!");
