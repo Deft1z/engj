@@ -32,6 +32,12 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>com.kge.energy</groupId>
+				<artifactId>msg-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<!-- Knife4j swagger增强在线接口文档 -->
 			<dependency>
 				<groupId>com.github.xiaoymin</groupId>

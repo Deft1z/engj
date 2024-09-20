@@ -1,5 +1,6 @@
 package com.kge.energy.crm.user.service;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,6 +14,7 @@ import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.tenant.service.TenantDomainService;
+import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -101,4 +103,10 @@ public class UserDomainService {
 
         return authToken;
     }
+
+    public List<UserContactDto> getUserContact(Integer userId, String roleCode, Integer organizationId, Integer tenantId) {
+        List<BUser> userContact = bUserDao.getUserContact(userId, roleCode, organizationId, tenantId);
+        return  BeanUtil.copyToList(userContact, UserContactDto.class);
+    }
+
 }

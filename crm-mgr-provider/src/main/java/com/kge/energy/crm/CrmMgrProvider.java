@@ -28,6 +28,8 @@ public class CrmMgrProvider {
                         """,
                 env.getProperty("spring.application.name"),
                 env.getProperty("server.port"),
+                env.getProperty("server.servlet.context-path"),
+                env.getProperty("server.port"),
                 env.getProperty("server.servlet.context-path")
         );
 

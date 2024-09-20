@@ -261,5 +261,30 @@
             )
         </if>
     </select>
+
+    <select id="getUserContact" resultMap="BUserMap">
+        select bu.user_id, bu.realname, bu.mobile, bu.open_id, null email
+        from b_user bu
+        <if test="roleCode != null and roleCode != ''">
+            join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
+            join b_role br on br.flag = 1 and br.role_id = rur.role_id
+        </if>
+        <if test="organizationId != null">
+            join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+            join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
+        </if>
+        where bu.flag = 1 and bu.status = 0
+          and bu.tenant_id = #{tenantId}
+        <if test="userId != null">
+            and bu.user_id = #{userId}
+        </if>
+        <if test="roleCode != null and roleCode != ''">
+            and br.code = #{roleCode}
+        </if>
+        <if test="organizationId != null">
+            and bo.organization_id = #{organizationId}
+        </if>
+    </select>
+
 </mapper>
 
