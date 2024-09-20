@@ -1,5 +1,6 @@
 package com.kge.energy.crm.workOrder.resp;
 
+import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -47,5 +48,8 @@ public class WfFormFlowResp {
 
     @Schema(description = "评论列表")
     private List<CmsCommentResult> commentList;
+
+    @Schema(description = "工单操作按钮")
+    private List<BaseButton> buttonList;
     
 }

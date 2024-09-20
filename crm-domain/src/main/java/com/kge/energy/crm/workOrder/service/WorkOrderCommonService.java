@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
@@ -48,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -190,7 +192,13 @@ public class WorkOrderCommonService {
         if (CollUtil.isEmpty(list)) {
             throw new ServiceException("权限不足!");
         }
-        return BeanUtil.copyToList(list, WfFormFlowResp.class);
+
+        List<WfFormFlowResp> wfFormFlowRespList = BeanUtil.copyToList(list, WfFormFlowResp.class);
+
+        //返回工单操作按钮
+        List<BaseButton> buttonList = new ArrayList<>();
+
+        return wfFormFlowRespList;
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -234,8 +242,11 @@ public class WorkOrderCommonService {
                 //终止工单：form表status和subStatus变为已终止；flow表新增记录status为已完成；关联合同的状态也会变为已终止
                 case 4 -> terminateOrder(req, wfForm, lastFlow.getActionType(), operator, now);
 
-                //撤回工单：1、二级公司客服驳回给集团客服 2、集团客服撤回已到二级公司客服的工单，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
+                //撤回工单：集团客服撤回已到二级公司客服的工单，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
                 case 5 -> withdrawOrder(req, wfForm, lastFlow.getActionType(), operator, now);
+
+                //退回工单：二级公司客服退回给集团客服，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
+                case 6 -> returnOrder(req, wfForm, lastFlow.getActionType(), operator, now);
 
                 default -> false;
             };
@@ -407,7 +418,7 @@ public class WorkOrderCommonService {
         return true;
     }
 
-    //撤回工单：1、二级公司客服退回给集团客服 2、集团客服撤回已到二级公司客服的工单，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
+    //撤回工单：集团客服撤回已到二级公司客服的工单，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
     private Boolean withdrawOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowHasFeedback)) {
             throw new ServiceException("工单已经回复，不能撤回!");
@@ -478,6 +489,65 @@ public class WorkOrderCommonService {
 
         return true;
     }
+
+    //退回工单：二级公司客服退回给集团客服，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
+    private Boolean returnOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
+        if (lastFlowActionType.equals(ConstParam.FlowHasFeedback)) {
+            throw new ServiceException("工单已经回复，不能退回!");
+        }
+        if (lastFlowActionType.equals(ConstParam.FlowGroupProcess)) {
+            throw new ServiceException("工单已被撤回，不能重复操作!");
+        }
+        if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
+            throw new ServiceException("工单已完成或终止，不能退回!");
+        }
+        Long operatorUserId = operator.getUserId();
+        Integer formId = wfForm.getFormId();
+        String formContent = wfForm.getContent();
+        Integer formCurrentOrgId = wfForm.getCurrentOrgId();
+        Integer customerUserId = wfForm.getCreateUserId();
+        //撤回到集团客服处理
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
+        //变更工单信息
+        LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
+                .set(WfForm::getStatus, ConstParam.WaitingForProcessing)
+                .set(WfForm::getSubStatus, ConstParam.WaitingForProcessing)
+                .set(WfForm::getTimeReception, now)
+                .set(WfForm::getModifyUserId, operatorUserId)
+                .set(WfForm::getCurrentOrgId, 1)
+                .set(WfForm::getCurrentRoleId, currentRoleId)
+                .eq(WfForm::getFormId, formId);
+        wfFormDao.update(wfUpdateWrapper);
+        //新增工单流转处撤回记录
+        WfFormFlow wfFormFlow = new WfFormFlow()
+                .setFormId(formId)
+                .setUserId(operatorUserId.intValue())
+                .setTimeAction(now)
+                .setActionType(ConstParam.FlowGroupProcess)
+                .setActionContent(req.getContent())
+                .setStatus(ConstParam.FlowGroupProcess)
+                .setCreateUserId(operatorUserId.intValue())
+                .setTenantId(operator.getTenantId());
+        wfFormFlowDao.save(wfFormFlow);
+
+        //发送微信小程序消息，通知客户
+        sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.SendBack);
+
+        //发送elink消息，通知集团客服
+        final String msgTitle = activeProfile.contains("prod") ? "工单撤回通知" : "工单撤回通知（体验版）";
+        JSONObject content = JSONUtil.parseObj(formContent);
+        String msgContentBuilder = "工单名称：" + content.get("businessName") + "\\n" +
+                "工单编号：" + content.get("code") + "\\n" +
+                "撤回时间：" + now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) + "\\n" +
+                "派发公司：" + content.get("companyName") + "\\n" +
+                "撤回原因：" + req.getContent();
+        //获取集团客服人员手机号
+        List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
+        sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContentBuilder);
+
+        return true;
+    }
+
 
     @Async
     private void sendFormStatusChangeMsg (WorkOrderUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {

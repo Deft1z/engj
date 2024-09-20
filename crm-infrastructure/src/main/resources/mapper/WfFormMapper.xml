@@ -323,6 +323,7 @@
                 and b.user_id = #{userInfo.userId}
             </otherwise>
         </choose>
+        order by wf.time_action asc
     </select>
 
 </mapper>

@@ -33,4 +33,12 @@ public class AbstractButtonHelper {
                 .setEnabled(enabled)
                 .setHint(hint);
     }
+
+    public static BaseButton createdSingleButton(ButtonEnum buttonEnum) {
+        return new BaseButton()
+                .setCode(buttonEnum.getCode())
+                .setName(buttonEnum.getName())
+                .setEnabled(buttonEnum.getEnabled())
+                .setHint(buttonEnum.getHint());
+    }
 }

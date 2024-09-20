@@ -1,6 +1,6 @@
 package com.kge.energy.crm.common.button.helper;
 
-import com.kge.energy.crm.common.button.enums.ConsultingButtonEnum;
+import com.kge.energy.crm.common.button.enums.WorkOrderButtonEnum;
 import com.kge.energy.crm.common.button.resp.BaseButton;
 
 import java.util.List;
@@ -16,8 +16,11 @@ public class ConsultingButtonHelper extends AbstractButtonHelper {
      * 待处理工单页面按钮
      */
     public static List<BaseButton> getWaitHandleButton() {
-        return createdButton(ConsultingButtonEnum.HANDLE_CONSULTING);
+        return createdButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER);
     }
 
+    public static BaseButton getWorkOrderButton(WorkOrderButtonEnum workOrderButtonEnum) {
+        return createdSingleButton(workOrderButtonEnum);
+    }
 
 }
