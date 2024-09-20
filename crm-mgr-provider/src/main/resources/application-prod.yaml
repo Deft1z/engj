@@ -22,8 +22,6 @@ auth:
     redis-front: ntcrm_prod_token_
 
 wechat:
-  common:
-    wxUrl: http://172.16.17.147:9011/vcheck
   applet:
     version: formal
     envVersion: release
