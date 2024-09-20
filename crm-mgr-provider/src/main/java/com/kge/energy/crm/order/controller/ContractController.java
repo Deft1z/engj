@@ -9,6 +9,10 @@ import com.kge.energy.crm.order.req.contract.UpdateProjectTimeReq;
 import com.kge.energy.crm.order.resp.ContractResp;
 import com.kge.energy.crm.order.service.ContractService;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
+import com.kge.energy.crm.workOrder.req.ServiceContractAddReq;
+import com.kge.energy.crm.workOrder.req.ServiceContractReq;
+import com.kge.energy.crm.workOrder.resp.ServiceContractResp;
+import com.kge.energy.crm.workOrder.service.ServiceContractCommonService;
 import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -29,13 +33,15 @@ public class ContractController {
 
     private final ContractService contractService;
 
+    private final ServiceContractCommonService serviceContractCommonService;
+
     /**
      * 获取合同
      */
     @ConvertToGoFormats
     @PostMapping("/form")
-    public CommonResult<List<ContractResp>> form(@Validated @RequestBody ContractReq req) {
-        return CommonResult.suc(contractService.form(req));
+    public CommonResult<List<ServiceContractResp>> form(@Validated @RequestBody ServiceContractReq req) {
+        return CommonResult.suc(serviceContractCommonService.getServiceContractList(req));
     }
 
     /**
@@ -52,8 +58,8 @@ public class ContractController {
      */
     @ConvertToGoFormats
     @PostMapping("/form/insert")
-    public CommonResult<Object> contractAdd(@Validated @RequestBody CreateContractReq req) {
-        return contractService.contractAdd(req);
+    public CommonResult<Boolean> contractAdd(@Validated @RequestBody ServiceContractAddReq req) {
+        return CommonResult.suc(serviceContractCommonService.addServiceContract(req));
     }
 
     /**
