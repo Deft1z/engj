@@ -1,18 +1,23 @@
 package com.kge.energy.crm.workOrder.service;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.PhoneUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.*;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.RedisLockUtils;
+import com.kge.energy.crm.common.util.RedisUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.external.elink.ElinkService;
@@ -22,11 +27,20 @@ import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
+import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
+import com.kge.energy.crm.repository.entityext.result.FlowResult;
+import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
+import com.kge.energy.crm.workOrder.req.WfFormPageReq;
+import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -34,13 +48,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * 业务工单公共service
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class WorkOrderCommonService {
+
+    private static final String WORK_CODE_CACHE_KEY_PREFIX = "crm_order_code:";
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
@@ -60,6 +81,8 @@ public class WorkOrderCommonService {
 
     private final BOrganizationDao bOrganizationDao;
 
+    private final RedisUtils redisUtils;
+
     private final RedisLockUtils redisLockUtils;
 
     private final WeChatAppletProperties weChatAppletProperties;
@@ -67,6 +90,108 @@ public class WorkOrderCommonService {
     private final WeChatAppletInfraService weChatAppletInfraService;
 
     private final ElinkService elinkService;
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    public Boolean addWorkOrder(WorkOrderAddReq req) {
+        LocalDateTime now = LocalDateTime.now();
+        //生成工单编号
+        String code = genOrderCode();
+
+        WorkOrderAddReq.WorkOrderContent content = req.getContent();
+        content.setCode(code);
+        //参数校验
+        if (!PhoneUtil.isPhone(content.getMobile())) {
+            throw new ServiceException("手机号码不正确");
+        }
+
+        //登录用户信息
+        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
+
+        //保存工单信息
+        Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
+        WfForm wfForm = new WfForm();
+        wfForm.setFormTypeId(1);
+        wfForm.setContent(JSONUtil.toJsonStr(content));
+        wfForm.setStatus(ConstParam.WaitingForProcessing);
+        wfForm.setSubStatus(ConstParam.WaitingForProcessing);
+        wfForm.setTimeSubmit(now);
+        wfForm.setFlag(1);
+        wfForm.setCreateUserId(operator.getUserId().intValue());
+        wfForm.setRemark(req.getRemark());
+        //集团总部
+        wfForm.setCurrentOrgId(1);
+        //集团客服
+        wfForm.setCurrentRoleId(currentRoleId);
+        //租户
+        wfForm.setTenantId(operator.getTenantId());
+        wfFormDao.save(wfForm);
+
+        //保存流转记录
+        WfFormFlow wfFormFlow = new WfFormFlow();
+        wfFormFlow.setFormId(wfForm.getFormId());
+        wfFormFlow.setTimeAction(now);
+        wfFormFlow.setActionType(ConstParam.FlowStart);
+        wfFormFlow.setStatus(ConstParam.FlowStart);
+        wfFormFlow.setSubStatus(ConstParam.FlowTagGroup);
+        wfFormFlow.setCreateUserId(operator.getUserId().intValue());
+        wfFormFlow.setTenantId(operator.getTenantId());
+        wfFormFlowDao.save(wfFormFlow);
+
+        //todo 使用流程引擎替换现有的流程业务
+
+
+        //发送消息，通知集团客服
+        final String msgTitle = activeProfile.contains("prod") ? "工单待处理通知" : "工单待处理通知（体验版）";
+        String msgContent = "工单名称：" + content.getBusinessName() + "\\n" +
+                "所在地区：" + content.getArea() + "\\n" +
+                "用电容量(kVA)：" + content.getElectricityCapacity() + "\\n" +
+                "工单编号：" + content.getCode() + "\\n" +
+                "生成时间：" + now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) + "\\n" +
+                "客户名称：" + content.getCustomerName() + "\\n" +
+                "客户手机：" + content.getMobile() + "\\n" +
+                "备注：" + req.getRemark();
+        //获取集团客服人员手机号
+        List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
+        sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContent);
+
+        return true;
+    }
+
+    public PageResp<WfFormPageResp> getByPage (WfFormPageReq req) {
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        Assert.notNull(userInfoDto);
+
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
+            throw new ServiceException("非法请求，不允许查看其他租户信息");
+        }
+
+        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+            req.setTenantId(userInfoDto.getTenantId());
+        }
+
+        IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
+        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
+
+        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
+        List<WfFormPageResp> resps = BeanUtil.copyToList(pages.getRecords(), WfFormPageResp.class);
+
+        return new PageResp<WfFormPageResp>()
+                .setList(resps)
+                .setCurrentPage(pages.getCurrent())
+                .setPageSize(pages.getSize())
+                .setTotal(pages.getTotal());
+
+    }
+
+    public List<WfFormFlowResp> getFlowByFormId (WfFormFlowReq req) {
+        UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
+        List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), userInfo);
+        if (CollUtil.isEmpty(list)) {
+            throw new ServiceException("权限不足!");
+        }
+        return BeanUtil.copyToList(list, WfFormFlowResp.class);
+    }
 
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean updateWorkOrder(WorkOrderUpdateReq req) {
@@ -93,12 +218,7 @@ public class WorkOrderCommonService {
             }
 
             //获取工单流转记录，时间倒序取最新的记录
-            LambdaQueryWrapper<WfFormFlow> queryWrapper = Wrappers.<WfFormFlow>lambdaQuery()
-                    .eq(WfFormFlow::getFormId, formId)
-                    .eq(WfFormFlow::getTenantId, operator.getTenantId())
-                    .orderByDesc(WfFormFlow::getCreateTime);
-            List<WfFormFlow> flows = wfFormFlowDao.list(queryWrapper);
-            WfFormFlow lastFlow = flows.get(0);
+            WfFormFlow lastFlow = wfFormFlowDao.getLatestFormFlow(formId, operator.getTenantId());
 
             return switch (req.getType()) {
 
@@ -164,7 +284,7 @@ public class WorkOrderCommonService {
         //TODO: 发送微信小程序消息通知提单的客户
 
         //发送elink消息通知，通知二级公司客服
-        sendAssignElinkMsg(wfForm, assignUsers, now);
+        sendSubCompanyCustomerElinkMsg(wfForm, assignUsers, now);
 
         return true;
     }
@@ -287,6 +407,7 @@ public class WorkOrderCommonService {
         return true;
     }
 
+    //撤回工单：1、二级公司客服退回给集团客服 2、集团客服撤回已到二级公司客服的工单，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
     private Boolean withdrawOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
         if (lastFlowActionType.equals(ConstParam.FlowHasFeedback)) {
             throw new ServiceException("工单已经回复，不能撤回!");
@@ -340,7 +461,7 @@ public class WorkOrderCommonService {
         msgContentBuilder.append("撤回原因：").append(req.getContent());
         //获取集团客服人员手机号
         List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
-        sendWithdrawElinkMsg(wfForm, phones, msgTitle, msgContentBuilder.toString());
+        sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContentBuilder.toString());
 
         //若集团客服撤回工单，需通知二级公司客服
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.toString())) {
@@ -352,7 +473,7 @@ public class WorkOrderCommonService {
             msgContentBuilder.append("撤回原因：").append(req.getContent());
             //获取二级公司客服人员手机号
             phones = bUserDao.findSubCustomerPhones(formCurrentOrgId, operator.getTenantId());
-            sendWithdrawElinkMsg(wfForm, phones, msgTitle, msgContentBuilder.toString());
+            sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContentBuilder.toString());
         }
 
         return true;
@@ -387,7 +508,7 @@ public class WorkOrderCommonService {
     }
 
     @Async
-    private void sendAssignElinkMsg (WfForm wfForm, List<RoleUserResult> assignUsers, LocalDateTime now) {
+    private void sendSubCompanyCustomerElinkMsg (WfForm wfForm, List<RoleUserResult> assignUsers, LocalDateTime now) {
         CompletableFuture.runAsync(() -> {
             try {
                 final String msgTitle = activeProfile.contains("prod") ? "工单待处理通知" : "工单待处理通知（体验版）";
@@ -418,7 +539,7 @@ public class WorkOrderCommonService {
     }
 
     @Async
-    private void sendWithdrawElinkMsg(WfForm wfForm, List<String> phones, String msgTitle, String msgContent) {
+    private void sendGroupCustomerElinkMsg(WfForm wfForm, List<String> phones, String msgTitle, String msgContent) {
         CompletableFuture.runAsync(() -> {
             try {
                 //获取当前环境
@@ -439,6 +560,19 @@ public class WorkOrderCommonService {
             }
         });
 
+    }
+
+    private String genOrderCode() {
+        //生成工单编号 yyyyMMdd+4位随机数
+        String dateStr = DateFormatUtils.format(Calendar.getInstance().getTime(), DatePattern.PURE_DATE_PATTERN);
+        String randomStr = RandomUtil.randomString(4);
+        String code = dateStr + randomStr;
+        boolean isExistCode = redisUtils.hasKey(WORK_CODE_CACHE_KEY_PREFIX + code);
+        if (isExistCode) {
+            this.genOrderCode();
+        }
+        redisUtils.setEx(WORK_CODE_CACHE_KEY_PREFIX + code, code, 24, TimeUnit.HOURS);
+        return code;
     }
 
 }

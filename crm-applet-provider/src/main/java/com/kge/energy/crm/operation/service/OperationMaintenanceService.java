@@ -21,6 +21,7 @@ import com.kge.energy.crm.repository.entityext.result.PatrolRecordResp;
 import com.kge.energy.crm.user.service.UserService;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OperationMaintenanceService {
@@ -62,6 +64,7 @@ public class OperationMaintenanceService {
         List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));
 
         String currentUserPhone = userInfoDto.getMobile();
+        log.info("用户{}查看了运维报告", currentUserPhone);
 
         //获取当前用户ecc org code, 处理施工单位筛选条件
         String eccOrgCode = bOrganizationDao.getEccOrgCode(UserInfoContextUtils.getCurrentOrgId());
@@ -76,7 +79,6 @@ public class OperationMaintenanceService {
         String searchPhone = eccReq.getCondition().getFirstPartyContactsPhone();
 
         //默认看当前用户手机号关联的数据
-
         List<BUser> userList = userService.findByPhone(currentUserPhone);
         List<Integer> userIdList = userList.stream().map(BUser::getUserId).toList();
         String firstPartyContactsPhone = userService.findShareUser(userIdList, 3);

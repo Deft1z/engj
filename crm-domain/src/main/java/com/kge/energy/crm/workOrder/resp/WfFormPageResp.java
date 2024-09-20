@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workflow.resp;
+package com.kge.energy.crm.workOrder.resp;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class WfFormResp {
+public class WfFormPageResp {
 
     private Integer formId;
     private Integer formTypeId;

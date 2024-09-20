@@ -53,10 +53,7 @@ public class CmsCommentService {
         if(ObjectUtil.isNull(req.getParentCommentId())){
             //如果是新增评论
             //获取当前工单最新节点
-            WfFormFlow latestFlow = new LambdaQueryChainWrapper<> (WfFormFlow.class)
-                    .eq(WfFormFlow::getFormId, req.getFormId())
-                    .orderByDesc(WfFormFlow::getCreateTime)
-                    .list().get(0);
+            WfFormFlow latestFlow = wfFormFlowDao.getLatestFormFlow(req.getFormId(), UserInfoContextUtils.getCurrentTenantId());
             req.setBizType(CmsCommentBizType.ORDER.getCode());
             req.setBizDataId(latestFlow.getFormFlowId());
 

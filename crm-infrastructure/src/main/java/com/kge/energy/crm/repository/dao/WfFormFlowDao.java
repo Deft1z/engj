@@ -1,6 +1,7 @@
 package com.kge.energy.crm.repository.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.mapper.WfFormFlowMapper;
@@ -23,6 +24,14 @@ public class WfFormFlowDao extends ServiceImpl<WfFormFlowMapper, WfFormFlow> {
         wrapper.eq(WfFormFlow::getFormId, formId);
         wrapper.eq(WfFormFlow::getActionType, typef);
         return mapper.selectList(wrapper);
+    }
+
+    public WfFormFlow getLatestFormFlow(Integer formId, Integer tenantId) {
+        LambdaQueryWrapper<WfFormFlow> queryWrapper = Wrappers.<WfFormFlow>lambdaQuery()
+                .eq(WfFormFlow::getFormId, formId)
+                .eq(WfFormFlow::getTenantId, tenantId)
+                .orderByDesc(WfFormFlow::getCreateTime);
+        return mapper.selectList(queryWrapper).get(0);
     }
 }
 

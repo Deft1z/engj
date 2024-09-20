@@ -108,7 +108,7 @@ public class ContractService {
         ScServiceContract contract = BeanUtil.copyProperties(req, ScServiceContract.class);
         Opt.ofBlankAble(req.getAmount()).ifPresent(a -> contract.setAmount(NumberUtil.round(Double.parseDouble(a), 2).doubleValue()));
         Opt.ofBlankAble(req.getSigningTime()).ifPresent(s -> contract.setSigningTime(LocalDateTimeUtil.parse(s, DatePattern.NORM_DATE_PATTERN)));
-        contract.setStatus(ConstParam.ContractNotReady);
+        contract.setStatus(ConstParam.ContractNotBegin);
         contract.setFlag(1);
         contract.setCreateUserId(userInfoDto.getUserId().intValue());
         contract.setServiceUnit(userInfoDto.getRoleCodes().contains(JT_CUSTOMER.getCode()) ?
@@ -130,7 +130,7 @@ public class ContractService {
         WfFormFlow wfFormFlow = new WfFormFlow().setFormId(req.getFormId())
                 .setUserId(userInfoDto.getUserId().intValue())
                 .setTimeAction(now)
-                .setActionContent(ConstParam.FlowCompanyContract)
+                .setActionType(ConstParam.FlowCompanyContract)
                 .setActionContent(req.getContent())
                 .setStatus(ConstParam.FlowCompanyContract)
                 .setTenantId(userInfoDto.getTenantId());

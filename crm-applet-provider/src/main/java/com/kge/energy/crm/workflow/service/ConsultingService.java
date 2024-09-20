@@ -33,10 +33,10 @@ import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.workflow.req.ConsultingAddReq;
 import com.kge.energy.crm.workflow.req.ConsultingUpdateReq;
-import com.kge.energy.crm.workflow.req.WfFormFlowReq;
-import com.kge.energy.crm.workflow.req.WfFormReq;
-import com.kge.energy.crm.workflow.resp.WfFormFlowResp;
-import com.kge.energy.crm.workflow.resp.WfFormResp;
+import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
+import com.kge.energy.crm.workOrder.req.WfFormPageReq;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -172,7 +172,7 @@ public class ConsultingService {
         return code;
     }
 
-    public PageResp<WfFormResp> getByPage(WfFormReq req) {
+    public PageResp<WfFormPageResp> getByPage(WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
 
@@ -183,9 +183,9 @@ public class ConsultingService {
         log.info("==> workOrderListParam= {}", workOrderListParam);
 
         IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
-        List<WfFormResp> resps = BeanUtil.copyToList(pages.getRecords(), WfFormResp.class);
+        List<WfFormPageResp> resps = BeanUtil.copyToList(pages.getRecords(), WfFormPageResp.class);
 
-        return new PageResp<WfFormResp>()
+        return new PageResp<WfFormPageResp>()
                 .setList(resps)
                 .setCurrentPage(pages.getCurrent())
                 .setPageSize(pages.getSize())

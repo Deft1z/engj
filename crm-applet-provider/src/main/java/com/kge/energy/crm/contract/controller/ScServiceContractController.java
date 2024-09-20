@@ -5,6 +5,10 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.contract.req.*;
 import com.kge.energy.crm.contract.resp.ScServiceContractResp;
 import com.kge.energy.crm.contract.service.ScServiceContractService;
+import com.kge.energy.crm.workOrder.req.ServiceContractAddReq;
+import com.kge.energy.crm.workOrder.req.ServiceContractReq;
+import com.kge.energy.crm.workOrder.resp.ServiceContractResp;
+import com.kge.energy.crm.workOrder.service.ServiceContractCommonService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +29,8 @@ public class ScServiceContractController {
 
     private final ScServiceContractService scServiceContractService;
 
+    private final ServiceContractCommonService serviceContractCommonService;
+
     @Operation(summary = "获取服务合同列表")
     @PostMapping(value = "/getPage")
     @ConvertToGoFormats
@@ -35,15 +41,15 @@ public class ScServiceContractController {
     @Operation(summary = "根据当前工单查询相关的合同")
     @PostMapping(value = "/getContractByFormId")
     @ConvertToGoFormats
-    public CommonResult<List<ScServiceContractResp>> getContractByFormId(@RequestBody ScServiceContractDetailReq req) {
-        return CommonResult.suc(scServiceContractService.getContractByFormId(req));
+    public CommonResult<List<ServiceContractResp>> getContractByFormId(@RequestBody ServiceContractReq req) {
+        return CommonResult.suc(serviceContractCommonService.getServiceContractList(req));
     }
 
     @Operation(summary = "新增合同")
     @PostMapping(value = "/opt/insert")
     @ConvertToGoFormats
-    public CommonResult<Boolean> insert(@RequestBody @Valid ScServiceContractAddReq req) {
-        return CommonResult.suc(scServiceContractService.insert(req));
+    public CommonResult<Boolean> insert(@RequestBody @Valid ServiceContractAddReq req) {
+        return CommonResult.suc(serviceContractCommonService.addServiceContract(req));
     }
 
     @Operation(summary = "更新合同项目结束时间")

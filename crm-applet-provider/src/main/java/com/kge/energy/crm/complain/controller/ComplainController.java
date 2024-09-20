@@ -5,7 +5,7 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.req.ComplainAddReq;
 import com.kge.energy.crm.complain.resp.ComplainFormResp;
 import com.kge.energy.crm.complain.service.ComplainService;
-import com.kge.energy.crm.workflow.req.WfFormReq;
+import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +27,7 @@ public class ComplainController {
     @Operation(summary = "获取工单列表")
     @PostMapping(value = "/getByPage")
     @ConvertToGoFormats
-    public CommonResult<PageResp<ComplainFormResp>> getByPage(@RequestBody @Valid WfFormReq req) {
+    public CommonResult<PageResp<ComplainFormResp>> getByPage(@RequestBody @Valid WfFormPageReq req) {
         return CommonResult.suc(complainService.getByPage(req));
     }
 
