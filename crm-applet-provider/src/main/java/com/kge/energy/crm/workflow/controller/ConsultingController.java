@@ -9,9 +9,9 @@ import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
-import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
-import com.kge.energy.crm.workflow.req.*;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.energy.crm.workflow.service.ConsultingService;
 import com.kge.platform.framework.common.net.CommonResult;
@@ -71,7 +71,7 @@ public class ConsultingController {
     @Operation(summary = "获取当前工单流程的流转情况")
     @PostMapping(value = "/getFlowByFormId")
     @ConvertToGoFormats
-    public CommonResult<List<WfFormFlowResp>> getFlowByFormId(@RequestBody WfFormFlowReq req) {
+    public CommonResult<WfFormFlowResp> getFlowByFormId(@RequestBody WfFormFlowReq req) {
         return CommonResult.suc(workOrderCommonService.getFlowByFormId(req));
     }
 

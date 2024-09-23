@@ -12,6 +12,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.kge.energy.crm.common.button.enums.WorkOrderButtonEnum;
+import com.kge.energy.crm.common.button.helper.ConsultingButtonHelper;
 import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -36,6 +38,7 @@ import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -186,19 +189,35 @@ public class WorkOrderCommonService {
 
     }
 
-    public List<WfFormFlowResp> getFlowByFormId (WfFormFlowReq req) {
-        UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
-        List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), userInfo);
+    public WfFormFlowResp getFlowByFormId (WfFormFlowReq req) {
+        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
+        List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), operator);
         if (CollUtil.isEmpty(list)) {
             throw new ServiceException("权限不足!");
         }
 
-        List<WfFormFlowResp> wfFormFlowRespList = BeanUtil.copyToList(list, WfFormFlowResp.class);
+        List<WfFormFlowListResp> wfFormFlowListRespList = BeanUtil.copyToList(list, WfFormFlowListResp.class);
+
+        //获取当前节点的type
+        String latestActionType = wfFormFlowListRespList.get(wfFormFlowListRespList.size() - 1).getActionType();
 
         //返回工单操作按钮
         List<BaseButton> buttonList = new ArrayList<>();
+        if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
+            //集团客服按钮
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
+        } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
+            //二级公司客服按钮
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
+        }
 
-        return wfFormFlowRespList;
+        return new WfFormFlowResp()
+                .setButtonList(buttonList)
+                .setWfFormFlowList(wfFormFlowListRespList);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

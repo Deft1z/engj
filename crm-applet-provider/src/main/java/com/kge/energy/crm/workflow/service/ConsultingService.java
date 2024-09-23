@@ -35,7 +35,7 @@ import com.kge.energy.crm.workflow.req.ConsultingAddReq;
 import com.kge.energy.crm.workflow.req.ConsultingUpdateReq;
 import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
-import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
@@ -192,13 +192,13 @@ public class ConsultingService {
                 .setTotal(pages.getTotal());
     }
 
-    public List<WfFormFlowResp> getFlowByFormId(WfFormFlowReq req) {
+    public List<WfFormFlowListResp> getFlowByFormId(WfFormFlowReq req) {
         UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
         List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), userInfo);
         if (list.isEmpty()) {
             throw new ServiceException("权限不足!");
         }
-        return BeanUtil.copyToList(list, WfFormFlowResp.class);
+        return BeanUtil.copyToList(list, WfFormFlowListResp.class);
     }
 
     @Transactional(rollbackFor = RuntimeException.class)

@@ -4,16 +4,13 @@ import com.kge.energy.crm.comment.req.WfFormCommentReq;
 import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
-import com.kge.energy.crm.order.req.WorkOrdeUpdateReq;
-import com.kge.energy.crm.order.req.WorkOrderListReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
-import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
 import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
@@ -60,7 +57,7 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/getFlowByFormId")
-    public CommonResult<List<WfFormFlowResp>> getFlowByFormId(@Validated @RequestBody WfFormFlowReq req) {
+    public CommonResult<WfFormFlowResp> getFlowByFormId(@Validated @RequestBody WfFormFlowReq req) {
         return CommonResult.suc(workOrderCommonService.getFlowByFormId(req));
     }
 
