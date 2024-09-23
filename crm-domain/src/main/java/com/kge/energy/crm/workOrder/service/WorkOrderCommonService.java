@@ -205,14 +205,14 @@ public class WorkOrderCommonService {
         List<BaseButton> buttonList = new ArrayList<>();
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
             //集团客服按钮
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
             buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
         } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
             //二级公司客服按钮
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
             buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
+            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
         }
 
         return new WfFormFlowResp()
