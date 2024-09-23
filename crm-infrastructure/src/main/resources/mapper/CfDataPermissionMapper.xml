@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.CfDataPermissionMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.CfDataPermission" id="CfDataPermissionMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="bizFunctionId" column="biz_function_id" jdbcType="INTEGER"/>
+        <result property="roleId" column="role_id" jdbcType="INTEGER"/>
+        <result property="dataRangeType" column="data_range_type" jdbcType="INTEGER"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="list" resultMap="CfDataPermissionMap">
+        select *
+        from cf_data_permission
+        where flag = 1
+        <if test="param.bizFunctionId != null">
+            and biz_function_id = #{param.bizFunctionId}
+        </if>
+    </select>
+</mapper>
+

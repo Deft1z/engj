@@ -12,11 +12,11 @@ import java.util.Map;
 @Data
 public class PageReq {
 
-    @Min(1)
+    @Min(value = 1, message = "当前页数不能小于1")
     private Long currentPage = 1L;
 
-    @Min(1)
-    @Max(100)
+    @Min(value = 1, message = "每页数量不能小于1")
+    @Max(value = 100, message = "每页数量不能大于100")
     private Long pageSize = 10L;
 
     private Map<String, String> sort;
