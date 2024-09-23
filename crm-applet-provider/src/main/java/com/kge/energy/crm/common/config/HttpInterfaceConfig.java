@@ -1,6 +1,7 @@
 package com.kge.energy.crm.common.config;
 
 import com.kge.energy.dh.service.SuiliangPvService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +15,7 @@ public class HttpInterfaceConfig {
     @Value("${edata.baseUrl}")
     private String baseUrl;
 
-    @Bean
+    @Bean(name = "dianhongWebClient")
     public WebClient webClient() {
         return WebClient.builder()
                 .defaultHeader("Content-Type", "application/json;charset=UTF-8")
@@ -23,7 +24,7 @@ public class HttpInterfaceConfig {
     }
 
     @Bean
-    public SuiliangPvService suiliangPvService(WebClient webClient){
+    public SuiliangPvService suiliangPvService(@Qualifier("dianhongWebClient") WebClient webClient){
         HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(WebClientAdapter.create(webClient)).build();
         return factory.createClient(SuiliangPvService.class);
     }
