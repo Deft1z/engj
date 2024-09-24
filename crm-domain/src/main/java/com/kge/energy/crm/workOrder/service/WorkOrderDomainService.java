@@ -22,12 +22,15 @@ import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.RedisLockUtils;
 import com.kge.energy.crm.common.util.RedisUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.BizFunctionEnums;
+import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.external.elink.ElinkService;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.FormStatusChangeMsgReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
@@ -76,26 +79,17 @@ public class WorkOrderDomainService {
     private String activeProfile;
 
     private final WfFormDao wfFormDao;
-
     private final WfFormFlowDao wfFormFlowDao;
-
     private final ScServiceContractDao scServiceContractDao;
-
     private final BUserDao bUserDao;
-
     private final BRoleDao bRoleDao;
-
     private final BOrganizationDao bOrganizationDao;
-
     private final RedisUtils redisUtils;
-
     private final RedisLockUtils redisLockUtils;
-
     private final WeChatAppletProperties weChatAppletProperties;
-
     private final WeChatAppletInfraService weChatAppletInfraService;
-
     private final ElinkService elinkService;
+    private final DataPermissionDomainService dataPermissionDomainService;
 
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean addWorkOrder(WorkOrderAddReq req) {
@@ -166,6 +160,8 @@ public class WorkOrderDomainService {
     public PageResp<WfFormPageResp> getByPage (WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
+
+        DataPermissionRangeTypeEnums dataPermissionRangeTypeEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
 
         if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许查看其他租户信息");
