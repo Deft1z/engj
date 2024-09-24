@@ -41,7 +41,7 @@ public class DataPermissionDomainService {
         List<CfDataPermission> cfDataPermissions = cfDataPermissionDao.getDataPermission(tenantId, roleIds, functionCode);
 
         if (CollectionUtil.isEmpty(cfDataPermissions)) {
-            return DataPermissionRangeTypeEnums.ONESELF;
+            return DataPermissionRangeTypeEnums.PERSONAL;
         }
 
         return DataPermissionRangeTypeEnums.getByCode(cfDataPermissions.get(0).getDataRangeType());

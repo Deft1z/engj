@@ -163,6 +163,7 @@ public class WorkOrderDomainService {
 
         DataPermissionRangeTypeEnums dataPermissionRangeTypeEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
 
+
         if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许查看其他租户信息");
         }
