@@ -21,7 +21,7 @@ public class DataPermissionListResp {
     @Schema(description = "角色ID集合")
     private Integer roleId;
 
-    @Schema(description = "数据权限范围类型：0-所有，1-租户，2-集团，3-公司，4-部门，5-本人")
+    @Schema(description = "数据权限范围类型：0-所有，1-租户，2-集团，3-公司，4-部门，5-个人")
     private Integer dataRangeType;
 
     @Schema(description = "优先级，越大越高")

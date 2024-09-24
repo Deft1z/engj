@@ -17,15 +17,19 @@ public enum BizFunctionEnums {
 
     BIZORDER_LIST("crm/bizOrder/list", "查看业务工单列表"),
 
-    BIZORDER_CREATE("crm/bizOrder/create", "新增业务工单"),
+    BIZORDER_CREATE_NOTIFY("crm/bizOrder/createNotify", "新增业务工单下发通知"),
 
-    BIZORDER_ASSIGN("crm/bizOrder/assign", "分派业务工单"),
+    BIZORDER_ASSIGN_NOTIFY("crm/bizOrder/assignNotify", "分派业务工单下发通知"),
 
-    BIZORDER_RETURN("crm/bizOrder/return", "退回业务工单"),
+    BIZORDER_HANDLE_NOTIFY("crm/bizOrder/handleNotify", "处理业务工单下发通知"),
 
-    BIZORDER_WITHDRAW("crm/bizOrder/withdraw", "撤回业务工单"),
+    BIZORDER_FINISH_NOTIFY("crm/bizOrderfinishNotify", "完成业务工单下发通知"),
 
-    BIZORDER_TERMINATE("crm/bizOrder/terminate", "终止业务工单"),
+    BIZORDER_RETURN_NOTIFY("crm/bizOrder/returnNotify", "退回业务工单下发通知"),
+
+    BIZORDER_WITHDRAW_NOTIFY("crm/bizOrder/withdrawNotify", "撤回业务工单下发通知"),
+
+    BIZORDER_TERMINATE_NOTIFY("crm/bizOrder/terminateNotify", "终止业务工单下发通知"),
 
     CONTRACT_LIST("crm/contract/list", "查看服务合同列表"),
 
