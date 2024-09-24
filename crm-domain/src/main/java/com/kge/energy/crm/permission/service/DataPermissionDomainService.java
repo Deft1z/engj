@@ -3,6 +3,7 @@ package com.kge.energy.crm.permission.service;
 import cn.hutool.core.collection.CollectionUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.repository.dao.CfDataPermissionDao;
 import com.kge.energy.crm.repository.entity.CfDataPermission;
@@ -22,6 +23,11 @@ import java.util.Set;
 public class DataPermissionDomainService {
 
     private final CfDataPermissionDao cfDataPermissionDao;
+
+    public DataPermissionRangeTypeEnums getCurrentUserDataPermission(BizFunctionEnums bizFunctionEnums) {
+
+        return getCurrentUserDataPermission(bizFunctionEnums.getCode());
+    }
 
     public DataPermissionRangeTypeEnums getCurrentUserDataPermission(String functionCode) {
 
