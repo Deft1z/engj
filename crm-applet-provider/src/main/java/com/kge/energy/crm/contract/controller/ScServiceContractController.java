@@ -7,8 +7,9 @@ import com.kge.energy.crm.contract.resp.ScServiceContractResp;
 import com.kge.energy.crm.contract.service.ScServiceContractService;
 import com.kge.energy.crm.workOrder.req.ServiceContractAddReq;
 import com.kge.energy.crm.workOrder.req.ServiceContractReq;
+import com.kge.energy.crm.workOrder.req.ServiceContractUpdateProjectTimeReq;
 import com.kge.energy.crm.workOrder.resp.ServiceContractResp;
-import com.kge.energy.crm.workOrder.service.ServiceContractCommonService;
+import com.kge.energy.crm.workOrder.service.ServiceContractDomainService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +30,7 @@ public class ScServiceContractController {
 
     private final ScServiceContractService scServiceContractService;
 
-    private final ServiceContractCommonService serviceContractCommonService;
+    private final ServiceContractDomainService serviceContractCommonService;
 
     @Operation(summary = "获取服务合同列表")
     @PostMapping(value = "/getPage")
@@ -59,11 +60,16 @@ public class ScServiceContractController {
         return CommonResult.suc(scServiceContractService.update(req));
     }
 
+    /**
+     * 小程序端更新项目开工竣工时间
+     * @param req
+     * @return
+     */
     @Operation(summary = "更新合同项目时间")
     @PostMapping(value = "/projectTime/update")
     @ConvertToGoFormats
-    public CommonResult<Boolean> updateProjTime(@RequestBody @Valid ScServiceContractProjTimeUpdReq req) {
-        return CommonResult.suc(scServiceContractService.updateProjTime(req));
+    public CommonResult<Boolean> updateProjTime(@RequestBody @Valid ServiceContractUpdateProjectTimeReq req) {
+        return CommonResult.suc(serviceContractCommonService.updateProjectTime(req));
     }
 
     @Operation(summary = "新增用户评价")

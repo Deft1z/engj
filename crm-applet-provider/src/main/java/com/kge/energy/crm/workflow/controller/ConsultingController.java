@@ -10,8 +10,7 @@ import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
-import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
-import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
+import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.energy.crm.workflow.service.ConsultingService;
 import com.kge.platform.framework.common.net.CommonResult;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/workMgr/consulting")
@@ -38,13 +35,13 @@ public class ConsultingController {
 
     private final CmsCommentService cmsCommentService;
 
-    private final WorkOrderCommonService workOrderCommonService;
+    private final WorkOrderDomainService workOrderDomainService;
 
     @Operation(summary = "创建业务工单")
     @PostMapping(value = "/opt/insert")
     @ConvertToGoFormats
     public CommonResult<Boolean> save(@RequestBody @Valid WorkOrderAddReq req) {
-        return CommonResult.suc(workOrderCommonService.addWorkOrder(req));
+        return CommonResult.suc(workOrderDomainService.addWorkOrder(req));
     }
 
     @Operation(summary = "获取工单列表")
@@ -65,21 +62,21 @@ public class ConsultingController {
     @PostMapping(value = "/getByPage")
     @ConvertToGoFormats
     public CommonResult<PageResp<WfFormPageResp>> getByPage(@RequestBody WfFormPageReq req) {
-        return CommonResult.suc(workOrderCommonService.getByPage(req));
+        return CommonResult.suc(workOrderDomainService.getByPage(req));
     }
 
     @Operation(summary = "获取当前工单流程的流转情况")
     @PostMapping(value = "/getFlowByFormId")
     @ConvertToGoFormats
     public CommonResult<WfFormFlowResp> getFlowByFormId(@RequestBody WfFormFlowReq req) {
-        return CommonResult.suc(workOrderCommonService.getFlowByFormId(req));
+        return CommonResult.suc(workOrderDomainService.getFlowByFormId(req));
     }
 
     @Operation(summary = "工单操作")
     @PostMapping(value = "/opt/update")
     @ConvertToGoFormats
     public CommonResult<Boolean> update(@RequestBody @Valid WorkOrderUpdateReq req) {
-        return CommonResult.suc(workOrderCommonService.updateWorkOrder(req));
+        return CommonResult.suc(workOrderDomainService.updateWorkOrder(req));
     }
 
     @Operation(summary = "工单节点评论")

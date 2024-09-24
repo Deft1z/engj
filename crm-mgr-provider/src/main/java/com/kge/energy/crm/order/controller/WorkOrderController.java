@@ -10,10 +10,9 @@ import com.kge.energy.crm.order.service.WorkOrderService;
 import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
-import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
-import com.kge.energy.crm.workOrder.service.WorkOrderCommonService;
+import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * 工单管理
@@ -40,7 +37,7 @@ public class WorkOrderController {
 
     private final CmsCommentService cmsCommentService;
 
-    private final WorkOrderCommonService workOrderCommonService;
+    private final WorkOrderDomainService workOrderDomainService;
 
     /**
      * 工单列表
@@ -48,7 +45,7 @@ public class WorkOrderController {
     @ConvertToGoFormats
     @PostMapping("/order")
     public CommonResult<PageResp<WfFormPageResp>> getByPage(@Validated @RequestBody WfFormPageReq req) {
-        return CommonResult.suc(workOrderCommonService.getByPage(req));
+        return CommonResult.suc(workOrderDomainService.getByPage(req));
     }
 
 
@@ -58,7 +55,7 @@ public class WorkOrderController {
     @ConvertToGoFormats
     @PostMapping("/getFlowByFormId")
     public CommonResult<WfFormFlowResp> getFlowByFormId(@Validated @RequestBody WfFormFlowReq req) {
-        return CommonResult.suc(workOrderCommonService.getFlowByFormId(req));
+        return CommonResult.suc(workOrderDomainService.getFlowByFormId(req));
     }
 
 
@@ -68,7 +65,7 @@ public class WorkOrderController {
     @ConvertToGoFormats
     @PostMapping("/order/update")
     public CommonResult<Object> workOrderUpdate(@Validated @RequestBody WorkOrderUpdateReq req) {
-        return CommonResult.suc(workOrderCommonService.updateWorkOrder(req));
+        return CommonResult.suc(workOrderDomainService.updateWorkOrder(req));
 
     }
 

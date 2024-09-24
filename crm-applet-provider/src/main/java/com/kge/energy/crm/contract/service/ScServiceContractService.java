@@ -25,6 +25,7 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
+import com.kge.energy.crm.workOrder.req.ServiceContractUpdateProjectTimeReq;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -172,8 +173,9 @@ public class ScServiceContractService {
         }
     }
 
+    /*
     @Transactional
-    public Boolean updateProjTime(ScServiceContractProjTimeUpdReq req) {
+    public Boolean updateProjTime(ServiceContractUpdateProjectTimeReq req) {
         LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
                 .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
         ScServiceContract contract = scServiceContractDao.getOne(queryWrapper);
@@ -205,6 +207,7 @@ public class ScServiceContractService {
                 return false;
         }
     }
+     */
 
     @Transactional
     public Boolean addEvaluation(ScServiceContractEvaAddReq req) {
