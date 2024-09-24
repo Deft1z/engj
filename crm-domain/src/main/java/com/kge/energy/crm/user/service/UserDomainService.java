@@ -66,6 +66,7 @@ public class UserDomainService {
         List<UserInfoDto.Role> userRoles = bUserDao.getUserRoles(systemType, user.getUserId());
         userInfoDto.setRoleList(userRoles);
 
+        userInfoDto.setRoleIds(userRoles.stream().map(UserInfoDto.Role::getId).collect(Collectors.toSet()));
         userInfoDto.setRoleCodes(userRoles.stream().map(UserInfoDto.Role::getCode).collect(Collectors.toSet()));
 
         List<UserInfoDto.Organization> orgs = bOrganizationDao.findUserInfoDtoOrgs(user.getUserId());
@@ -106,7 +107,7 @@ public class UserDomainService {
 
     public List<UserContactDto> getUserContact(Integer userId, String roleCode, Integer organizationId, Integer tenantId) {
         List<BUser> userContact = bUserDao.getUserContact(userId, roleCode, organizationId, tenantId);
-        return  BeanUtil.copyToList(userContact, UserContactDto.class);
+        return BeanUtil.copyToList(userContact, UserContactDto.class);
     }
 
 }

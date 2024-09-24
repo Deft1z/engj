@@ -38,6 +38,11 @@ public class CfDataPermission {
     private Integer dataRangeType;
 
     /**
+     * 优先级，越大越高
+     */
+    private Integer priority;
+
+    /**
      * 数据状态：-1-删除，1-正常
      */
     private Integer flag;

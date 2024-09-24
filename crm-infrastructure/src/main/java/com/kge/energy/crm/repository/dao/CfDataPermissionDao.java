@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 数据权限配置表(CfDataPermission)表数据库访问层
@@ -35,5 +36,8 @@ public class CfDataPermissionDao extends ServiceImpl<CfDataPermissionMapper, CfD
     }
 
 
+    public List<CfDataPermission> getDataPermission(Integer tenantId, Set<Integer> roleIds, String functionCode) {
+        return mapper.getDataPermission(tenantId, roleIds, functionCode);
+    }
 }
 

@@ -7,6 +7,7 @@
         <result property="bizFunctionId" column="biz_function_id" jdbcType="INTEGER"/>
         <result property="roleId" column="role_id" jdbcType="INTEGER"/>
         <result property="dataRangeType" column="data_range_type" jdbcType="INTEGER"/>
+        <result property="priority" column="priority" jdbcType="INTEGER"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -22,6 +23,21 @@
         <if test="param.bizFunctionId != null">
             and biz_function_id = #{param.bizFunctionId}
         </if>
+    </select>
+
+    <select id="getDataPermission" resultMap="CfDataPermissionMap">
+        select cdp.*
+        from cf_biz_function cbf,cf_data_permission cdp
+        where cbf.flag = 1
+          and cdp.flag = 1
+          and cbf.id = cdp.biz_function_id
+          and cbf.tenant_id = #{tenantId}
+          and cbf.function_code = #{functionCode}
+          and cdp.role_id in
+            <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        order by cdp.priority desc
     </select>
 </mapper>
 

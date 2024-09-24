@@ -45,10 +45,11 @@ public class DataPermissionService {
 
         List<DataPermissionListResp> list = page.getRecords()
                 .stream()
-                .map(cfBizFunction -> new DataPermissionListResp()
-                        .setBizFunctionId(cfBizFunction.getId())
-                        .setRoleId(cfBizFunction.getRoleId())
-                        .setDataRangeType(cfBizFunction.getDataRangeType())
+                .map(cfDataPermission -> new DataPermissionListResp()
+                        .setBizFunctionId(cfDataPermission.getId())
+                        .setRoleId(cfDataPermission.getRoleId())
+                        .setDataRangeType(cfDataPermission.getDataRangeType())
+                        .setPriority(cfDataPermission.getPriority())
                 ).toList();
 
         return new PageResp<DataPermissionListResp>()
@@ -73,6 +74,7 @@ public class DataPermissionService {
                 .setBizFunctionId(req.getBizFunctionId())
                 .setRoleId(req.getRoleId())
                 .setDataRangeType(req.getDataRangeType())
+                .setPriority(req.getPriority())
                 .setTenantId(cfBizFunction.getTenantId());
 
         return cfDataPermissionDao.save(cfDataPermission);
@@ -93,6 +95,7 @@ public class DataPermissionService {
         cfDataPermission.setBizFunctionId(req.getBizFunctionId())
                 .setRoleId(req.getRoleId())
                 .setDataRangeType(req.getDataRangeType())
+                .setPriority(req.getPriority())
                 .setTenantId(cfBizFunction.getTenantId());
 
         return cfDataPermissionDao.updateById(cfDataPermission);

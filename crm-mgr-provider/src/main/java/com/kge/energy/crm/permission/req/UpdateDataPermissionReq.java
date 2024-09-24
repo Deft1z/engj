@@ -29,4 +29,7 @@ public class UpdateDataPermissionReq {
     @NotNull
     private Integer dataRangeType;
 
+    @Schema(description = "优先级，越大越高")
+    private Integer priority;
+
 }
