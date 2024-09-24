@@ -107,7 +107,7 @@ public class WeChatLoginService {
 
             if (ObjectUtil.isNotNull(user)) {
                 //判断是否禁用
-                if(user.getStatus() == 1){
+                if (ObjectUtil.equal(user.getStatus(), 1)) {
                     throw new ServiceException("账号已禁用");
                 }
                 //统计每日登录
