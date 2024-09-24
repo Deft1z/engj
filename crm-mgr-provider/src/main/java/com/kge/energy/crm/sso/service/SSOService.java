@@ -50,6 +50,11 @@ public class SSOService {
         // 开始匹配用户手机号
         BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new ServiceException("登录失败"));
 
+        //判断是否禁用 帐号状态（0正常 1停用）
+        if(user.getStatus() == 1){
+            throw new ServiceException("账号已禁用");
+        }
+
         SSOResp resp = new SSOResp();
         resp.setToken(userDomainService.genToken(user, SystemTypeEnum.MGR, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true));
         resp.setUserId(user.getUserId());

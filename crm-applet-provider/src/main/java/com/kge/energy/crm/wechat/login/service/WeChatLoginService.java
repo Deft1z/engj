@@ -102,9 +102,14 @@ public class WeChatLoginService {
 //            throw new ServiceException(appletLoginResp.getErrMsg());
 //        }
 
+            //根据openid查找小程序用户
             user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
             if (ObjectUtil.isNotNull(user)) {
+                //判断是否禁用
+                if(user.getStatus() == 1){
+                    throw new ServiceException("账号已禁用");
+                }
                 //统计每日登录
                 String key = user.getUserId() + "_" + LocalDateTimeUtil.format(LocalDate.now(), "yyyy_MM_dd");
                 String hashKey = redisFront + "dailyLoginCount";
@@ -134,7 +139,6 @@ public class WeChatLoginService {
                     .setErrCode(appletLoginResp.getErrCode())
                     .setToken(token);
         } catch (Exception e) {
-
             //记录登录失败日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, e.getMessage());
             throw new RuntimeException(e);
