@@ -64,7 +64,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WorkOrderCommonService {
+public class WorkOrderDomainService {
 
     private static final String WORK_CODE_CACHE_KEY_PREFIX = "crm_order_code:";
 

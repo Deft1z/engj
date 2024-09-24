@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.CmsCommentBizType;
+import com.kge.energy.crm.enums.CmsCommentBizTypeEnums;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsCondition;
 import com.kge.energy.crm.external.epcpv.req.EpcpvDetailsReq;
 import com.kge.energy.crm.external.epcpv.req.EpcpvInfoReq;
@@ -67,7 +67,7 @@ public class PvService {
     public Integer commentPv(PvCommentReq pvCommentReq) {
         CmsComment cmsComment = new CmsComment();
         cmsComment.setContent(pvCommentReq.getContent());
-        cmsComment.setBizType(CmsCommentBizType.NZGF.getCode());
+        cmsComment.setBizType(CmsCommentBizTypeEnums.NZGF.getCode());
 
         if (pvCommentReq.getId() > 0) {
             cmsComment.setParentCommentId(pvCommentReq.getId());

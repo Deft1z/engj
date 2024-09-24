@@ -11,8 +11,9 @@ import com.kge.energy.crm.order.service.ContractService;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.workOrder.req.ServiceContractAddReq;
 import com.kge.energy.crm.workOrder.req.ServiceContractReq;
+import com.kge.energy.crm.workOrder.req.ServiceContractUpdateProjectTimeReq;
 import com.kge.energy.crm.workOrder.resp.ServiceContractResp;
-import com.kge.energy.crm.workOrder.service.ServiceContractCommonService;
+import com.kge.energy.crm.workOrder.service.ServiceContractDomainService;
 import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +34,7 @@ public class ContractController {
 
     private final ContractService contractService;
 
-    private final ServiceContractCommonService serviceContractCommonService;
+    private final ServiceContractDomainService serviceContractCommonService;
 
     /**
      * 获取合同
@@ -67,7 +68,7 @@ public class ContractController {
      */
     @ConvertToGoFormats
     @PostMapping("/projectTime/update")
-    public CommonResult<Object> projectTimeEdit(@Validated @RequestBody UpdateProjectTimeReq req) {
-        return contractService.projectTimeEdit(req);
+    public CommonResult<Object> projectTimeEdit(@Validated @RequestBody ServiceContractUpdateProjectTimeReq req) {
+        return CommonResult.suc(serviceContractCommonService.updateProjectTime(req));
     }
 }
