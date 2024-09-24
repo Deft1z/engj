@@ -21,7 +21,7 @@ public class AddDataPermissionReq {
     @NotNull
     private Integer roleId;
 
-    @Schema(description = "数据权限范围类型：0-所有，1-租户，2-集团，3-公司，4-部门，5-本人", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "数据权限范围类型：0-所有，1-租户，2-集团，3-公司，4-部门，5-个人", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private Integer dataRangeType;
 

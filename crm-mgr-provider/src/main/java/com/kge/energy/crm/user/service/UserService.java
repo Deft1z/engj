@@ -137,7 +137,7 @@ public class UserService {
             redisUtils.delete(loginErrorCountCacheKey);
 
             //判断是否禁用 帐号状态（0正常 1停用）
-            if(bUser.getStatus() == 1){
+            if (ObjectUtil.equal(bUser.getStatus(), 1)) {
                 throw new ServiceException("账号已禁用");
             }
 

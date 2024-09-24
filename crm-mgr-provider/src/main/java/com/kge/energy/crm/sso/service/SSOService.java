@@ -51,7 +51,7 @@ public class SSOService {
         BUser user = Optional.ofNullable(userService.getUserByMobile(phone)).orElseThrow(() -> new ServiceException("登录失败"));
 
         //判断是否禁用 帐号状态（0正常 1停用）
-        if(user.getStatus() == 1){
+        if (ObjectUtil.equal(user.getStatus(), 1)) {
             throw new ServiceException("账号已禁用");
         }
 
