@@ -21,11 +21,11 @@ public enum DataPermissionRangeTypeEnums {
 
     JITUAN(2, "集团"),
 
-    COMPANY(1, "公司"),
+    COMPANY(3, "公司"),
 
-    DEPARTMENT(1, "部门"),
+    DEPARTMENT(4, "部门"),
 
-    ONESELF(1, "本人");
+    ONESELF(5, "本人");
 
     private final Integer code;
 
