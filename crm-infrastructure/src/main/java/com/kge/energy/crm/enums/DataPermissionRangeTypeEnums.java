@@ -25,7 +25,7 @@ public enum DataPermissionRangeTypeEnums {
 
     DEPARTMENT(4, "部门"),
 
-    ONESELF(5, "个人");
+    PERSONAL(5, "个人");
 
     private final Integer code;
 
