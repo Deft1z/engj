@@ -106,7 +106,7 @@ public class ScServiceContractService {
                 .setProjectCode(req.getProjectCode())
                 .setSigningTime(req.getSigningTime().atStartOfDay())
                 .setServiceUnit(operator.getOrganizationList().iterator().next().getId())
-                .setStatus(ConstParam.Ready)
+                .setStatus(ConstParam.ContractNotBegin)
                 .setFlag(1)
                 .setCreateUserId(operator.getUserId().intValue())
                 .setRemark(req.getRemark())

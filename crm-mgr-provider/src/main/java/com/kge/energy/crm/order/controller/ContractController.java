@@ -34,7 +34,7 @@ public class ContractController {
 
     private final ContractService contractService;
 
-    private final ServiceContractDomainService serviceContractCommonService;
+    private final ServiceContractDomainService serviceContractDomainService;
 
     /**
      * 获取合同
@@ -42,7 +42,7 @@ public class ContractController {
     @ConvertToGoFormats
     @PostMapping("/form")
     public CommonResult<List<ServiceContractResp>> form(@Validated @RequestBody ServiceContractReq req) {
-        return CommonResult.suc(serviceContractCommonService.getServiceContractList(req));
+        return CommonResult.suc(serviceContractDomainService.getServiceContractList(req));
     }
 
     /**
@@ -60,7 +60,7 @@ public class ContractController {
     @ConvertToGoFormats
     @PostMapping("/form/insert")
     public CommonResult<Boolean> contractAdd(@Validated @RequestBody ServiceContractAddReq req) {
-        return CommonResult.suc(serviceContractCommonService.addServiceContract(req));
+        return CommonResult.suc(serviceContractDomainService.addServiceContract(req));
     }
 
     /**
@@ -69,6 +69,6 @@ public class ContractController {
     @ConvertToGoFormats
     @PostMapping("/projectTime/update")
     public CommonResult<Object> projectTimeEdit(@Validated @RequestBody ServiceContractUpdateProjectTimeReq req) {
-        return CommonResult.suc(serviceContractCommonService.updateProjectTime(req));
+        return CommonResult.suc(serviceContractDomainService.updateProjectTime(req));
     }
 }

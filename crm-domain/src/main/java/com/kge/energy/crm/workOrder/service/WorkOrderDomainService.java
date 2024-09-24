@@ -31,6 +31,7 @@ import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraServic
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
+import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
@@ -363,6 +364,14 @@ public class WorkOrderDomainService {
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         Integer customerUserId = wfForm.getCreateUserId();
+
+        //判断合同是否全部已竣工
+        List<ContractResult> resultList = scServiceContractDao.form(formId);
+        if (resultList.stream().anyMatch(contractResult -> contractResult.getStatus().equals(ConstParam.ContractNotBegin) ||
+                contractResult.getStatus().equals(ConstParam.ContractUnderWay))) {
+            throw new ServiceException("该工单有未竣工合同，不能完成工单!");
+        }
+
         //后续由集团客服操作完成工单，待定
         Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
@@ -428,7 +437,7 @@ public class WorkOrderDomainService {
         LambdaUpdateWrapper<ScServiceContract> sscUpdateWrapper = Wrappers.<ScServiceContract>update().lambda()
                 .set(ScServiceContract::getStatus, ConstParam.ContractDiscontinued)
                 .eq(ScServiceContract::getFormId, formId)
-                .and(i -> i.eq(ScServiceContract::getStatus, ConstParam.Ready).or().eq(ScServiceContract::getStatus, ConstParam.ContractUnderWay));
+                .and(i -> i.eq(ScServiceContract::getStatus, ConstParam.ContractNotBegin).or().eq(ScServiceContract::getStatus, ConstParam.ContractUnderWay));
         scServiceContractDao.update(sscUpdateWrapper);
 
         //发送微信小程序消息，通知客户

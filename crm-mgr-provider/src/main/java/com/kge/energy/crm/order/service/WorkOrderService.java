@@ -302,7 +302,7 @@ public class WorkOrderService {
         LambdaUpdateWrapper<ScServiceContract> sscUpdateWrapper = Wrappers.<ScServiceContract>update().lambda()
                 .set(ScServiceContract::getStatus, ConstParam.ContractDiscontinued)
                 .eq(ScServiceContract::getFormId, req.getFormId())
-                .and(i -> i.eq(ScServiceContract::getStatus, ConstParam.Ready).or().eq(ScServiceContract::getStatus, ConstParam.ContractUnderWay));
+                .and(i -> i.eq(ScServiceContract::getStatus, ConstParam.ContractNotBegin).or().eq(ScServiceContract::getStatus, ConstParam.ContractUnderWay));
         scServiceContractDao.update(sscUpdateWrapper);
 
         //发送微信小程序消息，通知客户

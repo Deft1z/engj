@@ -30,7 +30,7 @@ public class ScServiceContractController {
 
     private final ScServiceContractService scServiceContractService;
 
-    private final ServiceContractDomainService serviceContractCommonService;
+    private final ServiceContractDomainService serviceContractDomainService;
 
     @Operation(summary = "获取服务合同列表")
     @PostMapping(value = "/getPage")
@@ -43,14 +43,14 @@ public class ScServiceContractController {
     @PostMapping(value = "/getContractByFormId")
     @ConvertToGoFormats
     public CommonResult<List<ServiceContractResp>> getContractByFormId(@RequestBody ServiceContractReq req) {
-        return CommonResult.suc(serviceContractCommonService.getServiceContractList(req));
+        return CommonResult.suc(serviceContractDomainService.getServiceContractList(req));
     }
 
     @Operation(summary = "新增合同")
     @PostMapping(value = "/opt/insert")
     @ConvertToGoFormats
     public CommonResult<Boolean> insert(@RequestBody @Valid ServiceContractAddReq req) {
-        return CommonResult.suc(serviceContractCommonService.addServiceContract(req));
+        return CommonResult.suc(serviceContractDomainService.addServiceContract(req));
     }
 
     @Operation(summary = "更新合同项目结束时间")
@@ -69,7 +69,7 @@ public class ScServiceContractController {
     @PostMapping(value = "/projectTime/update")
     @ConvertToGoFormats
     public CommonResult<Boolean> updateProjTime(@RequestBody @Valid ServiceContractUpdateProjectTimeReq req) {
-        return CommonResult.suc(serviceContractCommonService.updateProjectTime(req));
+        return CommonResult.suc(serviceContractDomainService.updateProjectTime(req));
     }
 
     @Operation(summary = "新增用户评价")
