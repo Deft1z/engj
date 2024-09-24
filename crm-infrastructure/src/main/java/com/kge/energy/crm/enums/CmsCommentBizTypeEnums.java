@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum CmsCommentBizType {
+public enum CmsCommentBizTypeEnums {
     NZGF(1, "南综光伏"),
     ORDER(2, "业务工单"),
     COMPLAIN(3, "投诉建议");

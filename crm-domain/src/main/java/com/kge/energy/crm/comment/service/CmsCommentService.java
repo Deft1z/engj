@@ -2,16 +2,14 @@ package com.kge.energy.crm.comment.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.comment.req.CmsCommentAddReq;
 import com.kge.energy.crm.comment.req.WfFormCommentReq;
 import com.kge.energy.crm.comment.resp.CmsCommentResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.CmsCommentBizType;
+import com.kge.energy.crm.enums.CmsCommentBizTypeEnums;
 import com.kge.energy.crm.enums.FlagEnums;
 import com.kge.energy.crm.repository.dao.CmsCommentDao;
 import com.kge.energy.crm.repository.dao.WfFormFlowDao;
-import com.kge.energy.crm.repository.entity.BApp;
 import com.kge.energy.crm.repository.entity.CmsComment;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.CmsCommentParam;
@@ -54,7 +52,7 @@ public class CmsCommentService {
             //如果是新增评论
             //获取当前工单最新节点
             WfFormFlow latestFlow = wfFormFlowDao.getLatestFormFlow(req.getFormId(), UserInfoContextUtils.getCurrentTenantId());
-            req.setBizType(CmsCommentBizType.ORDER.getCode());
+            req.setBizType(CmsCommentBizTypeEnums.ORDER.getCode());
             req.setBizDataId(latestFlow.getFormFlowId());
 
         } else {

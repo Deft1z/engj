@@ -127,14 +127,19 @@ public class UserService {
                     //达到失败次数限制
                     if(Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT){
                         redisUtils.expire(loginErrorCountCacheKey,TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                        throw new ServiceException("账号已冻结");
                     }
-                    throw new ServiceException("账号已冻结");
                 }
                 throw new ServiceException("登录失败");
             }
 
             //账号密码正确 删除key
             redisUtils.delete(loginErrorCountCacheKey);
+
+            //判断是否禁用 帐号状态（0正常 1停用）
+            if(bUser.getStatus() == 1){
+                throw new ServiceException("账号已禁用");
+            }
 
             // 获取uid关联的租户
             RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
