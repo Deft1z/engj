@@ -36,6 +36,12 @@ public class BOrganization {
     private String type;
 
     /**
+     * 组织类别:0-集团 1-公司 2-部门 3-项目组
+     */
+    private Integer orgType;
+
+
+    /**
      * 总共两层
      */
     private Integer level;
