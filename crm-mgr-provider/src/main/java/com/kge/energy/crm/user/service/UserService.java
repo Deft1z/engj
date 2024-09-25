@@ -111,8 +111,8 @@ public class UserService {
 
         try {
             //校验账号登录次数
-            String loginErrorCountCacheKey = String.format(TokenConstant.LOGIN_ERROR_COUNT_CACHE_KEY,req.getName());
-            if(redisUtils.hasKey(loginErrorCountCacheKey) && Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT){
+            String loginErrorCountCacheKey = String.format(TokenConstant.LOGIN_ERROR_COUNT_CACHE_KEY, req.getName());
+            if (redisUtils.hasKey(loginErrorCountCacheKey) && Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT) {
                 throw new ServiceException("账号已冻结");
             }
 
@@ -120,17 +120,17 @@ public class UserService {
 
             if (ObjectUtil.isNull(bUser)) {
                 //首次登录失败
-                if(!redisUtils.hasKey(loginErrorCountCacheKey)){
-                    redisUtils.setEx(loginErrorCountCacheKey,"1",TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
-                }else{
-                    redisUtils.incrBy(loginErrorCountCacheKey,1);
+                if (!redisUtils.hasKey(loginErrorCountCacheKey)) {
+                    redisUtils.setEx(loginErrorCountCacheKey, "1", TokenConstant.LOGIN_ERROR_BAN_TIME, TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                } else {
+                    redisUtils.incrBy(loginErrorCountCacheKey, 1);
                     //达到失败次数限制
-                    if(Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT){
-                        redisUtils.expire(loginErrorCountCacheKey,TokenConstant.LOGIN_ERROR_BAN_TIME,TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                    if (Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT) {
+                        redisUtils.expire(loginErrorCountCacheKey, TokenConstant.LOGIN_ERROR_BAN_TIME, TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
                         throw new ServiceException("账号已冻结");
                     }
                 }
-                throw new ServiceException("登录失败");
+                throw new ServiceException("账号或密码不正确");
             }
 
             //账号密码正确 删除key
@@ -149,7 +149,7 @@ public class UserService {
             bUser.setLastLoginTime(LocalDateTime.now());
             bUserDao.updateById(bUser);
 
-            UserLoginResp userLoginResp =  new UserLoginResp()
+            UserLoginResp userLoginResp = new UserLoginResp()
                     .setUserId(bUser.getUserId())
                     .setTenantId(rUserTenant.getOrganizationId())
                     .setAuthToken(authToken)

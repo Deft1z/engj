@@ -11,7 +11,9 @@ import com.kge.energy.crm.dashboard.service.DashBoardService;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic;
+import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import com.kge.platform.framework.common.net.CommonResult;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,33 +42,10 @@ public class DashBoardController {
         return CommonResult.suc(resp);
     }
 
-    /**
-     * 查询统计上半部分
-     */
-    @ConvertToGoFormats
-    @PostMapping("/externalBack/aggregateData/dashboardData")
-    public CommonResult<StatisticResp1> getStatistic1(@Validated @RequestBody DashBoardReq req) {
-        StatisticResp1 resp = BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), StatisticResp1.class);
-        return CommonResult.suc(resp);
-    }
-
-    // TODO 这个接口后续建议与上面的接口合并
-
-    /**
-     * 查询统计下半部分
-     */
-    @ConvertToGoFormats
-    @PostMapping("/workMgrBack/contractBack/showOderContractNum")
-    public CommonResult<StatisticResp2> getStatistic2(@Validated @RequestBody DashBoardReq req) {
-        StatisticResp2 resp = new StatisticResp2();
-
-        HashMap<String, String> mapping = new HashMap<>();
-        mapping.put("sentNum", "sendDanNum");
-        mapping.put("terminateNum", "endNum");
-        mapping.put("processingNum", "startNum");
-
-        BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), resp, CopyOptions.create().setFieldMapping(mapping));
-        return CommonResult.suc(resp);
+    @Operation(summary = "控制台客户、工单、合同统计")
+    @PostMapping("/dashBoard/statisticalData")
+    public CommonResult<StatisticalDataResult> statisticalData() {
+        return CommonResult.suc(dashBoardService.statisticalData());
     }
 
     /**
