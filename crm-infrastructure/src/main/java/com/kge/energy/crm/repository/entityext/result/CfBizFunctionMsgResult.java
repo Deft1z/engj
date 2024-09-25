@@ -23,7 +23,16 @@ public class CfBizFunctionMsgResult {
     private Integer bizFunctionId;
 
     @Schema(description = "消息渠道id")
-    private String msgChannelId;
+    private Integer msgChannelId;
+
+    @Schema(description = "渠道编码")
+    private String channelCode;
+
+    @Schema(description = "渠道名称")
+    private String channelName;
+
+    @Schema(description = "备注")
+    private String remark;
 
     @Schema(description = "黑名单,userIds")
     private String blacklist;
@@ -34,8 +43,8 @@ public class CfBizFunctionMsgResult {
     @Schema(description = "通知优先等级")
     private Integer priority;
 
-    @Schema(description = "备注")
-    private String remark;
+    @Schema(description = "是否启用")
+    private Boolean enabled;
 
     @Schema(description = "创建人ID")
     private Integer createUserId;

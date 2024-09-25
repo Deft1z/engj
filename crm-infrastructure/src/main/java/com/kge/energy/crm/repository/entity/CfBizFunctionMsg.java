@@ -51,10 +51,10 @@ public class CfBizFunctionMsg {
     private Integer priority;
 
     /**
-     * 备注
+     * 是否启用
      */
-    @TableField(value = "remark")
-    private String remark;
+    @TableField(value = "is_enabled")
+    private Boolean enabled;
 
     /**
      * 创建人ID

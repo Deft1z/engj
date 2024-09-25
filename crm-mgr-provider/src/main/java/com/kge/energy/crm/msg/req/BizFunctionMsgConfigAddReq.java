@@ -40,8 +40,8 @@ public class BizFunctionMsgConfigAddReq {
         @Schema(description = "通知优先等级")
         private Integer priority;
 
-        @Schema(description = "备注")
-        private String remark;
+        @Schema(description = "是否启用")
+        private Boolean enabled = false;
     }
 
 }

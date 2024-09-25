@@ -1,8 +1,7 @@
 package com.kge.energy.crm.msg.controller;
 
-import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.msg.req.BizFunctionMsgConfigAddReq;
-import com.kge.energy.crm.msg.resp.SysMsgChannelResp;
+import com.kge.energy.crm.msg.resp.FunctionMsgChannelConfigResp;
 import com.kge.energy.crm.msg.service.SysMsgChannelService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,16 +26,14 @@ public class SysMsgChannelController {
 
     private final SysMsgChannelService sysMsgChannelService;
 
-    @Operation(summary = "获取所有消息渠道")
-    @GetMapping(value = "/getAll")
-    @ConvertToGoFormats
-    public CommonResult<List<SysMsgChannelResp>> getAll() {
-        return CommonResult.suc(sysMsgChannelService.getAll());
+    @Operation(summary = "获取业务功能可关联配置的消息渠道")
+    @GetMapping(value = "/getFunctionConfigs")
+    public CommonResult<List<FunctionMsgChannelConfigResp>> getFunctionConfigs(@RequestParam(value = "bizFunctionId", required = false) Integer bizFunctionId) {
+        return CommonResult.suc(sysMsgChannelService.getFunctionConfigs(bizFunctionId));
     }
 
     @Operation(summary = "关联消息渠道和业务功能")
     @PostMapping(value = "/relateBizFunction")
-    @ConvertToGoFormats
     public CommonResult<Boolean> relateBizFunction(@RequestBody @Valid BizFunctionMsgConfigAddReq bizFunctionMsgConfig) {
         return CommonResult.suc(sysMsgChannelService.relateBizFunction(bizFunctionMsgConfig));
     }

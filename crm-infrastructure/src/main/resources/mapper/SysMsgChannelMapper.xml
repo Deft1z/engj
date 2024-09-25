@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kge.energy.crm.repository.mapper.SysMsgChannelMapper">
 
-    <resultMap id="SysMsgChannelVO" type="com.kge.energy.crm.repository.entity.SysMsgChannel">
+    <resultMap id="SysMsgChannel" type="com.kge.energy.crm.repository.entity.SysMsgChannel">
         <result property="id" column="id" jdbcType="INTEGER"/>
         <result property="channelCode" column="channel_code" jdbcType="VARCHAR"/>
         <result property="channelName" column="channel_name" jdbcType="VARCHAR"/>

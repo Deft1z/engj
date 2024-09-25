@@ -2,13 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kge.energy.crm.repository.mapper.CfBizFunctionMsgMapper">
 
-    <resultMap id="CfBizFunctionMsgVO" type="com.kge.energy.crm.repository.entity.CfBizFunctionMsg">
+    <resultMap id="CfBizFunctionMsgResult" type="com.kge.energy.crm.repository.entityext.result.CfBizFunctionMsgResult">
         <result property="bizFunctionId" column="biz_function_id" jdbcType="INTEGER"/>
         <result property="msgChannelId" column="msg_channel_id" jdbcType="VARCHAR"/>
         <result property="blacklist" column="blacklist" jdbcType="VARCHAR"/>
         <result property="whitelist" column="whitelist" jdbcType="VARCHAR"/>
         <result property="priority" column="priority" jdbcType="INTEGER"/>
-        <result property="remark" column="remark" jdbcType="VARCHAR"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
@@ -21,6 +20,26 @@
     <sql id="columns">
         biz_function_id, msg_channel_id, blacklist, whitelist, priority, remark, create_user_id, create_time, modify_user_id, modify_time, flag, tenant_id
     </sql>
+
+    <select id="getFunctionConfigs" resultType="com.kge.energy.crm.repository.entityext.result.CfBizFunctionMsgResult">
+        select id as msg_channel_id
+            , smc.channel_code
+            , smc.channel_name
+            , smc.remark
+            , cbfm.blacklist
+            , cbfm.whitelist
+            , ifnull(cbfm.priority, 1) as priority
+            , ifnull(cbfm.is_enabled, false) as enabled
+        from sys_msg_channel smc
+        left join cf_biz_function_msg cbfm on cbfm.flag = 1 and cbfm.msg_channel_id = smc.id
+        where smc.flag = 1
+        and smc.tenant_id = #{tenantId}
+        <if test="bizFunctionId != null">
+            and cbfm.biz_function_id = #{bizFunctionId}
+        </if>
+        group by smc.id, smc.channel_code, smc.channel_name, smc.remark, cbfm.blacklist, cbfm.whitelist, cbfm.priority,cbfm.is_enabled
+        order by cbfm.priority, smc.id
+    </select>
 
 </mapper>
 

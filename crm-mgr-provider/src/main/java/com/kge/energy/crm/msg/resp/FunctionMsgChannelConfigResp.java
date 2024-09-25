@@ -13,10 +13,13 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 @Schema(description = "消息渠道列表响应对象")
-public class SysMsgChannelResp {
+public class FunctionMsgChannelConfigResp {
 
-    @Schema(description = "主键id")
-    private Integer id;
+    @Schema(description = "业务功能id")
+    private Integer bizFunctionId;
+
+    @Schema(description = "消息渠道id")
+    private Integer msgChannelId;
 
     @Schema(description = "渠道编码")
     private String channelCode;
@@ -26,6 +29,18 @@ public class SysMsgChannelResp {
 
     @Schema(description = "备注")
     private String remark;
+
+    @Schema(description = "黑名单,userIds")
+    private String blacklist;
+
+    @Schema(description = "白名单,userIds")
+    private String whitelist;
+
+    @Schema(description = "通知优先等级")
+    private Integer priority;
+
+    @Schema(description = "是否启用")
+    private Boolean enabled;
 
 }
 

@@ -6,10 +6,14 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.msg.req.BizFunctionMsgConfigAddReq;
 import com.kge.energy.crm.repository.dao.CfBizFunctionMsgDao;
 import com.kge.energy.crm.repository.entity.CfBizFunctionMsg;
+import com.kge.energy.crm.repository.entityext.result.CfBizFunctionMsgResult;
 import com.kge.platform.framework.web.util.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 业务功能消息配置(CfBizFunctionMsgConfig)Service层
@@ -24,7 +28,12 @@ public class CfBizFunctionMsgConfigService {
 
     private final CfBizFunctionMsgDao cfBizFunctionMsgDao;
 
-    public Boolean add(BizFunctionMsgConfigAddReq bizFunctionMsgConfig) {
+    public List<CfBizFunctionMsgResult> getFunctionConfigs(Integer bizFunctionId, Integer tenantId){
+        return cfBizFunctionMsgDao.getFunctionConfigs(bizFunctionId,tenantId);
+    }
+
+    @Transactional
+    public Boolean save(BizFunctionMsgConfigAddReq bizFunctionMsgConfig) {
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
         //执行全删全插
         //删除关联关系
@@ -41,7 +50,7 @@ public class CfBizFunctionMsgConfigService {
                         .setBlacklist(JsonUtils.serialize(msgConfig.getBlacklist()))
                         .setWhitelist(JsonUtils.serialize(msgConfig.getWhitelist()))
                         .setPriority(msgConfig.getPriority())
-                        .setRemark(msgConfig.getRemark())
+                        .setEnabled(msgConfig.getEnabled())
                         .setMsgChannelId(msgConfig.getMsgChannelId())
                         .setCreateUserId(operator.getUserId().intValue())
                         .setTenantId(operator.getTenantId())
