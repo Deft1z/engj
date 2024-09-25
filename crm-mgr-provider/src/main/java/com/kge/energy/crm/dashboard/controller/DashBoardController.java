@@ -49,35 +49,6 @@ public class DashBoardController {
     }
 
     /**
-     * 查询统计上半部分
-     */
-    @ConvertToGoFormats
-    @PostMapping("/externalBack/aggregateData/dashboardData")
-    public CommonResult<StatisticResp1> getStatistic1(@Validated @RequestBody DashBoardReq req) {
-        StatisticResp1 resp = BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), StatisticResp1.class);
-        return CommonResult.suc(resp);
-    }
-
-    // TODO 这个接口后续建议与上面的接口合并
-
-    /**
-     * 查询统计下半部分
-     */
-    @ConvertToGoFormats
-    @PostMapping("/workMgrBack/contractBack/showOderContractNum")
-    public CommonResult<StatisticResp2> getStatistic2(@Validated @RequestBody DashBoardReq req) {
-        StatisticResp2 resp = new StatisticResp2();
-
-        HashMap<String, String> mapping = new HashMap<>();
-        mapping.put("sentNum", "sendDanNum");
-        mapping.put("terminateNum", "endNum");
-        mapping.put("processingNum", "startNum");
-
-        BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), resp, CopyOptions.create().setFieldMapping(mapping));
-        return CommonResult.suc(resp);
-    }
-
-    /**
      * 查询工单合同数量变化
      */
     @ConvertToGoFormats

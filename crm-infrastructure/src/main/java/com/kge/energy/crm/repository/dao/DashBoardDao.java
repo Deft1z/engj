@@ -13,10 +13,6 @@ import java.util.List;
 public class DashBoardDao {
     private final DashBoardMapper mapper;
 
-    public DashBoardStatistic getStatistic(DashBoardParam param) {
-        return mapper.selectStatistic(param);
-    }
-
     public List<DashBoardOrderContract> getOrderContractList(DashBoardParam param) {
         return mapper.selectOrderContractList(param);
     }

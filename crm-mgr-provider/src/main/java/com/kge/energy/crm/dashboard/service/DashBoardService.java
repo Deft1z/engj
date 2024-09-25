@@ -44,10 +44,6 @@ public class DashBoardService {
                 .setContract(contract);
     }
 
-    public DashBoardStatistic getStatistic(DashBoardParam param) {
-        return dashBoardDao.getStatistic(param);
-    }
-
     public DashBoardUserTrans getUserTrans(DashBoardParam param) {
         return dashBoardDao.getUserTrans(param);
     }
