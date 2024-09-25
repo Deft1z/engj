@@ -22,4 +22,10 @@ public interface DashBoardMapper {
     DashBoardComplainTypeStatistic selectComplainTypeStatistic(DashBoardParam param);
 
     List<DashBoardComplainRank> selectComplainRankList(DashBoardParam param);
+
+    StatisticalDataResult.User getUserStatistic(Integer tenantId);
+
+    StatisticalDataResult.Consulting getConsultingStatistic(Integer tenantId);
+
+    StatisticalDataResult.Contract getContractStatistic(Integer tenantId);
 }
