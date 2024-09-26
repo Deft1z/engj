@@ -16,6 +16,8 @@ import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.BizFunctionEnums;
+import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishMsgReq;
@@ -26,6 +28,7 @@ import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.req.contract.CreateContractReq;
 import com.kge.energy.crm.order.req.contract.UpdateProjectTimeReq;
 import com.kge.energy.crm.order.resp.ContractResp;
+import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.ScServiceContractDao;
 import com.kge.energy.crm.repository.dao.WfFormDao;
@@ -60,19 +63,9 @@ public class ContractService {
     private final WfFormDao wfFormDao;
     private final WfFormFlowDao wfFormFlowDao;
     private final ScServiceContractDao scServiceContractDao;
-
+    private final DataPermissionDomainService dataPermissionDomainService;
     private final WeChatAppletProperties weChatAppletProperties;
     private final WeChatAppletInfraService weChatAppletInfraService;
-
-    /**
-     * 获取合同
-     */
-    public List<ContractResp> form(ContractReq req) {
-
-        List<ContractResult> resultList = scServiceContractDao.form(req.getFormId());
-
-        return BeanUtil.copyToList(resultList, ContractResp.class);
-    }
 
     /**
      * 微信客户小程序 -> 获取合同
@@ -81,7 +74,11 @@ public class ContractService {
         IPage<WxUserWorkOrderParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
         WxUserWorkOrderParam wxUserWorkOrderParam = BeanUtil.copyProperties(req, WxUserWorkOrderParam.class);
         System.out.println("wxUserWorkOrderParam = " + wxUserWorkOrderParam);
-        IPage<ContractResult> pages = scServiceContractDao.contractPageByUserIdLoad(reqIpage, wxUserWorkOrderParam);
+
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+
+        IPage<ContractResult> pages = scServiceContractDao.contractPageByUserIdLoad(reqIpage, wxUserWorkOrderParam, userInfoDto, dataEnums);
         List<ContractResult> resps = BeanUtil.copyToList(pages.getRecords(), ContractResult.class);
         return new PageResp<ContractResult>()
                 .setList(resps)

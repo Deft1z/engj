@@ -14,7 +14,10 @@ import com.kge.energy.crm.common.util.RedisLockUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.contract.req.*;
 import com.kge.energy.crm.contract.resp.ScServiceContractResp;
+import com.kge.energy.crm.enums.BizFunctionEnums;
+import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.ScContractEvaluateDao;
 import com.kge.energy.crm.repository.dao.ScServiceContractDao;
 import com.kge.energy.crm.repository.dao.WfFormDao;
@@ -55,6 +58,8 @@ public class ScServiceContractService {
 
     private final RedisLockUtils redisLockUtils;
 
+    private final DataPermissionDomainService dataPermissionDomainService;
+
     /**
      * 获取服务合同列表
      *
@@ -71,18 +76,17 @@ public class ScServiceContractService {
         //超管super_admin和集团客服jt_customer，可查看全部服务合同
         //二级公司客服sub_company_customer，仅可查看自己创建的服务合同
         wxUserWorkOrderParam.setRoleCodes(currentUserInfo.getRoleCodes());
-        IPage<ContractResult> pages = scServiceContractDao.contractPageByUserIdLoad(reqIpage, wxUserWorkOrderParam);
+
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+
+        IPage<ContractResult> pages = scServiceContractDao.getPage(reqIpage, wxUserWorkOrderParam, userInfoDto, dataEnums);
         List<ScServiceContractResp> resps = BeanUtil.copyToList(pages.getRecords(), ScServiceContractResp.class);
         return new PageResp<ScServiceContractResp>()
                 .setList(resps)
                 .setCurrentPage(pages.getCurrent())
                 .setPageSize(pages.getSize())
                 .setTotal(pages.getTotal());
-    }
-
-    public List<ScServiceContractResp> getContractByFormId(ScServiceContractDetailReq req) {
-        List<ContractResult> contracts = scServiceContractDao.form(req.getFormId());
-        return BeanUtil.copyToList(contracts, ScServiceContractResp.class);
     }
 
     @Transactional

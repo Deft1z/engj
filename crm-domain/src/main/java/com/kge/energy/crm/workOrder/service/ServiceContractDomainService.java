@@ -10,12 +10,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.BizFunctionEnums;
+import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishMsgReq;
 import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishValueReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.ScServiceContractDao;
 import com.kge.energy.crm.repository.dao.WfFormDao;
@@ -50,9 +53,13 @@ public class ServiceContractDomainService {
     private final ScServiceContractDao scServiceContractDao;
     private final WeChatAppletProperties weChatAppletProperties;
     private final WeChatAppletInfraService weChatAppletInfraService;
+    private final DataPermissionDomainService dataPermissionDomainService;
 
     public List<ServiceContractResp> getServiceContractList(ServiceContractReq req) {
-        List<ContractResult> resultList = scServiceContractDao.form(req.getFormId());
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+
+        List<ContractResult> resultList = scServiceContractDao.form(req.getFormId(), userInfoDto, dataEnums);
         return BeanUtil.copyToList(resultList, ServiceContractResp.class);
     }
 

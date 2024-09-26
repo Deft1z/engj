@@ -242,7 +242,7 @@
             </when>
             <when test="dataEnums != null and dataEnums.getCode() == 2">
                 /*数据范围：集团*/
-                and a.tenant_id = 1
+                and a.tenant_id = #{userInfo.tenantId}
             </when>
             <when test="dataEnums != null and dataEnums.getCode() == 3">
                 /*数据范围：公司*/

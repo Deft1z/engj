@@ -358,7 +358,8 @@ public class WorkOrderDomainService {
         Integer customerUserId = wfForm.getCreateUserId();
 
         //判断合同是否全部已竣工
-        List<ContractResult> resultList = scServiceContractDao.form(formId);
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+        List<ContractResult> resultList = scServiceContractDao.form(formId, operator, dataEnums);
         if (resultList.stream().anyMatch(contractResult -> contractResult.getStatus().equals(ConstParam.ContractNotBegin) ||
                 contractResult.getStatus().equals(ConstParam.ContractUnderWay))) {
             throw new ServiceException("该工单有未竣工合同，不能完成工单!");
