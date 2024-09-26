@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.enums.CmsCommentBizTypeEnums;
+import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entityext.param.CmsCommentParam;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
@@ -40,10 +41,6 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         return res;
     }
 
-    public List<FlowResult> getFlowByFormId(Integer formId) {
-        return mapper.getFlowByFormId(formId);
-    }
-
     public Long findOrderNum(String startTime, String endTime) {
         return mapper.findOrderNum(startTime, endTime);
     }
@@ -53,12 +50,12 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
     }
 
     public IPage<FormResult> findListForWx(IPage<WorkOrderListParam> reqIpage, WorkOrderListParam workOrderListParam,
-                                           UserInfoDto userInfoDto) {
-        return mapper.findListForWx(reqIpage, workOrderListParam, userInfoDto);
+                                           UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.findListForWx(reqIpage, workOrderListParam, userInfoDto, dataEnums);
     }
 
-    public List<FlowResult> getFlowByFormIdForWx(Integer formId, UserInfoDto userInfoDto) {
-        List<FlowResult> list = mapper.getFlowByFormIdForWx(formId, userInfoDto);
+    public List<FlowResult> getFlowByFormId(Integer formId, UserInfoDto userInfoDto) {
+        List<FlowResult> list = mapper.getFlowByFormId(formId, userInfoDto);
         for(FlowResult flowResult : list){
             CmsCommentParam param = new CmsCommentParam(flowResult.getFormFlowId(), CmsCommentBizTypeEnums.ORDER.getCode());
             List<CmsCommentResult> commentResultList = commentMapper.getCmsCommentList(param);

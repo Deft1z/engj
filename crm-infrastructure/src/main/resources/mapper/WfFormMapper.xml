@@ -152,19 +152,6 @@
         order by a.time_submit DESC
     </select>
 
-    <select id="getFlowByFormId" resultType="com.kge.energy.crm.repository.entityext.result.FlowResult">
-        select form_flow_id,
-               form_id,
-               DATE_FORMAT(time_action, '%Y-%m-%d %T') AS time_action,
-               user_id,
-               action_type,
-               action_content,
-               status,
-               `sub_status`
-        from wf_form_flow
-        where form_id = #{formId}
-    </select>
-
     <select id="findOrderNum" resultType="java.lang.Long">
         select count(*)
         from wf_form
@@ -246,16 +233,26 @@
             and a.tenant_id = #{listParam.tenantId}
         </if>
         <choose>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
-                /*管理员和集团客服可查看全部数据*/
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
             </when>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = 1
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
                 and a.current_org_id in
                 <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
                     #{org.id}
                 </foreach>
             </when>
             <otherwise>
+                /*数据范围：个人*/
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
@@ -282,7 +279,7 @@
         order by a.modify_time desc
     </select>
 
-    <select id="getFlowByFormIdForWx" resultType="com.kge.energy.crm.repository.entityext.result.FlowResult">
+    <select id="getFlowByFormId" resultType="com.kge.energy.crm.repository.entityext.result.FlowResult">
         select wf.form_flow_id,
                wf.form_id,
                DATE_FORMAT(wf.time_action, '%Y-%m-%d %T') AS time_action,

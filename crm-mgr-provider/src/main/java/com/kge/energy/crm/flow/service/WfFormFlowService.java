@@ -36,12 +36,6 @@ public class WfFormFlowService {
         return wfFormDao.findList(reqIpage, workOrderListParam, userInfoDto);
     }
 
-
-
-    public List<FlowResult> getFlowByFormId(Integer formId) {
-        return wfFormDao.getFlowByFormId(formId);
-    }
-
     public IPage<FormResult> getWxUserWorkOrder(IPage<WxUserWorkOrderParam> reqIpage,WxUserWorkOrderParam wxUserWorkOrderParam) {
         return wfFormDao.findWxUserWorkOrder(reqIpage,wxUserWorkOrderParam);
     }

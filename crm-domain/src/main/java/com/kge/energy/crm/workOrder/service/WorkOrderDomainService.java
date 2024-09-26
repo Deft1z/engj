@@ -161,9 +161,6 @@ public class WorkOrderDomainService {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
 
-        DataPermissionRangeTypeEnums dataPermissionRangeTypeEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
-
-
         if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
             throw new ServiceException("非法请求，不允许查看其他租户信息");
         }
@@ -175,8 +172,9 @@ public class WorkOrderDomainService {
 
         IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
         WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
 
-        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
+        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto, dataEnums);
         List<WfFormPageResp> resps = BeanUtil.copyToList(pages.getRecords(), WfFormPageResp.class);
 
         return new PageResp<WfFormPageResp>()
@@ -189,15 +187,12 @@ public class WorkOrderDomainService {
 
     public WfFormFlowResp getFlowByFormId (WfFormFlowReq req) {
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
-        List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), operator);
+        List<FlowResult> list = wfFormDao.getFlowByFormId(req.getFormId(), operator);
         if (CollUtil.isEmpty(list)) {
             throw new ServiceException("权限不足!");
         }
 
         List<WfFormFlowListResp> wfFormFlowListRespList = BeanUtil.copyToList(list, WfFormFlowListResp.class);
-
-        //获取当前节点的type
-        String latestActionType = wfFormFlowListRespList.get(wfFormFlowListRespList.size() - 1).getActionType();
 
         //返回工单操作按钮
         List<BaseButton> buttonList = new ArrayList<>();
