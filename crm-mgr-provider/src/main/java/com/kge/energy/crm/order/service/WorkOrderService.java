@@ -100,12 +100,6 @@ public class WorkOrderService {
 //                .setTotal(pages.getTotal());
 //    }
 
-    public List<FlowResp> getFlowByFormId(GetFlowByFormIdReq req) {
-        UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
-        List<FlowResult> results = wfFormDao.getFlowByFormIdForWx(req.getFormId(), userInfo);
-        return BeanUtil.copyToList(results, FlowResp.class);
-    }
-
     /**
      * 分派工单 终止工单 处理工单
      * 暂时不重构，待上流程引擎

@@ -172,35 +172,6 @@ public class ConsultingService {
         return code;
     }
 
-//    public PageResp<WfFormPageResp> getByPage(WfFormPageReq req) {
-//        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-//        Assert.notNull(userInfoDto);
-//
-//        IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
-//        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
-//        //限制数据查询范围，设置租户id
-//        workOrderListParam.setTenantId(UserInfoContextUtils.getCurrentTenantId());
-//        log.info("==> workOrderListParam= {}", workOrderListParam);
-//
-//        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
-//        List<WfFormPageResp> resps = BeanUtil.copyToList(pages.getRecords(), WfFormPageResp.class);
-//
-//        return new PageResp<WfFormPageResp>()
-//                .setList(resps)
-//                .setCurrentPage(pages.getCurrent())
-//                .setPageSize(pages.getSize())
-//                .setTotal(pages.getTotal());
-//    }
-
-    public List<WfFormFlowListResp> getFlowByFormId(WfFormFlowReq req) {
-        UserInfoDto userInfo = UserInfoContextUtils.getCurrentUserInfo();
-        List<FlowResult> list = wfFormDao.getFlowByFormIdForWx(req.getFormId(), userInfo);
-        if (list.isEmpty()) {
-            throw new ServiceException("权限不足!");
-        }
-        return BeanUtil.copyToList(list, WfFormFlowListResp.class);
-    }
-
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean update(ConsultingUpdateReq req) {
         LocalDateTime now = LocalDateTime.now();
