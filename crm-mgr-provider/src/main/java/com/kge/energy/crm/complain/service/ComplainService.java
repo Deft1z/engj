@@ -9,18 +9,22 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
+import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.complain.req.ComplainListReq;
 import com.kge.energy.crm.complain.req.ComplainReplyReq;
 import com.kge.energy.crm.complain.resp.ComplainListResp;
+import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.ComplainStatusEnums;
+import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.req.complain.ReplyComplainData;
 import com.kge.energy.crm.external.wechat.applet.req.complain.ReplyComplainReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.WComplainDao;
 import com.kge.energy.crm.repository.dao.WComplainFlowDao;
@@ -51,15 +55,16 @@ public class ComplainService {
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final WeChatAppletProperties wechatAppletProperties;
     private final BUserDao bUserDao;
+    private final DataPermissionDomainService dataPermissionDomainService;
 
     public PageResp<ComplainListResp> getComplainList(ComplainListReq req) {
         //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
-            req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
-        }
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许查看其他租户信息");
-        }
+//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+//            req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
+//        }
+//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
+//            throw new ServiceException("非法请求，不允许查看其他租户信息");
+//        }
 
         ComplainListParam complainListParam = BeanUtil.copyProperties(req, ComplainListParam.class);
         Opt.ofNullable(req.getSearchMap()).ifPresent(map -> {
@@ -68,11 +73,13 @@ public class ComplainService {
         });
 
         //小程序用户只能看自己提的投诉单
-        if (AuthVerifyUtils.isOnlyAppletUser()) {
-            complainListParam.setCreateUserId(UserInfoContextUtils.getCurrentUserId());
-        }
+//        if (AuthVerifyUtils.isOnlyAppletUser()) {
+//            complainListParam.setCreateUserId(UserInfoContextUtils.getCurrentUserId());
+//        }
 
-        Page<ComplainResult> complainResultPage = wComplainDao.getComplainList(complainListParam);
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
+        Page<ComplainResult> complainResultPage = wComplainDao.getComplainList(complainListParam, userInfoDto, dataEnums);
         List<ComplainListResp> complainListRespList = complainResultPage.getRecords()
                 .stream()
                 .map(complainResult -> BeanUtil.copyProperties(complainResult, ComplainListResp.class))

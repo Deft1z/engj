@@ -82,20 +82,44 @@
                 GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name
             )
         ) AS rs
-        <where>
-            <if test="param.tenantId != null">
-                and tenant_id = #{param.tenantId}
-            </if>
-            <if test="param.status != null">
-                and rs.status = #{param.status}
-            </if>
-            <if test="param.name != null and param.name != ''">
-                and ( rs.subject like CONCAT('%',#{param.name},'%') or rs.content like CONCAT('%',#{param.name},'%') )
-            </if>
-            <if test="param.createUserId != null">
-                and rs.create_user_id = #{param.createUserId}
-            </if>
-        </where>
+        where rs.flag = 1
+        <if test="param.tenantId != null">
+            and rs.tenant_id = #{param.tenantId}
+        </if>
+        <if test="param.status != null">
+            and rs.status = #{param.status}
+        </if>
+        <if test="param.name != null and param.name != ''">
+            and ( rs.subject like CONCAT('%',#{param.name},'%') or rs.content like CONCAT('%',#{param.name},'%') )
+        </if>
+        <if test="param.createUserId != null">
+            and rs.create_user_id = #{param.createUserId}
+        </if>
+
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and rs.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and rs.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and rs.organization_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and rs.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
         ORDER BY rs.create_time DESC
     </select>
 
@@ -136,20 +160,27 @@
         from w_complain a
         left join (<include refid="extend_complain_info"/>) as b on b.complain_id = a.complain_id
         where a.flag = 1
-        <if test="userInfo.tenantId != null">
-            and a.tenant_id = #{userInfo.tenantId}
-        </if>
         <choose>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
-                /*管理员和集团客服可查看全部数据*/
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
             </when>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
                 and a.organization_id in
                 <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
                     #{org.id}
                 </foreach>
             </when>
             <otherwise>
+                /*数据范围：个人*/
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>

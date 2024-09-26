@@ -7,6 +7,9 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.complain.req.ComplainAddReq;
 import com.kge.energy.crm.complain.resp.ComplainFormResp;
+import com.kge.energy.crm.enums.BizFunctionEnums;
+import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
+import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.RFormConsultComplainDao;
 import com.kge.energy.crm.repository.dao.WComplainDao;
@@ -39,6 +42,8 @@ public class ComplainService {
 
     private final BUserDao bUserDao;
 
+    private final DataPermissionDomainService dataPermissionDomainService;
+
     public PageResp<ComplainFormResp> getByPage(WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
 
@@ -46,7 +51,9 @@ public class ComplainService {
         WorkOrderListParam listParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
         log.info("==> workOrderListParam= {}", listParam);
 
-        Page<ComplainResult> pages = wComplainDao.getComplainListForWx(page, listParam, userInfoDto);
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
+
+        Page<ComplainResult> pages = wComplainDao.getComplainListForWx(page, listParam, userInfoDto, dataEnums);
         List<ComplainFormResp> resps = BeanUtil.copyToList(pages.getRecords(), ComplainFormResp.class);
 
         return new PageResp<ComplainFormResp>()
