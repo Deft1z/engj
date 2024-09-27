@@ -16,6 +16,7 @@ import com.kge.energy.crm.repository.mapper.BUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,15 +29,15 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
 
     private final BUserMapper mapper;
 
-    public BUser findUserByOpenId(String openId) {
+    public List<BUser> findUserByOpenId(String openId) {
         if (Objects.equals(openId, "")) {
-            return null;
+            return Collections.EMPTY_LIST;
         }
 
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
                 .eq(BUser::getOpenId, openId);
 
-        return mapper.selectOne(wrapper, false);
+        return mapper.selectList(wrapper);
     }
 
 
