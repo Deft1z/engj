@@ -23,14 +23,6 @@ public class UserService {
 
     private final BUserDao bUserDao;
 
-    public List<BUser> findByPhone(String phone) {
-        return bUserDao.findByPhone(phone);
-    }
-
-    public String findShareUser(List<Integer> userIdList, Integer appid) {
-        return bUserDao.findShareUser(userIdList, appid);
-    }
-
     public Boolean updateWxUser(UpdateWxUserReq req) {
 
         if (ObjUtil.notEqual(UserInfoContextUtils.getCurrentUserId(), req.getUserId())) {
