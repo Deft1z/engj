@@ -8,9 +8,6 @@ import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
-/**
- * @author wangjihua
- */
 @Data
 @Accessors(chain = true)
 @Schema(name = "用户消息列表请求参数", description = "用户消息列表请求参数")
