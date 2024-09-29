@@ -2,6 +2,7 @@ package com.kge.energy.crm.complain.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.complain.req.ComplainListExportReq;
 import com.kge.energy.crm.complain.req.ComplainListReq;
 import com.kge.energy.crm.complain.req.ComplainReplyReq;
 import com.kge.energy.crm.complain.resp.ComplainListResp;
@@ -31,6 +32,12 @@ public class ComplainController {
     @PostMapping("/feedback/insert")
     public CommonResult<Boolean> replyComplain(@Validated @RequestBody ComplainReplyReq complainReplyReq) {
         return CommonResult.suc(complainService.replyComplain(complainReplyReq));
+    }
+
+    @ConvertToGoFormats
+    @PostMapping("/complain/export")
+    public CommonResult<Boolean> exportComplainList(@RequestBody ComplainListExportReq complainListExportReq) {
+        return CommonResult.suc(complainService.exportComplainList(complainListExportReq));
     }
 
 }

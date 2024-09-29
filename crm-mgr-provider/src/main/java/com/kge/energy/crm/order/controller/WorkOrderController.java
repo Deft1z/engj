@@ -4,6 +4,7 @@ import com.kge.energy.crm.comment.req.WfFormCommentReq;
 import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.order.req.WorkOrderExportReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
@@ -46,6 +47,16 @@ public class WorkOrderController {
     @PostMapping("/order")
     public CommonResult<PageResp<WfFormPageResp>> getByPage(@Validated @RequestBody WfFormPageReq req) {
         return CommonResult.suc(workOrderDomainService.getByPage(req));
+    }
+
+
+    /*
+     *  工单列表导出
+     * */
+    @ConvertToGoFormats
+    @PostMapping("/order/export")
+    public CommonResult<Boolean> workOrderExport(@Validated @RequestBody WorkOrderExportReq req) {
+        return CommonResult.suc(workOrderService.exportWorkOrder(req));
     }
 
 

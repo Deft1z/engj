@@ -4,15 +4,22 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.converters.longconverter.LongStringConverter;
+import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.common.util.ExcelUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.complain.req.ComplainListExportReq;
 import com.kge.energy.crm.complain.req.ComplainListReq;
 import com.kge.energy.crm.complain.req.ComplainReplyReq;
 import com.kge.energy.crm.complain.resp.ComplainListResp;
@@ -40,7 +47,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -154,4 +163,39 @@ public class ComplainService {
 
     }
 
+    /*
+        投诉列表导出
+     */
+    public Boolean exportComplainList(ComplainListExportReq req){
+        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
+//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+//            req.setTenantId(userInfoDto.getTenantId());
+//        }
+//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
+//            throw new ServiceException("非法请求，不允许查看其他租户信息");
+//        }
+        //请求参数
+        ComplainListParam complainListParam = BeanUtil.copyProperties(req, ComplainListParam.class);
+        Opt.ofNullable(req.getSearchMap()).ifPresent(map -> {
+            Opt.ofBlankAble(map.getName()).ifPresent(complainListParam::setName);
+            Opt.ofNullable(map.getStatus()).ifPresent(status -> complainListParam.setStatus(ComplainStatusEnums.getCodeByDesc(status)));
+        });
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        Assert.notNull(userInfoDto);
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
+        //执行查询
+        List<ComplainResult> complainListBySearch = wComplainDao.getComplainListForExport(complainListParam,userInfoDto,dataEnums);
+        if(ObjUtil.isNotEmpty(complainListBySearch)) {
+            // 当前默认路径为用户桌面
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+            String formattedDateTime = now.format(formatter);
+            String fileName = System.getProperty("user.home") + File.separator +
+                    "Desktop" + File.separator + formattedDateTime + "ComplainListExport.xlsx";
+            EasyExcel.write(fileName, ComplainResult.class)
+                    .sheet("投诉列表导出数据")
+                    .doWrite(complainListBySearch);
+        }
+        return true;
+    }
 }

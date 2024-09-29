@@ -10,6 +10,8 @@ import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.complain.ComplainResult;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * 投诉反馈(WComplain)表数据库接口层
  */
@@ -23,6 +25,11 @@ public interface WComplainMapper extends BaseMapper<WComplain> {
                                                 @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
 
     public ComplainResult getComplain(Integer complainId);
+
+    public List<ComplainResult> getComplainListForExport(@Param("param") ComplainListParam complainListParam,
+                                                         @Param("userInfo") UserInfoDto userInfo,
+                                                         @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+
 
     public Page<ComplainResult> getComplainListForWx(@Param("page") Page<WorkOrderListParam> page,
                                                      @Param("listParam") WorkOrderListParam listParam,

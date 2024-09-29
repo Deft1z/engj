@@ -12,6 +12,8 @@ import com.kge.energy.crm.repository.mapper.WComplainMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 投诉反馈(WComplain)表数据库访问层
  */
@@ -33,6 +35,11 @@ public class WComplainDao extends ServiceImpl<WComplainMapper, WComplain> {
 
     public ComplainResult getComplain(Integer complainId) {
         return mapper.getComplain(complainId);
+    }
+
+    public List<ComplainResult> getComplainListForExport(ComplainListParam param,UserInfoDto userInfo,
+                                                         DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.getComplainListForExport(param,userInfo,dataEnums);
     }
 
     public Page<ComplainResult> getComplainListForWx(Page<WorkOrderListParam> page, WorkOrderListParam listParam,
