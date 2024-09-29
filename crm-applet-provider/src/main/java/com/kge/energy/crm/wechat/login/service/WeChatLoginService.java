@@ -1,6 +1,7 @@
 package com.kge.energy.crm.wechat.login.service;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Opt;
@@ -103,27 +104,35 @@ public class WeChatLoginService {
 //        }
 
             //根据openid查找小程序用户
-            user = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
+            List<BUser> bUsers = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
-            if (ObjectUtil.isNotNull(user)) {
+            if (CollectionUtil.isNotEmpty(bUsers)) {
+                user = bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getMobile(), req.getMobile()))
+                        .findFirst()
+                        .orElse(null);
+                if (ObjectUtil.isNull(user)) {
+                    user = bUsers.get(0);
+                }
                 //判断是否禁用
                 if (ObjectUtil.equal(user.getStatus(), 1)) {
                     throw new ServiceException("账号已禁用");
                 }
-                //统计每日登录
-                String key = user.getUserId() + "_" + LocalDateTimeUtil.format(LocalDate.now(), "yyyy_MM_dd");
-                String hashKey = redisFront + "dailyLoginCount";
-                stringRedisTemplate.opsForHash().increment(key, hashKey, 1);
 
             } else {
                 // 新用户默认挂靠到南投-未挂靠组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
             }
 
-            String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
+            String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT,
+                    TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
 
             user.setLastLoginTime(LocalDateTime.now());
             bUserDao.updateById(user);
+
+            //统计每日登录
+            String key = user.getUserId() + "_" + LocalDateTimeUtil.format(LocalDate.now(), "yyyy_MM_dd");
+            String hashKey = redisFront + "dailyLoginCount";
+            stringRedisTemplate.opsForHash().increment(key, hashKey, 1);
 
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.SUCCESS, null);
@@ -155,7 +164,7 @@ public class WeChatLoginService {
 
         BUser bUser = new BUser()
                 .setOpenId(openId)
-                .setMobile(mobile)
+                .setMobile(StrUtil.isNotBlank(mobile) ? mobile : null)
                 .setStatus(0)
                 .setFlag(1)
                 .setTenantId(defaultTenantId);
@@ -240,7 +249,7 @@ public class WeChatLoginService {
         }
 
         // openid 只存在一个用户，且手机号为空
-        if (userList.size() == 1 && ObjectUtil.isNull(userList.get(0).getMobile())) {
+        if (userList.size() == 1 && StrUtil.isBlank(userList.get(0).getMobile())) {
             bUser = userList.get(0);
             bUser.setMobile(mobile);
 

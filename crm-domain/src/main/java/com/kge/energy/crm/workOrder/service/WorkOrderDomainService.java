@@ -30,6 +30,7 @@ import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties
 import com.kge.energy.crm.external.wechat.applet.req.FormStatusChangeMsgReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
@@ -43,6 +44,8 @@ import com.kge.energy.crm.workOrder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
+import com.kge.energy.msg.dto.UserContactDto;
+import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +60,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -88,6 +92,8 @@ public class WorkOrderDomainService {
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final ElinkService elinkService;
     private final DataPermissionDomainService dataPermissionDomainService;
+    private final UserDomainService userDomainService;
+    private final MsgDomainService msgDomainService;
 
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean addWorkOrder(WorkOrderAddReq req) {
@@ -315,8 +321,7 @@ public class WorkOrderDomainService {
                 .setStatus(ConstParam.FlowCompanyProcess)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
-                .setTenantId(operator.getTenantId())
-                .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
+                .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
         //TODO: 发送微信小程序消息通知提单的客户

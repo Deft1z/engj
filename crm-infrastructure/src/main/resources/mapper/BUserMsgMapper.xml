@@ -16,23 +16,35 @@
     </resultMap>
 
     <select id="getUserAlatmMsgList" resultType="com.kge.energy.crm.repository.entityext.result.UserMsgListResult">
-        select b.id, b.msg_biz_id, b.path_type, b.content, b.is_read
-        from b_user_msg b
-        where b.user_id = #{param.userId}
-        and b.msg_biz_type = #{param.msgBizType}
-
-        <if test="param.alarmLevel != null and param.alarmLevel != ''">
-            and b.content ->> '$.alarmLevel' = #{param.alarmLevel}
-        </if>
-
+        select bum.*
+        from b_user_msg bum
+        where bum.msg_biz_type = #{param.msgBizType}
+        and json_unquote(json_extract(bum.content, '$.format')) is not null
         <if test="param.startTime != null">
-            and #{param.startTime} &lt;= STR_TO_DATE(b.content ->> '$.alarmTime', '%Y-%m-%d %H:%i:%s')
+            and bum.create_time &gt;= #{param.startTime}
         </if>
-
         <if test="param.endTime != null">
-            and STR_TO_DATE(b.content ->> '$.alarmTime', '%Y-%m-%d %H:%i:%s') &lt;= #{param.endTime}
+            and bum.create_time &lt;= #{param.endTime}
         </if>
-
+        /* 超级管理员和租户管理员可查询全部数据 */
+        <choose>
+            <when test="param.roleCodes != null and param.roleCodes.contains('super_admin') or param.roleCodes.contains('tenant_admin')">
+                and 1 = 1
+            </when>
+            <otherwise>
+                and bum.user_id = #{param.userId}
+            </otherwise>
+        </choose>
+        /* msgBizType: 0 告警信息 1 工单通知 2 项目合同 3 投诉处理 */
+        <choose>
+            <when test="param.msgBizType == '0'.toString() and param.alarmLevel != null and param.alarmLevel != ''">
+                and json_unquote(json_extract(bum.content, '$.alarmLevel')) = #{param.alarmLevel}
+            </when>
+            <when test="param.msgBizType == '1'.toString() and param.functionName != null and param.functionName != ''">
+                and json_unquote(json_extract(bum.content, '$.functionName')) = #{param.functionName}
+            </when>
+        </choose>
+        order by bum.create_time desc
     </select>
 
 </mapper>
