@@ -165,9 +165,9 @@ public class WorkOrderDomainService {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
 
-        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
-            throw new ServiceException("非法请求，不允许查看其他租户信息");
-        }
+//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
+//            throw new ServiceException("非法请求，不允许查看其他租户信息");
+//        }
 
         //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
         if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
