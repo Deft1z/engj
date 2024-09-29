@@ -12,6 +12,7 @@ import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
+import com.kge.energy.crm.repository.entityext.result.FormWithdrawReturnResult;
 import com.kge.energy.crm.repository.mapper.CmsCommentMapper;
 import com.kge.energy.crm.repository.mapper.WfFormMapper;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,11 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
     public IPage<FormResult> findListForWx(IPage<WorkOrderListParam> reqIpage, WorkOrderListParam workOrderListParam,
                                            UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
         return mapper.findListForWx(reqIpage, workOrderListParam, userInfoDto, dataEnums);
+    }
+
+    public IPage<FormWithdrawReturnResult> findWithdrawReturnList(IPage<WorkOrderListParam> reqIpage, WorkOrderListParam listParam,
+                                                                  UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.findWithdrawReturnList(reqIpage, listParam, userInfoDto, dataEnums);
     }
 
     public List<FlowResult> getFlowByFormId(Integer formId, UserInfoDto userInfoDto) {

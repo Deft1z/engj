@@ -34,14 +34,12 @@ import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
-import com.kge.energy.crm.repository.entityext.result.ContractResult;
-import com.kge.energy.crm.repository.entityext.result.FlowResult;
-import com.kge.energy.crm.repository.entityext.result.FormResult;
-import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
@@ -135,6 +133,7 @@ public class WorkOrderDomainService {
         wfFormFlow.setSubStatus(ConstParam.FlowTagGroup);
         wfFormFlow.setCreateUserId(operator.getUserId().intValue());
         wfFormFlow.setTenantId(operator.getTenantId());
+        wfFormFlow.setServiceUnitId(1);
         wfFormFlowDao.save(wfFormFlow);
 
         //todo 使用流程引擎替换现有的流程业务
@@ -183,6 +182,21 @@ public class WorkOrderDomainService {
                 .setPageSize(pages.getSize())
                 .setTotal(pages.getTotal());
 
+    }
+
+    public PageResp<FormWithdrawReturnResp> findWithdrawReturnList(WfFormPageReq req) {
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        Assert.notNull(userInfoDto);
+        IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
+        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
+        IPage<FormWithdrawReturnResult> pages = wfFormDao.findWithdrawReturnList(reqIpage, workOrderListParam, userInfoDto, dataEnums);
+        List<FormWithdrawReturnResp> resps = BeanUtil.copyToList(pages.getRecords(), FormWithdrawReturnResp.class);
+        return new PageResp<FormWithdrawReturnResp>()
+                .setList(resps)
+                .setCurrentPage(pages.getCurrent())
+                .setPageSize(pages.getSize())
+                .setTotal(pages.getTotal());
     }
 
     public WfFormFlowResp getFlowByFormId (WfFormFlowReq req) {
@@ -301,7 +315,8 @@ public class WorkOrderDomainService {
                 .setStatus(ConstParam.FlowCompanyProcess)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
 
         //TODO: 发送微信小程序消息通知提单的客户
@@ -340,7 +355,8 @@ public class WorkOrderDomainService {
                 .setStatus(ConstParam.FlowHasFeedback)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
@@ -387,7 +403,8 @@ public class WorkOrderDomainService {
                 .setStatus(ConstParam.FlowFinished)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
@@ -406,8 +423,8 @@ public class WorkOrderDomainService {
         Integer customerUserId = wfForm.getCreateUserId();
         //终止工单
         LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
-                .set(WfForm::getStatus, ConstParam.Finished)
-                .set(WfForm::getSubStatus, ConstParam.Finished)
+                .set(WfForm::getStatus, ConstParam.Terminated)
+                .set(WfForm::getSubStatus, ConstParam.Terminated)
                 .set(WfForm::getTimeFinished, now)
                 .set(WfForm::getModifyUserId, operatorUserId)
                 .set(WfForm::getCurrentOrgId, req.getCurrentOrgId())
@@ -419,12 +436,13 @@ public class WorkOrderDomainService {
                 .setFormId(formId)
                 .setUserId(operatorUserId.intValue())
                 .setTimeAction(now)
-                .setActionType(ConstParam.FlowFinished)
+                .setActionType(ConstParam.FlowTerminatedd)
                 .setActionContent(req.getContent())
-                .setStatus(ConstParam.FlowFinished)
+                .setStatus(ConstParam.FlowTerminatedd)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
         //终止合同
         LambdaUpdateWrapper<ScServiceContract> sscUpdateWrapper = Wrappers.<ScServiceContract>update().lambda()
@@ -455,6 +473,7 @@ public class WorkOrderDomainService {
         String formContent = wfForm.getContent();
         Integer formCurrentOrgId = wfForm.getCurrentOrgId();
         Integer customerUserId = wfForm.getCreateUserId();
+
         //撤回到集团客服处理
         Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
@@ -472,11 +491,12 @@ public class WorkOrderDomainService {
                 .setFormId(formId)
                 .setUserId(operatorUserId.intValue())
                 .setTimeAction(now)
-                .setActionType(ConstParam.FlowGroupProcess)
+                .setActionType(ConstParam.GroupWithdraw)
                 .setActionContent(req.getContent())
-                .setStatus(ConstParam.FlowGroupProcess)
+                .setStatus(ConstParam.FlowGroupWithdraw)
                 .setCreateUserId(operatorUserId.intValue())
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(formCurrentOrgId);
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
@@ -544,11 +564,12 @@ public class WorkOrderDomainService {
                 .setFormId(formId)
                 .setUserId(operatorUserId.intValue())
                 .setTimeAction(now)
-                .setActionType(ConstParam.FlowGroupProcess)
+                .setActionType(ConstParam.CompanyReturn)
                 .setActionContent(req.getContent())
-                .setStatus(ConstParam.FlowGroupProcess)
+                .setStatus(ConstParam.FlowCompanyReturn)
                 .setCreateUserId(operatorUserId.intValue())
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户

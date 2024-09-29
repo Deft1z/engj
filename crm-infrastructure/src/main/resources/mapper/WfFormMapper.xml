@@ -201,24 +201,32 @@
                 <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
                     (case
                         when a.`status` = '处理中' or a.`status` = '已处理' then '已处理'
+                        when a.status = '已完结' then '已完结'
+                        when a.status = '已终止' then '已终止'
                         else (case when a.`status` = '已终止' then '已终止' else '待处理' end)
                     end) as user_status
                 </when>
                 <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer')">
                     (case
                         when (a.`status` = '处理中' and a.`sub_status` = '待处理')  then '待处理'
+                        when a.status = '已完结' then '已完结'
+                        when a.status = '已终止' then '已终止'
                         else (case when a.`status` = '已终止' then '已终止' else '已处理' end)
                     end) AS user_status
                 </when>
                 <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('applet_user')">
                     (case
-                        when a.`sub_status` = '待处理' then '待处理'
+                        when a.`sub_status` = '待处理' then '处理中'
+                        when a.status = '已完结' then '已完结'
+                        when a.status = '已终止' then '已终止'
                         else (case when a.`status` = '已终止' then '已终止' else '已处理' end)
                     end) AS user_status
                 </when>
                 <otherwise>
                     (case
                         when a.`sub_status` = '待处理'  then '待处理'
+                        when a.status = '已完结' then '已完结'
+                        when a.status = '已终止' then '已终止'
                         else (case when a.`status` = '已终止' then '已终止' else '已处理' end)
                     end) AS user_status
                 </otherwise>
@@ -321,6 +329,47 @@
             </otherwise>
         </choose>
         order by wf.time_action asc
+    </select>
+
+    <select id="findWithdrawReturnList" resultType="com.kge.energy.crm.repository.entityext.result.FormWithdrawReturnResult">
+        select
+            wf.form_id,
+            json_unquote(json_extract(wf.content, '$.businessName')) AS business_name,  json_unquote(json_extract(wf.content, '$.code')) AS code,
+            DATE_FORMAT(wf.time_submit, '%Y-%m-%d %T') AS time_submit,
+            DATE_FORMAT(wff.modify_time, '%Y-%m-%d %T') AS modify_time,
+            bo.name as company_name,
+            wff.action_content,
+            wff.`status`
+        from wf_form_flow wff
+        left join wf_form wf on wf.form_id = wff.form_id
+        left join b_organization bo on bo.organization_id = wff.service_unit_id
+        where wf.flag = 1
+        and wff.`status` in ('已撤回', '已退回')
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and wf.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and wf.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and wff.service_unit_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and wf.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+        order by wff.modify_time desc
     </select>
 
 </mapper>

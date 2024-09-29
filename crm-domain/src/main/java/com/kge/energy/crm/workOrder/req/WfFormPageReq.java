@@ -48,6 +48,9 @@ public class WfFormPageReq extends PageReq {
 
         @Schema(description = "业务名称")
         private String businessName;
+
+        @Schema(description = "服务单位id")
+        private Integer serviceUnitId;
     }
     
 }

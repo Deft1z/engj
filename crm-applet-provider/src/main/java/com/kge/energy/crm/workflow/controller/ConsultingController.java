@@ -9,6 +9,7 @@ import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workOrder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
@@ -56,6 +57,13 @@ public class ConsultingController {
         } else {
             return this.getByPage(req);
         }
+    }
+
+    @Operation(summary = "获取撤回退回工单列表")
+    @PostMapping(value = "/getFormWithdrawReturnPage")
+    @ConvertToGoFormats
+    public PageResp<FormWithdrawReturnResp> getWithdrawReturnList(@RequestBody WfFormPageReq req) {
+        return workOrderDomainService.findWithdrawReturnList(req);
     }
 
     @Operation(summary = "分页获取工单列表")

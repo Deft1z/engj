@@ -113,7 +113,8 @@ public class ServiceContractDomainService {
                 .setActionType(ConstParam.FlowCompanyContract)
                 .setActionContent(req.getRemark())
                 .setStatus(ConstParam.FlowCompanyContract)
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
 
         return true;
