@@ -31,7 +31,7 @@ public class UserMsgController {
 
     @Operation(summary = "消息列表导出")
     @PostMapping(value = "/list/export")
-    public void export(@Validated @RequestBody UserMsgListReq req, HttpServletResponse response) {
+    public void export(@RequestBody UserMsgListReq req, HttpServletResponse response) {
         userMsgService.exportList(response, req);
     }
 

@@ -35,10 +35,13 @@ public class UserMsgService {
 
     @SneakyThrows
     public void exportList(HttpServletResponse response, UserMsgListReq req) {
+        if (req.getPageSize() > 5000) {
+            throw new ServiceException("导出数据量不得超过5000，请重新选择导出数据范围");
+        }
         List<UserMsgListResult> list = getUserAlatmMsgList(req).getRecords();
         //数据转换
         List<UserMsgExcelResp> excelList = new ArrayList<>();
-        for (UserMsgListResult userMsg : list){
+        for (UserMsgListResult userMsg : list) {
             UserMsgExcelResp excelResp = new UserMsgExcelResp();
             excelResp.setRealname(userMsg.getRealname());
             excelResp.setMsgBizType(userMsg.getMsgBizType());

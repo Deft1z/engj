@@ -1,8 +1,6 @@
 package com.kge.energy.crm.msg.resp;
 
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.alibaba.excel.annotation.write.style.ContentStyle;
-import com.alibaba.excel.enums.BooleanEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -24,16 +22,14 @@ public class UserMsgExcelResp {
     @ExcelProperty("消息类型")
     private String msgBizType;
 
-    @Schema(description = "消息内容")
-    @ExcelProperty("消息内容")
-    @ContentStyle(wrapped = BooleanEnum.TRUE, shrinkToFit = BooleanEnum.TRUE)
-    private String content;
-
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "消息时间")
     @ExcelProperty("消息时间")
-    @ContentStyle(shrinkToFit = BooleanEnum.TRUE)
     private LocalDateTime createTime;
+
+    @Schema(description = "消息内容")
+    @ExcelProperty("消息内容")
+    private String content;
 
     public void setMsgBizType(Integer msgBizType) {
         if (msgBizType.equals(0)){
