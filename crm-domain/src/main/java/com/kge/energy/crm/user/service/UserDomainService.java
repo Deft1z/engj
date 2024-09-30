@@ -93,9 +93,11 @@ public class UserDomainService {
         String lastTokenKey = String.format(TokenConstant.LAST_TOKEN_CACHE_KEY, systemTypeEnum.getCode(), user.getUserId());
         String lastToken = redisUtils.get(lastTokenKey);
 
+        List<String> deleteLastTokenEnvs = List.of("dev", "test");
+
         if (StrUtil.isNotBlank(lastToken)) {
             //如果是dev环境不删除旧的token
-            if (!StrUtil.equals(env, "dev") && deleteLastToken) {
+            if (!deleteLastTokenEnvs.contains(env) && deleteLastToken) {
                 redisUtils.delete(authTokenKeyPrefix + lastToken);
             }
         }
@@ -107,6 +109,7 @@ public class UserDomainService {
 
     /**
      * 根据用户ID获取用户的联系方式
+     *
      * @param userId
      * @param tenantId
      * @return
@@ -118,6 +121,7 @@ public class UserDomainService {
 
     /**
      * 根据角色code获取用户的联系方式
+     *
      * @param roleCode
      * @param tenantId
      * @return
@@ -129,6 +133,7 @@ public class UserDomainService {
 
     /**
      * 跟进角色code和组织ID获取用户的联系方式
+     *
      * @param roleCode
      * @param tenantId
      * @return
