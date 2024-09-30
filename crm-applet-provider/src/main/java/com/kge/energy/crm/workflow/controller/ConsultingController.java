@@ -62,8 +62,8 @@ public class ConsultingController {
     @Operation(summary = "获取撤回退回工单列表")
     @PostMapping(value = "/getFormWithdrawReturnPage")
     @ConvertToGoFormats
-    public PageResp<FormWithdrawReturnResp> getWithdrawReturnList(@RequestBody WfFormPageReq req) {
-        return workOrderDomainService.findWithdrawReturnList(req);
+    public CommonResult<PageResp<FormWithdrawReturnResp>> getWithdrawReturnList(@RequestBody WfFormPageReq req) {
+        return CommonResult.suc(workOrderDomainService.findWithdrawReturnList(req));
     }
 
     @Operation(summary = "分页获取工单列表")
