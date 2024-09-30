@@ -18,7 +18,7 @@ public class DataPermissionListResp {
     @Schema(description = "业务功能配置ID")
     private Integer bizFunctionId;
 
-    @Schema(description = "角色ID集合")
+    @Schema(description = "角色ID")
     private Integer roleId;
 
     @Schema(description = "数据权限范围类型：0-所有，1-租户，2-集团，3-公司，4-部门，5-个人")
