@@ -105,8 +105,36 @@ public class UserDomainService {
         return authToken;
     }
 
-    public List<UserContactDto> getUserContact(Integer userId, String roleCode, Integer organizationId, Integer tenantId) {
-        List<BUser> userContact = bUserDao.getUserContact(userId, roleCode, organizationId, tenantId);
+    /**
+     * 根据用户ID获取用户的联系方式
+     * @param userId
+     * @param tenantId
+     * @return
+     */
+    public List<UserContactDto> getUserContact(Integer userId, Integer tenantId) {
+        List<BUser> userContact = bUserDao.getUserContact(userId, null, null, tenantId);
+        return BeanUtil.copyToList(userContact, UserContactDto.class);
+    }
+
+    /**
+     * 根据角色code获取用户的联系方式
+     * @param roleCode
+     * @param tenantId
+     * @return
+     */
+    public List<UserContactDto> getUserContact(String roleCode, Integer tenantId) {
+        List<BUser> userContact = bUserDao.getUserContact(null, roleCode, null, tenantId);
+        return BeanUtil.copyToList(userContact, UserContactDto.class);
+    }
+
+    /**
+     * 跟进角色code和组织ID获取用户的联系方式
+     * @param roleCode
+     * @param tenantId
+     * @return
+     */
+    public List<UserContactDto> getUserContact(String roleCode, Integer organizationId, Integer tenantId) {
+        List<BUser> userContact = bUserDao.getUserContact(null, roleCode, organizationId, tenantId);
         return BeanUtil.copyToList(userContact, UserContactDto.class);
     }
 
