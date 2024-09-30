@@ -45,6 +45,7 @@ import com.kge.energy.crm.workOrder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
+import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -145,18 +147,20 @@ public class WorkOrderDomainService {
 
 
         //发送消息，通知集团客服
-        final String msgTitle = activeProfile.contains("prod") ? "工单待处理通知" : "工单待处理通知（体验版）";
-        String msgContent = "工单名称：" + content.getBusinessName() + "\\n" +
-                "所在地区：" + content.getArea() + "\\n" +
-                "用电容量(kVA)：" + content.getElectricityCapacity() + "\\n" +
-                "工单编号：" + content.getCode() + "\\n" +
-                "生成时间：" + now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) + "\\n" +
-                "客户名称：" + content.getCustomerName() + "\\n" +
-                "客户手机：" + content.getMobile() + "\\n" +
-                "备注：" + req.getRemark();
-        //获取集团客服人员手机号
-        List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
-        sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContent);
+        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
+        msgDomainService.sendCrmMsg(new BizOrderCreateMsgParam()
+                .setOrderName(content.getBusinessName())
+                .setArea(content.getArea())
+                .setElectricityCapacity(content.getElectricityCapacity())
+                .setOrderCode(content.getCode())
+                .setCreateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                .setCustomerName(content.getCustomerName())
+                .setMobile(content.getMobile())
+                .setRemark(req.getRemark())
+                .setPathUrl(null)
+                .setTenantId(operator.getTenantId())
+                .setNotifyUsers(userContact)
+        );
 
         return true;
     }
@@ -326,7 +330,18 @@ public class WorkOrderDomainService {
         //TODO: 发送微信小程序消息通知提单的客户
 
         //发送elink消息通知，通知二级公司客服
-        sendSubCompanyCustomerElinkMsg(wfForm, assignUsers, now);
+        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
+        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), req.getCurrentOrgId(), operator.getTenantId());
+        msgDomainService.sendCrmMsg(new BizOrderAssignMsgParam()
+                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
+                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
+                .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                .setCustomerName(Optional.ofNullable(content.get("customerName")).map(String::valueOf).orElse(null))
+                .setMobile(Optional.ofNullable(content.get("mobile")).map(String::valueOf).orElse(null))
+                .setPathUrl(null)
+                .setTenantId(operator.getTenantId())
+                .setNotifyUsers(userContact)
+        );
 
         return true;
     }
@@ -364,7 +379,19 @@ public class WorkOrderDomainService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
-        sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.FlowHasFeedback);
+        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
+        List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
+        msgDomainService.sendCrmMsg(new BizOrderHandleMsgParam()
+                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
+                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
+                .setServiceUnit(bOrganizationDao.getById(req.getCurrentOrgId()).getName())
+                .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                .setStatus(ConstParam.FlowHasFeedback)
+                .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                .setPathUrl(null)
+                .setTenantId(operator.getTenantId())
+                .setNotifyUsers(userContact)
+        );
 
         return true;
     }
@@ -412,7 +439,19 @@ public class WorkOrderDomainService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
-        sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.FlowFinished);
+        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
+        List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
+        msgDomainService.sendCrmMsg(new BizOrderFinishMsgParam()
+                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
+                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
+                .setServiceUnit(bOrganizationDao.getById(req.getCurrentOrgId()).getName())
+                .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                .setStatus(ConstParam.FlowFinished)
+                .setFinishTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                .setPathUrl(null)
+                .setTenantId(operator.getTenantId())
+                .setNotifyUsers(userContact)
+        );
 
         return true;
     }
@@ -456,7 +495,20 @@ public class WorkOrderDomainService {
         scServiceContractDao.update(sscUpdateWrapper);
 
         //发送微信小程序消息，通知客户
-        sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.Finished);
+        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
+        List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
+        msgDomainService.sendCrmMsg(new BizOrderTerminateMsgParam()
+                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
+                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
+                .setServiceUnit(bOrganizationDao.getById(req.getCurrentOrgId()).getName())
+                .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                .setStatus(ConstParam.FlowFinished)
+                .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                .setPathUrl(null)
+                .setTenantId(operator.getTenantId())
+                .setNotifyUsers(userContact)
+        );
+
 
         return true;
     }
@@ -507,29 +559,32 @@ public class WorkOrderDomainService {
         sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.SendBack);
 
         //发送elink消息，通知集团客服
-        final String msgTitle = activeProfile.contains("prod") ? "工单撤回通知" : "工单撤回通知（体验版）";
         JSONObject content = JSONUtil.parseObj(formContent);
-        StringBuilder msgContentBuilder = new StringBuilder();
-        msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
-        msgContentBuilder.append("工单编号：").append(content.get("code")).append("\\n");
-        msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
-        msgContentBuilder.append("派发公司：").append(content.get("companyName")).append("\\n");
-        msgContentBuilder.append("撤回原因：").append(req.getContent());
-        //获取集团客服人员手机号
-        List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
-        sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContentBuilder.toString());
+        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
+        msgDomainService.sendCrmMsg(new BizOrderReturnMsgParam()
+                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
+                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
+                .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                .setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null))
+                .setContent(req.getContent())
+                .setPathUrl(null)
+                .setTenantId(operator.getTenantId())
+                .setNotifyUsers(userContact)
+        );
 
         //若集团客服撤回工单，需通知二级公司客服
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.toString())) {
-            msgContentBuilder = new StringBuilder();
-            msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
-            msgContentBuilder.append("工单编号：").append(content.get("code")).append("\\n");
-            msgContentBuilder.append("撤回时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
-            msgContentBuilder.append("撤回人员：").append(RoleEnums.JT_CUSTOMER.getDesc()).append("\\n");
-            msgContentBuilder.append("撤回原因：").append(req.getContent());
-            //获取二级公司客服人员手机号
-            phones = bUserDao.findSubCustomerPhones(formCurrentOrgId, operator.getTenantId());
-            sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContentBuilder.toString());
+            userContact = userDomainService.getUserContact(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), formCurrentOrgId, operator.getTenantId());
+            msgDomainService.sendCrmMsg(new BizOrderWithdrawMsgParam()
+                    .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
+                    .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
+                    .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setOperator(RoleEnums.JT_CUSTOMER.getDesc())
+                    .setContent(req.getContent())
+                    .setPathUrl(null)
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+            );
         }
 
         return true;
@@ -580,16 +635,18 @@ public class WorkOrderDomainService {
         sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.SendBack);
 
         //发送elink消息，通知集团客服
-        final String msgTitle = activeProfile.contains("prod") ? "工单撤回通知" : "工单撤回通知（体验版）";
         JSONObject content = JSONUtil.parseObj(formContent);
-        String msgContentBuilder = "工单名称：" + content.get("businessName") + "\\n" +
-                "工单编号：" + content.get("code") + "\\n" +
-                "撤回时间：" + now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) + "\\n" +
-                "派发公司：" + content.get("companyName") + "\\n" +
-                "撤回原因：" + req.getContent();
-        //获取集团客服人员手机号
-        List<String> phones = bUserDao.findJtCustomerPhones(operator.getTenantId());
-        sendGroupCustomerElinkMsg(wfForm, phones, msgTitle, msgContentBuilder);
+        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
+        msgDomainService.sendCrmMsg(new BizOrderReturnMsgParam()
+                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
+                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
+                .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                .setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null))
+                .setContent(req.getContent())
+                .setPathUrl(null)
+                .setTenantId(operator.getTenantId())
+                .setNotifyUsers(userContact)
+        );
 
         return true;
     }
@@ -623,60 +680,6 @@ public class WorkOrderDomainService {
         });
     }
 
-    @Async
-    private void sendSubCompanyCustomerElinkMsg (WfForm wfForm, List<RoleUserResult> assignUsers, LocalDateTime now) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                final String msgTitle = activeProfile.contains("prod") ? "工单待处理通知" : "工单待处理通知（体验版）";
-                JSONObject content = JSONUtil.parseObj(wfForm.getContent());
-                StringBuilder msgContentBuilder = new StringBuilder();
-                msgContentBuilder.append("工单名称：").append(content.get("businessName")).append("\\n");
-                msgContentBuilder.append("工单编号：").append(content.get("code")).append("\\n");
-                msgContentBuilder.append("派发时间：").append(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN))).append("\\n");
-                msgContentBuilder.append("客户名称：").append(content.get("customerName")).append("\\n");
-                msgContentBuilder.append("客户手机：").append(content.get("mobile")).append("\\n");
-
-                for (RoleUserResult user : assignUsers) {
-                    if (PhoneUtil.isPhone(user.getMobile())) {
-                        String msgContent = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), msgTitle, msgContentBuilder.toString(), user.getMobile());
-                        log.info("==> 发送elink消息内容：{}", msgContent);
-                        if (activeProfile.contains("dev")) {
-                            log.info("<== 当前环境为dev，不发送elink消息");
-                        } else {
-                            String result = elinkService.pushElinkMsg(msgContent);
-                            log.info("<== 发送elink消息响应：{}", result);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.error("sendElinkMsg formId {} error: ", wfForm.getFormId(), e);
-            }
-        });
-    }
-
-    @Async
-    private void sendGroupCustomerElinkMsg(WfForm wfForm, List<String> phones, String msgTitle, String msgContent) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                //获取当前环境
-                for (String phone : phones) {
-                    if (PhoneUtil.isPhone(phone)) {
-                        String msgBody = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), msgTitle, msgContent, phone);
-                        log.info("==> 发送elink消息内容：{}", msgBody);
-                        if (activeProfile.contains("dev")) {
-                            log.info("<== 当前环境为dev，不发送elink消息");
-                        } else {
-                            String result = elinkService.pushElinkMsg(msgBody);
-                            log.info("<== 发送elink消息响应：{}", result);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.error("sendElinkMsg formId {} error: ", wfForm.getFormId(), e);
-            }
-        });
-
-    }
 
     private String genOrderCode() {
         //生成工单编号 yyyyMMdd+4位随机数
