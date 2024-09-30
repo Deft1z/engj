@@ -46,6 +46,7 @@ public class DataPermissionService {
         List<DataPermissionListResp> list = page.getRecords()
                 .stream()
                 .map(cfDataPermission -> new DataPermissionListResp()
+                        .setId(cfDataPermission.getId())
                         .setBizFunctionId(cfDataPermission.getId())
                         .setRoleId(cfDataPermission.getRoleId())
                         .setDataRangeType(cfDataPermission.getDataRangeType())
