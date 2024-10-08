@@ -16,6 +16,7 @@ import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.common.util.ExcelUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
@@ -36,6 +37,7 @@ import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.common.net.CommonResult;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -43,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -108,16 +111,9 @@ public class WorkOrderService {
     /*
         工单导出
      */
-    public Boolean exportWorkOrder(WorkOrderExportReq req) {
+    public Boolean exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
-        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
-//            req.setTenantId(userInfoDto.getTenantId());
-//        }
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
-//            throw new ServiceException("非法请求，不允许查看其他租户信息");
-//        }
         //获取筛选条件下的工单列表 (复用分页查询 size设为INT_MAX)
         IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), Integer.MAX_VALUE);
         WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
@@ -125,7 +121,7 @@ public class WorkOrderService {
         IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto,dataEnums);
         List<WfFormPageResp> formList = BeanUtil.copyToList(pages.getRecords(), WfFormPageResp.class);
 
-        //通过工单id获取所有合同
+        //通过工单id获取工单对应的所有合同
         Map<Integer, List<ContractResult>> formIdtoContractList = new HashMap<>();
         formList.forEach(form ->{
             List<ContractResult> contractResults = scServiceContractDao.form(form.getFormId(),userInfoDto,dataEnums);
@@ -157,18 +153,20 @@ public class WorkOrderService {
                 exportDtoList.add(wfFormExportDto);
             }
         });
-        //TODO 当前默认路径为用户桌面
-        if(ObjUtil.isNotEmpty(exportDtoList)){
-            LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-            String formattedDateTime = now.format(formatter);
-            String fileName = System.getProperty("user.home") + File.separator +
-                    "Desktop" + File.separator + formattedDateTime + "WorkOrderListExport.xlsx";
-            log.error(fileName);
-            EasyExcel.write(fileName, WfFormExportDto.class)
-                    .sheet("导出工单列表数据")
-                    .doWrite(exportDtoList);
-        }
+        //ExcelUtils写excel 响应给前端
+        ExcelUtils.write(response,"工单列表数据.xlsx","工单列表数据",WfFormExportDto.class,exportDtoList);
+//        if(ObjUtil.isNotEmpty(exportDtoList)){
+//            LocalDateTime now = LocalDateTime.now();
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+//            String formattedDateTime = now.format(formatter);
+//            String fileName = System.getProperty("user.home") + File.separator +
+//                    "Desktop" + File.separator + formattedDateTime + "WorkOrderListExport.xlsx";
+//            log.error(fileName);
+//            ExcelUtils.write(response,fileName,"导出工单列表数据",WfFormExportDto.class,exportDtoList);
+//            EasyExcel.write(fileName, WfFormExportDto.class)
+//                    .sheet("导出工单列表数据")
+//                    .doWrite(exportDtoList);
+//        }
         return true;
     }
 

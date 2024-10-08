@@ -41,6 +41,7 @@ import com.kge.energy.crm.repository.entity.WComplainFlow;
 import com.kge.energy.crm.repository.entityext.param.ComplainListParam;
 import com.kge.energy.crm.repository.entityext.result.complain.ComplainResult;
 import com.kge.platform.framework.common.exception.ServiceException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -166,7 +168,7 @@ public class ComplainService {
     /*
         投诉列表导出
      */
-    public Boolean exportComplainList(ComplainListExportReq req){
+    public Boolean exportComplainList(HttpServletResponse response, ComplainListExportReq req) throws IOException {
         //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
 //        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
 //            req.setTenantId(userInfoDto.getTenantId());
@@ -185,17 +187,18 @@ public class ComplainService {
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
         //执行查询
         List<ComplainResult> complainListBySearch = wComplainDao.getComplainListForExport(complainListParam,userInfoDto,dataEnums);
-        if(ObjUtil.isNotEmpty(complainListBySearch)) {
-            // 当前默认路径为用户桌面
-            LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-            String formattedDateTime = now.format(formatter);
-            String fileName = System.getProperty("user.home") + File.separator +
-                    "Desktop" + File.separator + formattedDateTime + "ComplainListExport.xlsx";
-            EasyExcel.write(fileName, ComplainResult.class)
-                    .sheet("投诉列表导出数据")
-                    .doWrite(complainListBySearch);
-        }
+        //ExcelUtils工具类写excel 响应给前端
+        ExcelUtils.write(response,"投诉列表数据.xlsx","投诉列表数据", ComplainResult.class,complainListBySearch);
+//        if(ObjUtil.isNotEmpty(complainListBySearch)) {
+//            LocalDateTime now = LocalDateTime.now();
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+//            String formattedDateTime = now.format(formatter);
+//            String fileName = System.getProperty("user.home") + File.separator +
+//                    "Desktop" + File.separator + formattedDateTime + "ComplainListExport.xlsx";
+//            EasyExcel.write(fileName, ComplainResult.class)
+//                    .sheet("投诉列表导出数据")
+//                    .doWrite(complainListBySearch);
+//        }
         return true;
     }
 }

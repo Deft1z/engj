@@ -8,12 +8,16 @@ import com.kge.energy.crm.complain.req.ComplainReplyReq;
 import com.kge.energy.crm.complain.resp.ComplainListResp;
 import com.kge.energy.crm.complain.service.ComplainService;
 import com.kge.platform.framework.common.net.CommonResult;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.net.http.HttpResponse;
 
 @RestController
 @RequestMapping("/workMgrBack/complainBack")
@@ -34,10 +38,11 @@ public class ComplainController {
         return CommonResult.suc(complainService.replyComplain(complainReplyReq));
     }
 
+    //投诉列表导出
     @ConvertToGoFormats
     @PostMapping("/complain/export")
-    public CommonResult<Boolean> exportComplainList(@RequestBody ComplainListExportReq complainListExportReq) {
-        return CommonResult.suc(complainService.exportComplainList(complainListExportReq));
+    public CommonResult<Boolean> exportComplainList(HttpServletResponse httpResponse, @RequestBody ComplainListExportReq complainListExportReq) throws IOException {
+        return CommonResult.suc(complainService.exportComplainList(httpResponse,complainListExportReq));
     }
 
 }

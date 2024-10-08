@@ -16,6 +16,7 @@ import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
 import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 
 /**
  * 工单管理
@@ -49,14 +52,13 @@ public class WorkOrderController {
         return CommonResult.suc(workOrderDomainService.getByPage(req));
     }
 
-
     /*
-     *  工单列表导出
+     * 工单列表导出
      * */
     @ConvertToGoFormats
     @PostMapping("/order/export")
-    public CommonResult<Boolean> workOrderExport(@Validated @RequestBody WorkOrderExportReq req) {
-        return CommonResult.suc(workOrderService.exportWorkOrder(req));
+    public CommonResult<Boolean> workOrderExport(HttpServletResponse response , @Validated @RequestBody WorkOrderExportReq req) throws IOException {
+        return CommonResult.suc(workOrderService.exportWorkOrder(response,req));
     }
 
 
