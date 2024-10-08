@@ -29,7 +29,7 @@ public enum RoleEnums {
 
     private final String desc;
 
-    public static RoleEnums getByCode(Integer code) {
+    public static RoleEnums getByCode(String code) {
         return Arrays.stream(values())
                 .filter(e -> Objects.equals(e.getCode(), code))
                 .findFirst()

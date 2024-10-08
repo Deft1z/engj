@@ -33,10 +33,12 @@
           and cbf.id = cdp.biz_function_id
           and cbf.tenant_id = #{tenantId}
           and cbf.function_code = #{functionCode}
-          and cdp.role_id in
+        <if test="roleIds != null and roleIds.size > 0">
+            and cdp.role_id in
             <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
                 #{item}
             </foreach>
+        </if>
         order by cdp.priority desc
     </select>
 </mapper>
