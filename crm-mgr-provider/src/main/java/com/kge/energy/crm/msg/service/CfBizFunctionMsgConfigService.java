@@ -7,7 +7,6 @@ import com.kge.energy.crm.msg.req.BizFunctionMsgConfigAddReq;
 import com.kge.energy.crm.repository.dao.CfBizFunctionMsgDao;
 import com.kge.energy.crm.repository.entity.CfBizFunctionMsg;
 import com.kge.energy.crm.repository.entityext.result.CfBizFunctionMsgResult;
-import com.kge.platform.framework.web.util.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,8 @@ public class CfBizFunctionMsgConfigService {
 
     private final CfBizFunctionMsgDao cfBizFunctionMsgDao;
 
-    public List<CfBizFunctionMsgResult> getFunctionConfigs(Integer bizFunctionId, Integer tenantId){
-        return cfBizFunctionMsgDao.getFunctionConfigs(bizFunctionId,tenantId);
+    public List<CfBizFunctionMsgResult> getFunctionConfigs(Integer bizFunctionId, Integer tenantId) {
+        return cfBizFunctionMsgDao.getFunctionConfigs(bizFunctionId, tenantId);
     }
 
     @Transactional
@@ -47,8 +46,8 @@ public class CfBizFunctionMsgConfigService {
             for (BizFunctionMsgConfigAddReq.MsgConfigAddReq msgConfig : bizFunctionMsgConfig.getMsgConfigs()) {
                 cfBizFunctionMsgDao.save(new CfBizFunctionMsg()
                         .setBizFunctionId(bizFunctionMsgConfig.getBizFunctionId())
-                        .setBlacklist(JsonUtils.serialize(msgConfig.getBlacklist()))
-                        .setWhitelist(JsonUtils.serialize(msgConfig.getWhitelist()))
+                        .setBlacklist(msgConfig.getBlacklist())
+                        .setWhitelist(msgConfig.getWhitelist())
                         .setPriority(msgConfig.getPriority())
                         .setEnabled(msgConfig.getEnabled())
                         .setMsgChannelId(msgConfig.getMsgChannelId())

@@ -32,10 +32,10 @@ public class BizFunctionMsgConfigAddReq {
         private Integer msgChannelId;
 
         @Schema(description = "黑名单,userIds")
-        private List<Integer> blacklist;
+        private String blacklist;
 
         @Schema(description = "白名单,userIds")
-        private List<Integer> whitelist;
+        private String whitelist;
 
         @Schema(description = "通知优先等级")
         private Integer priority;
