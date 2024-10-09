@@ -38,7 +38,6 @@
         <if test="bizFunctionId != null">
             and cbfm.biz_function_id = #{bizFunctionId}
         </if>
-        group by smc.id, smc.channel_code, smc.channel_name, smc.remark, cbfm.blacklist, cbfm.whitelist, cbfm.priority,cbfm.is_enabled
         order by cbfm.priority, smc.id
     </select>
 
