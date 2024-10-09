@@ -9,6 +9,7 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.property.AuthProperties;
 import com.kge.energy.crm.common.util.RedisUtils;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.enums.SystemTypeEnum;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BUserDao;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -122,24 +124,32 @@ public class UserDomainService {
     /**
      * 根据角色code获取用户的联系方式
      *
-     * @param roleCode
+     * @param roleEnums
      * @param tenantId
      * @return
      */
-    public List<UserContactDto> getUserContact(String roleCode, Integer tenantId) {
-        List<BUser> userContact = bUserDao.getUserContact(null, roleCode, null, tenantId);
+    public List<UserContactDto> getUserContact(List<RoleEnums> roleEnums, Integer tenantId) {
+        if(roleEnums.isEmpty()){
+            return Collections.emptyList();
+        }
+        List<String> roleCods = roleEnums.stream().map(RoleEnums::getCode).toList();
+        List<BUser> userContact = bUserDao.getUserContact(null, roleCods, null, tenantId);
         return BeanUtil.copyToList(userContact, UserContactDto.class);
     }
 
     /**
      * 跟进角色code和组织ID获取用户的联系方式
      *
-     * @param roleCode
+     * @param roleEnums
      * @param tenantId
      * @return
      */
-    public List<UserContactDto> getUserContact(String roleCode, Integer organizationId, Integer tenantId) {
-        List<BUser> userContact = bUserDao.getUserContact(null, roleCode, organizationId, tenantId);
+    public List<UserContactDto> getUserContact(List<RoleEnums> roleEnums, Integer organizationId, Integer tenantId) {
+        if(roleEnums.isEmpty()){
+            return Collections.emptyList();
+        }
+        List<String> roleCods = roleEnums.stream().map(RoleEnums::getCode).toList();
+        List<BUser> userContact = bUserDao.getUserContact(null, roleCods, organizationId, tenantId);
         return BeanUtil.copyToList(userContact, UserContactDto.class);
     }
 

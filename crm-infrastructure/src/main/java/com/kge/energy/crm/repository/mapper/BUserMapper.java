@@ -48,6 +48,6 @@ public interface BUserMapper extends BaseMapper<BUser> {
 
     IPage<BUser> findAppletUser(Page<BUser> page, @Param("tenantId") Integer tenantId, @Param("name") String name);
 
-    List<BUser> getUserContact(@Param("userId") Integer userId, @Param("roleCode") String roleCode, @Param("organizationId") Integer organizationId, @Param("tenantId") Integer tenantId);
+    List<BUser> getUserContact(@Param("userId") Integer userId, @Param("roleCodes") List<String> roleCodes, @Param("organizationId") Integer organizationId, @Param("tenantId") Integer tenantId);
 }
 
