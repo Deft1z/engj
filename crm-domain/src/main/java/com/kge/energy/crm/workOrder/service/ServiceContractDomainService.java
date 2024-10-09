@@ -29,6 +29,7 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.workOrder.req.ServiceContractAddReq;
+import com.kge.energy.crm.workOrder.req.ServiceContractDetailReq;
 import com.kge.energy.crm.workOrder.req.ServiceContractReq;
 import com.kge.energy.crm.workOrder.req.ServiceContractUpdateProjectTimeReq;
 import com.kge.energy.crm.workOrder.resp.ServiceContractResp;
@@ -61,6 +62,13 @@ public class ServiceContractDomainService {
 
         List<ContractResult> resultList = scServiceContractDao.form(req.getFormId(), userInfoDto, dataEnums);
         return BeanUtil.copyToList(resultList, ServiceContractResp.class);
+    }
+
+    public ServiceContractResp getContractDetailByContractId(ServiceContractDetailReq req){
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+        ContractResult contractResult = scServiceContractDao.getContractDetailByContractId(req.getContractId(), userInfoDto, dataEnums);
+        return BeanUtil.copyProperties(contractResult, ServiceContractResp.class);
     }
 
     public Boolean addServiceContract(ServiceContractAddReq req) {

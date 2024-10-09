@@ -51,5 +51,11 @@ public class ScServiceContractDao extends ServiceImpl<ScServiceContractMapper, S
         return mapper.getPage(page, listParam, userInfoDto, dataEnums);
     }
 
+    public ContractResult getContractDetailByContractId(Integer contractId,
+                                                        UserInfoDto userInfoDto,
+                                                        DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.getContractDetailByContractId(contractId, userInfoDto, dataEnums);
+    }
+
 }
 

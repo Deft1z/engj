@@ -33,5 +33,9 @@ public interface ScServiceContractMapper extends BaseMapper<ScServiceContract> {
     public Long findContractNum(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     public Long findNewContractCount(@Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    public ContractResult getContractDetailByContractId(@Param("contractId") Integer contractId,
+                                                        @Param("userInfo") UserInfoDto userInfoDto,
+                                                        @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
 }
 

@@ -6,6 +6,7 @@ import com.kge.energy.crm.contract.req.*;
 import com.kge.energy.crm.contract.resp.ScServiceContractResp;
 import com.kge.energy.crm.contract.service.ScServiceContractService;
 import com.kge.energy.crm.workOrder.req.ServiceContractAddReq;
+import com.kge.energy.crm.workOrder.req.ServiceContractDetailReq;
 import com.kge.energy.crm.workOrder.req.ServiceContractReq;
 import com.kge.energy.crm.workOrder.req.ServiceContractUpdateProjectTimeReq;
 import com.kge.energy.crm.workOrder.resp.ServiceContractResp;
@@ -37,6 +38,13 @@ public class ScServiceContractController {
     @ConvertToGoFormats
     public CommonResult<PageResp<ScServiceContractResp>> getPage(@RequestBody ScServiceContractPageReq req) {
         return CommonResult.suc(scServiceContractService.getPage(req));
+    }
+
+    @Operation(summary = "获取服务合同详情")
+    @PostMapping(value = "/getContractDetailByContractId")
+    @ConvertToGoFormats
+    public CommonResult<ServiceContractResp> getContractDetailByContractId(@RequestBody ServiceContractDetailReq req) {
+        return CommonResult.suc(serviceContractDomainService.getContractDetailByContractId(req));
     }
 
     @Operation(summary = "根据当前工单查询相关的合同")
