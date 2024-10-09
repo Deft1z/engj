@@ -23,11 +23,9 @@ import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishMsgReq;
 import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishValueReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
-import com.kge.energy.crm.order.req.ContractReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.req.contract.CreateContractReq;
 import com.kge.energy.crm.order.req.contract.UpdateProjectTimeReq;
-import com.kge.energy.crm.order.resp.ContractResp;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.dao.ScServiceContractDao;
@@ -73,7 +71,6 @@ public class ContractService {
     public PageResp<ContractResult> contractPageByUserIdLoad(WxUserWorkOrderReq req) {
         IPage<WxUserWorkOrderParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
         WxUserWorkOrderParam wxUserWorkOrderParam = BeanUtil.copyProperties(req, WxUserWorkOrderParam.class);
-        System.out.println("wxUserWorkOrderParam = " + wxUserWorkOrderParam);
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);

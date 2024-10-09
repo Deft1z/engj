@@ -55,10 +55,9 @@ public class WorkOrderController {
     /*
      * 工单列表导出
      * */
-    @ConvertToGoFormats
     @PostMapping("/order/export")
-    public CommonResult<Boolean> workOrderExport(HttpServletResponse response , @Validated @RequestBody WorkOrderExportReq req) throws IOException {
-        return CommonResult.suc(workOrderService.exportWorkOrder(response,req));
+    public CommonResult<Boolean> workOrderExport(HttpServletResponse response, @Validated @RequestBody WorkOrderExportReq req) throws IOException {
+        return CommonResult.suc(workOrderService.exportWorkOrder(response, req));
     }
 
 
@@ -88,9 +87,6 @@ public class WorkOrderController {
     @ConvertToGoFormats
     @PostMapping("/workOrderByUserIdLoad")
     public CommonResult<PageResp<FormResp>> workOrderByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
-        System.out.println("req = " + req);
-        System.out.println("req = " + req.getUserId());
-        System.out.println("req = " + req.getCurrentPage());
         return CommonResult.suc(workOrderService.getWxUserOrder(req));
 
     }
