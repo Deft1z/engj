@@ -25,7 +25,7 @@ public class FormWithdrawReturnResp {
     private String modifyTime;
 
     @Schema(description = "服务单位")
-    private String companyName;
+    private String orgName;
 
     @Schema(description = "原因")
     private String actionContent;

@@ -337,7 +337,7 @@
             json_unquote(json_extract(wf.content, '$.businessName')) AS business_name,  json_unquote(json_extract(wf.content, '$.code')) AS code,
             DATE_FORMAT(wf.time_submit, '%Y-%m-%d %T') AS time_submit,
             DATE_FORMAT(wff.modify_time, '%Y-%m-%d %T') AS modify_time,
-            bo.name as company_name,
+            bo.name as org_name,
             wff.action_content,
             wff.`status`
         from wf_form_flow wff

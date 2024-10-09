@@ -11,7 +11,7 @@ public class FormWithdrawReturnResult {
     private String code;
     private String timeSubmit;
     private String modifyTime;
-    private String companyName;
+    private String orgName;
     private String actionContent;
     private String status;
 }
