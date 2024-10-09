@@ -22,7 +22,8 @@
     </sql>
 
     <select id="getFunctionConfigs" resultType="com.kge.energy.crm.repository.entityext.result.CfBizFunctionMsgResult">
-        select id as msg_channel_id
+        select cbfm.biz_function_id bizFunctionId
+            ,id as msg_channel_id
             , smc.channel_code
             , smc.channel_name
             , smc.remark
