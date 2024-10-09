@@ -164,7 +164,7 @@ public class UserService {
             log.error("pc login error: ", e);
 
             //记录登录失败日志
-            sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
+            sysLoginLogHandleService.saveLoginLog(new BUser().setName(req.getName()), LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
 
             throw new ServiceException("登录失败");
         }
