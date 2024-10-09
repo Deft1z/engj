@@ -109,112 +109,6 @@ public class AppService {
         resp.setContent(content);
 
         return resp;
-
-        //该方法后面userK.getAppid() == 1时写死了当已绑定光伏appid=1时，同时返回电房appid=2的记录，实际数据库关联表并无appid=2的关联记录，所以可认为当查询appid=2时即是查appid=1
-       /* if (appid != null && appid.equals(2)) {
-            appid = 1;
-        }
-        List<OpenIdModelList> users = bAppDao.newList(page, limit, appid, mobile, name);
-        Integer total = bAppDao.newListCount(appid, mobile, name);
-        if (users.size() == 0) {
-            total = 0;
-        }
-        List<BApp> apps = bAppDao.getApps();
-        Map<Integer, Integer> recordMap = new HashMap<>();
-        for (int k = 0; k < apps.size(); k++) {
-            recordMap.put(apps.get(k).getAppId(), k + 1);
-        }
-
-        List<ListContent> result = new ArrayList<>();
-        for (OpenIdModelList userK : users) {
-            Integer projectToAppid = userK.getProaid();
-            if (userK.getFlag() == 1 && userK.getState() == 1 && recordMap.get(userK.getAppid()) > 0) {
-                if (result.size() == 0 || !Objects.equals(userK.getUid(), result.get(result.size() - 1).getUid())) {
-
-                    Project p1 = new Project();
-                    p1.setId(userK.getPid());
-                    p1.setName(userK.getPname());
-
-                    List<App> appsNull = new ArrayList<>();
-                    ListContent c1 = new ListContent();
-                    c1.setUid(userK.getUid());
-                    c1.setName(userK.getRealname());
-                    c1.setMobile(userK.getMobile());
-                    c1.setApps(appsNull);
-
-                    App a1 = new App();
-                    List<Project> pnull = new ArrayList<>();
-
-                    System.out.println("recordMap = "+recordMap);
-                    System.out.println("userK.getAppid() = "+ (userK.getAppid()));
-                    System.out.println("recordMap.get(userK.getAppid()) = "+ recordMap.get(userK.getAppid()));
-                    System.out.println("apps.get(recordMap.get(userK.getAppid())) = "+ recordMap.get(userK.getAppid()));
-                    a1.setName(apps.get(recordMap.get(userK.getAppid()) - 1).getName());
-                    a1.setId(userK.getAppid());
-                    a1.setOid(userK.getOid());
-                    a1.setProjects(pnull);
-
-                    if (p1.getId() != null && userK.getRflag() != -1) {
-                        List<Project> projs = new ArrayList<>();
-                        projs.add(p1);
-                        a1.setProjects(projs);
-                    }
-                    List<App> appList = new ArrayList<>();
-                    appList.add(a1);
-                    c1.setApps(appList);
-                    result.add(c1);
-                    if (userK.getAppid() == 1) {
-                        List<App> tmp = result.get(result.size() - 1).getApps();
-                        App a2 = new App();
-                        a2.setName(apps.get(recordMap.get(2) - 1).getName());
-                        a2.setId(2);
-                        List<Project> pnull2 = new ArrayList<>();
-                        a2.setProjects(pnull2);
-                        a2.setOid(userK.getOid());
-                        tmp.add(a2);
-                        result.get(result.size()-1).setApps(tmp);
-                    }
-                } else {
-                    //同个用户
-                    List<App> tmp = result.get(result.size() - 1).getApps();
-                    boolean find = false;
-                    for (App app : tmp) {
-                        if (Objects.equals(app.getId(), projectToAppid)) {
-                            if (userK.getPid() != 0 && userK.getRflag() != -1) {
-                                List<Project> tmp1 = app.getProjects();
-                                Project project = new Project();
-                                project.setId(userK.getPid());
-                                project.setName(userK.getPname());
-                                tmp1.add(project);
-                                app.setProjects(tmp1);
-                            }
-                            find = true;
-                        }
-                    }
-                    if (!find) {
-                        App tmpApp = new App();
-                        tmpApp.setName(apps.get(recordMap.get(userK.getAppid()) - 1).getName());
-                        tmpApp.setId(userK.getAppid());
-                        tmpApp.setOid(userK.getOid());
-                        if (userK.getPid() != null && userK.getRflag() != -1) {
-                            List<Project> prjs = new ArrayList<>();
-                            Project pj = new Project();
-                            pj.setId(userK.getPid());
-                            pj.setName(userK.getPname());
-                            prjs.add(pj);
-                            tmpApp.setProjects(prjs);
-                        }
-                        tmp.add(tmpApp);
-                    }
-
-                    result.get(result.size() - 1).setApps(tmp);
-                }
-            }
-        }
-        ListResp resp = new ListResp();
-        resp.setContent(result);
-        resp.setTotal(total);
-        return resp;*/
     }
 
     public DetailResp FindBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
@@ -251,7 +145,6 @@ public class AppService {
                 omMap.put(omsk.getUid(), tmp);
             }
         }
-        System.out.println("omMap = " + omMap);
         List<DetailC> result = new ArrayList<>();
         for (OpenShareModelList usersk : users) {
             DetailC content = new DetailC();

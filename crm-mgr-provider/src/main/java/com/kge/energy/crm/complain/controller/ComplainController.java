@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.net.http.HttpResponse;
 
 @RestController
 @RequestMapping("/workMgrBack/complainBack")
@@ -32,17 +31,15 @@ public class ComplainController {
         return CommonResult.suc(complainService.getComplainList(complainListReq));
     }
 
-    @ConvertToGoFormats
     @PostMapping("/feedback/insert")
     public CommonResult<Boolean> replyComplain(@Validated @RequestBody ComplainReplyReq complainReplyReq) {
         return CommonResult.suc(complainService.replyComplain(complainReplyReq));
     }
 
     //投诉列表导出
-    @ConvertToGoFormats
     @PostMapping("/complain/export")
     public CommonResult<Boolean> exportComplainList(HttpServletResponse httpResponse, @RequestBody ComplainListExportReq complainListExportReq) throws IOException {
-        return CommonResult.suc(complainService.exportComplainList(httpResponse,complainListExportReq));
+        return CommonResult.suc(complainService.exportComplainList(httpResponse, complainListExportReq));
     }
 
 }

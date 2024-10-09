@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -164,7 +165,9 @@ public class UserService {
             log.error("pc login error: ", e);
 
             //记录登录失败日志
-            sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
+            sysLoginLogHandleService.saveLoginLog(
+                    Optional.ofNullable(bUser).orElse(new BUser().setName(req.getName())),
+                    LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
 
             throw new ServiceException("登录失败");
         }
