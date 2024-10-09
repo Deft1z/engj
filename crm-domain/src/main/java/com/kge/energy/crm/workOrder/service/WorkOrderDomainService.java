@@ -147,25 +147,27 @@ public class WorkOrderDomainService {
 
 
         //发送消息，通知集团客服
-        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
-        msgDomainService.sendCrmMsg(new BizOrderCreateMsgParam()
-                .setOrderName(content.getBusinessName())
-                .setArea(content.getArea())
-                .setElectricityCapacity(content.getElectricityCapacity())
-                .setOrderCode(content.getCode())
-                .setCreateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                .setCustomerName(content.getCustomerName())
-                .setMobile(content.getMobile())
-                .setRemark(req.getRemark())
-                .setPathUrl(null)
-                .setTenantId(operator.getTenantId())
-                .setNotifyUsers(userContact)
-        );
+        BizOrderCreateMsgParam msgParam = new BizOrderCreateMsgParam();
+        msgParam.setOrderName(content.getBusinessName());
+        msgParam.setArea(content.getArea());
+        msgParam.setElectricityCapacity(content.getElectricityCapacity());
+        msgParam.setOrderCode(content.getCode());
+        msgParam.setCreateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+        msgParam.setCustomerName(content.getCustomerName());
+        msgParam.setMobile(content.getMobile());
+        msgParam.setRemark(req.getRemark());
+        msgParam.setPathUrl(null);
+        msgParam.setTenantId(operator.getTenantId());
+
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+        msgParam.setNotifyUsers(userContact);
+        msgDomainService.sendCrmMsg(msgParam);
 
         return true;
     }
 
-    public PageResp<WfFormPageResp> getByPage (WfFormPageReq req) {
+    public PageResp<WfFormPageResp> getByPage(WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
 
@@ -208,7 +210,7 @@ public class WorkOrderDomainService {
                 .setTotal(pages.getTotal());
     }
 
-    public WfFormFlowResp getFlowByFormId (WfFormFlowReq req) {
+    public WfFormFlowResp getFlowByFormId(WfFormFlowReq req) {
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
         List<FlowResult> list = wfFormDao.getFlowByFormId(req.getFormId(), operator);
         if (CollUtil.isEmpty(list)) {
@@ -331,17 +333,19 @@ public class WorkOrderDomainService {
 
         //发送elink消息通知，通知二级公司客服
         JSONObject content = JSONUtil.parseObj(wfForm.getContent());
-        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), req.getCurrentOrgId(), operator.getTenantId());
-        msgDomainService.sendCrmMsg(new BizOrderAssignMsgParam()
-                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
-                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
-                .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                .setCustomerName(Optional.ofNullable(content.get("customerName")).map(String::valueOf).orElse(null))
-                .setMobile(Optional.ofNullable(content.get("mobile")).map(String::valueOf).orElse(null))
-                .setPathUrl(null)
-                .setTenantId(operator.getTenantId())
-                .setNotifyUsers(userContact)
-        );
+        BizOrderAssignMsgParam msgParam = new BizOrderAssignMsgParam();
+        msgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
+        msgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
+        msgParam.setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+        msgParam.setCustomerName(Optional.ofNullable(content.get("customerName")).map(String::valueOf).orElse(null));
+        msgParam.setMobile(Optional.ofNullable(content.get("mobile")).map(String::valueOf).orElse(null));
+        msgParam.setPathUrl(null);
+        msgParam.setTenantId(operator.getTenantId());
+
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, req.getCurrentOrgId(), operator.getTenantId());
+        msgParam.setNotifyUsers(userContact);
+        msgDomainService.sendCrmMsg(msgParam);
 
         return true;
     }
@@ -560,31 +564,36 @@ public class WorkOrderDomainService {
 
         //发送elink消息，通知集团客服
         JSONObject content = JSONUtil.parseObj(formContent);
-        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
-        msgDomainService.sendCrmMsg(new BizOrderReturnMsgParam()
-                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
-                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
-                .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                .setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null))
-                .setContent(req.getContent())
-                .setPathUrl(null)
-                .setTenantId(operator.getTenantId())
-                .setNotifyUsers(userContact)
-        );
+
+        BizOrderReturnMsgParam msgParam = new BizOrderReturnMsgParam();
+        msgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
+        msgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
+        msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+        msgParam.setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null));
+        msgParam.setContent(req.getContent());
+        msgParam.setPathUrl(null);
+        msgParam.setTenantId(operator.getTenantId());
+
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+        msgParam.setNotifyUsers(userContact);
+        msgDomainService.sendCrmMsg(msgParam);
 
         //若集团客服撤回工单，需通知二级公司客服
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.toString())) {
-            userContact = userDomainService.getUserContact(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), formCurrentOrgId, operator.getTenantId());
-            msgDomainService.sendCrmMsg(new BizOrderWithdrawMsgParam()
-                    .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
-                    .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
-                    .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setOperator(RoleEnums.JT_CUSTOMER.getDesc())
-                    .setContent(req.getContent())
-                    .setPathUrl(null)
-                    .setTenantId(operator.getTenantId())
-                    .setNotifyUsers(userContact)
-            );
+            BizOrderWithdrawMsgParam withdrawMsgParam = new BizOrderWithdrawMsgParam();
+            withdrawMsgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
+            withdrawMsgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
+            withdrawMsgParam.setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            withdrawMsgParam.setOperator(RoleEnums.JT_CUSTOMER.getDesc());
+            withdrawMsgParam.setContent(req.getContent());
+            withdrawMsgParam.setPathUrl(null);
+            withdrawMsgParam.setTenantId(operator.getTenantId());
+
+            roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), withdrawMsgParam.getFunctionCode());
+            userContact = userDomainService.getUserContact(roleEnums, formCurrentOrgId, operator.getTenantId());
+            withdrawMsgParam.setNotifyUsers(userContact);
+            msgDomainService.sendCrmMsg(withdrawMsgParam);
         }
 
         return true;
@@ -636,24 +645,26 @@ public class WorkOrderDomainService {
 
         //发送elink消息，通知集团客服
         JSONObject content = JSONUtil.parseObj(formContent);
-        List<UserContactDto> userContact = userDomainService.getUserContact(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
-        msgDomainService.sendCrmMsg(new BizOrderReturnMsgParam()
-                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
-                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
-                .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                .setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null))
-                .setContent(req.getContent())
-                .setPathUrl(null)
-                .setTenantId(operator.getTenantId())
-                .setNotifyUsers(userContact)
-        );
+        BizOrderReturnMsgParam msgParam = new BizOrderReturnMsgParam();
+        msgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
+        msgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
+        msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+        msgParam.setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null));
+        msgParam.setContent(req.getContent());
+        msgParam.setPathUrl(null);
+        msgParam.setTenantId(operator.getTenantId());
+
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+        msgParam.setNotifyUsers(userContact);
+        msgDomainService.sendCrmMsg(msgParam);
 
         return true;
     }
 
 
     @Async
-    private void sendFormStatusChangeMsg (WorkOrderUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {
+    private void sendFormStatusChangeMsg(WorkOrderUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {
         CompletableFuture.runAsync(() -> {
             try {
                 Long operatorUserId = userInfoDto.getUserId();

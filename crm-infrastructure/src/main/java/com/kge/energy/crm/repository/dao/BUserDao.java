@@ -125,8 +125,8 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.findUserByContractId(scid);
     }
 
-    public List<BUser> getUserContact(Integer userId, String roleCode, Integer organizationId, Integer tenantId) {
-        return mapper.getUserContact(userId, roleCode, organizationId, tenantId);
+    public List<BUser> getUserContact(Integer userId, List<String> roleCodes, Integer organizationId, Integer tenantId) {
+        return mapper.getUserContact(userId, roleCodes, organizationId, tenantId);
     }
 
 }
