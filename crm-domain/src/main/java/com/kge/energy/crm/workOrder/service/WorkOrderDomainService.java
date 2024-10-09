@@ -604,15 +604,23 @@ public class WorkOrderDomainService {
 
     //退回工单：二级公司客服退回给集团客服，form表status和subStatus变为待处理；flow表新增记录status为流转集团处理；下一步由集团客服处理
     private Boolean returnOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
-        if (lastFlowActionType.equals(ConstParam.FlowHasFeedback)) {
-            throw new ServiceException("工单已经回复，不能退回!");
-        }
+//        if (lastFlowActionType.equals(ConstParam.FlowHasFeedback)) {
+//            throw new ServiceException("工单已经回复，不能退回!");
+//        }
         if (lastFlowActionType.equals(ConstParam.FlowGroupProcess)) {
             throw new ServiceException("工单已被撤回，不能重复操作!");
         }
         if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
             throw new ServiceException("工单已完成或终止，不能退回!");
         }
+
+        //添加过合同不能退回
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+        List<ContractResult> resultList = scServiceContractDao.form(req.getFormId(), operator, dataEnums);
+        if(CollUtil.isNotEmpty(resultList)) {
+            throw new ServiceException("工单已添加过合同，不能退回!");
+        }
+
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         String formContent = wfForm.getContent();

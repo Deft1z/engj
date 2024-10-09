@@ -2,6 +2,7 @@ package com.kge.energy.crm.workOrder.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -167,8 +168,12 @@ public class ServiceContractDomainService {
         }
 
         LocalDateTime projectFinishTime = LocalDateTimeUtil.parse(req.getProjectTime(), DatePattern.NORM_DATE_PATTERN);
+        LocalDateTime todayLocalDateTime = LocalDateTimeUtil.parse(DateUtil.now(), DatePattern.NORM_DATE_PATTERN);
         if (contract.getProjectStartTime().isAfter(projectFinishTime)) {
             throw new ServiceException("项目结束时间不能早于项目开始时间!");
+        }
+        if(projectFinishTime.isAfter(todayLocalDateTime)){
+            throw new ServiceException("项目结束时间不能早于当前时间!");
         }
 
         LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda();
