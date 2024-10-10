@@ -297,37 +297,13 @@
                wf.status,
                wf.sub_status
         from wf_form_flow wf
-        <choose>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
-                /*管理员和集团客服可查看全部数据*/
-            </when>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
-                join wf_form w on w.flag =1 and w.form_id = wf.form_id
-            </when>
-            <otherwise>
-                join wf_form w on w.flag =1 and w.form_id = wf.form_id
-                join b_user b ON b.flag = 1 and json_unquote(JSON_EXTRACT(w.content , '$.mobile')) = b.mobile
-            </otherwise>
-        </choose>
+
         where wf.flag = 1
             and wf.form_id = #{formId}
         <if test="userInfo.tenantId != null and !userInfo.roleCodes.contains('super_admin')">
             and wf.tenant_id = #{userInfo.tenantId}
         </if>
-        <choose>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('super_admin') or userInfo.roleCodes.contains('jt_customer')">
-                /*管理员和集团客服可查看全部数据*/
-            </when>
-            <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('sub_company_customer') and userInfo.organizationList.size > 0">
-                and w.current_org_id in
-                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
-                    #{org.id}
-                </foreach>
-            </when>
-            <otherwise>
-                and b.user_id = #{userInfo.userId}
-            </otherwise>
-        </choose>
+
         order by wf.time_action asc
     </select>
 
