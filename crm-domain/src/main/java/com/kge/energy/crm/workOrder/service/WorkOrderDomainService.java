@@ -211,6 +211,11 @@ public class WorkOrderDomainService {
     }
 
     public WfFormFlowResp getFlowByFormId(WfFormFlowReq req) {
+        WfForm wfForm = wfFormDao.getById(req.getFormId());
+        if(ObjectUtil.isNull(wfForm)) {
+            throw new ServiceException("工单不存在!");
+        }
+
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
         List<FlowResult> list = wfFormDao.getFlowByFormId(req.getFormId(), operator);
         if (CollUtil.isEmpty(list)) {
@@ -224,13 +229,37 @@ public class WorkOrderDomainService {
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
             //集团客服按钮
             buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
+
+            //二级公司未处理工单才显示撤回按钮
+            if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
+            }
+
+            //待分派状态才显示分派按钮
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)){
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
+            }
+
         } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
             //二级公司客服按钮
             buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
+
+            //未处理或未添加合同才显示退回按钮
+            if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))
+                    || wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowCompanyContract))) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
+            }
+
+            //工单状态为待处理才显示处理按钮
+            if(StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)){
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
+            }
+
+            //二级公司处理过工单才显示添加合同按钮
+            if (wfFormFlowListRespList.stream().anyMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ADD_SERVICE_CONTRACT));
+            }
+
         }
 
         return new WfFormFlowResp()
