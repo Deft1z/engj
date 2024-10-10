@@ -52,7 +52,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -212,7 +211,7 @@ public class WorkOrderDomainService {
 
     public WfFormFlowResp getFlowByFormId(WfFormFlowReq req) {
         WfForm wfForm = wfFormDao.getById(req.getFormId());
-        if(ObjectUtil.isNull(wfForm)) {
+        if (ObjectUtil.isNull(wfForm)) {
             throw new ServiceException("工单不存在!");
         }
 
@@ -236,7 +235,7 @@ public class WorkOrderDomainService {
             }
 
             //待分派状态才显示分派按钮
-            if(StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)){
+            if (StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)) {
                 buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
             }
 
@@ -251,7 +250,7 @@ public class WorkOrderDomainService {
             }
 
             //工单状态为待处理才显示处理按钮
-            if(StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)){
+            if (StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)) {
                 buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
             }
 
@@ -655,7 +654,7 @@ public class WorkOrderDomainService {
         //添加过合同不能退回
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
         List<ContractResult> resultList = scServiceContractDao.form(req.getFormId(), operator, dataEnums);
-        if(CollUtil.isNotEmpty(resultList)) {
+        if (CollUtil.isNotEmpty(resultList)) {
             throw new ServiceException("工单已添加过合同，不能退回!");
         }
 
@@ -712,7 +711,6 @@ public class WorkOrderDomainService {
     }
 
 
-    @Async
     private void sendFormStatusChangeMsg(WorkOrderUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {
         CompletableFuture.runAsync(() -> {
             try {
