@@ -354,6 +354,15 @@ public class WorkOrderDomainService {
         if (lastFlowActionType.equals(ConstParam.FlowGroupProcess)) {
             throw new ServiceException("工单已经撤回!");
         }
+
+        if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
+            throw new ServiceException("工单已完成，不能再次处理!");
+        }
+
+        if (lastFlowActionType.equals(ConstParam.Terminated)) {
+            throw new ServiceException("工单已终止，不能再次处理!");
+        }
+
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         //二级公司处理工单
