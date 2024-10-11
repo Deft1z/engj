@@ -129,10 +129,13 @@ public class UserDomainService {
      * @return
      */
     public List<UserContactDto> getUserContact(List<RoleEnums> roleEnums, Integer tenantId) {
-        if(roleEnums.isEmpty()){
+        if (roleEnums.isEmpty()) {
             return Collections.emptyList();
         }
-        List<String> roleCods = roleEnums.stream().map(RoleEnums::getCode).toList();
+        //需移除小程序角色，通过该方法会返回所有小程序客户的联系方式，要避免发送消息给全部小程序客户
+        List<String> roleCods = roleEnums.stream()
+                .filter(item -> !item.equals(RoleEnums.APPLET_USER))
+                .map(RoleEnums::getCode).toList();
         List<BUser> userContact = bUserDao.getUserContact(null, roleCods, null, tenantId);
         return BeanUtil.copyToList(userContact, UserContactDto.class);
     }
@@ -145,10 +148,13 @@ public class UserDomainService {
      * @return
      */
     public List<UserContactDto> getUserContact(List<RoleEnums> roleEnums, Integer organizationId, Integer tenantId) {
-        if(roleEnums.isEmpty()){
+        if (roleEnums.isEmpty() || organizationId == null) {
             return Collections.emptyList();
         }
-        List<String> roleCods = roleEnums.stream().map(RoleEnums::getCode).toList();
+        //需移除小程序角色，通过该方法会返回所有小程序客户的联系方式，要避免发送消息给全部小程序客户
+        List<String> roleCods = roleEnums.stream()
+                .filter(item -> !item.equals(RoleEnums.APPLET_USER))
+                .map(RoleEnums::getCode).toList();
         List<BUser> userContact = bUserDao.getUserContact(null, roleCods, organizationId, tenantId);
         return BeanUtil.copyToList(userContact, UserContactDto.class);
     }
