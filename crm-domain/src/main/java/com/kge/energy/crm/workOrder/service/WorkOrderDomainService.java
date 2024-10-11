@@ -52,7 +52,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -211,6 +210,11 @@ public class WorkOrderDomainService {
     }
 
     public WfFormFlowResp getFlowByFormId(WfFormFlowReq req) {
+        WfForm wfForm = wfFormDao.getById(req.getFormId());
+        if (ObjectUtil.isNull(wfForm)) {
+            throw new ServiceException("工单不存在!");
+        }
+
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
         List<FlowResult> list = wfFormDao.getFlowByFormId(req.getFormId(), operator);
         if (CollUtil.isEmpty(list)) {
@@ -224,13 +228,37 @@ public class WorkOrderDomainService {
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
             //集团客服按钮
             buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
+
+            //二级公司未处理工单才显示撤回按钮
+            if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
+            }
+
+            //待分派状态才显示分派按钮
+            if (StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
+            }
+
         } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
             //二级公司客服按钮
             buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
+
+            //未处理或未添加合同才显示退回按钮
+            if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))
+                    || wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowCompanyContract))) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
+            }
+
+            //工单状态为待处理才显示处理按钮
+            if (StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
+            }
+
+            //二级公司处理过工单才显示添加合同按钮
+            if (wfFormFlowListRespList.stream().anyMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ADD_SERVICE_CONTRACT));
+            }
+
         }
 
         return new WfFormFlowResp()
@@ -354,6 +382,15 @@ public class WorkOrderDomainService {
         if (lastFlowActionType.equals(ConstParam.FlowGroupProcess)) {
             throw new ServiceException("工单已经撤回!");
         }
+
+        if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
+            throw new ServiceException("工单已完成，不能再次处理!");
+        }
+
+        if (lastFlowActionType.equals(ConstParam.Terminated)) {
+            throw new ServiceException("工单已终止，不能再次处理!");
+        }
+
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         //二级公司处理工单
@@ -617,7 +654,7 @@ public class WorkOrderDomainService {
         //添加过合同不能退回
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
         List<ContractResult> resultList = scServiceContractDao.form(req.getFormId(), operator, dataEnums);
-        if(CollUtil.isNotEmpty(resultList)) {
+        if (CollUtil.isNotEmpty(resultList)) {
             throw new ServiceException("工单已添加过合同，不能退回!");
         }
 
@@ -674,7 +711,6 @@ public class WorkOrderDomainService {
     }
 
 
-    @Async
     private void sendFormStatusChangeMsg(WorkOrderUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {
         CompletableFuture.runAsync(() -> {
             try {

@@ -17,8 +17,8 @@ public enum WorkOrderButtonEnum implements ButtonEnum {
     TERMINATE_WORK_ORDER("terminate_work_order", "终止工单", true, null),
     RETURN_WORK_ORDER("return_work_order", "退回工单", true, null),
     HANDLE_WORK_ORDER("handle_work_order", "处理工单", true, null),
-    FINISH_WORK_ORDER("finish_work_order", "完结工单", true, null)
-
+    FINISH_WORK_ORDER("finish_work_order", "完结工单", true, null),
+    ADD_SERVICE_CONTRACT("add_service_contract", "新增合同", true, null)
     ;
 
     private final String code;
