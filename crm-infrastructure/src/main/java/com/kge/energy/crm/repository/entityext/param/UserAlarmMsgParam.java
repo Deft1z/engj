@@ -34,4 +34,7 @@ public class UserAlarmMsgParam extends PageReq {
     @Schema(description = "结束时间 yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
+    @Schema(description = "已读标识，false 未读 true 已读")
+    private Boolean isRead;
+
 }

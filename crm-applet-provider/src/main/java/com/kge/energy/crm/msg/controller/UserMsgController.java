@@ -6,13 +6,11 @@ import com.kge.energy.crm.msg.service.UserMsgService;
 import com.kge.energy.crm.repository.entityext.result.UserMsgListResult;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author wangjihua
@@ -27,7 +25,30 @@ public class UserMsgController {
 
     @Operation(summary = "当前登录用户消息列表")
     @PostMapping("/currentUserMsgList")
-    public CommonResult<PageResp<UserMsgListResult>> currentUserMsgList(@Validated @RequestBody UserMsgListReq req) {
+    public CommonResult<PageResp<UserMsgListResult>> currentUserMsgList(@RequestBody UserMsgListReq req) {
         return CommonResult.suc(userMsgService.getUserAlatmMsgList(req));
     }
+
+    @Operation(summary = "获取个人未读消息总数")
+    @Parameter(name = "msgBizType", description = "消息业务类型， 0 告警信息 1 工单通知 2 项目合同 3 投诉处理", required = false, in = ParameterIn.QUERY)
+    @GetMapping("/getUnreadCount")
+    public CommonResult<Integer> getUnreadCount(@RequestParam(value = "msgBizType", required = false) Integer msgBizType) {
+        return CommonResult.suc(userMsgService.getUnreadCount(msgBizType));
+    }
+
+    @Operation(summary = "根据id标记个人消息为已读")
+    @Parameter(name = "id", description = "消息id", required = true, in = ParameterIn.QUERY)
+    @GetMapping("/read")
+    public CommonResult<Boolean> read(@RequestParam(value = "id") Integer id) {
+        return CommonResult.suc(userMsgService.readById(id));
+    }
+
+    @Operation(summary = "一键标记全部个人消息为已读")
+    @Parameter(name = "msgBizType", description = "消息业务类型， 0 告警信息 1 工单通知 2 项目合同 3 投诉处理", required = false, in = ParameterIn.QUERY)
+    @GetMapping("/readAll")
+    public CommonResult<Boolean> readAll(@RequestParam(value = "msgBizType", required = false) Integer msgBizType) {
+        return CommonResult.suc(userMsgService.readByMsgBizType(msgBizType));
+    }
+
+
 }

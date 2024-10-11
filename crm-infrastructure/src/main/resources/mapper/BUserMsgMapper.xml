@@ -18,13 +18,18 @@
     <select id="getUserAlatmMsgList" resultType="com.kge.energy.crm.repository.entityext.result.UserMsgListResult">
         select bum.*
         from b_user_msg bum
-        where bum.msg_biz_type = #{param.msgBizType}
-        and json_unquote(json_extract(bum.content, '$.format')) is not null
+        where json_unquote(json_extract(bum.content, '$.format')) is not null
+        <if test="param.msgBizType != null">
+            and bum.msg_biz_type = #{param.msgBizType}
+        </if>
         <if test="param.startTime != null">
             and bum.create_time &gt;= #{param.startTime}
         </if>
         <if test="param.endTime != null">
             and bum.create_time &lt;= #{param.endTime}
+        </if>
+        <if test="param.isRead != null">
+            and bum.is_read = #{param.isRead}
         </if>
         /* 超级管理员和租户管理员可查询全部数据 */
         <choose>
@@ -45,6 +50,17 @@
             </when>
         </choose>
         order by bum.create_time desc
+    </select>
+
+    <select id="getUnreadCount" resultType="integer">
+        select count(1)
+        from b_user_msg bum
+        where bum.is_read is false
+        and json_unquote(json_extract(bum.content, '$.format')) is not null
+        and bum.user_id = #{userId}
+        <if test="msgBizType != null">
+            and bum.msg_biz_type = #{msgBizType}
+        </if>
     </select>
 
 </mapper>

@@ -24,5 +24,9 @@ public class BUserMsgDao extends ServiceImpl<BUserMsgMapper, BUserMsg> {
         return mapper.getUserAlatmMsgList(page, param);
     }
 
+    public Integer getUnreadCount(Integer userId, Integer msgBizType) {
+        return mapper.getUnreadCount(userId, msgBizType);
+    }
+
 }
 
