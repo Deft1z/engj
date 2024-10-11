@@ -26,7 +26,7 @@ public class UserMsgController {
     @Operation(summary = "当前登录用户消息列表")
     @PostMapping("/currentUserMsgList")
     public CommonResult<PageResp<UserMsgListResult>> currentUserMsgList(@RequestBody UserMsgListReq req) {
-        return CommonResult.suc(userMsgService.getUserAlatmMsgList(req));
+        return CommonResult.suc(userMsgService.getUserAlarmMsgList(req));
     }
 
     @Operation(summary = "获取个人未读消息总数")
@@ -49,6 +49,5 @@ public class UserMsgController {
     public CommonResult<Boolean> readAll(@RequestParam(value = "msgBizType", required = false) Integer msgBizType) {
         return CommonResult.suc(userMsgService.readByMsgBizType(msgBizType));
     }
-
 
 }

@@ -37,4 +37,7 @@ public class UserAlarmMsgParam extends PageReq {
     @Schema(description = "已读标识，false 未读 true 已读")
     private Boolean isRead;
 
+    @Schema(description = "false 查看全部消息 true 仅查看个人消息")
+    private Boolean onlyMe;
+
 }

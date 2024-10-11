@@ -2,14 +2,11 @@ package com.kge.energy.crm.msg.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.msg.req.UserMsgListReq;
 import com.kge.energy.crm.repository.dao.BUserMsgDao;
-import com.kge.energy.crm.repository.entity.BUserMsg;
 import com.kge.energy.crm.repository.entityext.param.UserAlarmMsgParam;
 import com.kge.energy.crm.repository.entityext.result.UserMsgListResult;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -27,7 +24,7 @@ public class UserMsgService {
 
     private final BUserMsgDao bUserMsgDao;
 
-    public PageResp<UserMsgListResult> getUserAlatmMsgList(UserMsgListReq req) {
+    public PageResp<UserMsgListResult> getUserAlarmMsgList(UserMsgListReq req) {
         UserAlarmMsgParam param = BeanUtil.copyProperties(req, UserAlarmMsgParam.class);
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
@@ -36,7 +33,7 @@ public class UserMsgService {
         }
         param.setUserId(userInfoDto.getUserId());
 
-        return new PageResp<>(bUserMsgDao.getUserAlatmMsgList(param));
+        return new PageResp<>(bUserMsgDao.getUserAlarmMsgList(param));
     }
 
     public Integer getUnreadCount(Integer msgBizType) {
@@ -44,23 +41,11 @@ public class UserMsgService {
     }
 
     public Boolean readById(Integer id) {
-        LambdaUpdateWrapper<BUserMsg> wrapper = Wrappers.<BUserMsg>update().lambda()
-                .set(BUserMsg::getIsRead, 1)
-                .eq(BUserMsg::getId, id)
-                .eq(BUserMsg::getIsRead, 0)
-                .eq(BUserMsg::getUserId, UserInfoContextUtils.getCurrentUserInfo().getUserId());
-        return bUserMsgDao.update(wrapper);
+        return bUserMsgDao.readById(UserInfoContextUtils.getCurrentUserId(), id);
     }
 
     public Boolean readByMsgBizType(Integer msgBizType) {
-        LambdaUpdateWrapper<BUserMsg> wrapper = Wrappers.<BUserMsg>update().lambda()
-                .set(BUserMsg::getIsRead, 1)
-                .eq(BUserMsg::getIsRead, 0)
-                .eq(BUserMsg::getUserId, UserInfoContextUtils.getCurrentUserInfo().getUserId());
-        if (msgBizType != null) {
-            wrapper.eq(BUserMsg::getMsgBizType, msgBizType);
-        }
-        return bUserMsgDao.update(wrapper);
+        return bUserMsgDao.readByMsgBizType(UserInfoContextUtils.getCurrentUserId(), msgBizType);
     }
 
 }
