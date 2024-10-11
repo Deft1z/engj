@@ -15,7 +15,7 @@
         <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <select id="getUserAlatmMsgList" resultType="com.kge.energy.crm.repository.entityext.result.UserMsgListResult">
+    <select id="getUserAlarmMsgList" resultType="com.kge.energy.crm.repository.entityext.result.UserMsgListResult">
         select bum.*
         from b_user_msg bum
         where json_unquote(json_extract(bum.content, '$.format')) is not null
@@ -30,6 +30,9 @@
         </if>
         <if test="param.isRead != null">
             and bum.is_read = #{param.isRead}
+        </if>
+        <if test="param.onlyMe">
+            and bum.user_id = #{param.userId}
         </if>
         /* 超级管理员和租户管理员可查询全部数据 */
         <choose>

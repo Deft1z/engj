@@ -62,7 +62,19 @@ public class UserMsgService {
         param.setUserId(userInfoDto.getUserId());
         param.setRoleCodes(userInfoDto.getRoleCodes());
 
-        return bUserMsgDao.getUserAlatmMsgList(param);
+        return bUserMsgDao.getUserAlarmMsgList(param);
+    }
+
+    public Integer getUnreadCount(Integer msgBizType) {
+        return bUserMsgDao.getUnreadCount(UserInfoContextUtils.getCurrentUserId(), msgBizType);
+    }
+
+    public Boolean readById(Integer id) {
+        return bUserMsgDao.readById(UserInfoContextUtils.getCurrentUserId(), id);
+    }
+
+    public Boolean readByMsgBizType(Integer msgBizType) {
+        return bUserMsgDao.readByMsgBizType(UserInfoContextUtils.getCurrentUserId(), msgBizType);
     }
 
 }
