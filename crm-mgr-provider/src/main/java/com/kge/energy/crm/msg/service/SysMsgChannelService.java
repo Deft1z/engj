@@ -25,12 +25,16 @@ public class SysMsgChannelService {
     private final CfBizFunctionMsgConfigService bizFunctionMsgConfigService;
 
     public List<FunctionMsgChannelConfigResp> getFunctionConfigs(Integer bizFunctionId) {
+        //获取默认全部可用的渠道配置
+        List<CfBizFunctionMsgResult> all = bizFunctionMsgConfigService.getFunctionConfigs(null, UserInfoContextUtils.getCurrentTenantId());
+        //获取当前业务功能已关联的渠道配置
         List<CfBizFunctionMsgResult> list = bizFunctionMsgConfigService.getFunctionConfigs(bizFunctionId, UserInfoContextUtils.getCurrentTenantId());
         if (list.isEmpty()) {
-            //获取默认全部可用的渠道配置
-            list = bizFunctionMsgConfigService.getFunctionConfigs(null, UserInfoContextUtils.getCurrentTenantId());
+            return BeanUtil.copyToList(all, FunctionMsgChannelConfigResp.class);
+        } else {
+            list.addAll(all.stream().filter(channel -> !list.stream().map(CfBizFunctionMsgResult::getChannelCode).toList().contains(channel.getChannelCode())).toList());
+            return BeanUtil.copyToList(list, FunctionMsgChannelConfigResp.class);
         }
-        return BeanUtil.copyToList(list, FunctionMsgChannelConfigResp.class);
     }
 
     public Boolean relateBizFunction(BizFunctionMsgConfigAddReq bizFunctionMsgConfig) {
