@@ -704,11 +704,12 @@ public class WorkOrderDomainService {
         BizOrderReturnMsgToRoleParam msgParam = new BizOrderReturnMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()){
+            String serviceUnit = bOrganizationDao.getById(currentOrgId).getName();
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             msgParam.setOrderName(fromContent.getBusinessName());
             msgParam.setOrderCode(fromContent.getCode());
             msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-            msgParam.setCompanyName(fromContent.getCompanyName());
+            msgParam.setCompanyName(serviceUnit);
             msgParam.setContent(req.getContent());
             msgParam.setPathUrl(null);
             msgParam.setTenantId(operator.getTenantId());
@@ -721,7 +722,7 @@ public class WorkOrderDomainService {
                 msgDomainService.sendCrmMsg(new BizOrderReturnMsgToUserParam()
                         .setOrderName(fromContent.getBusinessName())
                         .setOrderCode(fromContent.getCode())
-                        .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
+                        .setServiceUnit(serviceUnit)
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowCompanyReturn)
                         .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
