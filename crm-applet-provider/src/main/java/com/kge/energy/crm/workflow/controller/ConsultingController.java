@@ -11,9 +11,8 @@ import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
 import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
 import com.kge.energy.crm.workOrder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
-import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
-import com.kge.energy.crm.workflow.service.ConsultingService;
+import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,8 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "业务工单")
 @RequiredArgsConstructor
 public class ConsultingController {
-
-    private final ConsultingService consultingService;
 
     private final ComplainController complainController;
 

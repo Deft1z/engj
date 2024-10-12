@@ -3,10 +3,8 @@ package com.kge.energy.crm.workOrder.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.*;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -16,6 +14,7 @@ import com.kge.energy.crm.common.button.enums.WorkOrderButtonEnum;
 import com.kge.energy.crm.common.button.helper.ConsultingButtonHelper;
 import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.common.constans.ConstParam;
+import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
@@ -25,15 +24,12 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
-import com.kge.energy.crm.external.elink.ElinkService;
-import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
-import com.kge.energy.crm.external.wechat.applet.req.FormStatusChangeMsgReq;
-import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
-import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
-import com.kge.energy.crm.repository.entity.*;
+import com.kge.energy.crm.repository.entity.ScServiceContract;
+import com.kge.energy.crm.repository.entity.WfForm;
+import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.user.service.UserDomainService;
@@ -60,8 +56,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -88,9 +82,6 @@ public class WorkOrderDomainService {
     private final BOrganizationDao bOrganizationDao;
     private final RedisUtils redisUtils;
     private final RedisLockUtils redisLockUtils;
-    private final WeChatAppletProperties weChatAppletProperties;
-    private final WeChatAppletInfraService weChatAppletInfraService;
-    private final ElinkService elinkService;
     private final DataPermissionDomainService dataPermissionDomainService;
     private final UserDomainService userDomainService;
     private final MsgDomainService msgDomainService;
@@ -142,26 +133,24 @@ public class WorkOrderDomainService {
         wfFormFlow.setServiceUnitId(1);
         wfFormFlowDao.save(wfFormFlow);
 
-        //todo 使用流程引擎替换现有的流程业务
-
-
         //发送消息，通知集团客服
-        BizOrderCreateMsgParam msgParam = new BizOrderCreateMsgParam();
-        msgParam.setOrderName(content.getBusinessName());
-        msgParam.setArea(content.getArea());
-        msgParam.setElectricityCapacity(content.getElectricityCapacity());
-        msgParam.setOrderCode(content.getCode());
-        msgParam.setCreateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-        msgParam.setCustomerName(content.getCustomerName());
-        msgParam.setMobile(content.getMobile());
-        msgParam.setRemark(req.getRemark());
-        msgParam.setPathUrl(null);
-        msgParam.setTenantId(operator.getTenantId());
-
+        BizOrderCreateMsgToRoleParam msgParam = new BizOrderCreateMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
-        msgParam.setNotifyUsers(userContact);
-        msgDomainService.sendCrmMsg(msgParam);
+        if (!roleEnums.isEmpty()){
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+            msgParam.setOrderName(content.getBusinessName());
+            msgParam.setArea(content.getArea());
+            msgParam.setElectricityCapacity(content.getElectricityCapacity());
+            msgParam.setOrderCode(content.getCode());
+            msgParam.setCreateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            msgParam.setCustomerName(content.getCustomerName());
+            msgParam.setMobile(content.getMobile());
+            msgParam.setRemark(req.getRemark());
+            msgParam.setPathUrl(null);
+            msgParam.setTenantId(operator.getTenantId());
+            msgParam.setNotifyUsers(userContact);
+            msgDomainService.sendCrmMsg(msgParam);
+        }
 
         return true;
     }
@@ -327,7 +316,9 @@ public class WorkOrderDomainService {
         }
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
-        String formContent = wfForm.getContent();
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
+        Integer customerUserId = wfForm.getCreateUserId();
+        Integer currentOrgId = wfForm.getCurrentOrgId();
         List<RoleUserResult> assignUsers = bUserDao.getUserByRoleCodeAndOrgId(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), req.getCurrentOrgId(), operator.getTenantId());
         if (assignUsers.isEmpty()) {
             throw new ServiceException("没有客服角色!");
@@ -357,23 +348,38 @@ public class WorkOrderDomainService {
                 .setTenantId(operator.getTenantId());
         wfFormFlowDao.save(wfFormFlow);
 
-        //TODO: 发送微信小程序消息通知提单的客户
-
         //发送elink消息通知，通知二级公司客服
-        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
-        BizOrderAssignMsgParam msgParam = new BizOrderAssignMsgParam();
-        msgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
-        msgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
-        msgParam.setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-        msgParam.setCustomerName(Optional.ofNullable(content.get("customerName")).map(String::valueOf).orElse(null));
-        msgParam.setMobile(Optional.ofNullable(content.get("mobile")).map(String::valueOf).orElse(null));
-        msgParam.setPathUrl(null);
-        msgParam.setTenantId(operator.getTenantId());
-
+        BizOrderAssignMsgToRoleParam msgParam = new BizOrderAssignMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, req.getCurrentOrgId(), operator.getTenantId());
-        msgParam.setNotifyUsers(userContact);
-        msgDomainService.sendCrmMsg(msgParam);
+        if (!roleEnums.isEmpty()) {
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, req.getCurrentOrgId(), operator.getTenantId());
+            msgParam.setOrderName(fromContent.getBusinessName());
+            msgParam.setOrderCode(fromContent.getCode());
+            msgParam.setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            msgParam.setCustomerName(fromContent.getCustomerName());
+            msgParam.setMobile(fromContent.getMobile());
+            msgParam.setPathUrl(null);
+            msgParam.setTenantId(operator.getTenantId());
+            msgParam.setNotifyUsers(userContact);
+            msgDomainService.sendCrmMsg(msgParam);
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+                //发送微信小程序消息，通知客户
+                userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
+                msgDomainService.sendCrmMsg(new BizOrderAssignMsgToUserParam()
+                        .setOrderName(fromContent.getBusinessName())
+                        .setOrderCode(fromContent.getCode())
+                        .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
+                        .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                        .setStatus(ConstParam.FlowGroupAssign)
+                        .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                        .setPathUrl(null)
+                        .setTenantId(operator.getTenantId())
+                        .setNotifyUsers(userContact)
+                );
+            }
+        }
+
 
         return true;
     }
@@ -393,6 +399,7 @@ public class WorkOrderDomainService {
 
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
+        Integer currentOrgId = wfForm.getCurrentOrgId();
         //二级公司处理工单
         Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.SUB_COMPANY_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
@@ -420,19 +427,22 @@ public class WorkOrderDomainService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
-        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
-        List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
-        msgDomainService.sendCrmMsg(new BizOrderHandleMsgParam()
-                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
-                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
-                .setServiceUnit(bOrganizationDao.getById(req.getCurrentOrgId()).getName())
-                .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
-                .setStatus(ConstParam.FlowHasFeedback)
-                .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                .setPathUrl(null)
-                .setTenantId(operator.getTenantId())
-                .setNotifyUsers(userContact)
-        );
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
+        BizOrderHandleMsgToUserParam msgParam = new BizOrderHandleMsgToUserParam();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+            List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
+            msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
+                    .setOrderCode(fromContent.getCode())
+                    .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
+                    .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                    .setStatus(ConstParam.FlowHasFeedback)
+                    .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setPathUrl(null)
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+            );
+        }
 
         return true;
     }
@@ -444,6 +454,7 @@ public class WorkOrderDomainService {
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         Integer customerUserId = wfForm.getCreateUserId();
+        Integer currentOrgId = wfForm.getCurrentOrgId();
 
         //判断合同是否全部已竣工
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
@@ -480,19 +491,22 @@ public class WorkOrderDomainService {
         wfFormFlowDao.save(wfFormFlow);
 
         //发送微信小程序消息，通知客户
-        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
-        List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
-        msgDomainService.sendCrmMsg(new BizOrderFinishMsgParam()
-                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
-                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
-                .setServiceUnit(bOrganizationDao.getById(req.getCurrentOrgId()).getName())
-                .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
-                .setStatus(ConstParam.FlowFinished)
-                .setFinishTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                .setPathUrl(null)
-                .setTenantId(operator.getTenantId())
-                .setNotifyUsers(userContact)
-        );
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
+        BizOrderFinishMsgToUserParam msgParam = new BizOrderFinishMsgToUserParam();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+            List<UserContactDto> userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
+            msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
+                    .setOrderCode(fromContent.getCode())
+                    .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
+                    .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                    .setStatus(ConstParam.FlowFinished)
+                    .setFinishTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setPathUrl(null)
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+            );
+        }
 
         return true;
     }
@@ -505,6 +519,7 @@ public class WorkOrderDomainService {
         Integer currentRoleId = bRoleDao.getRoleIdByCode(operator.getRoleCodes().iterator().next(), operator.getTenantId());
         Integer formId = wfForm.getFormId();
         Integer customerUserId = wfForm.getCreateUserId();
+        Integer currentOrgId = wfForm.getCurrentOrgId();
         //终止工单
         LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
                 .set(WfForm::getStatus, ConstParam.Terminated)
@@ -536,20 +551,22 @@ public class WorkOrderDomainService {
         scServiceContractDao.update(sscUpdateWrapper);
 
         //发送微信小程序消息，通知客户
-        JSONObject content = JSONUtil.parseObj(wfForm.getContent());
-        List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
-        msgDomainService.sendCrmMsg(new BizOrderTerminateMsgParam()
-                .setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null))
-                .setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null))
-                .setServiceUnit(bOrganizationDao.getById(req.getCurrentOrgId()).getName())
-                .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
-                .setStatus(ConstParam.FlowFinished)
-                .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                .setPathUrl(null)
-                .setTenantId(operator.getTenantId())
-                .setNotifyUsers(userContact)
-        );
-
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
+        BizOrderTerminateMsgToUserParam msgParam = new BizOrderTerminateMsgToUserParam();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+            List<UserContactDto> userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
+            msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
+                    .setOrderCode(fromContent.getCode())
+                    .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
+                    .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                    .setStatus(ConstParam.FlowFinished)
+                    .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setPathUrl(null)
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+            );
+        }
 
         return true;
     }
@@ -570,7 +587,7 @@ public class WorkOrderDomainService {
         }
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
-        String formContent = wfForm.getContent();
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
         Integer formCurrentOrgId = wfForm.getCurrentOrgId();
         Integer customerUserId = wfForm.getCreateUserId();
 
@@ -599,41 +616,36 @@ public class WorkOrderDomainService {
                 .setServiceUnitId(formCurrentOrgId);
         wfFormFlowDao.save(wfFormFlow);
 
-        //发送微信小程序消息，通知客户
-        sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.SendBack);
-
-        //发送elink消息，通知集团客服
-        JSONObject content = JSONUtil.parseObj(formContent);
-
-        BizOrderReturnMsgParam msgParam = new BizOrderReturnMsgParam();
-        msgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
-        msgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
-        msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-        msgParam.setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null));
-        msgParam.setContent(req.getContent());
-        msgParam.setPathUrl(null);
-        msgParam.setTenantId(operator.getTenantId());
-
-        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
-        msgParam.setNotifyUsers(userContact);
-        msgDomainService.sendCrmMsg(msgParam);
-
-        //若集团客服撤回工单，需通知二级公司客服
-        if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.toString())) {
-            BizOrderWithdrawMsgParam withdrawMsgParam = new BizOrderWithdrawMsgParam();
-            withdrawMsgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
-            withdrawMsgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
+        //发送elink消息，通知二级公司客服
+        BizOrderWithdrawMsgToRoleParam withdrawMsgParam = new BizOrderWithdrawMsgToRoleParam();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), withdrawMsgParam.getFunctionCode());
+        if (!roleEnums.isEmpty()){
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, formCurrentOrgId, operator.getTenantId());
+            withdrawMsgParam.setOrderName(fromContent.getBusinessName());
+            withdrawMsgParam.setOrderCode(fromContent.getCode());
             withdrawMsgParam.setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             withdrawMsgParam.setOperator(RoleEnums.JT_CUSTOMER.getDesc());
             withdrawMsgParam.setContent(req.getContent());
             withdrawMsgParam.setPathUrl(null);
             withdrawMsgParam.setTenantId(operator.getTenantId());
-
-            roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), withdrawMsgParam.getFunctionCode());
-            userContact = userDomainService.getUserContact(roleEnums, formCurrentOrgId, operator.getTenantId());
             withdrawMsgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(withdrawMsgParam);
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+                //发送微信小程序消息，通知客户
+                userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
+                msgDomainService.sendCrmMsg(new BizOrderWithdrawMsgToUserParam()
+                        .setOrderName(fromContent.getBusinessName())
+                        .setOrderCode(fromContent.getCode())
+                        .setServiceUnit(bOrganizationDao.getById(req.getCurrentOrgId()).getName())
+                        .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                        .setStatus(ConstParam.FlowGroupWithdraw)
+                        .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                        .setPathUrl(null)
+                        .setTenantId(operator.getTenantId())
+                        .setNotifyUsers(userContact)
+                );
+            }
         }
 
         return true;
@@ -660,9 +672,9 @@ public class WorkOrderDomainService {
 
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
-        String formContent = wfForm.getContent();
-        Integer formCurrentOrgId = wfForm.getCurrentOrgId();
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
         Integer customerUserId = wfForm.getCreateUserId();
+        Integer currentOrgId = wfForm.getCurrentOrgId();
         //撤回到集团客服处理
         Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
         //变更工单信息
@@ -688,56 +700,40 @@ public class WorkOrderDomainService {
                 .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
 
-        //发送微信小程序消息，通知客户
-        sendFormStatusChangeMsg(req, operator, wfForm, now, ConstParam.SendBack);
-
         //发送elink消息，通知集团客服
-        JSONObject content = JSONUtil.parseObj(formContent);
-        BizOrderReturnMsgParam msgParam = new BizOrderReturnMsgParam();
-        msgParam.setOrderName(Optional.ofNullable(content.get("businessName")).map(String::valueOf).orElse(null));
-        msgParam.setOrderCode(Optional.ofNullable(content.get("code")).map(String::valueOf).orElse(null));
-        msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-        msgParam.setCompanyName(Optional.ofNullable(content.get("companyName")).map(String::valueOf).orElse(null));
-        msgParam.setContent(req.getContent());
-        msgParam.setPathUrl(null);
-        msgParam.setTenantId(operator.getTenantId());
-
+        BizOrderReturnMsgToRoleParam msgParam = new BizOrderReturnMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
-        msgParam.setNotifyUsers(userContact);
-        msgDomainService.sendCrmMsg(msgParam);
+        if (!roleEnums.isEmpty()){
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+            msgParam.setOrderName(fromContent.getBusinessName());
+            msgParam.setOrderCode(fromContent.getCode());
+            msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            msgParam.setCompanyName(fromContent.getCompanyName());
+            msgParam.setContent(req.getContent());
+            msgParam.setPathUrl(null);
+            msgParam.setTenantId(operator.getTenantId());
+            msgParam.setNotifyUsers(userContact);
+            msgDomainService.sendCrmMsg(msgParam);
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+                //发送微信小程序消息，通知客户
+                userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
+                msgDomainService.sendCrmMsg(new BizOrderReturnMsgToUserParam()
+                        .setOrderName(fromContent.getBusinessName())
+                        .setOrderCode(fromContent.getCode())
+                        .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
+                        .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
+                        .setStatus(ConstParam.FlowCompanyReturn)
+                        .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                        .setPathUrl(null)
+                        .setTenantId(operator.getTenantId())
+                        .setNotifyUsers(userContact)
+                );
+            }
+        }
 
         return true;
     }
-
-
-    private void sendFormStatusChangeMsg(WorkOrderUpdateReq req, UserInfoDto userInfoDto, WfForm form, LocalDateTime sendTime, String status) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                Long operatorUserId = userInfoDto.getUserId();
-                Integer customerUserId = form.getCreateUserId();
-                BUser customer = bUserDao.getById(customerUserId);
-                //服务单位人员信息
-                BOrganization serviceOrg = bOrganizationDao.getById(req.getCurrentOrgId());
-                BUser servicePerson = bUserDao.getById(operatorUserId);
-                FormStatusChangeMsgReq formStatusChangeMsgReq = new FormStatusChangeMsgReq()
-                        .setServiceUnit(new FormStatusChangeMsgReq.Value(serviceOrg.getName()))
-                        .setServicePerson(new FormStatusChangeMsgReq.Value(servicePerson.getRealname()))
-                        .setStatus(new FormStatusChangeMsgReq.Value(status))
-                        .setHandleTime(new FormStatusChangeMsgReq.Value(LocalDateTimeUtil.format(sendTime, DatePattern.NORM_DATETIME_FORMATTER)));
-                SendSubscribeReq<FormStatusChangeMsgReq> sendSubscribeReq = new SendSubscribeReq<FormStatusChangeMsgReq>()
-                        .setTemplateId(weChatAppletProperties.getOrderStatusChangeTemplate())
-                        .setPage(weChatAppletProperties.getOrderStatusChangeTemplate())
-                        .setToUserOpenId(customer.getOpenId())
-                        .setData(formStatusChangeMsgReq);
-
-                weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
-            } catch (Exception e) {
-                log.error("sendFormStatusChangeMsg {} error: ", status, e);
-            }
-        });
-    }
-
 
     private String genOrderCode() {
         //生成工单编号 yyyyMMdd+4位随机数

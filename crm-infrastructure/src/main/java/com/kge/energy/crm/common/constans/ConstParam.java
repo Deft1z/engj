@@ -19,6 +19,7 @@ public class ConstParam {
     public static String CompanyReturn = "二级公司退回";
     public static String FlowCompanyReturn = "已退回";
     public static String FlowGroupWithdraw = "已撤回";
+    public static String FlowGroupAssign = "已分派";
 
 
     public static String WaitingForProcessing = "待处理";
