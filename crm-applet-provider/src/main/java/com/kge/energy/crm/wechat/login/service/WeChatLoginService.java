@@ -10,7 +10,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -36,7 +35,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,10 +107,7 @@ public class WeChatLoginService {
             if (CollectionUtil.isNotEmpty(bUsers)) {
                 user = bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getMobile(), req.getMobile()))
                         .findFirst()
-                        .orElse(null);
-                if (ObjectUtil.isNull(user)) {
-                    user = bUsers.get(0);
-                }
+                        .orElse(bUsers.get(0));
                 //判断是否禁用
                 if (ObjectUtil.equal(user.getStatus(), 1)) {
                     throw new ServiceException("账号已禁用");
@@ -192,7 +187,6 @@ public class WeChatLoginService {
     }
 
 
-    @Async
     public void sendLeaderOnlineMsg(BUser user) {
 
         CompletableFuture.runAsync(() -> {
@@ -233,57 +227,63 @@ public class WeChatLoginService {
     @Transactional
     public WeChatPhoneNumberResp phoneNumber(PhoneNumberReq req) {
 
-        GetUserPhoneNumberResp getUserPhoneNumberResp = weChatAppletInfraService.getUserPhoneNumber(req.getCode(), req.getOpenid());
-        if (ObjectUtil.isNull(getUserPhoneNumberResp) || ObjectUtil.notEqual(getUserPhoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
+        GetUserPhoneNumberResp phoneNumberResp = weChatAppletInfraService.getUserPhoneNumber(req.getCode(), req.getOpenid());
+        if (ObjectUtil.isNull(phoneNumberResp) || ObjectUtil.notEqual(phoneNumberResp.getErrCode(), GetUserPhoneNumberResp.SUCCESS_CODE)) {
             throw new ServiceException("获取用户手机号码失败");
         }
 
-        List<BUser> userList = new LambdaQueryChainWrapper<>(BUser.class)
-                .eq(BUser::getOpenId, req.getOpenid())
-                .list();
-        String mobile = getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber();
-        BUser bUser;
-
+        List<BUser> userList = bUserDao.findUserByOpenId(req.getOpenid());
         if (CollUtil.isEmpty(userList)) {
             throw new ServiceException("用户不存在");
         }
 
-        // openid 只存在一个用户，且手机号为空
-        if (userList.size() == 1 && StrUtil.isBlank(userList.get(0).getMobile())) {
-            bUser = userList.get(0);
-            bUser.setMobile(mobile);
+        String mobile = phoneNumberResp.getPhoneInfo().getPhoneNumber();
+        BUser bUser;
 
-        } else {
-            // 匹配 openid、手机号用户
-            bUser = userList.stream()
-                    .filter(user -> ObjectUtil.equal(user.getMobile(), mobile))
-                    .findFirst()
-                    .orElse(null);
+        // 匹配 openid + 手机号用户
+        bUser = userList.stream()
+                .filter(user -> ObjectUtil.equal(user.getMobile(), mobile))
+                .findFirst()
+                .orElse(null);
 
-            // 不存在该 openid、手机号用户则新建用户
-            if (ObjectUtil.isNull(bUser)) {
+        if (ObjectUtil.isNull(bUser)) {
+            List<BUser> byPhoneUserList = bUserDao.findByPhone(mobile);
+
+            if (CollectionUtil.isEmpty(byPhoneUserList) && userList.size() == 1 && StrUtil.isBlank(userList.get(0).getMobile())) {
+                // openid 只存在一个用户，且不存在该手机号用户
+                bUser = userList.get(0);
+                bUser.setMobile(mobile);
+
+            } else if (userList.size() == 1 && byPhoneUserList.size() == 1) {
+                // 先有PC手机号码的账号，再登录小程序，要把小程序的有openid且没有手机号码的账号删掉，且将PC手机号码的账号设置openid
+                bUser = byPhoneUserList.get(0).setOpenId(req.getOpenid());
+                bUserDao.removeById(userList.get(0));
+
+            } else {
+                // 不存在该 openid + 手机号用户则新建用户
                 bUser = saveNewUser(req.getOpenid(), mobile);
             }
         }
 
-        String token = userDomainService.genToken(bUser, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
+        String token = userDomainService.genToken(bUser, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT,
+                TokenConstant.APPLET_EXPIRED_TIMEUNIT, false);
 
         bUser.setLastLoginTime(LocalDateTime.now());
         bUserDao.updateById(bUser);
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
-                .setTimestamp(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())
-                .setAppId(getUserPhoneNumberResp.getPhoneInfo().getWatermark().getAppId());
+                .setTimestamp(phoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())
+                .setAppId(phoneNumberResp.getPhoneInfo().getWatermark().getAppId());
 
         WeChatPhoneNumberResp.PhoneInfo phoneInfo = new WeChatPhoneNumberResp.PhoneInfo()
-                .setPhoneNumber(getUserPhoneNumberResp.getPhoneInfo().getPhoneNumber())
-                .setPurePhoneNumber(getUserPhoneNumberResp.getPhoneInfo().getPurePhoneNumber())
+                .setPhoneNumber(phoneNumberResp.getPhoneInfo().getPhoneNumber())
+                .setPurePhoneNumber(phoneNumberResp.getPhoneInfo().getPurePhoneNumber())
                 .setWatermark(watermark)
-                .setCountryCode(getUserPhoneNumberResp.getPhoneInfo().getCountryCode());
+                .setCountryCode(phoneNumberResp.getPhoneInfo().getCountryCode());
 
         return new WeChatPhoneNumberResp()
-                .setErrCode(getUserPhoneNumberResp.getErrCode())
-                .setErrMsg(getUserPhoneNumberResp.getErrMsg())
+                .setErrCode(phoneNumberResp.getErrCode())
+                .setErrMsg(phoneNumberResp.getErrMsg())
                 .setPhoneInfo(phoneInfo)
                 .setToken(token);
     }
