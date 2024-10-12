@@ -18,13 +18,13 @@ public class TokenConstant {
 
     public static final TimeUnit PC_EXPIRED_TIMEUNIT = TimeUnit.HOURS;
 
-    public static final long APPLET_EXPIRED_TIMEOUT = 14 * 24L;
+    public static final long APPLET_EXPIRED_TIMEOUT = 7 * 24L;
 
     public static final TimeUnit APPLET_EXPIRED_TIMEUNIT = TimeUnit.HOURS;
 
     /*
-    * 连续登录失败次数
-    * */
+     * 连续登录失败次数
+     * */
     public static final int MAX_LOGIN_ERROR_COUNT = 5;
 
     public static final long LOGIN_ERROR_BAN_TIME = 1;

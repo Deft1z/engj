@@ -415,6 +415,11 @@ public class UserService {
                     .setTenantId(req.getTenantId()));
         }
 
+        if (ObjectUtil.equal(req.getStatus(), 1)) {
+            // 删除用户的登录token
+            userDomainService.deleteUserToken(bUser);
+        }
+
         sysOperateLogService.saveLog(
                 bUser.getTenantId(), OperateModuleEnums.USER,
                 "更新用户【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
@@ -446,6 +451,9 @@ public class UserService {
                 bUser.getTenantId(), OperateModuleEnums.USER,
                 "删除用户【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
         );
+
+        // 删除用户的登录token
+        userDomainService.deleteUserToken(bUser);
 
         return true;
     }
