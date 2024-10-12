@@ -392,7 +392,7 @@ public class UserService {
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        checkUpdateExistedUser(req, bUser);
+        checkUpdateExistedUser(req);
 
         if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许编辑其他租户用户");
@@ -413,6 +413,11 @@ public class UserService {
                     .setUserId(bUser.getUserId())
                     .setOrganizationId(req.getOrganizationId())
                     .setTenantId(req.getTenantId()));
+        }
+
+        if (ObjectUtil.equal(req.getStatus(), 1)) {
+            // 删除用户的登录token
+            userDomainService.deleteUserToken(bUser);
         }
 
         sysOperateLogService.saveLog(
@@ -446,6 +451,9 @@ public class UserService {
                 bUser.getTenantId(), OperateModuleEnums.USER,
                 "删除用户【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
         );
+
+        // 删除用户的登录token
+        userDomainService.deleteUserToken(bUser);
 
         return true;
     }
@@ -547,35 +555,35 @@ public class UserService {
                 .eq(BUser::getName, req.getName())
                 .exists();
         if (existed) {
-            throw new ServiceException("用户已经存在");
+            throw new ServiceException("已存在该用户名用户：" + req.getName());
         }
 
         existed = new LambdaQueryChainWrapper<>(BUser.class)
                 .eq(BUser::getMobile, req.getMobile())
                 .exists();
         if (existed) {
-            throw new ServiceException("用户已经存在");
+            throw new ServiceException("已存在该手机号码用户：" + req.getMobile());
         }
     }
 
 
-    private void checkUpdateExistedUser(UpdateUserReq req, BUser bUser) {
+    private void checkUpdateExistedUser(UpdateUserReq req) {
 
         boolean existed = new LambdaQueryChainWrapper<>(BUser.class)
                 .ne(BUser::getUserId, req.getUserId())
                 .eq(BUser::getName, req.getName())
                 .exists();
         if (existed) {
-            throw new ServiceException("用户已经存在");
+            throw new ServiceException("已存在该用户名用户：" + req.getName());
         }
-//
-//        existed = new LambdaQueryChainWrapper<>(BUser.class)
-//                .ne(BUser::getUserId, req.getUserId())
-//                .eq(BUser::getMobile, req.getMobile())
-//                .exists();
-//        if (existed) {
-//            throw new ServiceException("用户已经存在");
-//        }
+
+        existed = new LambdaQueryChainWrapper<>(BUser.class)
+                .ne(BUser::getUserId, req.getUserId())
+                .eq(BUser::getMobile, req.getMobile())
+                .exists();
+        if (existed) {
+            throw new ServiceException("已存在该手机号码用户：" + req.getMobile());
+        }
     }
 
 

@@ -93,20 +93,37 @@ public class UserDomainService {
         redisUtils.setEx(authTokenKeyPrefix + authToken, String.valueOf(user.getUserId()), expiredTimeout, expiredTimeUnit);
 
         String lastTokenKey = String.format(TokenConstant.LAST_TOKEN_CACHE_KEY, systemTypeEnum.getCode(), user.getUserId());
-        String lastToken = redisUtils.get(lastTokenKey);
 
         List<String> deleteLastTokenEnvs = List.of("dev", "test");
-
-        if (StrUtil.isNotBlank(lastToken)) {
-            //如果是dev环境不删除旧的token
-            if (!deleteLastTokenEnvs.contains(env) && deleteLastToken) {
-                redisUtils.delete(authTokenKeyPrefix + lastToken);
-            }
+        if (!deleteLastTokenEnvs.contains(env) && deleteLastToken) {
+            deleteLastToken(user, systemTypeEnum);
         }
-
         redisUtils.setEx(lastTokenKey, authToken, expiredTimeout + 2, expiredTimeUnit);
 
         return authToken;
+    }
+
+    /**
+     * 删除用户上一个登录的token
+     */
+    public void deleteLastToken(BUser user, SystemTypeEnum systemTypeEnum) {
+
+        String lastTokenKey = String.format(TokenConstant.LAST_TOKEN_CACHE_KEY, systemTypeEnum.getCode(), user.getUserId());
+        String lastToken = redisUtils.get(lastTokenKey);
+
+        if (StrUtil.isNotBlank(lastToken)) {
+            redisUtils.delete(authProperties.getToken().getRedisFront() + lastToken);
+        }
+    }
+
+    /**
+     * 删除用户所有平台登录的token
+     */
+    public void deleteUserToken(BUser bUser) {
+
+        for (SystemTypeEnum systemTypeEnum : SystemTypeEnum.values()) {
+            deleteLastToken(bUser, systemTypeEnum);
+        }
     }
 
     /**
