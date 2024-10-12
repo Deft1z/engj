@@ -74,9 +74,6 @@ public class WeChatLoginService {
     @Value("${spring.data.redis.front}")
     private String redisFront;
 
-    @Value("${loginAttention.leaderPhones}")
-    private String[] leaderPhones;
-
     @Value("${loginAttention.sendee}")
     private String[] sendee;
 
@@ -194,13 +191,18 @@ public class WeChatLoginService {
                 return;
             }
 
-            List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));
             List<String> sendeeList = new ArrayList<>(Arrays.asList(sendee));
-            if (CollUtil.isEmpty(leaderPhoneList) || CollUtil.isEmpty(sendeeList)) {
+            if (CollUtil.isEmpty(sendeeList)) {
                 return;
             }
 
-            if (CollUtil.contains(leaderPhoneList, user.getMobile())) {
+            //查找用户角色
+            List<BRole> roleList = bRoleDao.userRole(user.getTenantId(), user.getUserId());
+            List<String> roleCodeList = roleList.stream().map(BRole::getCode).toList();
+
+            //如果是集团领导或公司领导则发送登录提醒
+            if (CollUtil.contains(roleCodeList, RoleEnums.JT_LEADER.getCode()) ||
+                    CollUtil.contains(roleCodeList, RoleEnums.COMPANY_LEADER.getCode())) {
                 String header = activeProfile.contains("prod") ? "e能管家小程序领导登录提醒" : "e能管家小程序（体验版）领导登录提醒";
                 String msg = "领导名字：" + user.getRealname() + "\\n" +
                         "手机号：" + user.getMobile() + "\\n" +

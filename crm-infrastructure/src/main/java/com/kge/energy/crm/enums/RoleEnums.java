@@ -22,6 +22,10 @@ public enum RoleEnums {
     SUB_COMPANY_CUSTOMER("sub_company_customer", "二级公司客服"),
 
     APPLET_USER("applet_user", "小程序用户"),
+
+    JT_LEADER("jt_leader", "集团领导"),
+
+    COMPANY_LEADER("company_leader", "公司领导"),
     ;
 
 

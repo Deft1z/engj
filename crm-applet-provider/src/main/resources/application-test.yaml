@@ -49,7 +49,6 @@ edata:
   baseUrl: http://localhost:9252
 
 loginAttention:
-  leaderPhones: 18613028815,13702470083
   sendee: 13702470083,13288012316
 
 group:
