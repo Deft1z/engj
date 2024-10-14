@@ -1,6 +1,7 @@
 package com.kge.energy.crm.contract.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -12,11 +13,15 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.RedisLockUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.contract.req.*;
+import com.kge.energy.crm.contract.req.ScServiceContractAddReq;
+import com.kge.energy.crm.contract.req.ScServiceContractEvaAddReq;
+import com.kge.energy.crm.contract.req.ScServiceContractPageReq;
+import com.kge.energy.crm.contract.req.ScServiceContractProjEndTimeUpdReq;
 import com.kge.energy.crm.contract.resp.ScServiceContractResp;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.ScContractEvaluateDao;
 import com.kge.energy.crm.repository.dao.ScServiceContractDao;
@@ -28,7 +33,9 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
-import com.kge.energy.crm.workOrder.req.ServiceContractUpdateProjectTimeReq;
+import com.kge.energy.crm.user.service.UserDomainService;
+import com.kge.energy.msg.dto.UserContactDto;
+import com.kge.energy.msg.param.ContractEvaluateMsgToRole;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -59,6 +67,10 @@ public class ScServiceContractService {
     private final RedisLockUtils redisLockUtils;
 
     private final DataPermissionDomainService dataPermissionDomainService;
+
+    private final UserDomainService userDomainService;
+
+    private final MsgDomainService msgDomainService;
 
     /**
      * 获取服务合同列表
@@ -215,6 +227,12 @@ public class ScServiceContractService {
 
     @Transactional
     public Boolean addEvaluation(ScServiceContractEvaAddReq req) {
+        ScServiceContract contract = scServiceContractDao.getById(req.getServiceContractId());
+        if (contract == null) {
+            throw new ServiceException("合同不存在!");
+        }
+        //获取当前登录操作用户信息
+        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
         //新增评价
         ScContractEvaluate scContractEvaluate = new ScContractEvaluate()
                 .setServiceContractId(req.getServiceContractId())
@@ -227,6 +245,25 @@ public class ScServiceContractService {
                 .set(ScServiceContract::getStatus, ConstParam.HasEvaluated)
                 .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
         boolean updated = scServiceContractDao.update(updateWrapper);
+
+        //发送消息通知集团客服
+        ContractEvaluateMsgToRole msgParam = new ContractEvaluateMsgToRole();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        if (!roleEnums.isEmpty()) {
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+            msgParam.setContractCode(contract.getCode());
+            msgParam.setContractName(contract.getName());
+            msgParam.setSignedTime(contract.getSigningTime() != null ? contract.getSigningTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) : "");
+            msgParam.setStartTime(contract.getProjectStartTime() != null ? contract.getProjectStartTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) : "");
+            msgParam.setEndTime(contract.getProjectEndTime() != null ? contract.getProjectEndTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) : "");
+            msgParam.setSatisfaction(req.getSatisfaction().toString());
+            msgParam.setEvaluate(req.getEvaluate());
+            msgParam.setTenantId(operator.getTenantId());
+            msgParam.setNotifyUsers(userContact);
+            msgParam.setPathUrl(null);
+            msgDomainService.sendCrmMsg(msgParam);
+        }
+
         return saved && updated;
     }
 
