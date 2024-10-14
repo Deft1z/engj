@@ -1,5 +1,6 @@
 package com.kge.energy.crm.operation.service;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -8,6 +9,7 @@ import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.external.ecc.property.EccProperties;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
@@ -17,7 +19,9 @@ import com.kge.energy.crm.external.ecc.service.EccService;
 import com.kge.energy.crm.operation.req.PatrolRecordReq;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
+import com.kge.energy.crm.repository.dao.BRoleDao;
 import com.kge.energy.crm.repository.dao.OmReportDao;
+import com.kge.energy.crm.repository.entity.BRole;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import com.kge.energy.crm.repository.entityext.result.PatrolRecordResp;
@@ -46,13 +50,9 @@ public class OperationMaintenanceService {
 
     private final BOrganizationDao bOrganizationDao;
 
-    private final EccProperties eccProperties;
-
     private final DataPermissionDomainService dataPermissionDomainService;
 
-    //集团领导
-    @Value("${group.leaderPhones}")
-    private String[] leaderPhones;
+    private final BRoleDao bRoleDao;
 
     /**
      * 获取运维托管列表
@@ -66,8 +66,6 @@ public class OperationMaintenanceService {
             throw new ServiceException("权限不足");
         }
 
-        List<String> leaderPhoneList = new ArrayList<>(Arrays.asList(leaderPhones));
-
         String currentUserPhone = userInfoDto.getMobile();
         log.info("用户{}查看了运维报告", currentUserPhone);
 
@@ -77,9 +75,6 @@ public class OperationMaintenanceService {
         //获取当前用户ecc org code, 处理施工单位筛选条件
         String eccOrgCode = bOrganizationDao.getEccOrgCode(UserInfoContextUtils.getCurrentOrgId());
         if (StrUtil.isBlank(eccReq.getCondition().getSysCompanyCode())) {
-            if (!AuthVerifyUtils.isSuperAdmin() && !leaderPhoneList.contains(currentUserPhone)) {
-                eccReq.getCondition().setSysCompanyCode(eccOrgCode);
-            }
             switch (dataEnums.getCode()) {
                 case 0, 1, 2:
                     eccReq.getCondition().setSysCompanyCode(null);

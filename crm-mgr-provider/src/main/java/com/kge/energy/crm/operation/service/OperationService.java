@@ -44,10 +44,6 @@ public class OperationService {
     private final BOrganizationDao bOrganizationDao;
     private final DataPermissionDomainService dataPermissionDomainService;
 
-    //集团领导
-    @Value("${group.leaderPhones}")
-    private String[] leaderPhones;
-
     public EccResp<EccPageData<EccMaintenance>> getPage(OperationListReq req) throws NoSuchAlgorithmException {
         // 构造ecc接口请求参数
         EccReq eccReq = new EccReq();
