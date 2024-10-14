@@ -149,7 +149,8 @@ public class ServiceContractDomainService {
             throw new ServiceException("项目开始时间不能早于合同签订时间!");
         }
 
-        contract.setStatus(ConstParam.ContractUnderWay);
+        contract.setStatus(ConstParam.ContractUnderWay)
+                .setProjectStartTime(projectStartTime);
 
         return scServiceContractDao.updateById(contract);
     }
@@ -166,7 +167,8 @@ public class ServiceContractDomainService {
             throw new ServiceException("合同竣工时间不能早于开始时间!");
         }
 
-        contract.setStatus(ConstParam.RemainToBeEvaluated);
+        contract.setStatus(ConstParam.RemainToBeEvaluated)
+                .setProjectEndTime(projectFinishTime);
 
         Boolean updateResult = scServiceContractDao.updateById(contract);
         if (updateResult) {
