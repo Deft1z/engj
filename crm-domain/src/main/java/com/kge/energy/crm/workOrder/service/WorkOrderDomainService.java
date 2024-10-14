@@ -136,7 +136,7 @@ public class WorkOrderDomainService {
         //发送消息，通知集团客服
         BizOrderCreateMsgToRoleParam msgParam = new BizOrderCreateMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        if (!roleEnums.isEmpty()){
+        if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             msgParam.setOrderName(content.getBusinessName());
             msgParam.setArea(content.getArea());
@@ -363,7 +363,7 @@ public class WorkOrderDomainService {
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
 
-            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
                 //发送微信小程序消息，通知客户
                 userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
                 msgDomainService.sendCrmMsg(new BizOrderAssignMsgToUserParam()
@@ -430,7 +430,7 @@ public class WorkOrderDomainService {
         BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
         BizOrderHandleMsgToUserParam msgParam = new BizOrderHandleMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
             List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
@@ -494,7 +494,7 @@ public class WorkOrderDomainService {
         BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
         BizOrderFinishMsgToUserParam msgParam = new BizOrderFinishMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
             List<UserContactDto> userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
@@ -554,7 +554,7 @@ public class WorkOrderDomainService {
         BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
         BizOrderTerminateMsgToUserParam msgParam = new BizOrderTerminateMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
             List<UserContactDto> userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
@@ -619,7 +619,7 @@ public class WorkOrderDomainService {
         //发送elink消息，通知二级公司客服
         BizOrderWithdrawMsgToRoleParam withdrawMsgParam = new BizOrderWithdrawMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), withdrawMsgParam.getFunctionCode());
-        if (!roleEnums.isEmpty()){
+        if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, formCurrentOrgId, operator.getTenantId());
             withdrawMsgParam.setOrderName(fromContent.getBusinessName());
             withdrawMsgParam.setOrderCode(fromContent.getCode());
@@ -631,7 +631,7 @@ public class WorkOrderDomainService {
             withdrawMsgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(withdrawMsgParam);
 
-            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
                 //发送微信小程序消息，通知客户
                 userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
                 msgDomainService.sendCrmMsg(new BizOrderWithdrawMsgToUserParam()
@@ -703,7 +703,7 @@ public class WorkOrderDomainService {
         //发送elink消息，通知集团客服
         BizOrderReturnMsgToRoleParam msgParam = new BizOrderReturnMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        if (!roleEnums.isEmpty()){
+        if (!roleEnums.isEmpty()) {
             String serviceUnit = bOrganizationDao.getById(currentOrgId).getName();
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             msgParam.setOrderName(fromContent.getBusinessName());
@@ -716,7 +716,7 @@ public class WorkOrderDomainService {
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
 
-            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())){
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
                 //发送微信小程序消息，通知客户
                 userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
                 msgDomainService.sendCrmMsg(new BizOrderReturnMsgToUserParam()
