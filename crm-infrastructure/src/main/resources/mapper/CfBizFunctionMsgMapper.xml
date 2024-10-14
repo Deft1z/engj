@@ -32,7 +32,7 @@
                     , cbfm.blacklist
                     , cbfm.whitelist
                     , cbfm.priority
-                    , cbfm.is_enabled
+                    , cbfm.is_enabled as enabled
                 from sys_msg_channel smc
                 left join cf_biz_function_msg cbfm on cbfm.flag = 1 and cbfm.msg_channel_id = smc.id
                 where smc.flag = 1
