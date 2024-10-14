@@ -229,6 +229,14 @@ public class WorkOrderDomainService {
             }
 
         } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
+
+            //如果工单未分派，则不显示操作按钮
+            if (StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)) {
+                return new WfFormFlowResp()
+                        .setButtonList(buttonList)
+                        .setWfFormFlowList(wfFormFlowListRespList);
+            }
+
             //二级公司客服按钮
             buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
 
