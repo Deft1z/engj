@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -16,10 +15,6 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.RedisLockUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.contract.req.ScServiceContractAddReq;
-import com.kge.energy.crm.contract.req.ScServiceContractEvaAddReq;
-import com.kge.energy.crm.contract.req.ScServiceContractPageReq;
-import com.kge.energy.crm.contract.req.ScServiceContractProjEndTimeUpdReq;
 import com.kge.energy.crm.contract.req.ScServiceContractEvaAddReq;
 import com.kge.energy.crm.contract.req.ScServiceContractPageReq;
 import com.kge.energy.crm.contract.req.ScServiceContractProjEndTimeUpdReq;
@@ -145,12 +140,6 @@ public class ScServiceContractService {
             throw new ServiceException("未达到合同竣工时间，不能评价!");
         }
 
-    @Transactional
-    public Boolean addEvaluation(ScServiceContractEvaAddReq req) {
-        ScServiceContract contract = scServiceContractDao.getById(req.getServiceContractId());
-        if (contract == null) {
-            throw new ServiceException("合同不存在!");
-        }
         //获取当前登录操作用户信息
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
         //新增评价
