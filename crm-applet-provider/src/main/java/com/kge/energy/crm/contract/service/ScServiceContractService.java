@@ -168,9 +168,9 @@ public class ScServiceContractService {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             msgParam.setContractCode(contract.getCode());
             msgParam.setContractName(contract.getName());
-            msgParam.setSignedTime(contract.getSigningTime() != null ? contract.getSigningTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) : "");
-            msgParam.setStartTime(contract.getProjectStartTime() != null ? contract.getProjectStartTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) : "");
-            msgParam.setEndTime(contract.getProjectEndTime() != null ? contract.getProjectEndTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)) : "");
+            msgParam.setSignedTime(contract.getSigningTime() != null ? contract.getSigningTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "");
+            msgParam.setStartTime(contract.getProjectStartTime() != null ? contract.getProjectStartTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "");
+            msgParam.setEndTime(contract.getProjectEndTime() != null ? contract.getProjectEndTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "");
             msgParam.setSatisfaction(req.getSatisfaction().toString());
             msgParam.setEvaluate(req.getEvaluate());
             msgParam.setTenantId(operator.getTenantId());
