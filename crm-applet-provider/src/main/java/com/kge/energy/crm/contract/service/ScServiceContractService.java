@@ -136,7 +136,7 @@ public class ScServiceContractService {
         }
 
         LocalDateTime todayLocalDateTime = LocalDateTimeUtil.parse(DateUtil.today(), DatePattern.NORM_DATE_PATTERN);
-        if (todayLocalDateTime.isAfter(contract.getProjectEndTime())) {
+        if (todayLocalDateTime.isBefore(contract.getProjectEndTime())) {
             throw new ServiceException("未达到合同竣工时间，不能评价!");
         }
 
