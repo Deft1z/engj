@@ -47,7 +47,7 @@ public class InternalBindController {
                                            @RequestParam(name = "mobile", required = false) String mobile,
                                            @RequestParam(name = "name", required = false) String name) {
 
-        DetailResp result = appService.FindBindList(page, limit, mobile, name, ids);
+        DetailResp result = appService.findBindList(page, limit, mobile, name, ids);
         return CommonResult.suc(result);
     }
 
@@ -67,7 +67,7 @@ public class InternalBindController {
     @ConvertToGoFormats
     @PostMapping("/project/update")
     public CommonResult<Boolean> delProject(@RequestBody ProjectDelReq req) {
-        appService.Del(req);
+        appService.del(req);
         return CommonResult.suc(true);
     }
 
@@ -77,7 +77,7 @@ public class InternalBindController {
     @ConvertToGoFormats
     @PostMapping("/cancel/update")
     public CommonResult<Boolean> cancel(@RequestBody BindReq req) {
-        appService.CancelAndUpdate(req);
+        appService.cancelAndUpdate(req);
         return CommonResult.suc(true);
     }
 
@@ -87,7 +87,7 @@ public class InternalBindController {
     @ConvertToGoFormats
     @PostMapping("/cancelall/update")
     public CommonResult<Boolean> cancelAll(@RequestBody CancelAllReq req) {
-        appService.CancelAll(req.getOpenid());
+        appService.cancelAll(req.getOpenid());
         return CommonResult.suc(true);
     }
 
@@ -97,7 +97,7 @@ public class InternalBindController {
     @ConvertToGoFormats
     @GetMapping("/finduser")
     public CommonResult<UserResp> findUserResp(@RequestParam("mobile") String mobile) {
-        return CommonResult.suc(appService.FindUserResp(mobile));
+        return CommonResult.suc(appService.findUserResp(mobile));
     }
 
     /**

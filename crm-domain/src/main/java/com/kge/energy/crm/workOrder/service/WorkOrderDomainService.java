@@ -24,6 +24,7 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
@@ -85,6 +86,7 @@ public class WorkOrderDomainService {
     private final DataPermissionDomainService dataPermissionDomainService;
     private final UserDomainService userDomainService;
     private final MsgDomainService msgDomainService;
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean addWorkOrder(WorkOrderAddReq req) {
@@ -146,7 +148,7 @@ public class WorkOrderDomainService {
             msgParam.setCustomerName(content.getCustomerName());
             msgParam.setMobile(content.getMobile());
             msgParam.setRemark(req.getRemark());
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -215,8 +217,23 @@ public class WorkOrderDomainService {
         //返回工单操作按钮
         List<BaseButton> buttonList = new ArrayList<>();
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
+
+            //如果工单已完成或已终止，不返回操作按钮
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) ||
+                    StrUtil.equals(wfForm.getStatus(), ConstParam.Terminated)) {
+                return new WfFormFlowResp()
+                        .setButtonList(buttonList)
+                        .setWfFormFlowList(wfFormFlowListRespList);
+            }
+
             //集团客服按钮
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
+
+            //待分派或已分派状态才显示终止按钮
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) ||
+                    StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
+            }
+
 
             //二级公司未处理工单才显示撤回按钮
             if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
@@ -237,8 +254,21 @@ public class WorkOrderDomainService {
                         .setWfFormFlowList(wfFormFlowListRespList);
             }
 
+            //如果工单已完成或已终止，不返回操作按钮
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) ||
+                    StrUtil.equals(wfForm.getStatus(), ConstParam.Terminated)) {
+                return new WfFormFlowResp()
+                        .setButtonList(buttonList)
+                        .setWfFormFlowList(wfFormFlowListRespList);
+            }
+
             //二级公司客服按钮
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
+
+            //工单待处理不显示完成工单按钮
+            if(!StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)){
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
+            }
+
 
             //未处理或未添加合同才显示退回按钮
             if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))
@@ -256,6 +286,13 @@ public class WorkOrderDomainService {
                 buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ADD_SERVICE_CONTRACT));
             }
 
+        } else if (operator.getRoleCodes().contains(RoleEnums.APPLET_USER.getCode())) {
+            //如果工单已完成或已终止，不返回操作按钮
+            DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+            List<ContractResult> resultList = scServiceContractDao.form(wfForm.getFormId(), operator, dataEnums);
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) && CollUtil.isNotEmpty(resultList)) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.GO_TO_CONTRACT));
+            }
         }
 
         return new WfFormFlowResp()
@@ -366,7 +403,7 @@ public class WorkOrderDomainService {
             msgParam.setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             msgParam.setCustomerName(fromContent.getCustomerName());
             msgParam.setMobile(fromContent.getMobile());
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -381,7 +418,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupAssign)
                         .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(null)
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
@@ -446,7 +483,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowHasFeedback)
                     .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(null)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -459,6 +496,11 @@ public class WorkOrderDomainService {
         if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
             throw new ServiceException("工单已经完成，不能重复完成!");
         }
+
+        if(StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)) {
+            throw new ServiceException("工单未处理，不能完成!");
+        }
+
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         Integer customerUserId = wfForm.getCreateUserId();
@@ -510,7 +552,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowFinished)
                     .setFinishTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(null)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -520,8 +562,13 @@ public class WorkOrderDomainService {
     }
 
     private Boolean terminateOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
-        if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
-            throw new ServiceException("工单已经完成或终止，不能重复完成或终止!");
+        if(!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) ||
+                !StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
+            throw new ServiceException("工单正在处理中，不能终止!");
+        }
+
+        if (lastFlowActionType.equals(ConstParam.Terminated)) {
+            throw new ServiceException("工单已终止，不能重复终止!");
         }
         Long operatorUserId = operator.getUserId();
         Integer currentRoleId = bRoleDao.getRoleIdByCode(operator.getRoleCodes().iterator().next(), operator.getTenantId());
@@ -543,9 +590,9 @@ public class WorkOrderDomainService {
                 .setFormId(formId)
                 .setUserId(operatorUserId.intValue())
                 .setTimeAction(now)
-                .setActionType(ConstParam.FlowTerminatedd)
+                .setActionType(ConstParam.FlowTerminated)
                 .setActionContent(req.getContent())
-                .setStatus(ConstParam.FlowTerminatedd)
+                .setStatus(ConstParam.FlowTerminated)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
                 .setTenantId(operator.getTenantId())
@@ -570,7 +617,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowFinished)
                     .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(null)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -634,7 +681,7 @@ public class WorkOrderDomainService {
             withdrawMsgParam.setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             withdrawMsgParam.setOperator(RoleEnums.JT_CUSTOMER.getDesc());
             withdrawMsgParam.setContent(req.getContent());
-            withdrawMsgParam.setPathUrl(null);
+            withdrawMsgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             withdrawMsgParam.setTenantId(operator.getTenantId());
             withdrawMsgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(withdrawMsgParam);
@@ -649,7 +696,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupWithdraw)
                         .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(null)
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
@@ -719,7 +766,7 @@ public class WorkOrderDomainService {
             msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             msgParam.setCompanyName(serviceUnit);
             msgParam.setContent(req.getContent());
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -734,7 +781,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowCompanyReturn)
                         .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(null)
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );

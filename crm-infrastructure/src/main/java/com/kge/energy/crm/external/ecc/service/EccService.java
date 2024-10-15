@@ -2,8 +2,6 @@ package com.kge.energy.crm.external.ecc.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.HexUtil;
 import cn.hutool.json.JSONObject;
@@ -70,7 +68,7 @@ public class EccService {
 
     public List<EccOrgResp> getEccOrgList() {
         List<BOrganization> bOrganizationList = bOrganizationDao.getEccOrgList();
-        List<String> eccOrgCodeList = Arrays.asList("A16","A01","A25","A18","A07","A34","A04");
+        List<String> eccOrgCodeList = Arrays.asList("A16", "A01", "A25", "A18", "A07", "A34", "A04");
         return bOrganizationList
                 .stream()
                 .filter(bOrganization -> eccOrgCodeList.contains(bOrganization.getEccOrgCode()))

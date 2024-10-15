@@ -48,38 +48,38 @@ public interface BAppMapper extends BaseMapper<BApp> {
     /**
      * 绑定管理 -> 获取详情列表
      */
-    List<OpenShareModelList> FindBindList(@Param("page") Integer page,@Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids,@Param("offset") Integer offset,@Param("limit") Integer limit);
+    List<OpenShareModelList> findBindList(@Param("page") Integer page, @Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids, @Param("offset") Integer offset, @Param("limit") Integer limit);
 
 
     /**
      * 绑定管理 -> 获取详情列表(总数)
      */
-    List<OpenShareModelList> FindBindListCount(@Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids);
+    List<OpenShareModelList> findBindListCount(@Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids);
 
     /**
      * 绑定管理 -> 用户绑定组织关系记录
      */
-    List<OpenIdModelList> FindByUidAndOid(@Param("uids") List<Integer> uids, @Param("ids") List<Integer> ids);
+    List<OpenIdModelList> findByUidAndOid(@Param("uids") List<Integer> uids, @Param("ids") List<Integer> ids);
 
     /**
      * @description 小程序我的->获取业务系统列表
      * @author tangchenghui
      * @date 2024/7/29 15:16
-    */
+     */
     List<AppListResult> getAppListByUserId(@Param("userId") Integer userId);
 
     /**
      * @description 小程序我的->获取业务系统图标列表
      * @author tangchenghui
      * @date 2024/7/29 15:47
-    */
+     */
     List<AppAvatarListResult> getAppAvatarList();
 
     /**
      * @description 后台管理-分页获取应用列表
      * @author tangchenghui
      * @date 2024/8/15 17:38
-    */
+     */
     IPage<AppMgrListResult> selectAppPage(Page<AppMgrListResult> page, @Param("param") AppMgrListParam param);
 
     IPage<BindUserResult> getBindUsers(Page<BindUserResult> page, @Param("appId") Integer appId, @Param("mobile") String mobile, @Param("name") String name);

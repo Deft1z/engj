@@ -1,8 +1,6 @@
 package com.kge.energy.crm.repository.entityext.param;
 
 import com.kge.energy.crm.common.page.PageReq;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

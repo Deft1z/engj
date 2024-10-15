@@ -12,7 +12,7 @@ public class ConstParam {
     public static String FlowCompanyContract = "添加合同";
     public static String FlowHasFeedback = "已回复";
     public static String FlowFinished = "已完结";
-    public static String FlowTerminatedd = "已终止";
+    public static String FlowTerminated = "已终止";
     public static String FlowTagGroup = "集团";
     public static String FlowTagSub = "二级公司";
     public static String GroupWithdraw = "集团撤回";

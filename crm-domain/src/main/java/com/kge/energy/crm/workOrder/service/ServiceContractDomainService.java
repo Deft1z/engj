@@ -2,7 +2,6 @@ package com.kge.energy.crm.workOrder.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -65,7 +64,7 @@ public class ServiceContractDomainService {
         return BeanUtil.copyToList(resultList, ServiceContractResp.class);
     }
 
-    public ServiceContractResp getContractDetailByContractId(ServiceContractDetailReq req){
+    public ServiceContractResp getContractDetailByContractId(ServiceContractDetailReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
         ContractResult contractResult = scServiceContractDao.getContractDetailByContractId(req.getContractId(), userInfoDto, dataEnums);
@@ -129,6 +128,7 @@ public class ServiceContractDomainService {
         return true;
     }
 
+    @Transactional
     public Boolean updateProjectTime(ServiceContractUpdateProjectTimeReq req) {
         return switch (req.getMode()) {
             case 0 -> updateStartTime(req);
@@ -137,11 +137,9 @@ public class ServiceContractDomainService {
         };
     }
 
-    @Transactional
     private Boolean updateStartTime(ServiceContractUpdateProjectTimeReq req) {
-        LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
-                .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-        ScServiceContract contract = scServiceContractDao.getOne(queryWrapper);
+
+        ScServiceContract contract = scServiceContractDao.getById(req.getServiceContractId());
         if (contract == null) {
             throw new ServiceException("合同不存在!");
         }
@@ -151,37 +149,29 @@ public class ServiceContractDomainService {
             throw new ServiceException("项目开始时间不能早于合同签订时间!");
         }
 
-        LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda();
-        updateWrapper.set(ScServiceContract::getProjectStartTime, projectStartTime)
-                .set(ScServiceContract::getStatus, ConstParam.ContractUnderWay)
-                .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-        return scServiceContractDao.update(updateWrapper);
+        contract.setStatus(ConstParam.ContractUnderWay)
+                .setProjectStartTime(projectStartTime);
+
+        return scServiceContractDao.updateById(contract);
     }
 
-    @Transactional
     private Boolean updateFinishTime(ServiceContractUpdateProjectTimeReq req) {
-        LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
-                .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-        ScServiceContract contract = scServiceContractDao.getOne(queryWrapper);
+
+        ScServiceContract contract = scServiceContractDao.getById(req.getServiceContractId());
         if (contract == null) {
             throw new ServiceException("合同不存在!");
         }
 
         LocalDateTime projectFinishTime = LocalDateTimeUtil.parse(req.getProjectTime(), DatePattern.NORM_DATE_PATTERN);
-        LocalDateTime todayLocalDateTime = LocalDateTimeUtil.parse(DateUtil.now(), DatePattern.NORM_DATE_PATTERN);
         if (contract.getProjectStartTime().isAfter(projectFinishTime)) {
-            throw new ServiceException("项目结束时间不能早于项目开始时间!");
-        }
-        if(projectFinishTime.isAfter(todayLocalDateTime)){
-            throw new ServiceException("项目结束时间不能早于当前时间!");
+            throw new ServiceException("合同竣工时间不能早于开始时间!");
         }
 
-        LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda();
-        updateWrapper.set(ScServiceContract::getProjectEndTime, req.getProjectTime())
-                .set(ScServiceContract::getStatus, ConstParam.RemainToBeEvaluated)
-                .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-        Boolean updateResult = scServiceContractDao.update(updateWrapper);
-        if(updateResult){
+        contract.setStatus(ConstParam.RemainToBeEvaluated)
+                .setProjectEndTime(projectFinishTime);
+
+        Boolean updateResult = scServiceContractDao.updateById(contract);
+        if (updateResult) {
             sendServiceContractUpdateMsg(contract);
         }
         return updateResult;

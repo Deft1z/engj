@@ -2,6 +2,8 @@ package com.kge.energy.crm.contract.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -13,7 +15,6 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.RedisLockUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.contract.req.ScServiceContractAddReq;
 import com.kge.energy.crm.contract.req.ScServiceContractEvaAddReq;
 import com.kge.energy.crm.contract.req.ScServiceContractPageReq;
 import com.kge.energy.crm.contract.req.ScServiceContractProjEndTimeUpdReq;
@@ -25,12 +26,8 @@ import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.ScContractEvaluateDao;
 import com.kge.energy.crm.repository.dao.ScServiceContractDao;
-import com.kge.energy.crm.repository.dao.WfFormDao;
-import com.kge.energy.crm.repository.dao.WfFormFlowDao;
 import com.kge.energy.crm.repository.entity.ScContractEvaluate;
 import com.kge.energy.crm.repository.entity.ScServiceContract;
-import com.kge.energy.crm.repository.entity.WfForm;
-import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.user.service.UserDomainService;
@@ -59,10 +56,6 @@ public class ScServiceContractService {
     private final ScServiceContractDao scServiceContractDao;
 
     private final ScContractEvaluateDao scContractEvaluateDao;
-
-    private final WfFormDao wfFormDao;
-
-    private final WfFormFlowDao wfFormFlowDao;
 
     private final RedisLockUtils redisLockUtils;
 
@@ -101,62 +94,6 @@ public class ScServiceContractService {
                 .setTotal(pages.getTotal());
     }
 
-    @Transactional
-    public Boolean insert(ScServiceContractAddReq req) {
-        LocalDateTime now = LocalDateTime.now();
-        //校验合同code是否存在
-        LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
-                .eq(ScServiceContract::getCode, req.getCode());
-        ScServiceContract contract = scServiceContractDao.getOne(queryWrapper);
-        if (contract != null) {
-            log.info("==> 合同已存在，不重复添加！");
-            return false;
-        }
-
-        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
-        ScServiceContract scServiceContract = new ScServiceContract()
-                .setFormId(req.getFormId())
-                .setName(req.getName())
-                .setCode(req.getCode())
-                .setAmount(req.getAmount())
-                .setProjectCode(req.getProjectCode())
-                .setSigningTime(req.getSigningTime().atStartOfDay())
-                .setServiceUnit(operator.getOrganizationList().iterator().next().getId())
-                .setStatus(ConstParam.ContractNotBegin)
-                .setFlag(1)
-                .setCreateUserId(operator.getUserId().intValue())
-                .setRemark(req.getRemark())
-                .setTenantId(operator.getTenantId());
-        if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
-            scServiceContract.setServiceUnit(req.getServiceUnit());
-        }
-        scServiceContractDao.save(scServiceContract);
-
-        //变更工单信息
-        LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
-                .set(WfForm::getStatus, ConstParam.Processed)
-                .set(WfForm::getSubStatus, ConstParam.Processed)
-                .set(WfForm::getModifyUserId, operator.getUserId())
-                .set(WfForm::getTimeFinished, now)
-                .set(WfForm::getCurrentOrgId, operator.getOrganizationList().iterator().next().getId())
-                .set(WfForm::getCurrentRoleId, operator.getRoleList().iterator().next().getId())
-                .eq(WfForm::getFormId, req.getFormId());
-        wfFormDao.update(wfUpdateWrapper);
-
-        //新增工单流转添加合同记录
-        WfFormFlow wfFormFlow = new WfFormFlow()
-                .setFormId(req.getFormId())
-                .setUserId(operator.getUserId().intValue())
-                .setCreateUserId(operator.getUserId().intValue())
-                .setTimeAction(now)
-                .setActionType(ConstParam.FlowCompanyContract)
-                .setActionContent(req.getRemark())
-                .setStatus(ConstParam.FlowCompanyContract)
-                .setTenantId(operator.getTenantId());
-        wfFormFlowDao.save(wfFormFlow);
-
-        return true;
-    }
 
     @Transactional
     public Boolean update(ScServiceContractProjEndTimeUpdReq req) {
@@ -189,48 +126,20 @@ public class ScServiceContractService {
         }
     }
 
-    /*
-    @Transactional
-    public Boolean updateProjTime(ServiceContractUpdateProjectTimeReq req) {
-        LambdaQueryWrapper<ScServiceContract> queryWrapper = Wrappers.<ScServiceContract>lambdaQuery()
-                .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-        ScServiceContract contract = scServiceContractDao.getOne(queryWrapper);
-        if (contract == null) {
-            throw new ServiceException("合同不存在!");
-        }
-
-        LambdaUpdateWrapper<ScServiceContract> updateWrapper = Wrappers.<ScServiceContract>update().lambda();
-        switch (req.getMode()) {
-            case 0:
-                //数据时间校验
-                if (contract.getSigningTime().isAfter(req.getProjectTime().atStartOfDay())) {
-                    throw new ServiceException("项目开始时间不能早于合同签订时间!");
-                }
-                updateWrapper.set(ScServiceContract::getProjectStartTime, req.getProjectTime())
-                        .set(ScServiceContract::getStatus, ConstParam.ContractUnderWay)
-                        .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-                return scServiceContractDao.update(updateWrapper);
-            case 1:
-                //数据时间校验
-                if (contract.getProjectStartTime().isAfter(req.getProjectTime().atStartOfDay())) {
-                    throw new ServiceException("项目结束时间不能早于项目开始时间!");
-                }
-                updateWrapper.set(ScServiceContract::getProjectEndTime, req.getProjectTime())
-                        .set(ScServiceContract::getStatus, ConstParam.RemainToBeEvaluated)
-                        .eq(ScServiceContract::getServiceContractId, req.getServiceContractId());
-                return scServiceContractDao.update(updateWrapper);
-            default:
-                return false;
-        }
-    }
-     */
 
     @Transactional
     public Boolean addEvaluation(ScServiceContractEvaAddReq req) {
+
         ScServiceContract contract = scServiceContractDao.getById(req.getServiceContractId());
         if (contract == null) {
             throw new ServiceException("合同不存在!");
         }
+
+        LocalDateTime todayLocalDateTime = LocalDateTimeUtil.parse(DateUtil.today(), DatePattern.NORM_DATE_PATTERN);
+        if (todayLocalDateTime.isBefore(contract.getProjectEndTime())) {
+            throw new ServiceException("未达到合同竣工时间，不能评价!");
+        }
+
         //获取当前登录操作用户信息
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
         //新增评价
