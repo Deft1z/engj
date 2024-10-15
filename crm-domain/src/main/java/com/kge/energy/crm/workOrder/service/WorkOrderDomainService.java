@@ -263,7 +263,12 @@ public class WorkOrderDomainService {
             }
 
             //二级公司客服按钮
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
+
+            //工单待处理不显示完成工单按钮
+            if(!StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)){
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
+            }
+
 
             //未处理或未添加合同才显示退回按钮
             if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))
@@ -491,6 +496,11 @@ public class WorkOrderDomainService {
         if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
             throw new ServiceException("工单已经完成，不能重复完成!");
         }
+
+        if(StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)) {
+            throw new ServiceException("工单未处理，不能完成!");
+        }
+
         Long operatorUserId = operator.getUserId();
         Integer formId = wfForm.getFormId();
         Integer customerUserId = wfForm.getCreateUserId();
