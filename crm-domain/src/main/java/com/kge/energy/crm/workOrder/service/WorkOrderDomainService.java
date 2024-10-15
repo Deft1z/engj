@@ -215,8 +215,23 @@ public class WorkOrderDomainService {
         //返回工单操作按钮
         List<BaseButton> buttonList = new ArrayList<>();
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
+
+            //如果工单已完成或已终止，不返回操作按钮
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) ||
+                    StrUtil.equals(wfForm.getStatus(), ConstParam.Terminated)) {
+                return new WfFormFlowResp()
+                        .setButtonList(buttonList)
+                        .setWfFormFlowList(wfFormFlowListRespList);
+            }
+
             //集团客服按钮
-            buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
+
+            //待分派或已分派状态才显示终止按钮
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) ||
+                    StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
+            }
+
 
             //二级公司未处理工单才显示撤回按钮
             if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
@@ -232,6 +247,14 @@ public class WorkOrderDomainService {
 
             //如果工单未分派，则不显示操作按钮
             if (StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)) {
+                return new WfFormFlowResp()
+                        .setButtonList(buttonList)
+                        .setWfFormFlowList(wfFormFlowListRespList);
+            }
+
+            //如果工单已完成或已终止，不返回操作按钮
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) ||
+                    StrUtil.equals(wfForm.getStatus(), ConstParam.Terminated)) {
                 return new WfFormFlowResp()
                         .setButtonList(buttonList)
                         .setWfFormFlowList(wfFormFlowListRespList);
@@ -256,6 +279,13 @@ public class WorkOrderDomainService {
                 buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ADD_SERVICE_CONTRACT));
             }
 
+        } else if (operator.getRoleCodes().contains(RoleEnums.APPLET_USER.getCode())) {
+            //如果工单已完成或已终止，不返回操作按钮
+            DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+            List<ContractResult> resultList = scServiceContractDao.form(wfForm.getFormId(), operator, dataEnums);
+            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) && CollUtil.isNotEmpty(resultList)) {
+                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.GO_TO_CONTRACT));
+            }
         }
 
         return new WfFormFlowResp()
@@ -520,8 +550,13 @@ public class WorkOrderDomainService {
     }
 
     private Boolean terminateOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
-        if (lastFlowActionType.equals(ConstParam.FlowFinished)) {
-            throw new ServiceException("工单已经完成或终止，不能重复完成或终止!");
+        if(!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) ||
+                !StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
+            throw new ServiceException("工单正在处理中，不能终止!");
+        }
+
+        if (lastFlowActionType.equals(ConstParam.Terminated)) {
+            throw new ServiceException("工单已终止，不能重复终止!");
         }
         Long operatorUserId = operator.getUserId();
         Integer currentRoleId = bRoleDao.getRoleIdByCode(operator.getRoleCodes().iterator().next(), operator.getTenantId());
@@ -543,9 +578,9 @@ public class WorkOrderDomainService {
                 .setFormId(formId)
                 .setUserId(operatorUserId.intValue())
                 .setTimeAction(now)
-                .setActionType(ConstParam.FlowTerminatedd)
+                .setActionType(ConstParam.FlowTerminated)
                 .setActionContent(req.getContent())
-                .setStatus(ConstParam.FlowTerminatedd)
+                .setStatus(ConstParam.FlowTerminated)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
                 .setTenantId(operator.getTenantId())
