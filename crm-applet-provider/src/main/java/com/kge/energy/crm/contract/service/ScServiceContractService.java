@@ -35,7 +35,7 @@ import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.msg.dto.UserContactDto;
-import com.kge.energy.msg.param.ContractEvaluateMsgToRole;
+import com.kge.energy.msg.param.ContractEvaluateMsgToRoleParam;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -247,7 +247,13 @@ public class ScServiceContractService {
         boolean updated = scServiceContractDao.update(updateWrapper);
 
         //发送消息通知集团客服
-        ContractEvaluateMsgToRole msgParam = new ContractEvaluateMsgToRole();
+        sendMsg(req, operator, contract);
+
+        return saved && updated;
+    }
+
+    private void sendMsg(ScServiceContractEvaAddReq req, UserInfoDto operator, ScServiceContract contract) {
+        ContractEvaluateMsgToRoleParam msgParam = new ContractEvaluateMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
@@ -263,8 +269,6 @@ public class ScServiceContractService {
             msgParam.setPathUrl(null);
             msgDomainService.sendCrmMsg(msgParam);
         }
-
-        return saved && updated;
     }
 
 }

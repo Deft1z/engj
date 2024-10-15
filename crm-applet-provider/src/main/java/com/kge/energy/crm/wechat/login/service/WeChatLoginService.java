@@ -1,15 +1,15 @@
 package com.kge.energy.crm.wechat.login.service;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
@@ -17,11 +17,11 @@ import com.kge.energy.crm.enums.LoginPlatformEnums;
 import com.kge.energy.crm.enums.LoginResultEnums;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.enums.SystemTypeEnum;
-import com.kge.energy.crm.external.elink.ElinkService;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.login.SysLoginLogHandleService;
+import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.user.service.UserDomainService;
@@ -30,6 +30,8 @@ import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
+import com.kge.energy.msg.dto.UserContactDto;
+import com.kge.energy.msg.param.LeaderLoginMsgToRoleParam;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -65,11 +66,12 @@ public class WeChatLoginService {
     private final UserDomainService userDomainService;
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final SysLoginLogHandleService sysLoginLogHandleService;
-    private final ElinkService elinkService;
 
     private final BOrganizationDao bOrganizationDao;
     private final BRoleDao bRoleDao;
     private final RUserTenantDao rUserTenantDao;
+
+    private final MsgDomainService msgDomainService;
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
@@ -203,21 +205,14 @@ public class WeChatLoginService {
             //如果是集团领导或公司领导则发送登录提醒
             if (CollUtil.contains(roleCodeList, RoleEnums.JT_LEADER.getCode()) ||
                     CollUtil.contains(roleCodeList, RoleEnums.COMPANY_LEADER.getCode())) {
-                String header = activeProfile.contains("prod") ? "e能管家小程序领导登录提醒" : "e能管家小程序（体验版）领导登录提醒";
-                String msg = "领导名字：" + user.getRealname() + "\\n" +
-                        "手机号：" + user.getMobile() + "\\n" +
-                        "登录时间：" + DateUtil.now() + "\\n" +
-                        "请重点关注！！！";
-
-                for (String sendPhone : sendeeList) {
-                    String msgContent = elinkService.createElinkPushContent(IdUtil.fastSimpleUUID(), header, msg, sendPhone);
-                    try {
-                        elinkService.pushElinkMsg(msgContent);
-                    } catch (Exception e) {
-                        log.error("sendLeaderOnlineMsg error: ", e);
-                    }
-                    ThreadUtil.sleep(1, TimeUnit.SECONDS);
-                }
+                List<BUser> notifyUsers = bUserDao.list(Wrappers.<BUser>lambdaQuery().in(BUser::getMobile, sendeeList));
+                msgDomainService.sendCrmMsg(new LeaderLoginMsgToRoleParam()
+                        .setRealname(user.getRealname())
+                        .setMobile(user.getMobile())
+                        .setLoginTime(DateUtil.now())
+                        .setTenantId(user.getTenantId())
+                        .setNotifyUsers(BeanUtil.copyToList(notifyUsers, UserContactDto.class))
+                );
             }
         });
 

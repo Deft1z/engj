@@ -22,7 +22,7 @@ import com.kge.energy.crm.repository.entityext.result.complain.ComplainResult;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.workOrder.req.WfFormPageReq;
 import com.kge.energy.msg.dto.UserContactDto;
-import com.kge.energy.msg.param.ComplainCreateMsgToRole;
+import com.kge.energy.msg.param.ComplainCreateMsgToRoleParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -116,7 +116,7 @@ public class ComplainService {
     }
 
     private void sendMsg(Integer typef, Integer id, UserInfoDto operator, WComplain wComplain) {
-        ComplainCreateMsgToRole msgParam = new ComplainCreateMsgToRole();
+        ComplainCreateMsgToRoleParam msgParam = new ComplainCreateMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
@@ -134,7 +134,7 @@ public class ComplainService {
         }
     }
 
-    private void setBaseInfo(Integer typef, Integer id, ComplainCreateMsgToRole msgParam) {
+    private void setBaseInfo(Integer typef, Integer id, ComplainCreateMsgToRoleParam msgParam) {
         String type = "";
         String bizCode = "";
         if (typef.equals(1)) {
