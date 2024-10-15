@@ -42,24 +42,21 @@ public class AppService {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
         WxUserAppParam wxUserAppParam = BeanUtil.copyProperties(req, WxUserAppParam.class);
-        List<WxUserAppResp> resps = BeanUtil.copyToList(bAppDao.contractPageByUserIdLoad(wxUserAppParam), WxUserAppResp.class);
-        return resps;
+        return BeanUtil.copyToList(bAppDao.contractPageByUserIdLoad(wxUserAppParam), WxUserAppResp.class);
     }
 
     /**
      * 微信客户小程序 -> 绑定的第三方应用 -> 绑定应用选择列表
      */
     public List<AppDetailUserResp> appUnbindingListLoad(AppBindingListReq req) {
-        List<AppDetailUserResp> resps = BeanUtil.copyToList(bAppDao.appUnbindingListLoad(req.getUserId()), AppDetailUserResp.class);
-        return resps;
+        return BeanUtil.copyToList(bAppDao.appUnbindingListLoad(req.getUserId()), AppDetailUserResp.class);
     }
 
     /**
      * 微信客户小程序 -> 获取所有第三方应用的列表
      */
     public List<BApp> list() {
-        List<BApp> resps = bAppDao.appList();
-        return resps;
+        return bAppDao.appList();
     }
 
     /**
@@ -111,9 +108,9 @@ public class AppService {
         return resp;
     }
 
-    public DetailResp FindBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
-        List<OpenShareModelList> users = bAppDao.FindBindList(page, limit, mobile, name, ids);
-        Integer resultCount = bAppDao.FindBindListCount(mobile, name, ids);
+    public DetailResp findBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
+        List<OpenShareModelList> users = bAppDao.findBindList(page, limit, mobile, name, ids);
+        Integer resultCount = bAppDao.findBindListCount(mobile, name, ids);
         List<Integer> uids = new ArrayList<>();
         for (OpenShareModelList osml : users) {
             uids.add(osml.getUid());
@@ -124,7 +121,7 @@ public class AppService {
             recordMap.put(apps.get(k).getAppId(), k + 1);
         }
 
-        List<OpenIdModelList> oms = bAppDao.FindByUidAndOid(uids, ids);
+        List<OpenIdModelList> oms = bAppDao.findByUidAndOid(uids, ids);
         Map<Integer, List<Integer>> omMap = new HashMap<>();
 
         for (OpenIdModelList omsk : oms) {
@@ -174,35 +171,35 @@ public class AppService {
         }
         if (req.getProjectid() != null) {
             //只需要新建关系
-            bAppDao.AddPro(req.getOpenid(), req.getProjectid());
+            bAppDao.addPro(req.getOpenid(), req.getProjectid());
         } else if (req.getName().length() > 0) {
             //需要新建关系以及项目名称
-            pid = bAppDao.AddProAndRelation(req.getOpenid(), req.getAppid(), req.getName());
+            pid = bAppDao.addProAndRelation(req.getOpenid(), req.getAppid(), req.getName());
         } else {
             return 0;
         }
         return pid;
     }
 
-    public int Del(ProjectDelReq req) {
-        return bAppDao.Del(req.getOpenid(), req.getProjectid());
+    public int del(ProjectDelReq req) {
+        return bAppDao.del(req.getOpenid(), req.getProjectid());
     }
 
-    public int CancelAndUpdate(BindReq req) {
-        return bAppDao.CancelAndUpdate(req.getOpenid(), req.getUserid());
+    public int cancelAndUpdate(BindReq req) {
+        return bAppDao.cancelAndUpdate(req.getOpenid(), req.getUserid());
     }
 
-    public int CancelAll(List<Integer> openIds) {
-        return bAppDao.CancelAll(openIds);
+    public int cancelAll(List<Integer> openIds) {
+        return bAppDao.cancelAll(openIds);
     }
 
 
-    public UserResp FindUserResp(String mobile) {
-        BUser bUser = bAppDao.FindUserByMobile(mobile);
+    public UserResp findUserResp(String mobile) {
+        BUser bUser = bAppDao.findUserByMobile(mobile);
         UserResp userResp = new UserResp();
         List<UserBindByMobileResult> userBindByMobileResults = new ArrayList<>();
         if (bUser != null) {
-            userBindByMobileResults = bAppDao.FindUserBindByUid(bUser.getUserId());
+            userBindByMobileResults = bAppDao.findUserBindByUid(bUser.getUserId());
             userResp.setUserid(bUser.getUserId());
             userResp.setName(bUser.getRealname());
             for (UserBindByMobileResult ubmr : userBindByMobileResults) {
@@ -219,8 +216,7 @@ public class AppService {
     }
 
     public Boolean bindApp(BindReq req) {
-        Boolean result = bAppDao.bindApp(req.getUserid(), req.getOpenid());
-        return result;
+        return bAppDao.bindApp(req.getUserid(), req.getOpenid());
     }
 
 }

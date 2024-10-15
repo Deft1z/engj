@@ -1,7 +1,6 @@
 package com.kge.energy.crm.order.resp;
 
 import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;

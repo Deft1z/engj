@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -45,16 +46,14 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
      * 小程序客户 -> 获取工单
      */
     public List<WxUserAppResult> contractPageByUserIdLoad(WxUserAppParam wxUserAppParam) {
-        List<WxUserAppResult> res = mapper.contractPageByUserIdLoad(wxUserAppParam);
-        return res;
+        return mapper.contractPageByUserIdLoad(wxUserAppParam);
     }
 
     /**
      * 小程序客户 -> 获取绑定应用的选择列表
      */
     public List<AppDetailUserResult> appUnbindingListLoad(Integer userId) {
-        List<AppDetailUserResult> res = mapper.appUnbindingListLoad(userId);
-        return res;
+        return mapper.appUnbindingListLoad(userId);
     }
 
     /**
@@ -63,54 +62,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     public List<BApp> appList() {
         QueryWrapper<BApp> wrapper = Wrappers.query();
         // 封装分页信息
-        List<BApp> res = mapper.selectList(wrapper);
-        return res;
-    }
-
-    /**
-     * 绑定管理 -> 内部绑定列表
-     */
-    public List<OpenIdModelList> newList(Integer page, Integer limit, Integer appId, String mobile, String name) {
-
-        // OpenIdModelList
-
-        // 获取用户对应openid的列表
-        List<OpenIdModelList> resultU = mapper.userOpenId(appId, mobile, name, (page - 1) * limit, limit);
-        int nullFlag = 0;
-        if (resultU.size() < 1) {
-            nullFlag = 1;
-        }
-        List<Integer> uids = new ArrayList<>();
-
-        resultU.forEach(oml -> {
-            uids.add(oml.getUid());
-        });
-
-        List<OpenIdModelList> result = mapper.userOpenIdProject(uids);
-        if (result.size() < 1) {
-            nullFlag = 1;
-        }
-
-        List<OpenIdModelList> rawCount = mapper.userOpenIdCount(appId, mobile, name);
-        if (rawCount.size() < 1) {
-            nullFlag = 1;
-        }
-        List<OpenIdModelList> users = new ArrayList<>();
-        if (nullFlag == 0) {
-            users = result;
-        }
-        return users;
-    }
-
-    /**
-     * 绑定管理 -> 绑定记录的总数
-     */
-    public Integer newListCount(Integer appId, String mobile, String name) {
-
-        // 获取绑定记录的数量
-        List<OpenIdModelList> rawCount = mapper.userOpenIdCount(appId, mobile, name);
-
-        return rawCount.size();
+        return mapper.selectList(wrapper);
     }
 
     /**
@@ -118,20 +70,18 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
      */
     public List<BApp> getApps() {
         QueryWrapper<BApp> wrapper = Wrappers.query();
-        // 封装分页信息
-        List<BApp> applications = mapper.selectList(wrapper);
-        return applications;
+        return mapper.selectList(wrapper);
     }
 
     /**
      * 绑定管理 -> 详情列表
      */
-    public List<OpenShareModelList> FindBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
+    public List<OpenShareModelList> findBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
         int nullFlag = 0; // 判断记录和总数是否为0
         // 获取绑定记录的列表
-        List<OpenShareModelList> result = mapper.FindBindList(page, mobile, name, ids, (page - 1) * limit, limit);
+        List<OpenShareModelList> result = mapper.findBindList(page, mobile, name, ids, (page - 1) * limit, limit);
         // 获取绑定记录的列表（总数）
-        List<OpenShareModelList> resultCount = mapper.FindBindListCount(mobile, name, ids);
+        List<OpenShareModelList> resultCount = mapper.findBindListCount(mobile, name, ids);
         if (result.size() < 1 || resultCount.size() < 1) {
             nullFlag = 1;
         }
@@ -146,25 +96,23 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 详情列表(总数)
      */
-    public Integer FindBindListCount(String mobile, String name, List<Integer> ids) {
+    public Integer findBindListCount(String mobile, String name, List<Integer> ids) {
         // 获取绑定记录的列表（总数）
-        List<OpenShareModelList> resultCount = mapper.FindBindListCount(mobile, name, ids);
+        List<OpenShareModelList> resultCount = mapper.findBindListCount(mobile, name, ids);
         return resultCount.size();
     }
 
     /**
      * 绑定管理 -> 查找对应的用户组织关系
      */
-    public List<OpenIdModelList> FindByUidAndOid(List<Integer> uids, List<Integer> ids) {
-        // 查找对应的用户组织关系
-        List<OpenIdModelList> result = mapper.FindByUidAndOid(uids, ids);
-        return result;
+    public List<OpenIdModelList> findByUidAndOid(List<Integer> uids, List<Integer> ids) {
+        return mapper.findByUidAndOid(uids, ids);
     }
 
     /**
      * 绑定管理 -> 增加项目记录
      */
-    public void AddPro(Integer openId, Integer proId) {
+    public void addPro(Integer openId, Integer proId) {
         ROpenidProject rOpenidProject = new ROpenidProject();
         rOpenidProject.setProjectId(proId);
         rOpenidProject.setOpenId(openId);
@@ -175,7 +123,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 增加项目关联关系记录
      */
-    public int AddProAndRelation(Integer openId, Integer appId, String name) {
+    public int addProAndRelation(Integer openId, Integer appId, String name) {
         BProject bProject = new BProject();
         bProject.setAppId(appId);
         bProject.setName(name);
@@ -196,7 +144,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 删除应用关联记录
      */
-    public int Del(Integer openId, Integer projectId) {
+    public int del(Integer openId, Integer projectId) {
         LambdaUpdateWrapper<ROpenidProject> wrapper = Wrappers.<ROpenidProject>update().lambda()
                 .set(ROpenidProject::getFlag, -1)
                 .eq(ROpenidProject::getOpenId, openId)
@@ -211,7 +159,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 删除该用户关联的某个应用
      */
-    public int CancelAndUpdate(Integer openId, Integer uid) {
+    public int cancelAndUpdate(Integer openId, Integer uid) {
         LambdaUpdateWrapper<BOpenidShare> wrapper = Wrappers.<BOpenidShare>update().lambda()
                 .set(BOpenidShare::getFlag, -1)
                 .eq(BOpenidShare::getShareOpenidId, openId)
@@ -226,7 +174,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 删除所有用户关联的某个应用
      */
-    public int CancelAll(List<Integer> openIds) {
+    public int cancelAll(List<Integer> openIds) {
         LambdaUpdateWrapper<BOpenidShare> wrapper = Wrappers.<BOpenidShare>update().lambda()
                 .set(BOpenidShare::getFlag, -1)
                 .in(BOpenidShare::getShareOpenidId, openIds);
@@ -240,7 +188,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 根据手机号码查找用户
      */
-    public BUser FindUserByMobile(String mobile) {
+    public BUser findUserByMobile(String mobile) {
         LambdaUpdateWrapper<BUser> wrapper = Wrappers.<BUser>update().lambda()
                 .like(BUser::getMobile, mobile);
         List<BUser> users = bUserMapper.selectList(wrapper);
@@ -253,9 +201,8 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     /**
      * 绑定管理 -> 根据userId查找对应的APPID
      */
-    public List<UserBindByMobileResult> FindUserBindByUid(Integer userId) {
-        List<UserBindByMobileResult> userBindByMobileResult = bUserMapper.findUserBindByUid(userId);
-        return userBindByMobileResult;
+    public List<UserBindByMobileResult> findUserBindByUid(Integer userId) {
+        return bUserMapper.findUserBindByUid(userId);
     }
 
     /**
@@ -263,18 +210,20 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
      */
     @Transactional
     public Boolean bindApp(Integer uid, Integer openid) {
-        if (uid == UserInfoContextUtils.getCurrentUserId()) {
+        if (ObjectUtil.equals(uid, UserInfoContextUtils.getCurrentUserId())) {
             throw new ServiceException("非当前用户");
         }
         LambdaUpdateWrapper<BOpenid> wrapper = Wrappers.<BOpenid>update().lambda()
                 .set(BOpenid::getFlag, -1)
                 .eq(BOpenid::getUserId, uid);
         bOpenidMapper.update(wrapper);
+
         BOpenidShare bOpenidShare = new BOpenidShare();
         bOpenidShare.setUserId(uid);
         bOpenidShare.setShareOpenidId(openid);
         bOpenidShare.setFlag(1);
         bOpenidShareMapper.insert(bOpenidShare);
+
         return true;
     }
 

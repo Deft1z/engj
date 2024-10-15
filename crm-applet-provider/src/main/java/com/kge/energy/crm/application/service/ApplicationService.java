@@ -88,10 +88,7 @@ public class ApplicationService {
             throw new ServiceException("当前账号未绑定该业务系统");
         }
 
-        int result = openidDao.logicDeleteOpenId(openid.getOpenidId());
-        if (result != 1) {
-            return false;
-        }
+        openidDao.logicDeleteOpenId(openid.getOpenidId());
         return true;
     }
 

@@ -20,7 +20,7 @@ public class App {
      * 应用Id
      */
     @JsonProperty("Id")
-    private Integer Id;
+    private Integer id;
 
     /**
      * 应用Id
@@ -32,6 +32,6 @@ public class App {
      * 组织id
      */
     @JsonProperty("Oid")
-    private Integer Oid;
+    private Integer oid;
 
 }
