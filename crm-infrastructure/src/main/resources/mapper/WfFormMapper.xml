@@ -264,9 +264,7 @@
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
-        <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleCodes.contains('applet_user')">
-            and a.sub_status = #{listParam.searchMap.status}
-        </if>
+
         <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
             and (json_unquote(json_extract(a.content, '$.code')) like CONCAT('%', #{listParam.searchMap.name}, '%') or json_unquote(json_extract(a.content, '$.businessName')) like CONCAT('%', #{listParam.searchMap.name}, '%'))
         </if>
@@ -281,7 +279,7 @@
             and a.modify_time &lt;= #{listParam.searchMap.endtime}
         </if>
         group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`, `user_status`
-        <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and !userInfo.roleCodes.contains('applet_user')">
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
             having user_status = #{listParam.searchMap.status}
         </if>
         order by a.modify_time desc
