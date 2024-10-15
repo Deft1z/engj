@@ -57,7 +57,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 业务工单公共service
@@ -213,6 +215,7 @@ public class WorkOrderDomainService {
         }
 
         List<WfFormFlowListResp> wfFormFlowListRespList = BeanUtil.copyToList(list, WfFormFlowListResp.class);
+        WfFormFlowListResp latestFlow = CollUtil.getLast(wfFormFlowListRespList);
 
         //返回工单操作按钮
         List<BaseButton> buttonList = new ArrayList<>();
@@ -281,8 +284,18 @@ public class WorkOrderDomainService {
                 buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
             }
 
-            //二级公司处理过工单才显示添加合同按钮
-            if (wfFormFlowListRespList.stream().anyMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
+            //二级公司处理过工单或者添加过合同并且未完结或未终止才显示添加合同按钮
+            Set<String> statusSet = wfFormFlowListRespList.stream()
+                    .map(WfFormFlowListResp::getStatus)
+                    .collect(Collectors.toSet());
+            // 判断是否有 ConstParam.FlowHasFeedback 或 ConstParam.FlowCompanyContract 状态
+            boolean hasRequiredStatus = statusSet.contains(ConstParam.FlowHasFeedback) ||
+                    statusSet.contains(ConstParam.FlowCompanyContract);
+            // 判断 latestFlow 的状态是否为 ConstParam.FlowFinished 或 ConstParam.FlowTerminated
+            boolean isFinishedOrTerminated = StrUtil.equals(latestFlow.getStatus(), ConstParam.FlowFinished) ||
+                    StrUtil.equals(latestFlow.getStatus(), ConstParam.FlowTerminated);
+            // 根据条件添加按钮
+            if (hasRequiredStatus && !isFinishedOrTerminated) {
                 buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ADD_SERVICE_CONTRACT));
             }
 
