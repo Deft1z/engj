@@ -13,6 +13,7 @@ import com.kge.energy.crm.complain.resp.ComplainFormResp;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
@@ -57,6 +58,8 @@ public class ComplainService {
     private final UserDomainService userDomainService;
 
     private final MsgDomainService msgDomainService;
+
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     public PageResp<ComplainFormResp> getByPage(WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
@@ -129,7 +132,7 @@ public class ComplainService {
             msgParam.setContent(wComplain.getContent());
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             msgDomainService.sendCrmMsg(msgParam);
         }
     }

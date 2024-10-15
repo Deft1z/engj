@@ -24,6 +24,7 @@ import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
@@ -85,6 +86,7 @@ public class WorkOrderDomainService {
     private final DataPermissionDomainService dataPermissionDomainService;
     private final UserDomainService userDomainService;
     private final MsgDomainService msgDomainService;
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean addWorkOrder(WorkOrderAddReq req) {
@@ -146,7 +148,7 @@ public class WorkOrderDomainService {
             msgParam.setCustomerName(content.getCustomerName());
             msgParam.setMobile(content.getMobile());
             msgParam.setRemark(req.getRemark());
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -396,7 +398,7 @@ public class WorkOrderDomainService {
             msgParam.setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             msgParam.setCustomerName(fromContent.getCustomerName());
             msgParam.setMobile(fromContent.getMobile());
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -411,7 +413,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupAssign)
                         .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(null)
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
@@ -476,7 +478,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowHasFeedback)
                     .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(null)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -540,7 +542,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowFinished)
                     .setFinishTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(null)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -605,7 +607,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowFinished)
                     .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(null)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -669,7 +671,7 @@ public class WorkOrderDomainService {
             withdrawMsgParam.setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             withdrawMsgParam.setOperator(RoleEnums.JT_CUSTOMER.getDesc());
             withdrawMsgParam.setContent(req.getContent());
-            withdrawMsgParam.setPathUrl(null);
+            withdrawMsgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             withdrawMsgParam.setTenantId(operator.getTenantId());
             withdrawMsgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(withdrawMsgParam);
@@ -684,7 +686,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupWithdraw)
                         .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(null)
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
@@ -754,7 +756,7 @@ public class WorkOrderDomainService {
             msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             msgParam.setCompanyName(serviceUnit);
             msgParam.setContent(req.getContent());
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -769,7 +771,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowCompanyReturn)
                         .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(null)
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
