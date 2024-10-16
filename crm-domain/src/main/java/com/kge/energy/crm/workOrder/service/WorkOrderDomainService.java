@@ -488,7 +488,7 @@ public class WorkOrderDomainService {
     }
 
     private Boolean terminateOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
-        if(!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) ||
+        if(!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) &&
                 !StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
             throw new ServiceException("工单正在处理中，不能终止!");
         }
