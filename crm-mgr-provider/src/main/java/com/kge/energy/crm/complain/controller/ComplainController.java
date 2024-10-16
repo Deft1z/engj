@@ -38,8 +38,8 @@ public class ComplainController {
 
     //投诉列表导出
     @PostMapping("/complain/export")
-    public CommonResult<Boolean> exportComplainList(HttpServletResponse httpResponse, @RequestBody ComplainListExportReq complainListExportReq) throws IOException {
-        return CommonResult.suc(complainService.exportComplainList(httpResponse, complainListExportReq));
+    public void exportComplainList(HttpServletResponse httpResponse, @RequestBody ComplainListExportReq complainListExportReq) throws IOException {
+        complainService.exportComplainList(httpResponse, complainListExportReq);
     }
 
 }

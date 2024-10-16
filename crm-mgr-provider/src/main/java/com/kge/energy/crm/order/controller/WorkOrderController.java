@@ -56,8 +56,8 @@ public class WorkOrderController {
      * 工单列表导出
      * */
     @PostMapping("/order/export")
-    public CommonResult<Boolean> workOrderExport(HttpServletResponse response, @Validated @RequestBody WorkOrderExportReq req) throws IOException {
-        return CommonResult.suc(workOrderService.exportWorkOrder(response, req));
+    public void workOrderExport(HttpServletResponse response, @Validated @RequestBody WorkOrderExportReq req) throws IOException {
+        workOrderService.exportWorkOrder(response, req);
     }
 
 

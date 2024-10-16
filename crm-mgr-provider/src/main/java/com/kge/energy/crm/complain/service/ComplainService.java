@@ -6,17 +6,11 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.converters.longconverter.LongStringConverter;
-import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
-import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.ExcelUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.complain.req.ComplainListExportReq;
@@ -48,10 +42,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -186,19 +178,9 @@ public class ComplainService {
         Assert.notNull(userInfoDto);
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
         //执行查询
-        List<ComplainResult> complainListBySearch = wComplainDao.getComplainListForExport(complainListParam,userInfoDto,dataEnums);
+        List<ComplainResult> complainListBySearch = wComplainDao.getComplainListForExport(complainListParam, userInfoDto, dataEnums);
         //ExcelUtils工具类写excel 响应给前端
-        ExcelUtils.write(response,"投诉列表数据.xlsx","投诉列表数据", ComplainResult.class,complainListBySearch);
-//        if(ObjUtil.isNotEmpty(complainListBySearch)) {
-//            LocalDateTime now = LocalDateTime.now();
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-//            String formattedDateTime = now.format(formatter);
-//            String fileName = System.getProperty("user.home") + File.separator +
-//                    "Desktop" + File.separator + formattedDateTime + "ComplainListExport.xlsx";
-//            EasyExcel.write(fileName, ComplainResult.class)
-//                    .sheet("投诉列表导出数据")
-//                    .doWrite(complainListBySearch);
-//        }
+        ExcelUtils.write(response, "投诉列表数据.xlsx", "投诉列表数据", ComplainResult.class, complainListBySearch);
         return true;
     }
 }

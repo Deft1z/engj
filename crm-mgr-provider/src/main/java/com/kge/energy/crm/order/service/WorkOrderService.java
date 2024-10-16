@@ -82,20 +82,22 @@ public class WorkOrderService {
     /*
         工单导出
      */
-    public Boolean exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
+    public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);
+
         //获取筛选条件下的工单列表 (复用分页查询 size设为INT_MAX)
-        IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), Integer.MAX_VALUE);
+        IPage<WorkOrderListParam> reqIpage = new Page<>(1, Integer.MAX_VALUE);
         WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
-        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto,dataEnums);
+
+        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto, dataEnums);
         List<WfFormPageResp> formList = BeanUtil.copyToList(pages.getRecords(), WfFormPageResp.class);
 
         //通过工单id获取工单对应的所有合同
         Map<Integer, List<ContractResult>> formIdtoContractList = new HashMap<>();
-        formList.forEach(form ->{
-            List<ContractResult> contractResults = scServiceContractDao.form(form.getFormId(),userInfoDto,dataEnums);
+        formList.forEach(form -> {
+            List<ContractResult> contractResults = scServiceContractDao.form(form.getFormId(), userInfoDto, dataEnums);
             contractResults.forEach(contractResult -> {
                 formIdtoContractList.computeIfAbsent(contractResult.getFormId(), k -> new ArrayList<>());
                 formIdtoContractList.get(contractResult.getFormId()).add(contractResult);
@@ -107,7 +109,7 @@ public class WorkOrderService {
         formList.forEach(form -> {
             //补充dto类中合同相关字段
             List<ContractResult> contracts = formIdtoContractList.get(form.getFormId());
-            if(ObjUtil.isNotEmpty(contracts)){
+            if (ObjUtil.isNotEmpty(contracts)) {
                 //工单有合同
                 contracts.forEach(contract -> {
                     WfFormExportDto wfFormExportDto = BeanUtil.copyProperties(form, WfFormExportDto.class);
@@ -117,7 +119,7 @@ public class WorkOrderService {
                     wfFormExportDto.setContractAmount(contract.getAmount());
                     exportDtoList.add(wfFormExportDto);
                 });
-            }else{
+            } else {
                 //工单无合同
                 WfFormExportDto wfFormExportDto = BeanUtil.copyProperties(form, WfFormExportDto.class);
                 wfFormExportDto.setIfContractSigned("未签合同");
@@ -125,20 +127,7 @@ public class WorkOrderService {
             }
         });
         //ExcelUtils写excel 响应给前端
-        ExcelUtils.write(response,"工单列表数据.xlsx","工单列表数据",WfFormExportDto.class,exportDtoList);
-//        if(ObjUtil.isNotEmpty(exportDtoList)){
-//            LocalDateTime now = LocalDateTime.now();
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-//            String formattedDateTime = now.format(formatter);
-//            String fileName = System.getProperty("user.home") + File.separator +
-//                    "Desktop" + File.separator + formattedDateTime + "WorkOrderListExport.xlsx";
-//            log.error(fileName);
-//            ExcelUtils.write(response,fileName,"导出工单列表数据",WfFormExportDto.class,exportDtoList);
-//            EasyExcel.write(fileName, WfFormExportDto.class)
-//                    .sheet("导出工单列表数据")
-//                    .doWrite(exportDtoList);
-//        }
-        return true;
+        ExcelUtils.write(response, "工单列表数据.xlsx", "工单列表数据", WfFormExportDto.class, exportDtoList);
     }
 
 
