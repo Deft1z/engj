@@ -41,4 +41,16 @@ public class AbstractButtonHelper {
                 .setEnabled(buttonEnum.getEnabled())
                 .setHint(buttonEnum.getHint());
     }
+
+    public static List<BaseButton> createdButtonList(List<? extends ButtonEnum> buttonEnumList) {
+        List<BaseButton> list = new ArrayList<>();
+        for (ButtonEnum buttonEnum : buttonEnumList) {
+            list.add(new BaseButton()
+                    .setCode(buttonEnum.getCode())
+                    .setName(buttonEnum.getName())
+                    .setEnabled(buttonEnum.getEnabled())
+                    .setHint(buttonEnum.getHint()));
+        }
+        return list;
+    }
 }
