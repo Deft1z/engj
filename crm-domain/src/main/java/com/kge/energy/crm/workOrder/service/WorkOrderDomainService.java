@@ -224,108 +224,21 @@ public class WorkOrderDomainService {
         }
 
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
-        List<FlowResult> list = wfFormDao.getFlowByFormId(req.getFormId(), operator);
-        if (CollUtil.isEmpty(list)) {
+
+        //获取流程节点
+        List<FlowResult> flowList = wfFormDao.getFlowByFormId(req.getFormId(), operator);
+        if (CollUtil.isEmpty(flowList)) {
             throw new ServiceException("权限不足!");
         }
 
-        List<WfFormFlowListResp> wfFormFlowListRespList = BeanUtil.copyToList(list, WfFormFlowListResp.class);
-        WfFormFlowListResp latestFlow = CollUtil.getLast(wfFormFlowListRespList);
-
-        //返回工单操作按钮
-        List<BaseButton> buttonList = new ArrayList<>();
-        if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
-
-            //如果工单已完成或已终止，不返回操作按钮
-            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) ||
-                    StrUtil.equals(wfForm.getStatus(), ConstParam.Terminated)) {
-                return new WfFormFlowResp()
-                        .setButtonList(buttonList)
-                        .setWfFormFlowList(wfFormFlowListRespList);
-            }
-
-            //集团客服按钮
-
-            //待分派或已分派状态才显示终止按钮
-            if(StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) ||
-                    StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.TERMINATE_WORK_ORDER));
-            }
-
-
-            //二级公司未处理工单才显示撤回按钮
-            if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER));
-            }
-
-            //待分派状态才显示分派按钮
-            if (StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)) {
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ASSIGN_WORK_ORDER));
-            }
-
-        } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
-
-            //如果工单未分派，则不显示操作按钮
-            if (StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing)) {
-                return new WfFormFlowResp()
-                        .setButtonList(buttonList)
-                        .setWfFormFlowList(wfFormFlowListRespList);
-            }
-
-            //如果工单已完成或已终止，不返回操作按钮
-            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) ||
-                    StrUtil.equals(wfForm.getStatus(), ConstParam.Terminated)) {
-                return new WfFormFlowResp()
-                        .setButtonList(buttonList)
-                        .setWfFormFlowList(wfFormFlowListRespList);
-            }
-
-            //二级公司客服按钮
-
-            //工单待处理不显示完成工单按钮
-            if(!StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)){
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.FINISH_WORK_ORDER));
-            }
-
-
-            //未处理或未添加合同才显示退回按钮
-            if (wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))
-                    || wfFormFlowListRespList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowCompanyContract))) {
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.RETURN_WORK_ORDER));
-            }
-
-            //工单状态为待处理才显示处理按钮
-            if (StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)) {
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.HANDLE_WORK_ORDER));
-            }
-
-            //二级公司处理过工单或者添加过合同并且未完结或未终止才显示添加合同按钮
-            Set<String> statusSet = wfFormFlowListRespList.stream()
-                    .map(WfFormFlowListResp::getStatus)
-                    .collect(Collectors.toSet());
-            // 判断是否有 ConstParam.FlowHasFeedback 或 ConstParam.FlowCompanyContract 状态
-            boolean hasRequiredStatus = statusSet.contains(ConstParam.FlowHasFeedback) ||
-                    statusSet.contains(ConstParam.FlowCompanyContract);
-            // 判断 latestFlow 的状态是否为 ConstParam.FlowFinished 或 ConstParam.FlowTerminated
-            boolean isFinishedOrTerminated = StrUtil.equals(latestFlow.getStatus(), ConstParam.FlowFinished) ||
-                    StrUtil.equals(latestFlow.getStatus(), ConstParam.FlowTerminated);
-            // 根据条件添加按钮
-            if (hasRequiredStatus && !isFinishedOrTerminated) {
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.ADD_SERVICE_CONTRACT));
-            }
-
-        } else if (operator.getRoleCodes().contains(RoleEnums.APPLET_USER.getCode())) {
-            //如果工单已完成或已终止，不返回操作按钮
-            DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
-            List<ContractResult> resultList = scServiceContractDao.form(wfForm.getFormId(), operator, dataEnums);
-            if(StrUtil.equals(wfForm.getStatus(), ConstParam.Finished) && CollUtil.isNotEmpty(resultList)) {
-                buttonList.add(ConsultingButtonHelper.getWorkOrderButton(WorkOrderButtonEnum.GO_TO_CONTRACT));
-            }
-        }
+        //获取工单操作按钮
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
+        List<ContractResult> contractList = scServiceContractDao.form(wfForm.getFormId(), operator, dataEnums);
+        List<BaseButton> buttonList = ConsultingButtonHelper.getWorkOrderButton(wfForm, flowList, contractList, operator);
 
         return new WfFormFlowResp()
                 .setButtonList(buttonList)
-                .setWfFormFlowList(wfFormFlowListRespList);
+                .setWfFormFlowList(BeanUtil.copyToList(flowList, WfFormFlowListResp.class));
     }
 
     @Transactional(rollbackFor = RuntimeException.class)
@@ -590,7 +503,7 @@ public class WorkOrderDomainService {
     }
 
     private Boolean terminateOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
-        if(!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) ||
+        if(!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) &&
                 !StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
             throw new ServiceException("工单正在处理中，不能终止!");
         }
