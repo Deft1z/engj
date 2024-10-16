@@ -1,7 +1,7 @@
 package com.kge.energy.crm.repository.entityext.result;
 
-import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.kge.energy.crm.easyexcel.CustomMerge;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,72 +11,74 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class WfFormExportDto {
-    @ExcelIgnore
-    private Integer formId;
-    @ExcelIgnore
-    private Integer formTypeId;
-    @ExcelIgnore
-    private Integer formMetaId;
-    @ExcelIgnore
-    private String content;
+
     @ExcelProperty("需求单号")
+    @CustomMerge(isPk = true)
     private String code;
-    @ExcelProperty("所属地区")
-    private String area;
-    @ExcelProperty("详细地址")
-    private String detailedAddress;
+
     @ExcelProperty("业务类型")
+    @CustomMerge
     private String businessName;
+
     @ExcelProperty("用电容量")
+    @CustomMerge
     private String voltageLevel;
+
+    @ExcelProperty("所属地区")
+    @CustomMerge
+    private String area;
+
+    @ExcelProperty("客户地址")
+    @CustomMerge
+    private String detailedAddress;
+
     @ExcelProperty("联系人")
+    @CustomMerge
     private String customerName;
+
     @ExcelProperty("联系电话")
+    @CustomMerge
     private String mobile;
-    @ExcelProperty("对接公司")
-    private String orgName;
-    @ExcelProperty("工单状态")
-    private String status;
+
     @ExcelProperty("起单时间")
+    @CustomMerge
     private String timeSubmit;
+
     @ExcelProperty("接单时间")
+    @CustomMerge
     private String timeReception;
+
     @ExcelProperty("结单时间")
+    @CustomMerge
     private String timeFinished;
-    @ExcelProperty("是否已签合同")
-    private String ifContractSigned;
+
+    @ExcelProperty("工单状态")
+    @CustomMerge
+    private String status;
+
+    @ExcelProperty("对接公司")
+    @CustomMerge
+    private String orgName;
+
+    @ExcelProperty("是否已签订合同")
+    @CustomMerge
+    private String contractSignedFlag;
+
+    @ExcelProperty("合同编号")
+    private String contractCode;
+
     @ExcelProperty("合同名称")
     private String contractName;
+
     @ExcelProperty("合同签订时间")
-    private String contractSignTime;
+    private String contractSigningTime;
+
     @ExcelProperty("合同金额")
     private String contractAmount;
+
     @ExcelProperty("备注")
     private String remark;
 
-    @ExcelIgnore
-    private String subStatus;
-    @ExcelIgnore
-    private String modifyTime;
-    @ExcelIgnore
-    private Integer currentOrgId;
-    @ExcelIgnore
-    private Integer currentRoleId;
-    @ExcelIgnore
-    private Integer flag;
-    @ExcelIgnore
-    private Integer createUserId;
-    @ExcelIgnore
-    private Integer modifyUserId;
-    @ExcelIgnore
-    private String companyName;
-    @ExcelIgnore
-    private String electricityCapacity;
-    @ExcelIgnore
-    private String userStatus;
-    @ExcelIgnore
-    private Integer organizationId;
-    @ExcelIgnore
-    private String realname;
+
 }
 

@@ -187,6 +187,21 @@ public class WorkOrderDomainService {
 
     }
 
+    public List<FormResult> findAll(WfFormPageReq req) {
+        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
+        Assert.notNull(userInfoDto);
+
+        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
+        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
+            req.setTenantId(userInfoDto.getTenantId());
+        }
+
+        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
+
+        return wfFormDao.findAll(workOrderListParam, userInfoDto, dataEnums);
+    }
+
     public PageResp<FormWithdrawReturnResp> findWithdrawReturnList(WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         Assert.notNull(userInfoDto);

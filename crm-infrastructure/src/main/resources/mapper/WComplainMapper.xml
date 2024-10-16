@@ -212,7 +212,7 @@
                 and rs.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
-        ORDER BY rs.create_time ASC
+        ORDER BY rs.create_time DESC
     </select>
     <select id="getComplain" resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
         SELECT a.complain_id, a.subject, a.create_user_id,

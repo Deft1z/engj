@@ -177,6 +177,23 @@
 
     <!--微信小程序工单列表-->
     <select id="findListForWx" resultType="com.kge.energy.crm.repository.entityext.result.FormResult">
+        select * from (<include refid="fromListForWx"/>) as t
+        order by modify_time desc
+    </select>
+
+    <select id="findAll" resultType="com.kge.energy.crm.repository.entityext.result.FormResult">
+        select t.*
+            , case when ssc.code is null then '否' else '是' end as contract_signed_flag
+            , ssc.code as contract_code
+            , ssc.name as contract_name
+            , DATE_FORMAT(ssc.signing_time, '%Y-%m-%d') as contract_signing_time
+            , ssc.amount as contract_amount
+        from (<include refid="fromListForWx"/>) as t
+        left join sc_service_contract ssc on ssc.form_id = t.form_id and ssc.flag = 1
+        order by modify_time desc
+    </select>
+
+    <sql id="fromListForWx">
         select json_unquote(json_extract(a.content, '$.businessName')) AS business_name
              , json_unquote(json_extract(a.content, '$.area')) AS area
              , json_unquote(json_extract(a.content, '$.companyName')) AS company_Name
@@ -232,10 +249,10 @@
                 </otherwise>
             </choose>
         from wf_form a
-        LEFT JOIN wf_form_flow b ON b.form_id = a.form_id AND b.create_user_id = #{userInfo.userId}
-        LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
-        LEFT JOIN b_organization d ON d.organization_id = a.current_org_id
-        LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
+        join b_organization d on d.organization_id = a.current_org_id
+        left join wf_form_flow b on b.form_id = a.form_id and b.create_user_id = #{userInfo.userId}
+        /*LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
+        LEFT JOIN r_user_role f ON f.user_id = b.create_user_id*/
         where a.flag = 1
         <if test="listParam.tenantId != null">
             and a.tenant_id = #{listParam.tenantId}
@@ -282,8 +299,7 @@
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
             having user_status = #{listParam.searchMap.status}
         </if>
-        order by a.modify_time desc
-    </select>
+    </sql>
 
     <select id="getFlowByFormId" resultType="com.kge.energy.crm.repository.entityext.result.FlowResult">
         select wf.form_flow_id,

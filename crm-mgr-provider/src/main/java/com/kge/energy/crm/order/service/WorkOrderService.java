@@ -1,39 +1,30 @@
 package com.kge.energy.crm.order.service;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.ExcelUtils;
-import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.BizFunctionEnums;
-import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.flow.service.WfFormFlowService;
 import com.kge.energy.crm.order.req.WorkOrderExportReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
 import com.kge.energy.crm.order.resp.FormResp;
-import com.kge.energy.crm.permission.service.DataPermissionDomainService;
-import com.kge.energy.crm.repository.dao.ScServiceContractDao;
-import com.kge.energy.crm.repository.dao.WfFormDao;
-import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.WfFormExportDto;
-import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
+import com.kge.energy.crm.workOrder.req.WfFormPageReq;
+import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
+import com.kge.platform.framework.common.exception.ServiceException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author wangjihua
@@ -45,11 +36,7 @@ public class WorkOrderService {
 
     private final WfFormFlowService wfFormFlowService;
 
-    private final WfFormDao wfFormDao;
-
-    private final ScServiceContractDao scServiceContractDao;
-
-    private final DataPermissionDomainService dataPermissionDomainService;
+    private final WorkOrderDomainService workOrderDomainService;
 
     /**
      * 工单列表
@@ -78,54 +65,32 @@ public class WorkOrderService {
 //                .setPageSize(pages.getSize())
 //                .setTotal(pages.getTotal());
 //    }
-
     /*
         工单导出
      */
     public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
-        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-        Assert.notNull(userInfoDto);
+        //允许导出的最大时间范围
+        final Integer limitDays = 180;
+        WorkOrderExportReq.SearchFormMap searchMap = Optional.ofNullable(req.getSearchMap()).orElse(new WorkOrderExportReq.SearchFormMap());
+        if (searchMap.getStarttime() != null && searchMap.getEndtime() != null) {
+            long days = Duration.between(searchMap.getStarttime(), searchMap.getEndtime()).toDays();
+            if (days > limitDays) {
+                throw new ServiceException("数据导出时间范围不得超过180天");
+            }
+        } else {
+            //若未选择时间范围，默认为最近限制天数的时间
+            LocalDateTime now = LocalDateTime.now();
+            searchMap.setStarttime(now.minusDays(limitDays));
+            searchMap.setEndtime(now);
+            req.setSearchMap(searchMap);
+        }
 
-        //获取筛选条件下的工单列表 (复用分页查询 size设为INT_MAX)
-        IPage<WorkOrderListParam> reqIpage = new Page<>(1, Integer.MAX_VALUE);
-        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
-        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
-
-        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto, dataEnums);
-        List<WfFormPageResp> formList = BeanUtil.copyToList(pages.getRecords(), WfFormPageResp.class);
-
-        //通过工单id获取工单对应的所有合同
-        Map<Integer, List<ContractResult>> formIdtoContractList = new HashMap<>();
-        formList.forEach(form -> {
-            List<ContractResult> contractResults = scServiceContractDao.form(form.getFormId(), userInfoDto, dataEnums);
-            contractResults.forEach(contractResult -> {
-                formIdtoContractList.computeIfAbsent(contractResult.getFormId(), k -> new ArrayList<>());
-                formIdtoContractList.get(contractResult.getFormId()).add(contractResult);
-            });
-        });
+        WfFormPageReq wfFormPageReq = BeanUtil.copyProperties(req, WfFormPageReq.class);
+        List<FormResult> all = workOrderDomainService.findAll(wfFormPageReq);
 
         //数据转为要导出的dto类
-        List<WfFormExportDto> exportDtoList = new ArrayList<>();
-        formList.forEach(form -> {
-            //补充dto类中合同相关字段
-            List<ContractResult> contracts = formIdtoContractList.get(form.getFormId());
-            if (ObjUtil.isNotEmpty(contracts)) {
-                //工单有合同
-                contracts.forEach(contract -> {
-                    WfFormExportDto wfFormExportDto = BeanUtil.copyProperties(form, WfFormExportDto.class);
-                    wfFormExportDto.setIfContractSigned("已签合同");
-                    wfFormExportDto.setContractName(contract.getName());
-                    wfFormExportDto.setContractSignTime(contract.getSigningTime());
-                    wfFormExportDto.setContractAmount(contract.getAmount());
-                    exportDtoList.add(wfFormExportDto);
-                });
-            } else {
-                //工单无合同
-                WfFormExportDto wfFormExportDto = BeanUtil.copyProperties(form, WfFormExportDto.class);
-                wfFormExportDto.setIfContractSigned("未签合同");
-                exportDtoList.add(wfFormExportDto);
-            }
-        });
+        List<WfFormExportDto> exportDtoList = BeanUtil.copyToList(all, WfFormExportDto.class);
+
         //ExcelUtils写excel 响应给前端
         ExcelUtils.write(response, "工单列表数据.xlsx", "工单列表数据", WfFormExportDto.class, exportDtoList);
     }

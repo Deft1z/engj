@@ -55,6 +55,11 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         return mapper.findListForWx(reqIpage, workOrderListParam, userInfoDto, dataEnums);
     }
 
+    public List<FormResult> findAll(WorkOrderListParam workOrderListParam,
+                                    UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.findAll(workOrderListParam, userInfoDto, dataEnums);
+    }
+
     public IPage<FormWithdrawReturnResult> findWithdrawReturnList(IPage<WorkOrderListParam> reqIpage, WorkOrderListParam listParam,
                                                                   UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
         return mapper.findWithdrawReturnList(reqIpage, listParam, userInfoDto, dataEnums);

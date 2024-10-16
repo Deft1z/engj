@@ -35,6 +35,10 @@ public interface WfFormMapper extends BaseMapper<WfForm> {
                                     @Param("userInfo") UserInfoDto userInfoDto,
                                     @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
 
+    List<FormResult> findAll(@Param("listParam") WorkOrderListParam listParam,
+                             @Param("userInfo") UserInfoDto userInfoDto,
+                             @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+
     IPage<FormWithdrawReturnResult> findWithdrawReturnList(@Param("reqIpage") IPage<WorkOrderListParam> reqIpage,
                                                            @Param("listParam") WorkOrderListParam listParam,
                                                            @Param("userInfo") UserInfoDto userInfoDto,

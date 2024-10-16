@@ -2,6 +2,8 @@ package com.kge.energy.crm.repository.entityext.result.complain;
 
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.kge.energy.crm.easyexcel.DictConvert;
+import com.kge.energy.crm.easyexcel.DictFormat;
 import lombok.Data;
 
 @Data
@@ -20,34 +22,41 @@ public class ComplainResult {
     private Integer formId;
 
     /**
+     * 投诉类型：1 工单投诉；2 合同投诉
+     */
+    @ExcelProperty(value = "投诉类型", converter = DictConvert.class)
+    @DictFormat("complain-type")
+    private Integer typef;
+
+    /**
      * 用户ID
      */
     @ExcelIgnore
     private Integer userId;
 
     /**
+     * 真实姓名
+     */
+    @ExcelProperty("客户姓名")
+    private String realname;
+
+    /**
+     * 手机
+     */
+    @ExcelProperty("客户手机")
+    private String phone;
+
+    /**
      * 创建时间
      */
-    @ExcelProperty("创建时间")
+    @ExcelProperty("投诉时间")
     private String createTime;
 
     /**
-     * 投诉类型：1 工单投诉；2 合同投诉
+     * 投诉主因：进度慢；质量差；态度恶劣
      */
-    @ExcelProperty("投诉类型")
-    private Integer typef;
-
-    /**
-     * 投诉主题：进度慢；质量差；态度恶劣
-     */
-    @ExcelProperty("投诉主题")
+    @ExcelProperty("投诉主因")
     private String subject;
-
-    /**
-     * 投诉内容
-     */
-    @ExcelProperty("投诉内容")
-    private String content;
 
     /**
      * 投诉公司
@@ -60,12 +69,6 @@ public class ComplainResult {
      */
     @ExcelIgnore
     private String contacts;
-
-    /**
-     * 手机
-     */
-    @ExcelIgnore
-    private String phone;
 
     /**
      * 地址
@@ -88,15 +91,9 @@ public class ComplainResult {
     /**
      * 0 待处理；1 正在处理；2 完成
      */
-//    @ExcelProperty(value = "处理状态",converter = StatusConverter.class)
-    @ExcelProperty(value = "处理状态")
+    @ExcelProperty(value = "处理状态", converter = DictConvert.class)
+    @DictFormat("complain-status")
     private Integer status;
-
-    /**
-     * 反馈内容
-     */
-    @ExcelIgnore
-    private String feedback;
 
     /**
      * 处理用户ID
@@ -128,10 +125,22 @@ public class ComplainResult {
     //private Integer modifyUserId;
 
     /**
+     * 投诉内容
+     */
+    @ExcelProperty("投诉内容")
+    private String content;
+
+    /**
      * 备注
      */
     @ExcelProperty("备注")
     private String remark;
+
+    /**
+     * 反馈内容
+     */
+    @ExcelProperty("处理结果")
+    private String feedback;
 
     /**
      * 合同名称
@@ -176,10 +185,6 @@ public class ComplainResult {
     @ExcelIgnore
     private String orgName;
 
-    /**
-     * 真实姓名
-     */
-    @ExcelIgnore
-    private String realname;
+
 
 }
