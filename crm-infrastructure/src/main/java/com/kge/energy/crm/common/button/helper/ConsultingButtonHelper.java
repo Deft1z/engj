@@ -77,9 +77,8 @@ public class ConsultingButtonHelper extends AbstractButtonHelper {
 
         } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
 
-            //未处理或未添加合同才显示退回按钮
-            if (flowList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))
-                    || flowList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowCompanyContract))) {
+            //未添加合同才显示退回按钮
+            if (flowList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowCompanyContract))) {
                 buttonEnumList.add(WorkOrderButtonEnum.RETURN_WORK_ORDER);
             }
 
@@ -101,6 +100,11 @@ public class ConsultingButtonHelper extends AbstractButtonHelper {
         if (operator.getRoleCodes().contains(RoleEnums.JT_CUSTOMER.getCode())) {
             return createdButtonList(buttonEnumList);
         } else if (operator.getRoleCodes().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
+
+            //未添加合同才显示退回按钮
+            if (flowList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowCompanyContract))) {
+                buttonEnumList.add(WorkOrderButtonEnum.RETURN_WORK_ORDER);
+            }
 
             //没有正在进行的合同才显示完成按钮
             if(contractList.stream().noneMatch(contractResult -> contractResult.getStatus().equals(ConstParam.ContractNotBegin) ||
