@@ -28,8 +28,9 @@ public class SysMsgChannelController {
 
     @Operation(summary = "获取业务功能可关联配置的消息渠道")
     @GetMapping(value = "/getFunctionConfigs")
-    public CommonResult<List<FunctionMsgChannelConfigResp>> getFunctionConfigs(@RequestParam(value = "bizFunctionId", required = false) Integer bizFunctionId) {
-        return CommonResult.suc(sysMsgChannelService.getFunctionConfigs(bizFunctionId));
+    public CommonResult<List<FunctionMsgChannelConfigResp>> getFunctionConfigs(@RequestParam(value = "bizFunctionId", required = false) Integer bizFunctionId,
+                                                                               @RequestParam(value = "tenantId", required = true) Integer tenantId) {
+        return CommonResult.suc(sysMsgChannelService.getFunctionConfigs(bizFunctionId, tenantId));
     }
 
     @Operation(summary = "关联消息渠道和业务功能")
