@@ -74,48 +74,7 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         for(FlowResult flowResult : list){
             CmsCommentParam param = new CmsCommentParam(flowResult.getFormFlowId(), CmsCommentBizTypeEnums.ORDER.getCode());
             List<CmsCommentResult> commentResultList = commentMapper.getCmsCommentList(param);
-
-            // 存储父评论的列表
-            List<CmsCommentResult> parentComments = new ArrayList<>();
-
-            //存储子评论的列表
-            List<CmsCommentResult> childrenComments = new ArrayList<>();
-
-            // 用于快速查找根评论的映射
-            Map<Integer, CmsCommentResult> rootCommentMap = new HashMap<>();
-
-            //用于快速查找子评论的根评论映射
-            Map<Integer, Integer> childrenParentMap = new HashMap<>();
-
-            //分离父评论和子评论
-            for (CmsCommentResult comment : commentResultList) {
-                if (comment.getParentCommentId() == null) {
-                    parentComments.add(comment);
-                    rootCommentMap.put(comment.getCommentId(), comment);
-                } else {
-                    childrenComments.add(comment);
-                    childrenParentMap.put(comment.getCommentId(), findRootComment(commentResultList, comment).getCommentId());
-                }
-            }
-
-            for(CmsCommentResult childrenCommentResult : childrenComments) {
-                Integer rootCommentId = childrenParentMap.get(childrenCommentResult.getCommentId());
-                CmsCommentResult rootCommentResult = rootCommentMap.get(rootCommentId);
-
-                // 将子评论转换为 ChildrenCommentResult 对象
-                CmsCommentResult.ChildrenCommentResult childComment = new CmsCommentResult.ChildrenCommentResult()
-                        .setCommentId(childrenCommentResult.getCommentId())
-                        .setParentCommentId(childrenCommentResult.getParentCommentId())
-                        .setName(childrenCommentResult.getName())
-                        .setReplyName(childrenCommentResult.getReplyName())
-                        .setContent(childrenCommentResult.getContent())
-                        .setDate(childrenCommentResult.getDate());
-
-                rootCommentResult.getChildrenCommentList().add(childComment);
-            }
-
-
-            flowResult.setCommentList(parentComments);
+            flowResult.setCommentList(commentResultList);
         }
         return list;
     }

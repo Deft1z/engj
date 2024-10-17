@@ -42,6 +42,7 @@ import com.kge.energy.crm.workOrder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
 import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
+import com.kge.energy.crm.workOrder.util.WorkFlowCommentUtil;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -230,6 +231,9 @@ public class WorkOrderDomainService {
         if (CollUtil.isEmpty(flowList)) {
             throw new ServiceException("权限不足!");
         }
+
+        //处理流程节点评论
+        WorkFlowCommentUtil.handleWorkFlowComment(flowList);
 
         //获取工单操作按钮
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
