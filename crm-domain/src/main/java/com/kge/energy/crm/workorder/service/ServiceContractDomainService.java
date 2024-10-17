@@ -168,7 +168,7 @@ public class ServiceContractDomainService {
             throw new ServiceException("合同竣工时间不能早于开始时间!");
         }
 
-        LocalDateTime todayLocalDateTime = LocalDateTimeUtil.parse(DateUtil.now(), DatePattern.NORM_DATE_PATTERN);
+        LocalDateTime todayLocalDateTime = LocalDateTimeUtil.parse(DateUtil.today(), DatePattern.NORM_DATE_PATTERN);
         if (projectFinishTime.isAfter(todayLocalDateTime)) {
             throw new ServiceException("合同竣工时间不能晚于当前时间!");
         }
