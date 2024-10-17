@@ -1,9 +1,10 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 埋点事件记录表(EtEventRecord)实体类
@@ -19,7 +20,7 @@ public class EtEventRecord {
      * 主键id
      */
     @TableId(type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
     /**
      * 用户ID

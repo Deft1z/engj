@@ -3,7 +3,7 @@
 <mapper namespace="com.kge.energy.crm.repository.mapper.EtEventRecordMapper">
 
     <resultMap type="com.kge.energy.crm.repository.entity.EtEventRecord" id="EtEventRecordMap">
-        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="id" column="id" jdbcType="BIGINT"/>
         <result property="userId" column="user_id" jdbcType="INTEGER"/>
         <result property="eventId" column="event_id" jdbcType="INTEGER"/>
         <result property="viewPageName" column="view_page_name" jdbcType="VARCHAR"/>
