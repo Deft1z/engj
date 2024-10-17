@@ -46,3 +46,6 @@ epcpv:
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
 
+msg:
+  baseUrl: http://172.16.17.156:9002/msg
+
