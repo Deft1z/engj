@@ -43,6 +43,7 @@
         SELECT
             b.realname AS name,
             c.comment_id AS commentId,
+            c.parent_comment_id AS parentCommentId,
             c.content AS content,
             DATE_FORMAT(c.create_time, '%Y-%m-%d %H:%i:%s') AS date,
             bu.realname AS replyName
