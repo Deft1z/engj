@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class FormResult extends ContractDto{
 
+    private Integer rowNum;
     private Integer formId;
     private Integer formTypeId;
     private Integer formMetaId;

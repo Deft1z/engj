@@ -1,5 +1,8 @@
 package com.kge.energy.crm.common.util;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.file.FileNameUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.converters.longconverter.LongStringConverter;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
@@ -14,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ExcelUtils {
@@ -36,10 +40,10 @@ public class ExcelUtils {
                                  Class<T> head, List<T> data) throws IOException {
         // 设置基础样式
         HorizontalCellStyleStrategy horizontalCellStyleStrategy = new HorizontalCellStyleStrategy(getHeadStyle(), getContentStyle());
-
-        // 设置 header 和 contentType。写在最后的原因是，避免报错时，响应 contentType 已经被修改了
-        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8.name()));
-        response.addHeader("filename", URLEncoder.encode(filename, StandardCharsets.UTF_8.name()));
+        // 文件重命名, 追加时间字符串
+        filename = URLEncoder.encode(FileNameUtil.mainName(filename) + DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + "." + FileNameUtil.getSuffix(filename), StandardCharsets.UTF_8.name());
+        // 设置 header 和 contentType
+        response.addHeader("Content-Disposition", "attachment;filename=" + filename);
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
         // 输出 Excel
         EasyExcel.write(response.getOutputStream(), head)

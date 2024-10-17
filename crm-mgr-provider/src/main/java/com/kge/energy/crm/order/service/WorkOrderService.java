@@ -18,6 +18,7 @@ import com.kge.platform.framework.common.exception.ServiceException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,6 +34,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class WorkOrderService {
+
+    @Value("${excel.export.limit-days:180}")
+    private Integer limitDays;
 
     private final WfFormFlowService wfFormFlowService;
 
@@ -69,13 +73,12 @@ public class WorkOrderService {
         工单导出
      */
     public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
-        //允许导出的最大时间范围
-        final Integer limitDays = 180;
         WorkOrderExportReq.SearchFormMap searchMap = Optional.ofNullable(req.getSearchMap()).orElse(new WorkOrderExportReq.SearchFormMap());
         if (searchMap.getStarttime() != null && searchMap.getEndtime() != null) {
             long days = Duration.between(searchMap.getStarttime(), searchMap.getEndtime()).toDays();
+            //限制导出的最大时间范围
             if (days > limitDays) {
-                throw new ServiceException("数据导出时间范围不得超过180天");
+                throw new ServiceException(String.format("数据导出时间范围不得超过%s天", limitDays));
             }
         } else {
             //若未选择时间范围，默认为最近限制天数的时间
