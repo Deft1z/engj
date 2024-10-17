@@ -10,6 +10,7 @@ import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.kge.energy.crm.easyexcel.CustomMergeStrategy;
+import com.kge.energy.crm.easyexcel.FreezeAndFilterHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +49,7 @@ public class ExcelUtils {
         // 输出 Excel
         EasyExcel.write(response.getOutputStream(), head)
                 .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
+                .registerWriteHandler(new FreezeAndFilterHandler()) //首行筛选及冻结
                 .registerWriteHandler(new CustomMergeStrategy(head)) //自定义单元格合并
                 .registerWriteHandler(horizontalCellStyleStrategy) //自定义样式
                 .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
