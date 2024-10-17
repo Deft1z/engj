@@ -553,7 +553,7 @@ public class WorkOrderDomainService {
                     .setOrderCode(fromContent.getCode())
                     .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
-                    .setStatus(ConstParam.FlowFinished)
+                    .setStatus(ConstParam.FlowTerminated)
                     .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
                     .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
                     .setTenantId(operator.getTenantId())
