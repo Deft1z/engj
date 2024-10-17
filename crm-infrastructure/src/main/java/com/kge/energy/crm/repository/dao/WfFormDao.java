@@ -101,9 +101,7 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
             for(CmsCommentResult childrenCommentResult : childrenComments) {
                 Integer rootCommentId = childrenParentMap.get(childrenCommentResult.getCommentId());
                 CmsCommentResult rootCommentResult = rootCommentMap.get(rootCommentId);
-                if(CollUtil.isEmpty(rootCommentResult.getChildrenCommentList())){
-                    rootCommentResult.setChildrenCommentList(new ArrayList<>());
-                }
+
                 // 将子评论转换为 ChildrenCommentResult 对象
                 CmsCommentResult.ChildrenCommentResult childComment = new CmsCommentResult.ChildrenCommentResult()
                         .setCommentId(childrenCommentResult.getCommentId())

@@ -3,6 +3,7 @@ package com.kge.energy.crm.repository.entityext.result;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -14,7 +15,7 @@ public class CmsCommentResult {
     private String replyName;
     private String content;
     private String date;
-    private List<ChildrenCommentResult> childrenCommentList;
+    private List<ChildrenCommentResult> childrenCommentList = new ArrayList<>();
 
     @Data
     @Accessors(chain = true)

@@ -72,7 +72,6 @@ public class ConsultingController {
 
     @Operation(summary = "获取当前工单流程的流转情况")
     @PostMapping(value = "/getFlowByFormId")
-    @ConvertToGoFormats
     public CommonResult<WfFormFlowResp> getFlowByFormId(@RequestBody WfFormFlowReq req) {
         return CommonResult.suc(workOrderDomainService.getFlowByFormId(req));
     }
