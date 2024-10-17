@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TokenConstant {
 
+    private TokenConstant(){}
+
     public static final String HEADER_KEY = "Authorization";
 
     /**

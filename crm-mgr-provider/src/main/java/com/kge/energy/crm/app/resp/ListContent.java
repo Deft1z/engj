@@ -13,23 +13,23 @@ public class ListContent {
      * 用户id
      */
     @JsonProperty("Uid")
-    private Integer Uid;
+    private Integer uid;
 
     /**
      * 名称
      */
     @JsonProperty("Name")
-    private String Name;
+    private String name;
 
     /**
      * 电话
      */
     @JsonProperty("Mobile")
-    private String Mobile;
+    private String mobile;
 
     /**
      * 绑定类型
      */
     @JsonProperty("Apps")
-    private List<App> Apps;
+    private List<App> apps;
 }

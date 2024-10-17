@@ -16,8 +16,6 @@ import java.util.List;
  */
 public interface BAppMapper extends BaseMapper<BApp> {
 
-    // 含有分页功能
-    // IPage<WxUserAppResult> contractPageByUserIdLoad(@Param("reqIpage") IPage<WxUserAppParam> reqIpage, @Param("listParam") WxUserAppParam listParam);
 
     /**
      * 小程序客户 -> 获取合同列表

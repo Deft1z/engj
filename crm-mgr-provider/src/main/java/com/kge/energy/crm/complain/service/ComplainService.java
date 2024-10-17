@@ -38,7 +38,6 @@ import com.kge.platform.framework.common.exception.ServiceException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,7 +127,6 @@ public class ComplainService {
         return true;
     }
 
-    @Async
     protected void sendReplyMessage(ComplainReplyReq complainReplyReq, WComplain wComplain, Date sendDate) {
         CompletableFuture.runAsync(() -> {
             try {
@@ -161,14 +159,6 @@ public class ComplainService {
         投诉列表导出
      */
     public Boolean exportComplainList(HttpServletResponse response, ComplainListExportReq req) throws IOException {
-        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
-//            req.setTenantId(userInfoDto.getTenantId());
-//        }
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
-//            throw new ServiceException("非法请求，不允许查看其他租户信息");
-//        }
-        //请求参数
         ComplainListParam complainListParam = BeanUtil.copyProperties(req, ComplainListParam.class);
         Opt.ofNullable(req.getSearchMap()).ifPresent(map -> {
             Opt.ofBlankAble(map.getName()).ifPresent(complainListParam::setName);

@@ -12,8 +12,8 @@ import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.WfFormExportDto;
-import com.kge.energy.crm.workOrder.req.WfFormPageReq;
-import com.kge.energy.crm.workOrder.service.WorkOrderDomainService;
+import com.kge.energy.crm.workorder.req.WfFormPageReq;
+import com.kge.energy.crm.workorder.service.WorkOrderDomainService;
 import com.kge.platform.framework.common.exception.ServiceException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,33 +42,6 @@ public class WorkOrderService {
 
     private final WorkOrderDomainService workOrderDomainService;
 
-    /**
-     * 工单列表
-     */
-//    public PageResp<FormResp> list(WorkOrderListReq req) {
-//        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-//        Assert.notNull(userInfoDto);
-//
-//        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
-//            req.setTenantId(userInfoDto.getTenantId());
-//        }
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(userInfoDto.getTenantId(), req.getTenantId())) {
-//            throw new ServiceException("非法请求，不允许查看其他租户信息");
-//        }
-//
-//        IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
-//        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
-//
-//        IPage<FormResult> pages = wfFormDao.findListForWx(reqIpage, workOrderListParam, userInfoDto);
-//        List<FormResp> resps = BeanUtil.copyToList(pages.getRecords(), FormResp.class);
-//
-//        return new PageResp<FormResp>()
-//                .setList(resps)
-//                .setCurrentPage(pages.getCurrent())
-//                .setPageSize(pages.getSize())
-//                .setTotal(pages.getTotal());
-//    }
     /*
         工单导出
      */

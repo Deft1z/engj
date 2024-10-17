@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workOrder.resp;
+package com.kge.energy.crm.workorder.resp;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

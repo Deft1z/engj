@@ -21,7 +21,7 @@ import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.complain.ComplainResult;
 import com.kge.energy.crm.user.service.UserDomainService;
-import com.kge.energy.crm.workOrder.req.WfFormPageReq;
+import com.kge.energy.crm.workorder.req.WfFormPageReq;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.ComplainCreateMsgToRoleParam;
 import lombok.RequiredArgsConstructor;

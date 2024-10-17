@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -82,7 +83,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         List<OpenShareModelList> result = mapper.findBindList(page, mobile, name, ids, (page - 1) * limit, limit);
         // 获取绑定记录的列表（总数）
         List<OpenShareModelList> resultCount = mapper.findBindListCount(mobile, name, ids);
-        if (result.size() < 1 || resultCount.size() < 1) {
+        if (CollectionUtil.isEmpty(result) || CollectionUtil.isEmpty(resultCount)) {
             nullFlag = 1;
         }
         List<OpenShareModelList> openShareModelList = new ArrayList<>();
@@ -137,8 +138,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         openidProject.setProjectId(e);
         openidProject.setOpenId(openId);
         openidProject.setFlag(1);
-        int insertId = rOpenidProjectMapper.insert(openidProject);
-        return insertId;
+        return rOpenidProjectMapper.insert(openidProject);
     }
 
     /**
@@ -192,7 +192,7 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         LambdaUpdateWrapper<BUser> wrapper = Wrappers.<BUser>update().lambda()
                 .like(BUser::getMobile, mobile);
         List<BUser> users = bUserMapper.selectList(wrapper);
-        if (users.size() == 0) {
+        if (CollectionUtil.isEmpty(users)) {
             return null;
         }
         return users.get(0);

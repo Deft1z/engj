@@ -1,8 +1,6 @@
 package com.kge.energy.crm.operation.service;
 
 import cn.hutool.core.util.StrUtil;
-import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
@@ -21,15 +19,10 @@ import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import com.kge.energy.crm.repository.entityext.result.OperationDetail;
 import com.kge.energy.crm.user.service.UserDomainService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -54,7 +47,7 @@ public class OperationService {
         condition.setRiskRates(new String[]{"设备巡检", "设备试验", "设备维修", "设备检修、抢修作业"});
 
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.ECC_OM_REPORT_LIST);
-        if(StrUtil.isBlank(req.getPhone())){
+        if (StrUtil.isBlank(req.getPhone())) {
             switch (dataEnums.getCode()) {
                 case 0, 1, 2:
                     condition.setFirstPartyContactsPhone("");
@@ -72,7 +65,7 @@ public class OperationService {
                     String firstPartyContactsPhone = userDomainService.findShareUser(userIdList, 3);
 
                     //防止currentUserPhone和firstPartyContactsPhone都为空查到全部数据
-                    if(StrUtil.isBlank(currentUserPhone)){
+                    if (StrUtil.isBlank(currentUserPhone)) {
                         currentUserPhone = "0";
                     }
                     condition.setFirstPartyContactsPhone(StrUtil.isNotBlank(firstPartyContactsPhone) ? firstPartyContactsPhone : currentUserPhone);
@@ -96,7 +89,7 @@ public class OperationService {
                     String firstPartyContactsPhone = userDomainService.findShareUser(userIdList, 3);
 
                     //防止currentUserPhone和firstPartyContactsPhone都为空查到全部数据
-                    if(StrUtil.isBlank(currentUserPhone)){
+                    if (StrUtil.isBlank(currentUserPhone)) {
                         currentUserPhone = "0";
                     }
                     condition.setFirstPartyContactsPhone(StrUtil.isNotBlank(firstPartyContactsPhone) ? firstPartyContactsPhone : currentUserPhone);

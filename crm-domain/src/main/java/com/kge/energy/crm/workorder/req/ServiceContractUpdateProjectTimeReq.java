@@ -1,12 +1,10 @@
-package com.kge.energy.crm.workOrder.req;
+package com.kge.energy.crm.workorder.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import java.time.LocalDate;
 
 @Data
 @Accessors(chain = true)

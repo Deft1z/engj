@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workOrder.service;
+package com.kge.energy.crm.workorder.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
@@ -28,11 +28,11 @@ import com.kge.energy.crm.repository.entity.ScServiceContract;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
-import com.kge.energy.crm.workOrder.req.ServiceContractAddReq;
-import com.kge.energy.crm.workOrder.req.ServiceContractDetailReq;
-import com.kge.energy.crm.workOrder.req.ServiceContractReq;
-import com.kge.energy.crm.workOrder.req.ServiceContractUpdateProjectTimeReq;
-import com.kge.energy.crm.workOrder.resp.ServiceContractResp;
+import com.kge.energy.crm.workorder.req.ServiceContractAddReq;
+import com.kge.energy.crm.workorder.req.ServiceContractDetailReq;
+import com.kge.energy.crm.workorder.req.ServiceContractReq;
+import com.kge.energy.crm.workorder.req.ServiceContractUpdateProjectTimeReq;
+import com.kge.energy.crm.workorder.resp.ServiceContractResp;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -170,7 +170,7 @@ public class ServiceContractDomainService {
         contract.setStatus(ConstParam.RemainToBeEvaluated)
                 .setProjectEndTime(projectFinishTime);
 
-        Boolean updateResult = scServiceContractDao.updateById(contract);
+        boolean updateResult = scServiceContractDao.updateById(contract);
         if (updateResult) {
             sendServiceContractUpdateMsg(contract);
         }

@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workOrder.service;
+package com.kge.energy.crm.workorder.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kge.energy.crm.common.button.enums.WorkOrderButtonEnum;
 import com.kge.energy.crm.common.button.helper.ConsultingButtonHelper;
 import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.common.constans.ConstParam;
@@ -34,15 +33,15 @@ import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.user.service.UserDomainService;
-import com.kge.energy.crm.workOrder.req.WfFormFlowReq;
-import com.kge.energy.crm.workOrder.req.WfFormPageReq;
-import com.kge.energy.crm.workOrder.req.WorkOrderAddReq;
-import com.kge.energy.crm.workOrder.req.WorkOrderUpdateReq;
-import com.kge.energy.crm.workOrder.resp.FormWithdrawReturnResp;
-import com.kge.energy.crm.workOrder.resp.WfFormFlowListResp;
-import com.kge.energy.crm.workOrder.resp.WfFormFlowResp;
-import com.kge.energy.crm.workOrder.resp.WfFormPageResp;
-import com.kge.energy.crm.workOrder.util.WorkFlowCommentUtil;
+import com.kge.energy.crm.workorder.req.WfFormFlowReq;
+import com.kge.energy.crm.workorder.req.WfFormPageReq;
+import com.kge.energy.crm.workorder.req.WorkOrderAddReq;
+import com.kge.energy.crm.workorder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
+import com.kge.energy.crm.workorder.resp.WfFormFlowListResp;
+import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workorder.resp.WfFormPageResp;
+import com.kge.energy.crm.workorder.util.WorkFlowCommentUtil;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -55,12 +54,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 业务工单公共service
@@ -74,9 +70,6 @@ public class WorkOrderDomainService {
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
-
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
 
     private final WfFormDao wfFormDao;
     private final WfFormFlowDao wfFormFlowDao;
@@ -442,7 +435,7 @@ public class WorkOrderDomainService {
             throw new ServiceException("工单已经完成，不能重复完成!");
         }
 
-        if(StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)) {
+        if (StrUtil.equals(wfForm.getSubStatus(), ConstParam.WaitingForProcessing)) {
             throw new ServiceException("工单未处理，不能完成!");
         }
 
@@ -507,8 +500,8 @@ public class WorkOrderDomainService {
     }
 
     private Boolean terminateOrder(WorkOrderUpdateReq req, WfForm wfForm, String lastFlowActionType, UserInfoDto operator, LocalDateTime now) {
-        if(!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) &&
-                !StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)){
+        if (!StrUtil.equals(wfForm.getStatus(), ConstParam.WaitingForProcessing) &&
+                !StrUtil.equals(wfForm.getStatus(), ConstParam.Processing)) {
             throw new ServiceException("工单正在处理中，不能终止!");
         }
 

@@ -1,7 +1,5 @@
-package com.kge.energy.crm.workOrder.util;
+package com.kge.energy.crm.workorder.util;
 
-import com.kge.energy.crm.enums.CmsCommentBizTypeEnums;
-import com.kge.energy.crm.repository.entityext.param.CmsCommentParam;
 import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
 

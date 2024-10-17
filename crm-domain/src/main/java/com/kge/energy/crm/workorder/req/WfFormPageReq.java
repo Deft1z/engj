@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workOrder.req;
+package com.kge.energy.crm.workorder.req;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kge.energy.crm.common.page.PageReq;
@@ -52,5 +52,5 @@ public class WfFormPageReq extends PageReq {
         @Schema(description = "服务单位id")
         private Integer serviceUnitId;
     }
-    
+
 }

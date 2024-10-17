@@ -11,7 +11,7 @@
         <result property="bindType" column="bind_type" jdbcType="INTEGER"/>
         <result property="bindAddress" column="bind_address" jdbcType="VARCHAR"/>
         <result property="scope" column="scope" jdbcType="VARCHAR"/>
-        <result property="isCommonlyUsed" column="is_commonly_used" jdbcType="BOOLEAN"/>
+        <result property="commonlyUsed" column="is_commonly_used" jdbcType="BOOLEAN"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>

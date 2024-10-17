@@ -119,10 +119,6 @@ public class ComplainResult {
     @ExcelIgnore
     private Integer createUserId;
 
-    /*
-      修改用户ID
-     */
-    //private Integer modifyUserId;
 
     /**
      * 投诉内容
@@ -184,7 +180,6 @@ public class ComplainResult {
      */
     @ExcelIgnore
     private String orgName;
-
 
 
 }

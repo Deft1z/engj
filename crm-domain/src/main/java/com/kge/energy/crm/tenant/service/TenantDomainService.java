@@ -18,7 +18,7 @@ public class TenantDomainService {
 
     private final BTenantDao bTenantDao;
 
-    private final String TENANT_NAME_CACHE_KEY = "tenant:name:";
+    private static final String TENANT_NAME_CACHE_KEY = "tenant:name:";
 
     private final RedisUtils redisUtils;
 

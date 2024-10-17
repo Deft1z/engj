@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class IamService {
-    private final String IAM_PREFIX = "https://172.16.107.15:9082/uusafe/iam/thirdaccess/rest/v1";
-    private final String APP_KEY = "crmKey";
-    private final String SECRET_KEY = "95FF221807B48802148849C35FF363BB";
+    private static final String IAM_PREFIX = "https://172.16.107.15:9082/uusafe/iam/thirdaccess/rest/v1";
+    private static final String APP_KEY = "crmKey";
+    private static final String SECRET_KEY = "95FF221807B48802148849C35FF363BB";
 
     /**
      * Ticket校验

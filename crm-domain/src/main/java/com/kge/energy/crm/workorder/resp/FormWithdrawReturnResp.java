@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workOrder.resp;
+package com.kge.energy.crm.workorder.resp;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
