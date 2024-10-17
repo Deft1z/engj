@@ -227,7 +227,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and a.create_user_id = #{userInfo.userId}
+                and c.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
         <if test="listParam.tenantId != null">
