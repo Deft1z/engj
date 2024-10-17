@@ -15,6 +15,11 @@ public enum DictEnum {
     COMPLAIN_STATUS_0("complain-status", "0", "待处理"),
     COMPLAIN_STATUS_1("complain-status", "1", "处理中"),
     COMPLAIN_STATUS_2("complain-status", "2", "已解决"),
+    MSG_BIZ_TYPE_0("msg-biz-type", "0", "告警通知"),
+    MSG_BIZ_TYPE_1("msg-biz-type", "1", "工单通知"),
+    MSG_BIZ_TYPE_2("msg-biz-type", "2", "项目合同"),
+    MSG_BIZ_TYPE_3("msg-biz-type", "3", "投诉处理"),
+    MSG_BIZ_TYPE_4("msg-biz-type", "4", "登录提醒"),
     ;
 
     final String type;

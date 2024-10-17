@@ -12,6 +12,10 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class WfFormExportDto {
 
+    @ExcelProperty("序号")
+    @CustomMerge
+    private Integer rowNum;
+
     @ExcelProperty("需求单号")
     @CustomMerge(isPk = true)
     private String code;

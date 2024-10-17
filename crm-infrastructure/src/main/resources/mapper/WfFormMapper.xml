@@ -178,7 +178,6 @@
     <!--微信小程序工单列表-->
     <select id="findListForWx" resultType="com.kge.energy.crm.repository.entityext.result.FormResult">
         select * from (<include refid="fromListForWx"/>) as t
-        order by modify_time desc
     </select>
 
     <select id="findAll" resultType="com.kge.energy.crm.repository.entityext.result.FormResult">
@@ -190,11 +189,11 @@
             , ssc.amount as contract_amount
         from (<include refid="fromListForWx"/>) as t
         left join sc_service_contract ssc on ssc.form_id = t.form_id and ssc.flag = 1
-        order by modify_time desc
     </select>
 
     <sql id="fromListForWx">
-        select json_unquote(json_extract(a.content, '$.businessName')) AS business_name
+        select row_number() over (order by a.modify_time desc) as row_num
+             , json_unquote(json_extract(a.content, '$.businessName')) AS business_name
              , json_unquote(json_extract(a.content, '$.area')) AS area
              , json_unquote(json_extract(a.content, '$.companyName')) AS company_Name
              , json_unquote(json_extract(a.content, '$.detailedAddress')) AS detailed_address

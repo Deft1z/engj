@@ -33,7 +33,7 @@ public class UserMsgService {
         }
         param.setUserId(userInfoDto.getUserId());
 
-        return new PageResp<>(bUserMsgDao.getUserAlarmMsgList(param));
+        return new PageResp<>(bUserMsgDao.getByPage(param));
     }
 
     public Integer getUnreadCount(Integer msgBizType) {

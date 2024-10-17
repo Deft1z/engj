@@ -21,7 +21,7 @@ public class BUserMsgDao extends ServiceImpl<BUserMsgMapper, BUserMsg> {
 
     private final BUserMsgMapper mapper;
 
-    public IPage<UserMsgListResult> getUserAlarmMsgList(UserAlarmMsgParam param) {
+    public IPage<UserMsgListResult> getByPage(UserAlarmMsgParam param) {
         Page<UserMsgListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
         return mapper.getUserAlarmMsgList(page, param);
     }

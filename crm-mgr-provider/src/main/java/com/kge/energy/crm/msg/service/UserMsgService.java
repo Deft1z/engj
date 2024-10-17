@@ -17,9 +17,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -27,32 +29,38 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserMsgService {
 
+    @Value("${excel.export.limit-days:180}")
+    private Integer limitDays;
+
     private final BUserMsgDao bUserMsgDao;
 
     public PageResp<UserMsgListResult> list(UserMsgListReq req) {
-        return new PageResp<>(getUserAlatmMsgList(req));
+        return new PageResp<>(getByPage(req));
     }
 
     @SneakyThrows
     public void exportList(HttpServletResponse response, UserMsgListReq req) {
-        if (req.getPageSize() > 5000) {
-            throw new ServiceException("导出数据量不得超过5000，请重新选择导出数据范围");
+        if (req.getStartTime() != null && req.getEndTime() != null) {
+            long days = Duration.between(req.getStartTime(), req.getEndTime()).toDays();
+            //限制导出的最大时间范围
+            if (days > limitDays) {
+                throw new ServiceException(String.format("数据导出时间范围不得超过%s天", limitDays));
+            }
+        } else {
+            //若未选择时间范围，默认为最近限制天数的时间
+            LocalDateTime now = LocalDateTime.now();
+            req.setStartTime(now.minusDays(limitDays));
+            req.setEndTime(now);
         }
-        List<UserMsgListResult> list = getUserAlatmMsgList(req).getRecords();
+        //限制最多导出10000条记录
+        req.setPageSize(10000L);
+        List<UserMsgListResult> list = getByPage(req).getRecords();
         //数据转换
-        List<UserMsgExcelResp> excelList = new ArrayList<>();
-        for (UserMsgListResult userMsg : list) {
-            UserMsgExcelResp excelResp = new UserMsgExcelResp();
-            excelResp.setRealname(userMsg.getRealname());
-            excelResp.setMsgBizType(userMsg.getMsgBizType());
-            excelResp.setContent(userMsg.getContent());
-            excelResp.setCreateTime(userMsg.getCreateTime());
-            excelList.add(excelResp);
-        }
+        List<UserMsgExcelResp> excelList = BeanUtil.copyToList(list, UserMsgExcelResp.class);
         ExcelUtils.write(response, "用户消息数据.xls", "用户消息列表", UserMsgExcelResp.class, excelList);
     }
 
-    public IPage<UserMsgListResult> getUserAlatmMsgList(UserMsgListReq req) {
+    public IPage<UserMsgListResult> getByPage(UserMsgListReq req) {
         UserAlarmMsgParam param = BeanUtil.copyProperties(req, UserAlarmMsgParam.class);
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
@@ -62,7 +70,7 @@ public class UserMsgService {
         param.setUserId(userInfoDto.getUserId());
         param.setRoleCodes(userInfoDto.getRoleCodes());
 
-        return bUserMsgDao.getUserAlarmMsgList(param);
+        return bUserMsgDao.getByPage(param);
     }
 
     public Integer getUnreadCount(Integer msgBizType) {
