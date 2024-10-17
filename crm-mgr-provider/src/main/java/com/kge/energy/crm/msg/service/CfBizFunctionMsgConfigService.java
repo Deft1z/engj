@@ -1,10 +1,12 @@
 package com.kge.energy.crm.msg.service;
 
+import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.msg.req.BizFunctionMsgConfigAddReq;
+import com.kge.energy.crm.repository.dao.CfBizFunctionDao;
 import com.kge.energy.crm.repository.dao.CfBizFunctionMsgDao;
+import com.kge.energy.crm.repository.entity.CfBizFunction;
 import com.kge.energy.crm.repository.entity.CfBizFunctionMsg;
 import com.kge.energy.crm.repository.entityext.result.CfBizFunctionMsgResult;
 import lombok.RequiredArgsConstructor;
@@ -27,19 +29,24 @@ public class CfBizFunctionMsgConfigService {
 
     private final CfBizFunctionMsgDao cfBizFunctionMsgDao;
 
+    private final CfBizFunctionDao cfBizFunctionDao;
+
     public List<CfBizFunctionMsgResult> getFunctionConfigs(Integer bizFunctionId, Integer tenantId) {
         return cfBizFunctionMsgDao.getFunctionConfigs(bizFunctionId, tenantId);
     }
 
     @Transactional
     public Boolean save(BizFunctionMsgConfigAddReq bizFunctionMsgConfig) {
-        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
+
+        CfBizFunction cfBizFunction = cfBizFunctionDao.getById(bizFunctionMsgConfig.getBizFunctionId());
+        Assert.notNull(cfBizFunction, "业务功能配置不存在");
+
         //执行全删全插
         //删除关联关系
         cfBizFunctionMsgDao.remove(new QueryWrapper<CfBizFunctionMsg>()
                 .lambda()
                 .eq(CfBizFunctionMsg::getBizFunctionId, bizFunctionMsgConfig.getBizFunctionId())
-                .eq(CfBizFunctionMsg::getTenantId, operator.getTenantId())
+                .eq(CfBizFunctionMsg::getTenantId, cfBizFunction.getTenantId())
         );
         //新增关联关系
         if (bizFunctionMsgConfig.getMsgConfigs() != null && !bizFunctionMsgConfig.getMsgConfigs().isEmpty()) {
@@ -51,8 +58,8 @@ public class CfBizFunctionMsgConfigService {
                         .setPriority(msgConfig.getPriority())
                         .setEnabled(msgConfig.getEnabled())
                         .setMsgChannelId(msgConfig.getMsgChannelId())
-                        .setCreateUserId(operator.getUserId().intValue())
-                        .setTenantId(operator.getTenantId())
+                        .setCreateUserId(UserInfoContextUtils.getCurrentUserId())
+                        .setTenantId(cfBizFunction.getTenantId())
                 );
             }
         }
