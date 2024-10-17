@@ -3,6 +3,7 @@ package com.kge.energy.crm.sso.controller;
 import com.kge.energy.crm.sso.req.SSOReq;
 import com.kge.energy.crm.sso.resp.SSOResp;
 import com.kge.energy.crm.sso.service.SSOService;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +17,7 @@ public class SSOController {
     private final SSOService ssoService;
 
     @PostMapping("/external/sso/auth")
-    public SSOResp auth(@Validated @RequestBody SSOReq req) {
-        return ssoService.auth(req);
+    public CommonResult<SSOResp> auth(@Validated @RequestBody SSOReq req) {
+        return CommonResult.suc(ssoService.auth(req));
     }
 }
