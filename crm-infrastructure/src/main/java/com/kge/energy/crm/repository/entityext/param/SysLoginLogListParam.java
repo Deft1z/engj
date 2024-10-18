@@ -14,4 +14,6 @@ public class SysLoginLogListParam extends PageReq  {
 
     private Integer loginPlatform;
 
+    private Integer loginResult;
+
 }

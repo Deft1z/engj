@@ -16,6 +16,7 @@ import com.kge.energy.crm.repository.mapper.BUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,15 +29,15 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
 
     private final BUserMapper mapper;
 
-    public BUser findUserByOpenId(String openId) {
+    public List<BUser> findUserByOpenId(String openId) {
         if (Objects.equals(openId, "")) {
-            return null;
+            return Collections.EMPTY_LIST;
         }
 
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
                 .eq(BUser::getOpenId, openId);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectList(wrapper);
     }
 
 
@@ -66,14 +67,13 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
                 .eq(BUser::getName, name);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 
     public BUser getUserByMobile(String mobile) {
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()
-                .eq(BUser::getMobile, mobile)
-                .eq(BUser::getFlag, 1);
-        return mapper.selectOne(wrapper);
+                .eq(BUser::getMobile, mobile);
+        return mapper.selectOne(wrapper, false);
     }
 
     public IPage<BUser> findAppletUser(Page<BUser> page, Integer tenantId, String name) {
@@ -123,6 +123,10 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
 
     public BUser findUserByContractId(Integer scid) {
         return mapper.findUserByContractId(scid);
+    }
+
+    public List<BUser> getUserContact(Integer userId, List<String> roleCodes, Integer organizationId, Integer tenantId) {
+        return mapper.getUserContact(userId, roleCodes, organizationId, tenantId);
     }
 
 }

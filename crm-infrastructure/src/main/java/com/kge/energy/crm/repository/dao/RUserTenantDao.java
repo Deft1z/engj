@@ -23,7 +23,7 @@ public class RUserTenantDao extends ServiceImpl<RUserTenantMapper, RUserTenant> 
         LambdaQueryWrapper<RUserTenant> wrapper = Wrappers.<RUserTenant>lambdaQuery()
                 .eq(RUserTenant::getUserId, userId);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 
     public int removeByUserId(Integer userId) {

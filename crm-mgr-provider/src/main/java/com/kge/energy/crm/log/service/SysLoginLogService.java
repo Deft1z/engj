@@ -14,16 +14,13 @@ import com.kge.energy.crm.log.req.SysLoginLogListReq;
 import com.kge.energy.crm.log.resp.SysLoginLogListResp;
 import com.kge.energy.crm.repository.dao.SysLoginLogDao;
 import com.kge.energy.crm.repository.entity.SysLoginLog;
-import com.kge.energy.crm.repository.entity.SysOperateLog;
 import com.kge.energy.crm.repository.entityext.param.SysLoginLogListParam;
-import com.kge.energy.crm.repository.entityext.param.SysOperateLogListParam;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,7 +29,7 @@ public class SysLoginLogService {
 
     private final SysLoginLogDao sysLoginLogDao;
 
-    public PageResp<SysLoginLogListResp> list(SysLoginLogListReq sysLoginLogListReq){
+    public PageResp<SysLoginLogListResp> list(SysLoginLogListReq sysLoginLogListReq) {
         AuthVerifyUtils.mustAdmin();
 
         if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), sysLoginLogListReq.getTenantId())) {
@@ -42,6 +39,7 @@ public class SysLoginLogService {
         SysLoginLogListParam param = BeanUtil.copyProperties(sysLoginLogListReq, SysLoginLogListParam.class);
 
         Page<SysLoginLog> page = sysLoginLogDao.list(param);
+
         List<SysLoginLogListResp> list = page.getRecords()
                 .stream()
                 .map(log -> {

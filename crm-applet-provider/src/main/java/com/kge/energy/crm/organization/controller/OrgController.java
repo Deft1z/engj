@@ -1,13 +1,13 @@
 package com.kge.energy.crm.organization.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.external.ecc.resp.EccOrgResp;
 import com.kge.energy.crm.external.ecc.service.EccService;
 import com.kge.energy.crm.organization.req.OrgReq;
 import com.kge.energy.crm.organization.resp.OrgDictResp;
 import com.kge.energy.crm.organization.resp.OrgResp;
 import com.kge.energy.crm.organization.service.OrgService;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,20 +32,20 @@ public class OrgController {
      */
     @ConvertToGoFormats
     @PostMapping("/baseData/company/list")
-    public CommonResponse<List<OrgResp>> getCompanyList(@RequestBody OrgReq orgReq) {
-        return CommonResponse.suc(orgService.getCompanyList(orgReq));
+    public CommonResult<List<OrgResp>> getCompanyList(@RequestBody OrgReq orgReq) {
+        return CommonResult.suc(orgService.getCompanyList(orgReq));
     }
 
     /**
      * 获取每个公司的组织机构Id和服务类型
      */
     @PostMapping("/baseData/organizationMrg/orgDictList/load")
-    public CommonResponse<List<OrgDictResp>> orgDictList() {
-        return CommonResponse.suc(orgService.orgDictList());
+    public CommonResult<List<OrgDictResp>> orgDictList() {
+        return CommonResult.suc(orgService.orgDictList());
     }
 
     @PostMapping("/baseData/getEccOrgList")
-    public CommonResponse<List<EccOrgResp>> getEccOrgList() {
-        return CommonResponse.suc(eccService.getEccOrgList());
+    public CommonResult<List<EccOrgResp>> getEccOrgList() {
+        return CommonResult.suc(eccService.getEccOrgList());
     }
 }

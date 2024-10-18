@@ -1,6 +1,8 @@
 package com.kge.energy.crm.repository.dao;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.repository.entity.BUserMsg;
@@ -19,9 +21,33 @@ public class BUserMsgDao extends ServiceImpl<BUserMsgMapper, BUserMsg> {
 
     private final BUserMsgMapper mapper;
 
-    public IPage<UserMsgListResult> getUserAlatmMsgList(UserAlarmMsgParam param) {
+    public IPage<UserMsgListResult> getByPage(UserAlarmMsgParam param) {
         Page<UserMsgListResult> page = new Page<>(param.getCurrentPage(), param.getPageSize());
-        return mapper.getUserAlatmMsgList(page, param);
+        return mapper.getUserAlarmMsgList(page, param);
+    }
+
+    public Integer getUnreadCount(Integer userId, Integer msgBizType) {
+        return mapper.getUnreadCount(userId, msgBizType);
+    }
+
+    public Boolean readById(Integer userId, Integer id) {
+        LambdaUpdateWrapper<BUserMsg> wrapper = Wrappers.<BUserMsg>update().lambda()
+                .set(BUserMsg::getIsRead, 1)
+                .eq(BUserMsg::getId, id)
+                .eq(BUserMsg::getIsRead, 0)
+                .eq(BUserMsg::getUserId, userId);
+        return this.update(wrapper);
+    }
+
+    public Boolean readByMsgBizType(Integer userId, Integer msgBizType) {
+        LambdaUpdateWrapper<BUserMsg> wrapper = Wrappers.<BUserMsg>update().lambda()
+                .set(BUserMsg::getIsRead, 1)
+                .eq(BUserMsg::getIsRead, 0)
+                .eq(BUserMsg::getUserId, userId);
+        if (msgBizType != null) {
+            wrapper.eq(BUserMsg::getMsgBizType, msgBizType);
+        }
+        return this.update(wrapper);
     }
 
 }

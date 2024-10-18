@@ -59,7 +59,7 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
                 .eq(BRole::getTenantId, tenantId)
                 .eq(BRole::getCode, code);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 }
 

@@ -1,12 +1,11 @@
 package com.kge.energy.crm.repository.dao;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.ScContractEvaluate;
 import com.kge.energy.crm.repository.entityext.result.StartEva;
 import com.kge.energy.crm.repository.mapper.ScContractEvaluateMapper;
-import com.kge.energy.crm.repository.entity.ScContractEvaluate;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Repository;
 
 /**
  * sc_contract_evaluate 服务合同评价(ScContractEvaluate)表数据库访问层

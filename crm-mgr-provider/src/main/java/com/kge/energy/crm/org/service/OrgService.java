@@ -6,8 +6,6 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.OperateModuleEnums;
@@ -103,9 +101,8 @@ public class OrgService {
 
     @Transactional
     public Boolean add(AddOrgReq addOrgReq) {
-        //AuthVerifyUtils.mustAdmin();
 
-        if(!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(addOrgReq.getParentOrganizationId())){
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(addOrgReq.getParentOrganizationId())) {
             throw new ServiceException("权限不足");
         }
 
@@ -115,7 +112,7 @@ public class OrgService {
         }
 
         BOrganization parentOrganization = bOrganizationDao.getById(addOrgReq.getParentOrganizationId());
-        if(!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(parentOrganization)){
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(parentOrganization)) {
             throw new ServiceException("上级组织不存在");
         }
 
@@ -156,7 +153,7 @@ public class OrgService {
         }
 
         BOrganization pold = bOrganizationDao.getById(updateOrgReq.getParentOrganizationId());
-        if(!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(pold)){
+        if (!AuthVerifyUtils.isSuperAdmin() && ObjectUtil.isNull(pold)) {
             throw new ServiceException("上级组织不存在");
         }
 
@@ -223,7 +220,7 @@ public class OrgService {
             } else {
                 OrgListResult pOrgListResult = idOrgMap.get(pid);
                 if (CollUtil.isEmpty(pOrgListResult.getChildren())) {
-                    pOrgListResult.setChildren(new ArrayList<OrgListResult>());
+                    pOrgListResult.setChildren(new ArrayList<>());
                 }
                 orgListResult.setParentOrganizationName(pOrgListResult.getName());
                 pOrgListResult.getChildren().add(orgListResult);

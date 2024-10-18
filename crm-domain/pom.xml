@@ -22,6 +22,10 @@
             <groupId>com.kge.energy</groupId>
             <artifactId>crm-infrastructure</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.kge.energy</groupId>
+            <artifactId>msg-api</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

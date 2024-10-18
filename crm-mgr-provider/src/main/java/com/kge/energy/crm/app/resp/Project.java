@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 
 /**
  * wangrongjun
@@ -16,11 +15,11 @@ public class Project {
      * 项目名称
      */
     @JsonProperty("Name")
-    private String Name;
+    private String name;
 
     /**
      * 项目id
      */
     @JsonProperty("Id")
-    private Integer Id;
+    private Integer id;
 }

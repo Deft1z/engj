@@ -28,6 +28,8 @@ public class WeChatAppletProperties {
 
     private String version;
 
+    private String envVersion;
+
     private String agencyOrderPage;
 }
 

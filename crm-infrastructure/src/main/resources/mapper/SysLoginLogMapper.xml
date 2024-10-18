@@ -26,6 +26,9 @@
             <if test="param.loginPlatform != null">
                 and login_platform = #{param.loginPlatform}
             </if>
+            <if test="param.loginResult != null">
+                and login_result = #{param.loginResult}
+            </if>
         </where>
         order by id desc
     </select>

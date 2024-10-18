@@ -1,17 +1,16 @@
 package com.kge.energy.crm.app.controller;
 
-import com.kge.energy.crm.app.req.*;
-import com.kge.energy.crm.app.resp.AppDetailUserResp;
+import com.kge.energy.crm.app.req.AddProReq;
+import com.kge.energy.crm.app.req.BindReq;
+import com.kge.energy.crm.app.req.CancelAllReq;
+import com.kge.energy.crm.app.req.ProjectDelReq;
 import com.kge.energy.crm.app.resp.DetailResp;
 import com.kge.energy.crm.app.resp.ListResp;
 import com.kge.energy.crm.app.resp.UserResp;
 import com.kge.energy.crm.app.service.AppService;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
-import com.kge.energy.crm.common.net.ResponseCode;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,11 +27,11 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @GetMapping("/list")
-    public CommonResponse<ListResp> list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
-                                         @RequestParam(name="appid",required = false) Integer appid,
-                                         @RequestParam(name = "mobile",required = false) String mobile,
-                                         @RequestParam(name = "name",required = false) String name) {
-        return CommonResponse.suc(appService.listNew(page, limit, appid, mobile, name));
+    public CommonResult<ListResp> list(@RequestParam("page") Integer page, @RequestParam("limit") Integer limit,
+                                       @RequestParam(name = "appid", required = false) Integer appid,
+                                       @RequestParam(name = "mobile", required = false) String mobile,
+                                       @RequestParam(name = "name", required = false) String name) {
+        return CommonResult.suc(appService.listNew(page, limit, appid, mobile, name));
     }
 
     /**
@@ -40,16 +39,16 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @GetMapping("/detail")
-    public CommonResponse<DetailResp> detail(@RequestParam("page") Integer page,
-                                                   @RequestParam(name="limit",required = false) Integer limit,
-                                                   @RequestParam(name = "ids",required = false) List<Integer> ids,
-                                                   @RequestParam(name = "appid",required = false) Integer appid,
-                                                   @RequestParam(name = "total",required = false) Integer total,
-                                                   @RequestParam(name = "mobile",required = false) String mobile,
-                                                   @RequestParam(name = "name",required = false) String name) {
+    public CommonResult<DetailResp> detail(@RequestParam("page") Integer page,
+                                           @RequestParam(name = "limit", required = false) Integer limit,
+                                           @RequestParam(name = "ids", required = false) List<Integer> ids,
+                                           @RequestParam(name = "appid", required = false) Integer appid,
+                                           @RequestParam(name = "total", required = false) Integer total,
+                                           @RequestParam(name = "mobile", required = false) String mobile,
+                                           @RequestParam(name = "name", required = false) String name) {
 
-        DetailResp result = appService.FindBindList(page, limit, mobile, name ,ids);
-        return CommonResponse.suc(result);
+        DetailResp result = appService.findBindList(page, limit, mobile, name, ids);
+        return CommonResult.suc(result);
     }
 
     /**
@@ -57,13 +56,9 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @PostMapping("/addProject/add")
-    public CommonResponse<Integer> addProject(@RequestBody AddProReq req) {
+    public CommonResult<Integer> addProject(@RequestBody AddProReq req) {
         int resultId = appService.addProject(req);
-        if ( resultId == 0 ) {
-            throw new BadException(ResponseCode.DB_INSERT_FAIL);
-        }else {
-            return CommonResponse.suc(resultId);
-        }
+        return CommonResult.suc(resultId);
     }
 
     /**
@@ -71,12 +66,9 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @PostMapping("/project/update")
-    public CommonResponse<Boolean> delProject(@RequestBody ProjectDelReq req) {
-        int resultInt = appService.Del(req);
-        if (resultInt == 0) {
-            throw new BadException(ResponseCode.DB_UPDATE_FAIL);
-        }
-        return CommonResponse.suc(true);
+    public CommonResult<Boolean> delProject(@RequestBody ProjectDelReq req) {
+        appService.del(req);
+        return CommonResult.suc(true);
     }
 
     /**
@@ -84,12 +76,9 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @PostMapping("/cancel/update")
-    public CommonResponse<Boolean> cancel(@RequestBody BindReq req) {
-        int resultInt = appService.CancelAndUpdate(req);
-        if (resultInt == 0) {
-            throw new BadException(ResponseCode.DB_UPDATE_FAIL);
-        }
-        return CommonResponse.suc(true);
+    public CommonResult<Boolean> cancel(@RequestBody BindReq req) {
+        appService.cancelAndUpdate(req);
+        return CommonResult.suc(true);
     }
 
     /**
@@ -97,12 +86,9 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @PostMapping("/cancelall/update")
-    public CommonResponse<Boolean> cancelAll(@RequestBody CancelAllReq req) {
-        int resultInt = appService.CancelAll(req.getOpenid());
-        if (resultInt == 0) {
-            throw new BadException(ResponseCode.DB_UPDATE_FAIL);
-        }
-        return CommonResponse.suc(true);
+    public CommonResult<Boolean> cancelAll(@RequestBody CancelAllReq req) {
+        appService.cancelAll(req.getOpenid());
+        return CommonResult.suc(true);
     }
 
     /**
@@ -110,8 +96,8 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @GetMapping("/finduser")
-    public CommonResponse<UserResp> findUserResp(@RequestParam("mobile") String mobile) {
-        return CommonResponse.suc(appService.FindUserResp(mobile));
+    public CommonResult<UserResp> findUserResp(@RequestParam("mobile") String mobile) {
+        return CommonResult.suc(appService.findUserResp(mobile));
     }
 
     /**
@@ -119,7 +105,7 @@ public class InternalBindController {
      */
     @ConvertToGoFormats
     @PostMapping("/bind/add")
-    public CommonResponse<Boolean> bindApp(@RequestBody BindReq req) {
-        return CommonResponse.suc(appService.bindApp(req));
+    public CommonResult<Boolean> bindApp(@RequestBody BindReq req) {
+        return CommonResult.suc(appService.bindApp(req));
     }
 }

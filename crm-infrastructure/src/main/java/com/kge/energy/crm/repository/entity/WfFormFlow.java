@@ -51,5 +51,10 @@ public class WfFormFlow {
      * 租户id
      */
     private Integer tenantId;
+
+    /**
+     * 服务单位id
+     */
+    private Integer serviceUnitId;
 }
 

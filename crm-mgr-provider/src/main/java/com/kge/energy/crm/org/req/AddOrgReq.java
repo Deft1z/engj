@@ -21,6 +21,10 @@ public class AddOrgReq {
     @NotNull
     private Integer sort;
 
+    @Schema(description = "组织类别:0-集团 1-公司 2-部门 3-项目组")
+    @NotNull
+    private Integer orgType;
+
     @Schema(description = "状态,0正常 1停用")
     @NotNull
     private Integer status;

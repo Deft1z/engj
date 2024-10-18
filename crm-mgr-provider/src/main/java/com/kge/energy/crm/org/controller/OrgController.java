@@ -1,7 +1,6 @@
 package com.kge.energy.crm.org.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.org.req.AddOrgReq;
 import com.kge.energy.crm.org.req.DeleteOrgReq;
 import com.kge.energy.crm.org.req.OrgQueryReq;
@@ -10,6 +9,7 @@ import com.kge.energy.crm.org.resp.OrgDictResp;
 import com.kge.energy.crm.org.resp.OrgTreeResp;
 import com.kge.energy.crm.org.service.OrgService;
 import com.kge.energy.crm.repository.entityext.result.OrgListResult;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -37,38 +37,38 @@ public class OrgController {
      */
     @ConvertToGoFormats
     @PostMapping("/getOrgDictList")
-    public CommonResponse<List<OrgDictResp>> getOrgDictList() {
-        return CommonResponse.suc(orgService.getOrgDictList());
+    public CommonResult<List<OrgDictResp>> getOrgDictList() {
+        return CommonResult.suc(orgService.getOrgDictList());
     }
 
     @Operation(summary = "组织列表")
     @PostMapping("/getOrgList")
-    public CommonResponse<List<OrgListResult>> list(@Validated @RequestBody OrgQueryReq req) {
-        return CommonResponse.suc(orgService.selectList(req));
+    public CommonResult<List<OrgListResult>> list(@Validated @RequestBody OrgQueryReq req) {
+        return CommonResult.suc(orgService.selectList(req));
     }
 
     @Operation(summary = "组织树")
     @PostMapping("/getOrgTree")
-    public CommonResponse<OrgTreeResp> getOrgTree(@Validated @RequestBody OrgQueryReq req) {
-        return CommonResponse.suc(orgService.getOrgTree(req));
+    public CommonResult<OrgTreeResp> getOrgTree(@Validated @RequestBody OrgQueryReq req) {
+        return CommonResult.suc(orgService.getOrgTree(req));
     }
 
     @Operation(summary = "新增组织")
     @PostMapping("/addOrg")
-    public CommonResponse<Boolean> add(@Validated @RequestBody AddOrgReq req) {
-        return CommonResponse.suc(orgService.add(req));
+    public CommonResult<Boolean> add(@Validated @RequestBody AddOrgReq req) {
+        return CommonResult.suc(orgService.add(req));
     }
 
     @Operation(summary = "更新组织")
     @PostMapping("/updateOrg")
-    public CommonResponse<Boolean> update(@Validated @RequestBody UpdateOrgReq updateOrgReq) {
-        return CommonResponse.suc(orgService.update(updateOrgReq));
+    public CommonResult<Boolean> update(@Validated @RequestBody UpdateOrgReq updateOrgReq) {
+        return CommonResult.suc(orgService.update(updateOrgReq));
     }
 
     @Operation(summary = "删除组织")
     @PostMapping("/deleteOrg")
-    public CommonResponse<Boolean> delete(@Validated @RequestBody DeleteOrgReq deleteOrgReq) {
-        return CommonResponse.suc(orgService.delete(deleteOrgReq));
+    public CommonResult<Boolean> delete(@Validated @RequestBody DeleteOrgReq deleteOrgReq) {
+        return CommonResult.suc(orgService.delete(deleteOrgReq));
     }
 
 }

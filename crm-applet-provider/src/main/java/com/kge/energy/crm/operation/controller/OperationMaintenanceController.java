@@ -1,10 +1,10 @@
 package com.kge.energy.crm.operation.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.operation.req.PatrolRecordReq;
 import com.kge.energy.crm.operation.service.OperationMaintenanceService;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,14 +27,14 @@ public class OperationMaintenanceController {
 
     @ConvertToGoFormats
     @PostMapping("/external/getRecord")
-    public CommonResponse<Object> getRecordList(@RequestBody EccReq eccReq) throws NoSuchAlgorithmException {
-        return CommonResponse.suc(operationMaintenanceService.getRecordList(eccReq));
+    public CommonResult<Object> getRecordList(@RequestBody EccReq eccReq) throws NoSuchAlgorithmException {
+        return CommonResult.suc(operationMaintenanceService.getRecordList(eccReq));
     }
 
     @ConvertToGoFormats
     @PostMapping("/om/report/info/load")
-    public CommonResponse<Object> getPatrolRecordInfo(@RequestBody PatrolRecordReq patrolRecordReq){
-        return CommonResponse.suc(operationMaintenanceService.getPatrolRecordInfo(patrolRecordReq));
+    public CommonResult<Object> getPatrolRecordInfo(@RequestBody PatrolRecordReq patrolRecordReq) {
+        return CommonResult.suc(operationMaintenanceService.getPatrolRecordInfo(patrolRecordReq));
     }
 
 }

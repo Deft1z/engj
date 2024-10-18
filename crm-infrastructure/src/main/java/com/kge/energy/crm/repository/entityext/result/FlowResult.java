@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 /**
  * @author wangjihua
  */
@@ -33,4 +35,6 @@ public class FlowResult {
     private Integer createUserId;
 
     private Integer modifyUserId;
+
+    private List<CmsCommentResult> commentList;
 }

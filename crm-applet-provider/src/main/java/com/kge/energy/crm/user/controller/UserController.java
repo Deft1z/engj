@@ -1,9 +1,9 @@
 package com.kge.energy.crm.user.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.user.req.UpdateWxUserReq;
 import com.kge.energy.crm.user.service.UserService;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -25,7 +25,7 @@ public class UserController {
 
     @PostMapping("/baseData/userMrg/wxUser/update")
     @ConvertToGoFormats
-    public CommonResponse<Boolean> updateWxUser(@Validated @RequestBody UpdateWxUserReq req) {
-        return CommonResponse.suc(userService.updateWxUser(req));
+    public CommonResult<Boolean> updateWxUser(@Validated @RequestBody UpdateWxUserReq req) {
+        return CommonResult.suc(userService.updateWxUser(req));
     }
 }

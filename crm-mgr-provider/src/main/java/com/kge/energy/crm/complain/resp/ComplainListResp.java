@@ -83,11 +83,6 @@ public class ComplainListResp {
     private Integer createUserId;
 
     /**
-     * 修改用户ID
-     */
-    //private Integer modifyUserId;
-
-    /**
      * 备注
      */
     private String remark;
@@ -119,19 +114,9 @@ public class ComplainListResp {
     private String orderCode;
 
     /**
-     * 合同编码
-     */
-    //private String contractCode;
-
-    /**
      * 订单状态
      */
     private String orderStatus;
-
-    /**
-     * 合同状态
-     */
-    //private String contractStatus;
 
     /**
      * 组织名称

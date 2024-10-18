@@ -37,7 +37,6 @@ public class ResourceDomainService {
 
         List<BResource> bResourceList = bResourceDao.getSystemResources(param)
                 .stream().distinct().toList();
-        ;
 
         return converToResourceListResp(bResourceList);
     }

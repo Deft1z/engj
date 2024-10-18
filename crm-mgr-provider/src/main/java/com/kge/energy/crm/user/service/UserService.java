@@ -12,11 +12,10 @@ import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapp
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.execption.BadException;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.net.ResponseCode;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.common.util.RedisUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.*;
 import com.kge.energy.crm.log.service.SysOperateLogService;
@@ -30,6 +29,7 @@ import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.platform.framework.common.exception.ServiceException;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,8 @@ public class UserService {
     private final SysLoginLogHandleService sysLoginLogHandleService;
 
     private final UserDomainService userDomainService;
+
+    private final RedisUtils redisUtils;
 
 
     public BUser getUserByMobile(String mobile) {
@@ -104,16 +107,39 @@ public class UserService {
         return MD5.create().digestHex(req.getName() + sSystemConfig.getConfig());
     }
 
-    public CommonResponse<UserLoginResp> userLogin(UserLoginReq req) {
-        UserLoginResp userLoginResp = null;
+    public CommonResult<UserLoginResp> userLogin(UserLoginReq req) {
         BUser bUser = null;
 
         try {
+            //校验账号登录次数
+            String loginErrorCountCacheKey = String.format(TokenConstant.LOGIN_ERROR_COUNT_CACHE_KEY, req.getName());
+            if (redisUtils.hasKey(loginErrorCountCacheKey) && Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT) {
+                throw new ServiceException("账号已冻结");
+            }
 
             bUser = bUserDao.getOne(Wrappers.lambdaQuery(new BUser().setName(req.getName()).setPasswd(req.getPasswd())));
 
             if (ObjectUtil.isNull(bUser)) {
-                throw new BadException(ResponseCode.SHOULD_LOGIN);
+                //首次登录失败
+                if (!redisUtils.hasKey(loginErrorCountCacheKey)) {
+                    redisUtils.setEx(loginErrorCountCacheKey, "1", TokenConstant.LOGIN_ERROR_BAN_TIME, TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                } else {
+                    redisUtils.incrBy(loginErrorCountCacheKey, 1);
+                    //达到失败次数限制
+                    if (Integer.parseInt(redisUtils.get(loginErrorCountCacheKey)) == TokenConstant.MAX_LOGIN_ERROR_COUNT) {
+                        redisUtils.expire(loginErrorCountCacheKey, TokenConstant.LOGIN_ERROR_BAN_TIME, TokenConstant.LOGIN_ERROR_BAN_TIMEUNIT);
+                        throw new ServiceException("账号已冻结");
+                    }
+                }
+                throw new ServiceException("账号或密码不正确");
+            }
+
+            //账号密码正确 删除key
+            redisUtils.delete(loginErrorCountCacheKey);
+
+            //判断是否禁用 帐号状态（0正常 1停用）
+            if (ObjectUtil.equal(bUser.getStatus(), 1)) {
+                throw new ServiceException("账号已禁用");
             }
 
             // 获取uid关联的租户
@@ -124,7 +150,7 @@ public class UserService {
             bUser.setLastLoginTime(LocalDateTime.now());
             bUserDao.updateById(bUser);
 
-            userLoginResp = new UserLoginResp()
+            UserLoginResp userLoginResp = new UserLoginResp()
                     .setUserId(bUser.getUserId())
                     .setTenantId(rUserTenant.getOrganizationId())
                     .setAuthToken(authToken)
@@ -133,15 +159,17 @@ public class UserService {
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.SUCCESS, null);
 
-            return CommonResponse.suc(userLoginResp);
+            return CommonResult.suc(userLoginResp);
 
         } catch (Exception e) {
             log.error("pc login error: ", e);
 
             //记录登录失败日志
-            sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
+            sysLoginLogHandleService.saveLoginLog(
+                    Optional.ofNullable(bUser).orElse(new BUser().setName(req.getName())),
+                    LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
 
-            return CommonResponse.bad(ResponseCode.SHOULD_LOGIN, userLoginResp);
+            throw new ServiceException("登录失败");
         }
 
     }
@@ -151,11 +179,11 @@ public class UserService {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
 
         if (ObjectUtil.isNull(userInfoDto)) {
-            throw new BadException(ResponseCode.TOKEN_FAIL);
+            throw new ServiceException(ResponseCode.TOKEN_FAIL.getCode(), ResponseCode.TOKEN_FAIL.getMsg());
         }
 
         if (CollectionUtil.isEmpty(userInfoDto.getOrganizationList())) {
-            throw new BadException("找不到用户对应的租户ID");
+            throw new ServiceException("找不到用户对应的租户ID");
         }
 
         List<CurrentUserInfoResp.Role> roles = userInfoDto.getRoleList()
@@ -364,7 +392,7 @@ public class UserService {
         BUser bUser = bUserDao.getById(req.getUserId());
         Assert.notNull(bUser);
 
-        checkUpdateExistedUser(req, bUser);
+        checkUpdateExistedUser(req);
 
         if (AuthVerifyUtils.notSuperAdmin() && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), bUser.getTenantId())) {
             throw new ServiceException("非法请求，不允许编辑其他租户用户");
@@ -385,6 +413,11 @@ public class UserService {
                     .setUserId(bUser.getUserId())
                     .setOrganizationId(req.getOrganizationId())
                     .setTenantId(req.getTenantId()));
+        }
+
+        if (ObjectUtil.equal(req.getStatus(), 1)) {
+            // 删除用户的登录token
+            userDomainService.deleteUserToken(bUser);
         }
 
         sysOperateLogService.saveLog(
@@ -418,6 +451,9 @@ public class UserService {
                 bUser.getTenantId(), OperateModuleEnums.USER,
                 "删除用户【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() + "】"
         );
+
+        // 删除用户的登录token
+        userDomainService.deleteUserToken(bUser);
 
         return true;
     }
@@ -519,35 +555,35 @@ public class UserService {
                 .eq(BUser::getName, req.getName())
                 .exists();
         if (existed) {
-            throw new ServiceException("用户已经存在");
+            throw new ServiceException("已存在该用户名用户：" + req.getName());
         }
 
         existed = new LambdaQueryChainWrapper<>(BUser.class)
                 .eq(BUser::getMobile, req.getMobile())
                 .exists();
         if (existed) {
-            throw new ServiceException("用户已经存在");
+            throw new ServiceException("已存在该手机号码用户：" + req.getMobile());
         }
     }
 
 
-    private void checkUpdateExistedUser(UpdateUserReq req, BUser bUser) {
+    private void checkUpdateExistedUser(UpdateUserReq req) {
 
         boolean existed = new LambdaQueryChainWrapper<>(BUser.class)
                 .ne(BUser::getUserId, req.getUserId())
                 .eq(BUser::getName, req.getName())
                 .exists();
         if (existed) {
-            throw new ServiceException("用户已经存在");
+            throw new ServiceException("已存在该用户名用户：" + req.getName());
         }
-//
-//        existed = new LambdaQueryChainWrapper<>(BUser.class)
-//                .ne(BUser::getUserId, req.getUserId())
-//                .eq(BUser::getMobile, req.getMobile())
-//                .exists();
-//        if (existed) {
-//            throw new ServiceException("用户已经存在");
-//        }
+
+        existed = new LambdaQueryChainWrapper<>(BUser.class)
+                .ne(BUser::getUserId, req.getUserId())
+                .eq(BUser::getMobile, req.getMobile())
+                .exists();
+        if (existed) {
+            throw new ServiceException("已存在该手机号码用户：" + req.getMobile());
+        }
     }
 
 

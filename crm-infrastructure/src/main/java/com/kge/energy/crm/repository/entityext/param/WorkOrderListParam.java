@@ -38,5 +38,7 @@ public class WorkOrderListParam extends PageReq {
 
         private String businessName;
 
+        private Integer serviceUnitId;
+
     }
 }

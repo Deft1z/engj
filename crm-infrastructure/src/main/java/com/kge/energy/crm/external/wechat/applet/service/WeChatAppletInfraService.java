@@ -1,5 +1,7 @@
 package com.kge.energy.crm.external.wechat.applet.service;
 
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.json.JSONObject;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
 import com.kge.energy.crm.external.wechat.applet.req.GetUserPhoneNumberReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
@@ -73,6 +75,28 @@ public class WeChatAppletInfraService {
         String url = String.format("%s/cgi-bin/message/subscribe/send?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
 
         return RestUtils.postForObject(url, req, SendSubscribeResp.class);
+    }
+
+    public String getWeChatAppletUrlLink(String path, String query) {
+        try{
+            String url = String.format("%s/wxa/generate_urllink?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
+            JSONObject req = new JSONObject();
+            req.set("path", path);
+            req.set("query", query);
+            req.set("expire_type", 1);
+            req.set("expire_interval", 3);
+            req.set("env_version", wechatAppletProperties.getEnvVersion());
+            JSONObject rs = RestUtils.postForObject(url, req, JSONObject.class);
+
+            if(rs.getInt("errcode") == 0){
+                return rs.getStr("url_link");
+            } else {
+                return "";
+            }
+        }catch (Exception e){
+            log.error("获取小程序url失败:",e);
+            return "";
+        }
     }
 
 }

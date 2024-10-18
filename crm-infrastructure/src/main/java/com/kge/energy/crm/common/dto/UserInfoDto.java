@@ -55,6 +55,11 @@ public class UserInfoDto extends CommonUserInfoDto {
     private List<Role> roleList;
 
     /**
+     * 用户角色ID集合
+     */
+    private Set<Integer> roleIds = new HashSet<>();
+
+    /**
      * 用户角色编码集合，方便业务判断用户是否有该角色
      */
     private Set<String> roleCodes = new HashSet<>();

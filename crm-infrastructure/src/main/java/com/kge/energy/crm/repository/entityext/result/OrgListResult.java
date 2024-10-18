@@ -3,7 +3,6 @@ package com.kge.energy.crm.repository.entityext.result;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -30,6 +29,9 @@ public class OrgListResult {
 
     @Schema(description = "排序")
     private Integer sort;
+
+    @Schema(description = "组织类别:0-集团 1-公司 2-部门 3-项目组")
+    private Integer orgType;
 
     @Schema(description = "状态,0正常 1停用")
     private Integer status;

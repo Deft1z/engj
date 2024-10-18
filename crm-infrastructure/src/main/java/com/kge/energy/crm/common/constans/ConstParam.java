@@ -11,20 +11,27 @@ public class ConstParam {
     public static String FlowCompanyProcess = "流转二级公司处理";
     public static String FlowCompanyContract = "添加合同";
     public static String FlowHasFeedback = "已回复";
-    public static String FlowFinished = "已完成";
+    public static String FlowFinished = "已完结";
+    public static String FlowTerminated = "已终止";
     public static String FlowTagGroup = "集团";
     public static String FlowTagSub = "二级公司";
+    public static String GroupWithdraw = "集团撤回";
+    public static String CompanyReturn = "二级公司退回";
+    public static String FlowCompanyReturn = "已退回";
+    public static String FlowGroupWithdraw = "已撤回";
+    public static String FlowGroupAssign = "已分派";
 
 
-    public static String WaitingForProcessing = "待处理";
-    public static String Processed = "已处理";
-    public static String Finished = "已终止";
-    public static String Processing = "处理中";
-    public static String SendBack = "已撤回";
+    public static final String WaitingForProcessing = "待处理";
+    public static final String Processed = "已处理";
+    public static final String Finished = "已完结";
+    public static final String Terminated = "已终止";
+    public static final String Processing = "处理中";
+    public static final String SendBack = "已撤回";
 
     /* 服务合同状态 */
     public static String Ready = "未开始";
-    public static String ContractNotReady = "未开始";
+    public static String ContractNotBegin = "未开始";
     public static String ContractUnderWay = "进行中";
     public static String ContractDiscontinued = "已终止";
     public static String RemainToBeEvaluated = "待评价";

@@ -1,16 +1,16 @@
 package com.kge.energy.crm.order.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.order.req.ContractReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
-import com.kge.energy.crm.order.req.contract.CreateContractReq;
-import com.kge.energy.crm.order.req.contract.UpdateProjectTimeReq;
-import com.kge.energy.crm.order.resp.ContractResp;
 import com.kge.energy.crm.order.service.ContractService;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
+import com.kge.energy.crm.workorder.req.ServiceContractAddReq;
+import com.kge.energy.crm.workorder.req.ServiceContractReq;
+import com.kge.energy.crm.workorder.req.ServiceContractUpdateProjectTimeReq;
+import com.kge.energy.crm.workorder.resp.ServiceContractResp;
+import com.kge.energy.crm.workorder.service.ServiceContractDomainService;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,13 +30,15 @@ public class ContractController {
 
     private final ContractService contractService;
 
+    private final ServiceContractDomainService serviceContractDomainService;
+
     /**
      * 获取合同
      */
     @ConvertToGoFormats
     @PostMapping("/form")
-    public CommonResponse<List<ContractResp>> form(@Validated @RequestBody ContractReq req) {
-        return CommonResponse.suc(contractService.form(req));
+    public CommonResult<List<ServiceContractResp>> form(@Validated @RequestBody ServiceContractReq req) {
+        return CommonResult.suc(serviceContractDomainService.getServiceContractList(req));
     }
 
     /**
@@ -44,8 +46,8 @@ public class ContractController {
      */
     @ConvertToGoFormats
     @PostMapping("/contractPageByUserIdLoad")
-    public CommonResponse<PageResp<ContractResult>> contractPageByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
-        return CommonResponse.suc(contractService.contractPageByUserIdLoad(req));
+    public CommonResult<PageResp<ContractResult>> contractPageByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
+        return CommonResult.suc(contractService.contractPageByUserIdLoad(req));
     }
 
     /**
@@ -53,8 +55,8 @@ public class ContractController {
      */
     @ConvertToGoFormats
     @PostMapping("/form/insert")
-    public CommonResponse<Object> contractAdd(@Validated @RequestBody CreateContractReq req) {
-        return contractService.contractAdd(req);
+    public CommonResult<Boolean> contractAdd(@Validated @RequestBody ServiceContractAddReq req) {
+        return CommonResult.suc(serviceContractDomainService.addServiceContract(req));
     }
 
     /**
@@ -62,7 +64,7 @@ public class ContractController {
      */
     @ConvertToGoFormats
     @PostMapping("/projectTime/update")
-    public CommonResponse<Object> projectTimeEdit(@Validated @RequestBody UpdateProjectTimeReq req) {
-        return contractService.projectTimeEdit(req);
+    public CommonResult<Object> projectTimeEdit(@Validated @RequestBody ServiceContractUpdateProjectTimeReq req) {
+        return CommonResult.suc(serviceContractDomainService.updateProjectTime(req));
     }
 }

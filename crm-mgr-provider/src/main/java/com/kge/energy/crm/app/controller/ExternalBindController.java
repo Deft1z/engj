@@ -3,7 +3,7 @@ package com.kge.energy.crm.app.controller;
 import com.kge.energy.crm.app.req.ForceBindingReq;
 import com.kge.energy.crm.app.service.ExternalBindService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
+import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ public class ExternalBindController {
 
     @ConvertToGoFormats
     @PostMapping("/externalBack/application/forceAccountBinding")
-    public CommonResponse<Object> forceBinding(@Validated @RequestBody ForceBindingReq forceBindingReq){
+    public CommonResult<Object> forceBinding(@Validated @RequestBody ForceBindingReq forceBindingReq) {
         return externalBindService.forceBinding(forceBindingReq);
     }
 

@@ -2,93 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kge.energy.crm.repository.mapper.DashBoardMapper">
 
-    <select id="selectStatistic" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardStatistic">
-        select *
-        from (
-            <!-- 查询新增客户数量 -->
-            select count(*) AS new_user_count
-            from b_user
-            where flag != -1
-                and tenant_id = 1
-                and create_time between #{startTime} and #{endTime}
-        ) new_user, (
-            <!-- 查询咨询工单数量 -->
-            select count(*) AS new_consulting_count
-            from wf_form
-            where
-                flag != -1
-                and tenant_id = 1
-                and create_time between #{startTime} and #{endTime}
-        ) consulting, (
-            <!-- 查询问题/投诉数量 -->
-            select count(*) AS new_complain_count
-            from w_complain
-            where
-                flag != -1
-                and tenant_id = 1
-                and create_time between #{startTime} and #{endTime}
-        ) complain, (
-            <!-- 查询新增合同数量 -->
-            select count(*) AS new_contract_count
-            from sc_service_contract
-            where
-                flag != -1
-                and tenant_id = 1
-                and create_time between #{startTime} and #{endTime}
-        ) new_contract, (
-            <!-- 查询已分派工单数量 -->
-            select count(*) as sent_num
-            from wf_form wf
-            join b_organization org on org.organization_id = wf.current_org_id
-            where
-                wf.flag = 1
-                and wf.tenant_id = 1
-                and org.level != 1
-                and wf.create_time between #{startTime} and #{endTime}
-        ) sent_order, (
-            <!-- 查询已签订合同数量 -->
-            select count(*) as sign_num
-            from wf_form wf
-            join b_organization org on org.organization_id = wf.current_org_id
-            where
-                wf.form_id = any(
-                    select form_id
-                    from sc_service_contract
-                    where flag = 1
-                )
-                and wf.flag = 1
-                and wf.tenant_id = 1
-                and org.level != 1
-                and wf.create_time between #{startTime} and #{endTime}
-        ) sign_contract, (
-            <!-- 查询已终止工单数量 -->
-            select count(*) as terminate_num
-            from wf_form wf
-            join b_organization org on org.organization_id = wf.current_org_id
-            where
-                wf.flag = 1
-                and wf.tenant_id = 1
-                and wf.status = '已终止'
-                and org.level != 1
-                and wf.create_time between #{startTime} and #{endTime}
-        ) terminate_order, (
-            <!-- 查询开展中工单数量 -->
-            select count(*) as processing_num
-            from wf_form wf
-            join b_organization org on org.organization_id = wf.current_org_id
-            where
-                wf.form_id not in (
-                    select form_id
-                    from sc_service_contract
-                    where flag = 1
-                )
-                and wf.flag = 1
-                and wf.tenant_id = 1
-                and wf.status != '已终止'
-                and org.level != 1
-                and wf.create_time between #{startTime} and #{endTime}
-        ) processing_order
-    </select>
 
     <select id="selectOrderContractList" resultType="com.kge.energy.crm.repository.entityext.result.DashBoardOrderContract">
         select
@@ -268,5 +181,72 @@
           and complain.tenant_id = 1
         group by complain.organization_id
         order by num desc
+    </select>
+
+    <select id="getUserStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$User">
+        SELECT (SELECT COUNT(1)
+                FROM b_user bu
+                WHERE bu.flag = 1
+                  AND bu.tenant_id = #{tenantId}) AS totalCount,
+               (SELECT COUNT(1)
+                FROM b_user bu
+                WHERE bu.flag = 1
+                  AND bu.tenant_id = #{tenantId}
+                  AND DATE_FORMAT(bu.create_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) AS currentMonthCount
+    </select>
+
+    <select id="getConsultingStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Consulting">
+        SELECT (select count(wf.form_id)
+                from wf_form wf
+                where wf.flag = 1
+                  and wf.tenant_id = #{tenantId}
+                  and wf.form_type_id = 1) AS totalCount,
+               (select count(wf.form_id)
+                from wf_form wf
+                where wf.flag = 1
+                  and wf.tenant_id = #{tenantId}
+                  and wf.form_type_id = 1
+                  AND DATE_FORMAT(wf.create_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) AS currentMonthCount
+    </select>
+
+    <select id="getContractStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Contract">
+        SELECT
+            IFNULL(t1.totalCount, 0) AS totalCount,
+            IFNULL(t1.totalAmount, 0) AS totalAmount,
+            IFNULL(t2.currentMonthCount, 0) AS currentMonthCount,
+            IFNULL(t2.currentMonthAmount, 0) AS currentMonthAmount
+        FROM
+            (
+                SELECT
+                    COUNT(sc.service_contract_id) AS totalCount,
+                    SUM(sc.amount) AS totalAmount
+                FROM
+                    wf_form wf,
+                    sc_service_contract sc
+                WHERE
+                    wf.flag = 1
+                  AND sc.flag = 1
+                  AND wf.form_id = sc.form_id
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+            ) t1,
+            (
+                SELECT
+                    COUNT(sc.service_contract_id) AS currentMonthCount,
+                    SUM(sc.amount) AS currentMonthAmount
+                FROM
+                    wf_form wf,
+                    sc_service_contract sc
+                WHERE
+                    wf.flag = 1
+                  AND sc.flag = 1
+                  AND wf.form_id = sc.form_id
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  AND DATE_FORMAT(sc.signing_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+            ) t2;
     </select>
 </mapper>

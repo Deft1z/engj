@@ -1,12 +1,12 @@
 package com.kge.energy.crm.wechat.chart.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.wechat.chart.req.WeChatChartReq;
 import com.kge.energy.crm.wechat.chart.resp.WeChatChartResp;
 import com.kge.energy.crm.wechat.chart.resp.WeChatEvaluateResp;
 import com.kge.energy.crm.wechat.chart.resp.WeChatStatisticsResp;
 import com.kge.energy.crm.wechat.chart.service.WeChatChartService;
+import com.kge.platform.framework.common.net.CommonResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,19 +22,19 @@ public class WeChatChartController {
 
     @PostMapping("/UserChart")
     @ConvertToGoFormats
-    public CommonResponse<WeChatChartResp> getUserChart(@Valid @RequestBody WeChatChartReq req) {
-        return CommonResponse.suc(weChatChartService.getUserChart(req));
+    public CommonResult<WeChatChartResp> getUserChart(@Valid @RequestBody WeChatChartReq req) {
+        return CommonResult.suc(weChatChartService.getUserChart(req));
     }
 
     @PostMapping("/evaluateChart")
     @ConvertToGoFormats
-    public CommonResponse<WeChatEvaluateResp> findEvaluateNum() {
-        return CommonResponse.suc(weChatChartService.findEvaluateNum());
+    public CommonResult<WeChatEvaluateResp> findEvaluateNum() {
+        return CommonResult.suc(weChatChartService.findEvaluateNum());
     }
 
     @PostMapping("/statistics")
     @ConvertToGoFormats
-    public CommonResponse<WeChatStatisticsResp> getStatistics(@Valid @RequestBody WeChatChartReq req) {
-        return CommonResponse.suc(weChatChartService.getStatistics(req));
+    public CommonResult<WeChatStatisticsResp> getStatistics(@Valid @RequestBody WeChatChartReq req) {
+        return CommonResult.suc(weChatChartService.getStatistics(req));
     }
 }

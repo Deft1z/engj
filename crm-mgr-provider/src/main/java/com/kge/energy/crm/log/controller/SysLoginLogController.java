@@ -1,10 +1,10 @@
 package com.kge.energy.crm.log.controller;
 
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.log.req.SysLoginLogListReq;
 import com.kge.energy.crm.log.resp.SysLoginLogListResp;
 import com.kge.energy.crm.log.service.SysLoginLogService;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,8 @@ public class SysLoginLogController {
 
     @Operation(summary = "登录日志列表")
     @PostMapping("/list")
-    public CommonResponse<PageResp<SysLoginLogListResp>> list(@Validated @RequestBody SysLoginLogListReq req) {
-        return CommonResponse.suc(sysLoginLogService.list(req));
+    public CommonResult<PageResp<SysLoginLogListResp>> list(@Validated @RequestBody SysLoginLogListReq req) {
+        return CommonResult.suc(sysLoginLogService.list(req));
     }
 
 }

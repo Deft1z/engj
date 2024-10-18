@@ -165,6 +165,7 @@
         where bu.flag = 1
         and bo.flag = 1
         and rut.flag = 1
+        and rur.flag = 1
         and bu.user_id = rut.user_id
         and bo.organization_id = rut.organization_id
         and bu.user_id = rur.user_id
@@ -226,6 +227,7 @@
                  join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
                  join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
         where bu.flag = 1
+          and bu.status = 0
           and bu.tenant_id = #{tenantId}
           and br.code = #{roleCode}
           and bo.organization_id = #{organizationId}
@@ -259,5 +261,34 @@
             )
         </if>
     </select>
+
+    <select id="getUserContact" resultMap="BUserMap">
+        select bu.user_id, bu.realname, bu.mobile, bu.open_id, null email
+        from b_user bu
+        <if test="roleCodes != null and roleCodes.size > 0">
+            join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
+            join b_role br on br.flag = 1 and br.role_id = rur.role_id
+        </if>
+        <if test="organizationId != null">
+            join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+            join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
+        </if>
+        where bu.flag = 1 and bu.status = 0
+          and bu.tenant_id = #{tenantId}
+        <if test="userId != null">
+            and bu.user_id = #{userId}
+        </if>
+        <if test="roleCodes != null and roleCodes.size > 0">
+            and br.code in
+            <foreach collection="roleCodes" item="roleCode" index="index" open="(" close=")" separator=",">
+                #{roleCode}
+            </foreach>
+        </if>
+        <if test="organizationId != null">
+            and bo.organization_id = #{organizationId}
+        </if>
+        group by bu.user_id, bu.realname, bu.mobile, bu.open_id
+    </select>
+
 </mapper>
 

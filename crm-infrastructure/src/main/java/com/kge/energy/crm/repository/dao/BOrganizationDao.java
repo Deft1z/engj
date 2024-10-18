@@ -81,13 +81,13 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
                 .eq(BOrganization::getTenantId, tenantId)
                 .eq(BOrganization::getName, name);
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 
     public String getEccOrgCode(Integer orgId) {
         LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
                 .eq(BOrganization::getOrganizationId, orgId);
-        return mapper.selectOne(wrapper).getEccOrgCode();
+        return mapper.selectOne(wrapper, false).getEccOrgCode();
     }
 
     public List<BOrganization> getEccOrgList() {

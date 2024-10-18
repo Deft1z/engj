@@ -62,7 +62,8 @@ wechat:
     contractFinishTemplate: ExldQ4nH-DN-RYHBRqmTEo153sPr-XswYZ5Buf1bqGU
     wxUrl: ${wechat.common.wxUrl}
     version: developer
-    agencyOrderPage: pages/user/order/order
+    envVersion: developer
+    agencyOrderPage: /pages/user/order/order
   official-account:
     appId: wxa3cbdc535f7b834b
     appSecret: ca7bd8b039847eb430b624a5158d816f
@@ -185,9 +186,6 @@ knife4j:
     username: admin
     # Basic认证密码
     password: Kge@2024!
-
-framework:
-  global-exception-handler: false
 
 file:
   upload:

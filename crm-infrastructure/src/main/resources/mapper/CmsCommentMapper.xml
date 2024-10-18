@@ -5,10 +5,12 @@
     <resultMap type="com.kge.energy.crm.repository.entity.CmsComment" id="CmsCommentMap">
         <result property="commentId" column="comment_id" jdbcType="INTEGER"/>
         <result property="parentCommentId" column="parent_comment_id" jdbcType="INTEGER"/>
-        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
         <result property="likeNumber" column="like_number" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="bizDataId" column="biz_data_id" jdbcType="INTEGER"/>
+        <result property="bizType" column="biz_type" jdbcType="INTEGER"/>
     </resultMap>
 
     <select id="getAllCommentsByUserId" resultType="com.kge.energy.crm.repository.entityext.result.AppletCommentResult">
@@ -16,7 +18,7 @@
             b.realname AS name,
             c.comment_id AS id,
             c.parent_comment_id AS pid,
-            c.user_id AS uid,
+            c.create_user_id AS uid,
             c.content AS content,
             (select count(*) from r_user_like_comment where comment_id = c.comment_id and flag = 1) as cal_like_num,
             c.like_number AS thumb,
@@ -28,12 +30,31 @@
         END AS status
         FROM
             cms_comment c
-                LEFT JOIN b_user b ON c.user_id = b.user_id
-                LEFT JOIN cms_comment c1 ON c.parent_comment_id = c1.comment_id and c1.flag = 1
-                LEFT JOIN b_user bu ON c1.user_id = bu.user_id
+                LEFT JOIN b_user b ON c.create_user_id = b.user_id
+                LEFT JOIN cms_comment c1 ON c.parent_comment_id = c1.comment_id and c1.flag = 1 and c1.biz_type = 1
+                LEFT JOIN b_user bu ON c1.create_user_id = bu.user_id
         WHERE c.flag = 1
+        AND c.biz_type = 1
         ORDER BY
             c.create_time
+    </select>
+
+    <select id="getCmsCommentList" resultType="com.kge.energy.crm.repository.entityext.result.CmsCommentResult">
+        SELECT
+            b.realname AS name,
+            c.comment_id AS commentId,
+            c.parent_comment_id AS parentCommentId,
+            c.content AS content,
+            DATE_FORMAT(c.create_time, '%Y-%m-%d %H:%i:%s') AS date,
+            bu.realname AS replyName
+        FROM cms_comment c
+        LEFT JOIN b_user b ON c.create_user_id = b.user_id
+        LEFT JOIN cms_comment c1 ON c.parent_comment_id = c1.comment_id and c1.flag = 1 and c1.biz_type = #{param.bizType} and c1.biz_data_id = #{param.bizDataId}
+        LEFT JOIN b_user bu ON c1.create_user_id = bu.user_id
+        WHERE c.flag = 1
+        AND c.biz_type = #{param.bizType}
+        AND c.biz_data_id = #{param.bizDataId}
+        ORDER BY c.create_time asc
     </select>
 
 </mapper>

@@ -5,12 +5,12 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kge.energy.crm.common.execption.BadException;
 import com.kge.energy.crm.external.ct.req.CtAccountUnbindReq;
 import com.kge.energy.crm.external.ct.req.CtTokenReq;
+import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.web.util.RestUtils;
-import org.springframework.stereotype.Service;
 import org.apache.commons.codec.binary.Hex;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -71,13 +71,13 @@ public class CtService {
         Object object = RestUtils.postForObject(req.getInterfaceAddress() + ACCOUNT_UNBIND_PATH, reqParam, Object.class);
         JSONObject jsonObject = JSONUtil.parseObj(object);
 
-        if(!jsonObject.containsKey("ret")){
-            throw new BadException("响应未找到ret字段");
+        if (!jsonObject.containsKey("ret")) {
+            throw new ServiceException("响应未找到ret字段");
         }
 
         String ret = jsonObject.getStr("ret");
-        if(!StrUtil.equals("0", ret)){
-            throw new BadException(jsonObject.getStr("msg"));
+        if (!StrUtil.equals("0", ret)) {
+            throw new ServiceException(jsonObject.getStr("msg"));
         }
     }
 

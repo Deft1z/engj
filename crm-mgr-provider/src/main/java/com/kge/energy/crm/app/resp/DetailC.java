@@ -17,7 +17,7 @@ public class DetailC {
      * 用户Id
      */
     @JsonProperty("Uid")
-    private Integer Uid;
+    private Integer uid;
 
     /**
      * 应用名称
@@ -29,11 +29,11 @@ public class DetailC {
      * 电话
      */
     @JsonProperty("Mobile")
-    private String Mobile;
+    private String mobile;
 
     /**
      * 组织id
      */
     @JsonProperty("Apps")
-    private List<App> Apps;
+    private List<App> apps;
 }

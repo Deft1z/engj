@@ -1,10 +1,10 @@
 package com.kge.energy.crm.module.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.external.wechat.officialaccount.req.GetPublishArticleReq;
 import com.kge.energy.crm.external.wechat.officialaccount.resp.GetPublishArticleResp;
 import com.kge.energy.crm.module.service.ModuleContentService;
+import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -27,8 +27,8 @@ public class ModuleContentCrontroller {
     @Operation(summary = "获取南投集团公众号推文新闻")
     @PostMapping("/contentMgr/moduleContentMgr/getNews")
     @ConvertToGoFormats
-    public CommonResponse<GetPublishArticleResp> getNews(@Validated @RequestBody GetPublishArticleReq req) {
-        return CommonResponse.suc(moduleContentService.getNews(req));
+    public CommonResult<GetPublishArticleResp> getNews(@Validated @RequestBody GetPublishArticleReq req) {
+        return CommonResult.suc(moduleContentService.getNews(req));
     }
 
 }

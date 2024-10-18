@@ -9,8 +9,6 @@ import java.util.List;
 @Mapper
 public interface DashBoardMapper {
 
-    DashBoardStatistic selectStatistic(DashBoardParam param);
-
     List<DashBoardOrderContract> selectOrderContractList(DashBoardParam param);
 
     DashBoardUserTrans selectUserTrans(DashBoardParam param);
@@ -22,4 +20,10 @@ public interface DashBoardMapper {
     DashBoardComplainTypeStatistic selectComplainTypeStatistic(DashBoardParam param);
 
     List<DashBoardComplainRank> selectComplainRankList(DashBoardParam param);
+
+    StatisticalDataResult.User getUserStatistic(Integer tenantId);
+
+    StatisticalDataResult.Consulting getConsultingStatistic(Integer tenantId);
+
+    StatisticalDataResult.Contract getContractStatistic(Integer tenantId);
 }

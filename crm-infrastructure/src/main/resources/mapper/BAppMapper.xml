@@ -11,7 +11,7 @@
         <result property="bindType" column="bind_type" jdbcType="INTEGER"/>
         <result property="bindAddress" column="bind_address" jdbcType="VARCHAR"/>
         <result property="scope" column="scope" jdbcType="VARCHAR"/>
-        <result property="isCommonlyUsed" column="is_commonly_used" jdbcType="BOOLEAN"/>
+        <result property="commonlyUsed" column="is_commonly_used" jdbcType="BOOLEAN"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -173,7 +173,7 @@
         GROUP BY b_openid.user_id
     </select>
 
-    <select id="FindBindList" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
+    <select id="findBindList" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
         SELECT bos.user_id as uid,realname,mobile
         FROM b_openid_share bos LEFT JOIN b_user u ON bos.user_id = u.user_id
         <where>
@@ -194,7 +194,7 @@
         GROUP BY bos.user_id limit #{offset},#{limit}
     </select>
 
-    <select id="FindBindListCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
+    <select id="findBindListCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
         SELECT 1
         FROM b_openid_share bos LEFT JOIN b_user u ON bos.user_id = u.user_id
         <where>
@@ -215,7 +215,7 @@
         GROUP BY bos.user_id
     </select>
 
-    <select id="FindByUidAndOid" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
+    <select id="findByUidAndOid" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
         SELECT b_openid.app_id as appid,
         b_openid_share.share_openid_id as id,
         b_openid_share.user_id as uid
@@ -249,15 +249,9 @@
     </select>
 
     <select id="getAppAvatarList" resultType="com.kge.energy.crm.repository.entityext.result.AppAvatarListResult">
-        SELECT filepath, a.app_id as appid
+        SELECT a.app_id as appid
         from b_app a
-                 LEFT JOIN cms_block_content c ON c.app_id = a.app_id
-                 LEFT JOIN cms_block cb ON cb.block_id = c.block_id
-                 LEFT JOIN s_file d ON d.file_id = c.image_url
-        WHERE c.flag = 1
-          AND cb.flag = 1
-          AND c.app_id > 0
-          AND cb.type = '家园模块'
+        WHERE a.flag = 1
     </select>
 
     <select id="selectAppPage" resultType="com.kge.energy.crm.repository.entityext.result.AppMgrListResult">
