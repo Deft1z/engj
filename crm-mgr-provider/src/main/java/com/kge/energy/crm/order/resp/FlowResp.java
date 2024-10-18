@@ -1,8 +1,11 @@
 package com.kge.energy.crm.order.resp;
 
+import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+
+import java.util.List;
 
 /**
  * @author wangjihua
@@ -33,4 +36,6 @@ public class FlowResp {
     private Integer createUserId;
 
     private Integer modifyUserId;
+
+    private List<CmsCommentResult> commentList;
 }

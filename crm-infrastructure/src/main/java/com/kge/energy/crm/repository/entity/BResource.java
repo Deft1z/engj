@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * 资源表(BResource)实体类
  *
  * @author wangjihua
- * @since 2024-07-03 20:38:24
+ * @since 2024-07-30 16:47:28
  */
 @Data
 @Accessors(chain = true)
@@ -40,39 +40,19 @@ public class BResource {
     private String resourceType;
 
     /**
-     * 重构后停用
-     */
-    private Integer referResourceId;
-
-    /**
-     * 0，1，2，3,路由三级，重构后停用
-     */
-    private Integer level;
-
-    /**
-     * 子系统、板块、模块、功能块，重构后停用
-     */
-    private String type;
-
-    /**
-     * 与真实路由对应，重构后停用
-     */
-    private String name;
-
-    /**
-     * 管理后台资源名称，重构后停用
-     */
-    private String displayName;
-
-    /**
      * 排序
      */
     private Integer sort;
 
     /**
-     * 路由地址
+     * 资源地址
      */
     private String path;
+
+    /**
+     * 资源地址类型：system、file、app、link
+     */
+    private String pathType;
 
     /**
      * 图标编码
@@ -128,9 +108,5 @@ public class BResource {
      */
     private String remark;
 
-    /**
-     * 租户id
-     */
-    private Integer tenantId;
 }
 

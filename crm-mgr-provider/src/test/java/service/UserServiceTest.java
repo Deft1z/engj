@@ -7,14 +7,12 @@ import com.kge.energy.crm.app.resp.App;
 import com.kge.energy.crm.app.resp.ListContent;
 import com.kge.energy.crm.app.resp.Project;
 import com.kge.energy.crm.repository.dao.BUserDao;
-import com.kge.energy.crm.user.service.UserService;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @SpringBootTest(classes = CrmMgrProvider.class)
 class UserServiceTest {
@@ -28,7 +26,6 @@ class UserServiceTest {
 
         bUserDao.getBaseMapper().selectPage(new Page<>(1L, 10L), new LambdaQueryWrapper<>());
 
-//        userService.findWxUserList(new WxUserListReq().setCurrentPage(1L).setPageSize(10L));
     }
 
 
@@ -37,7 +34,7 @@ class UserServiceTest {
 
         List<ListContent> result = new ArrayList<>();
 
-        for (int i = 0 ; i <= 5 ; i++){
+        for (int i = 0; i <= 5; i++) {
             Project p1 = new Project();
             p1.setId(1);
             p1.setName("userK.getPname()");
@@ -62,17 +59,17 @@ class UserServiceTest {
             c1.setApps(appList);
             result.add(c1);
         }
-        System.out.println("初始: reslut = "+result);
+        System.out.println("初始: reslut = " + result);
 
         result.get(0).setUid(9);
 
-        System.out.println("改变后: reslut = "+result);
+        System.out.println("改变后: reslut = " + result);
 
         // 有效
         for (ListContent re : result) {
             re.setUid(98);
         }
-        System.out.println("循环变后: reslut = "+result);
+        System.out.println("循环变后: reslut = " + result);
 
 
     }

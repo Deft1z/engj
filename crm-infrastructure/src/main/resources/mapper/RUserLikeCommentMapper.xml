@@ -13,5 +13,22 @@
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+    <select id="findThumbsUp" resultMap="RUserLikeCommentMap">
+        select * from r_user_like_comment
+        where comment_id = #{param.commentId}
+        and user_id = #{param.userId}
+        <if test="param.flag != null">
+            and flag = #{param.flag}
+        </if>
+    </select>
+
+    <update id="thumbsUp2">
+        update r_user_like_comment
+        set flag = 1
+        where comment_id = #{param.commentId}
+        and user_id = #{param.userId}
+        and flag = 0
+    </update>
+
 </mapper>
 

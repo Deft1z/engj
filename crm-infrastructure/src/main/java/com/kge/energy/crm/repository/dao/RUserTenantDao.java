@@ -1,6 +1,7 @@
 package com.kge.energy.crm.repository.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.repository.entity.RUserTenant;
@@ -22,7 +23,14 @@ public class RUserTenantDao extends ServiceImpl<RUserTenantMapper, RUserTenant> 
         LambdaQueryWrapper<RUserTenant> wrapper = Wrappers.<RUserTenant>lambdaQuery()
                 .eq(RUserTenant::getUserId, userId);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
+
+    public int removeByUserId(Integer userId) {
+        LambdaUpdateWrapper wrapper = new LambdaUpdateWrapper<>(RUserTenant.class)
+                .eq(RUserTenant::getUserId, userId);
+        return mapper.delete(wrapper);
+    }
+
 }
 

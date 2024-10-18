@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户信息上下文
@@ -18,9 +20,19 @@ import java.util.List;
 public class UserInfoDto extends CommonUserInfoDto {
 
     /**
-     * 用户类型
+     * 租户ID
      */
-    private String type;
+    private Integer tenantId;
+
+    /**
+     * 租户名称
+     */
+    private String tenantName;
+
+    /**
+     * 系统类型：applet、mgr
+     */
+    private String systemType;
 
     /**
      * 手机
@@ -33,19 +45,40 @@ public class UserInfoDto extends CommonUserInfoDto {
     private String wxOpenId;
 
     /**
-     * 角色ID
+     * 岗位职级
      */
-    private Integer roleId;
+    private String jobLevel;
 
     /**
-     * 角色名称
+     * 角色列表
      */
-    private String roleName;
+    private List<Role> roleList;
+
+    /**
+     * 用户角色ID集合
+     */
+    private Set<Integer> roleIds = new HashSet<>();
+
+    /**
+     * 用户角色编码集合，方便业务判断用户是否有该角色
+     */
+    private Set<String> roleCodes = new HashSet<>();
 
     /**
      * 组织列表
      */
     private List<Organization> organizationList;
+
+    @Data
+    @Accessors(chain = true)
+    public static class Role {
+
+        private Integer id;
+
+        private String name;
+
+        private String code;
+    }
 
     @Data
     @Accessors(chain = true)
@@ -55,6 +88,5 @@ public class UserInfoDto extends CommonUserInfoDto {
 
         private String name;
 
-        private String authCode;
     }
 }

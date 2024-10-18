@@ -1,39 +1,31 @@
 package com.kge.energy.crm.order.service;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.kge.energy.crm.common.constans.ConstParam;
-import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.common.util.ExcelUtils;
 import com.kge.energy.crm.flow.service.WfFormFlowService;
-import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
-import com.kge.energy.crm.order.req.WorkOrdeUpdateReq;
-import com.kge.energy.crm.order.req.WorkOrderListReq;
+import com.kge.energy.crm.order.req.WorkOrderExportReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
-import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
-import com.kge.energy.crm.repository.dao.BUserDao;
-import com.kge.energy.crm.repository.dao.WfFormDao;
-import com.kge.energy.crm.repository.dao.WfFormFlowDao;
-import com.kge.energy.crm.repository.entity.BUser;
-import com.kge.energy.crm.repository.entity.WfForm;
-import com.kge.energy.crm.repository.entity.WfFormFlow;
-import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
+import com.kge.energy.crm.repository.entityext.result.WfFormExportDto;
+import com.kge.energy.crm.workorder.req.WfFormPageReq;
+import com.kge.energy.crm.workorder.service.WorkOrderDomainService;
+import com.kge.platform.framework.common.exception.ServiceException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author wangjihua
@@ -43,97 +35,40 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WorkOrderService {
 
+    @Value("${excel.export.limit-days:180}")
+    private Integer limitDays;
+
     private final WfFormFlowService wfFormFlowService;
 
-    private final BUserDao bUserDao;
+    private final WorkOrderDomainService workOrderDomainService;
 
-    private final WfFormDao wfFormDao;
-
-    private final WfFormFlowDao wfFormFlowDao;
-
-
-    /**
-     * 工单列表
+    /*
+        工单导出
      */
-    public PageResp<FormResp> list(WorkOrderListReq req) {
-
-        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-        Assert.notNull(userInfoDto);
-
-        IPage<WorkOrderListParam> reqIpage = new Page<>(req.getCurrentPage(), req.getPageSize());
-        WorkOrderListParam workOrderListParam = BeanUtil.copyProperties(req, WorkOrderListParam.class);
-
-        IPage<FormResult> pages = wfFormFlowService.findList(reqIpage, workOrderListParam, userInfoDto);
-        List<FormResp> resps = BeanUtil.copyToList(pages.getRecords(), FormResp.class);
-
-        return new PageResp<FormResp>()
-                .setList(resps)
-                .setCurrentPage(pages.getCurrent())
-                .setPageSize(pages.getSize())
-                .setTotal(pages.getTotal());
-    }
-
-    public List<FlowResp> getFlowByFormId(GetFlowByFormIdReq req) {
-
-        List<FlowResult> results = wfFormFlowService.getFlowByFormId(req.getFormId());
-
-        return BeanUtil.copyToList(results, FlowResp.class);
-    }
-
-    /**
-     * 分派工单 终止工单 处理工单
-     * 暂时不重构，待上流程引擎
-     */
-    @Transactional
-    public Integer workOrderUpdate(WorkOrdeUpdateReq req) {
-
-        UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-
-        switch (req.getType()) {
-
-            case 1:
-                //检查工单是否已经流转 (工单分配)
-                List<WfFormFlow> fms = wfFormFlowService.selectFlowByFormIdAndActionType(req.getFormId(), ConstParam.FlowCompanyProcess);
-                if (CollectionUtil.isNotEmpty(fms)) {
-                    return 4000;
-                }
-                //流转工单
-                //查询所选组织是否有客服角色
-                List<BUser> users = bUserDao.findUserByCurrentOrgId(req.getCurrentOrgId());
-                if (CollectionUtil.isEmpty(users)) {
-                    return 4001;
-                }
-
-                WfForm form = wfFormDao.getById(req.getFormId());
-                form.setStatus(ConstParam.Processing)
-                        .setSubStatus(ConstParam.WaitingForProcessing)
-                        .setTimeReception(LocalDateTime.now())
-                        .setModifyUserId(Math.toIntExact(userInfoDto.getUserId()))
-                        .setCurrentOrgId(req.getCurrentOrgId())
-                        .setCurrentRoleId(req.getCurrentRoleId());
-                wfFormDao.updateById(form);
-
-                WfFormFlow wfFormFlow = new WfFormFlow()
-                        .setFormId(req.getFormId())
-                        .setTimeAction(LocalDateTime.now())
-                        .setActionType(ConstParam.FlowCompanyProcess)
-                        .setActionContent(req.getContent())
-                        .setStatus(ConstParam.FlowCompanyProcess)
-                        .setCreateUserId(Math.toIntExact(userInfoDto.getUserId()));
-                if (ObjUtil.equals(req.getLevel(), 1)) {
-                    wfFormFlow.setStatus(ConstParam.FlowTagGroup);
-                } else {
-                    wfFormFlow.setStatus(ConstParam.FlowTagSub);
-                }
-                wfFormFlowDao.save(wfFormFlow);
-                break;
-
-            default:
-                break;
-
+    public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
+        WorkOrderExportReq.SearchFormMap searchMap = Optional.ofNullable(req.getSearchMap()).orElse(new WorkOrderExportReq.SearchFormMap());
+        if (searchMap.getStarttime() != null && searchMap.getEndtime() != null) {
+            long days = Duration.between(searchMap.getStarttime(), searchMap.getEndtime()).toDays();
+            //限制导出的最大时间范围
+            if (days > limitDays) {
+                throw new ServiceException(String.format("数据导出时间范围不得超过%s天", limitDays));
+            }
+        } else {
+            //若未选择时间范围，默认为最近限制天数的时间
+            LocalDateTime now = LocalDateTime.now();
+            searchMap.setStarttime(now.minusDays(limitDays));
+            searchMap.setEndtime(now);
+            req.setSearchMap(searchMap);
         }
 
-        return null;
+        WfFormPageReq wfFormPageReq = BeanUtil.copyProperties(req, WfFormPageReq.class);
+        List<FormResult> all = workOrderDomainService.findAll(wfFormPageReq);
+
+        //数据转为要导出的dto类
+        List<WfFormExportDto> exportDtoList = BeanUtil.copyToList(all, WfFormExportDto.class);
+
+        //ExcelUtils写excel 响应给前端
+        ExcelUtils.write(response, "工单列表数据.xlsx", "工单列表数据", WfFormExportDto.class, exportDtoList);
     }
 
 
@@ -152,4 +87,5 @@ public class WorkOrderService {
                 .setPageSize(pages.getSize())
                 .setTotal(pages.getTotal());
     }
+
 }

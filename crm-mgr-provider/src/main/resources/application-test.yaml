@@ -2,26 +2,34 @@ server:
   port: 9250
 
 mysql:
-  host: 172.16.17.157
-  port: 3307
+  host: 172.16.17.137
+  port: 3306
   dbname: ntcrm_test
-  username: ntcrmTest
-  password: ntcrmT@1113
+  username: crm_test
+  password: Crm_test@3030
 
 spring:
   data:
     redis:
-      host: 172.16.17.157
+      host: 172.16.17.137
       port: 6379
-      database: 11
+      database: 0
+      front: engjkfxcx_test_
 
 auth:
   token:
-    redis-front: ntcrm_prod_token_
+    redis-front: ntcrm_test_token_
+
+wechat:
+  applet:
+    version: trial
+    envVersion: trial
 
 ecc:
   appId: ntwx001
   appSecret: h9r2e2nd5bipf6z
+  baseUrl: https://ecc.nftz:8181
+  maintenanceListUrl: /publicApi/maintenance/list
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
@@ -36,3 +44,4 @@ epcpv:
   stagestat: api/v1/pv/project/stage/stat
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
+

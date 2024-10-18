@@ -7,7 +7,12 @@ spring:
     active: @profileActive@
 
   application:
-    name: CrmMgrProvider
+    name: crm-mgr-provider
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   main:
     allow-circular-references: true
@@ -15,7 +20,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname:test}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname:test}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
     username: ${mysql.username}
     password: ${mysql.password}
     hikari:
@@ -26,7 +31,7 @@ spring:
       connectionTimeout: 30000 # 获取连接超时时间（毫秒）
       autoCommit: true # 自动提交
       validationTimeout: 5000 # 连接验证超时时间（毫秒）
-      leakDetectionThreshold: 60000 # 检测连接泄露的阈值（毫秒）
+      leakDetectionThreshold: 180000 # 检测连接泄露的阈值（毫秒）
       isolateInternalQueries: false # 是否对内部查询使用独立的连接
       allowPoolSuspension: false # 是否允许暂停连接池
       readOnly: false # 连接是否只读
@@ -42,24 +47,35 @@ decorator:
   datasource:
     p6spy:
       log-format: "time:%(executionTime) || sql:%(sql)\n"
-      logging: custom
-      custom-appender-class: com.p6spy.engine.spy.appender.StdoutLogger
+      logging: SLF4J
+      custom-appender-class: com.p6spy.engine.spy.appender.Slf4JLogger
 
 wechat:
-  appId: wx00c47c0f09ea4612
-  appSecret: ee6576d61d20ba65286739ea977a6096
-  orderStatusChangeTemplate: C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE
-  agencyOrderTemplate: TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU
-  feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
-  wxUrl: https://api.weixin.qq.com
-  version: developer
-  agencyOrderPage: pages/user/order/order
+  common:
+    wxUrl: https://api.weixin.qq.com
+  applet:
+    appId: wx00c47c0f09ea4612
+    appSecret: ee6576d61d20ba65286739ea977a6096
+    orderStatusChangeTemplate: C6tY3sDufNBSUwczNpZGmt8c9DQWXkAUr0RQdXWDapE
+    agencyOrderTemplate: TWbN4m8-ul8ibrD0NOIHZoIByCONasoq_ubNvSMGVoU
+    feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
+    contractFinishTemplate: ExldQ4nH-DN-RYHBRqmTEo153sPr-XswYZ5Buf1bqGU
+    wxUrl: ${wechat.common.wxUrl}
+    version: developer
+    envVersion: developer
+    agencyOrderPage: /pages/user/order/order
+  official-account:
+    appId: wxa3cbdc535f7b834b
+    appSecret: ca7bd8b039847eb430b624a5158d816f
+    wxUrl: ${wechat.common.wxUrl}
 
 
 logging:
   config: classpath:config/logback.xml
 
 mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
   global-config:
     db-config:
       logic-delete-field: flag
@@ -70,26 +86,29 @@ auth:
   token:
     redis-front: ntcrm_test_token_
     white-list:
-      - /base/user/salt
-      - /base/user/login
-      - /external/sso/auth
+      - ${server.servlet.context-path}/base/user/salt
+      - ${server.servlet.context-path}/base/user/login
+      - ${server.servlet.context-path}/external/sso/auth
+      - ${server.servlet.context-path}/external/sso/auth
+      - ${server.servlet.context-path}/error
       - ${server.servlet.context-path}/doc.html
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
+
   permission:
     white-list:
-      - /chart/contractBack/contractOrderChart
-      - /chart/contractBack/evaluateChart
-      - /chart/userBackMrg/UserChart
-      - /chart/complainBack/complainPerChart
-      - /chart/complainBack/complainRankChart
-      - /applicationBack/applicationBackMrg/list
-      - /baseDataBack/internalBind/list
-      - /baseDataBack/internalBind/detail
-      - /baseDataBack/internalBind/addProject/add
-      - /baseDataBack/internalBind/project/update
-      - /baseDataBack/internalBind/finduser
-      - /baseDataBack/internalBind/bind/add
+      - /mgr/chart/contractBack/contractOrderChart
+      - /mgr/chart/contractBack/evaluateChart
+      - /mgr/chart/userBackMrg/UserChart
+      - /mgr/chart/complainBack/complainPerChart
+      - /mgr/chart/complainBack/complainRankChart
+      - /mgr/applicationBack/applicationBackMrg/list
+      - /mgr/baseDataBack/internalBind/list
+      - /mgr/baseDataBack/internalBind/detail
+      - /mgr/baseDataBack/internalBind/addProject/add
+      - /mgr/baseDataBack/internalBind/project/update
+      - /mgr/baseDataBack/internalBind/finduser
+      - /mgr/baseDataBack/internalBind/bind/add
 
 # springdoc-openapi项目配置
 springdoc:
@@ -115,7 +134,7 @@ knife4j:
   # 是否开启一个默认的跨域配置,该功能配合自定义Host使用
   cors: false
   # 是否开启生产环境保护策略
-  production: false
+  production: true
   setting:
     # Knife4j默认显示中文(zh-CN),如果想直接显示英文(en-US)，通过该配置进行设置即可
     language: zh-CN
@@ -145,7 +164,7 @@ knife4j:
     enable-home-custom: false
     # 启用自定义主页内容后可以设置一个Markdown文件来自定义显示Home主页的显示内容
     home-custom-path: classpath:markdown/home.md
-    # 否启用搜索功能,默认值为true(代表开启搜索)，如果要禁用搜索，该值设为false
+    # 是否启用搜索功能,默认值为true(代表开启搜索)，如果要禁用搜索，该值设为false
     enable-search: true
     # 禁用默认的Footer显示，如果要自定义的话该属性必须设置为false,否则不会生效
     enable-footer: false
@@ -162,8 +181,13 @@ knife4j:
     enable-group: true
   # 开启Swagger的Basic认证功能,默认是false
   basic:
-    enable: false
+    enable: true
     # Basic认证用户名
     username: admin
-    # Basic认证用密码
+    # Basic认证密码
     password: Kge@2024!
+
+file:
+  upload:
+    allow-types: jpg,jpeg,png,pdf
+    upload-url: http://172.18.26.112:80/fileservice/resourceManage/file/manage/upload

@@ -7,14 +7,15 @@
         <result property="passwd" column="passwd" jdbcType="VARCHAR"/>
         <result property="passwdSalt" column="passwd_salt" jdbcType="VARCHAR"/>
         <result property="passwdModifyTime" column="passwd_modify_time" jdbcType="TIMESTAMP"/>
-        <result property="type" column="type" jdbcType="VARCHAR"/>
         <result property="realname" column="realname" jdbcType="VARCHAR"/>
         <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
         <result property="openId" column="open_id" jdbcType="VARCHAR"/>
         <result property="company" column="company" jdbcType="VARCHAR"/>
         <result property="address" column="address" jdbcType="VARCHAR"/>
+        <result property="jobLevel" column="job_level" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="lastLoginTime" column="last_login_time" jdbcType="TIMESTAMP"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
         <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
@@ -23,24 +24,22 @@
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
     </resultMap>
 
-    <select id="findUserInfoDto" resultType="com.kge.energy.crm.common.dto.UserInfoDto">
-        select a.user_id userId,
-               a.name    userName,
-               a.realname,
-               a.type,
-               a.mobile,
-               a.open_id wxOpenId,
-               c.role_id roleId,
-               c.name AS roleName
-        from b_user a
-                 JOIN r_user_role b ON b.user_id = a.user_id
-                 JOIN b_role c ON c.role_id = b.role_id
-        where a.flag = 1
-          AND a.user_id = #{userId}
+    <select id="getUserRoles" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Role">
+        select r.role_id id, r.name, r.code
+        from b_user u,
+             b_role r,
+             r_user_role ur
+        where u.flag = 1
+          and r.flag = 1
+          and ur.flag = 1
+          and u.user_id = ur.user_id
+          and r.role_id = ur.role_id
+          and u.tenant_id = r.tenant_id
+          and u.user_id = #{userId}
     </select>
 
     <select id="getUserByRoleAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
-        select b.`name` AS username, b.realname, b.open_id, a.user_id
+        select b.`name` AS username, b.realname, b.open_id, a.user_id, b.mobile
         from r_user_role a
                  LEFT JOIN b_user b ON b.user_id = a.user_id
                  LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
@@ -59,7 +58,6 @@
 
     <select id="findUserByCurrentOrgId" resultMap="BUserMap">
         select a.open_id,
-               a.type,
                a.user_id,
                a.`name`,
                a.mobile,
@@ -70,7 +68,7 @@
         from b_user a
                  LEFT JOIN r_user_tenant b ON b.user_id = a.user_id
         where a.flag != -1
-          AND b.organization_id = #{orgId}s
+          AND b.organization_id = #{orgId}
     </select>
 
     <select id="findUserBindByUid" resultType="com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult">
@@ -96,5 +94,201 @@
         AND bo.app_id = #{appid}
         )
     </select>
+
+    <select id="findNewUserNum" resultType="java.lang.Long">
+        select count(u.user_id)
+        from b_user u,
+             b_role r,
+             r_user_role ur
+        where u.flag = 1
+          and r.flag = 1
+          and ur.flag = 1
+          and u.user_id = ur.user_id
+          and r.role_id = ur.role_id
+          and u.tenant_id = r.tenant_id
+          and r.code = 'applet_user'
+          and u.create_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <select id="findNewUserCount" resultType="java.lang.Long">
+        select count(u.user_id) AS new_user_count
+        from b_user u,
+             b_role r,
+             r_user_role ur
+        where u.flag = 1
+          and r.flag = 1
+          and ur.flag = 1
+          and u.user_id = ur.user_id
+          and r.role_id = ur.role_id
+          and u.tenant_id = r.tenant_id
+          and r.code = 'applet_user'
+          and u.create_time between #{startTime} and #{endTime}
+    </select>
+
+    <select id="list" resultType="com.kge.energy.crm.repository.entityext.result.UserListResult">
+        select bu.user_id,bu.name,bu.realname,bu.mobile,bu.status,bo.name organizationName,bu.tenant_id
+        from b_user bu,
+        b_organization bo,
+        r_user_tenant rut
+        where bu.flag = 1
+        and bo.flag = 1
+        and rut.flag = 1
+        and bu.user_id = rut.user_id
+        and bo.organization_id = rut.organization_id
+        <if test="param.tenantId != null">
+            and bu.tenant_id = #{param.tenantId}
+        </if>
+        <if test="param.organizationId != null">
+            and bo.organization_id = #{param.organizationId}
+        </if>
+        <if test="param.name != null and param.name != ''">
+            and bu.name like CONCAT('%',#{param.name},'%')
+        </if>
+        <if test="param.realname != null and param.realname != ''">
+            and bu.realname like CONCAT('%',#{param.realname},'%')
+        </if>
+        <if test="param.mobile != null and param.mobile != ''">
+            and bu.mobile like CONCAT('%',#{param.mobile},'%')
+        </if>
+        <if test="param.status != null">
+            and bu.status = #{param.status}
+        </if>
+    </select>
+
+    <select id="listByRole" resultType="com.kge.energy.crm.repository.entityext.result.UserListResult">
+        select bu.user_id,bu.name,bu.realname,bu.mobile,bu.status,bo.name organizationName
+        from b_user bu,
+        b_organization bo,
+        r_user_tenant rut,
+        b_role br,
+        r_user_role rur
+        where bu.flag = 1
+        and bo.flag = 1
+        and rut.flag = 1
+        and rur.flag = 1
+        and bu.user_id = rut.user_id
+        and bo.organization_id = rut.organization_id
+        and bu.user_id = rur.user_id
+        and br.role_id = rur.role_id
+        <if test="param.tenantId != null">
+            and bu.tenant_id = #{param.tenantId}
+            and br.tenant_id = #{param.tenantId}
+        </if>
+        <if test="param.roleId != null">
+            and br.role_id = #{param.roleId}
+        </if>
+        <if test="param.name != null and param.name != ''">
+            and bu.name like CONCAT('%',#{param.name},'%')
+        </if>
+        <if test="param.realname != null and param.realname != ''">
+            and bu.realname like CONCAT('%',#{param.realname},'%')
+        </if>
+        <if test="param.mobile != null and param.mobile != ''">
+            and bu.mobile like CONCAT('%',#{param.mobile},'%')
+        </if>
+    </select>
+
+    <!--查询集团总部的客服人员手机号-->
+    <select id="findJtCustomerPhones" resultType="string">
+        select a.mobile
+        from b_user a
+                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
+                 join b_organization c on c.flag = 1 and c.organization_id = b.organization_id
+                 join r_user_role d on d.flag = 1 and d.user_id = a.user_id
+                 join b_role e on e.flag = 1 and e.role_id = d.role_id
+        where a.flag = 1
+            /*集团总部*/
+          and c.parent_organization_id is null
+            /*集团客服*/
+          and e.code = 'jt_customer'
+          and a.tenant_id = #{tenantId}
+    </select>
+
+    <!--查询二级的客服人员手机号-->
+    <select id="findSubCustomerPhones" resultType="string">
+        select a.mobile
+        from b_user a
+                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
+                 join r_user_role c on c.flag = 1 and c.user_id = a.user_id
+                 join b_role d on d.flag = 1 and d.role_id = c.role_id
+        where a.flag = 1
+            /*二级公司*/
+          and b.organization_id = #{orgId}
+            /*二级公司客服*/
+          and d.code = 'sub_company_customer'
+          and a.tenant_id = #{tenantId}
+    </select>
+
+    <select id="getUserByRoleCodeAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
+        select bu.`name` as username, bu.realname, bu.open_id, bu.user_id, bu.mobile
+        from b_user bu
+                 join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
+                 join b_role br on br.flag = 1 and br.role_id = rur.role_id
+                 join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+                 join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
+        where bu.flag = 1
+          and bu.status = 0
+          and bu.tenant_id = #{tenantId}
+          and br.code = #{roleCode}
+          and bo.organization_id = #{organizationId}
+    </select>
+
+    <select id="findUserByContractId" resultMap="BUserMap">
+        select b.user_id, b.name, b.remark, b.open_id
+        from b_user b
+                 JOIN wf_form wf ON wf.create_user_id = b.user_id
+                 JOIN sc_service_contract sc ON sc.form_id = wf.form_id
+        where sc.service_contract_id = #{scid}
+        limit 1
+    </select>
+
+    <select id="findAppletUser" resultMap="BUserMap">
+        select bu.*
+        from b_user bu,b_role br,r_user_role rrr
+        where bu.flag = 1
+        and br.flag = 1
+        and rrr.flag = 1
+        and bu.user_id = rrr.user_id
+        and br.role_id = rrr.role_id
+        and br.code = 'applet_user'
+        <if test="tenantId != null">
+            and bu.tenant_id = #{tenantId}
+        </if>
+        <if test="name != null and name != ''">
+            and (bu.name like CONCAT('%',#{name},'%')
+            or bu.realname like CONCAT('%',#{name},'%')
+            or bu.mobile like CONCAT('%',#{name},'%')
+            )
+        </if>
+    </select>
+
+    <select id="getUserContact" resultMap="BUserMap">
+        select bu.user_id, bu.realname, bu.mobile, bu.open_id, null email
+        from b_user bu
+        <if test="roleCodes != null and roleCodes.size > 0">
+            join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
+            join b_role br on br.flag = 1 and br.role_id = rur.role_id
+        </if>
+        <if test="organizationId != null">
+            join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+            join b_organization bo on bo.flag = 1 and bo.organization_id = rut.organization_id
+        </if>
+        where bu.flag = 1 and bu.status = 0
+          and bu.tenant_id = #{tenantId}
+        <if test="userId != null">
+            and bu.user_id = #{userId}
+        </if>
+        <if test="roleCodes != null and roleCodes.size > 0">
+            and br.code in
+            <foreach collection="roleCodes" item="roleCode" index="index" open="(" close=")" separator=",">
+                #{roleCode}
+            </foreach>
+        </if>
+        <if test="organizationId != null">
+            and bo.organization_id = #{organizationId}
+        </if>
+        group by bu.user_id, bu.realname, bu.mobile, bu.open_id
+    </select>
+
 </mapper>
 

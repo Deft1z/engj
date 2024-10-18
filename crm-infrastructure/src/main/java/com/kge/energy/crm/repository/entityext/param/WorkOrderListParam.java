@@ -18,6 +18,8 @@ public class WorkOrderListParam extends PageReq {
 
     private Integer formTypeId;
 
+    private Integer tenantId;
+
     private SearchMapBean searchMap;
 
     @Data
@@ -35,6 +37,8 @@ public class WorkOrderListParam extends PageReq {
         private String onlyMe;
 
         private String businessName;
+
+        private Integer serviceUnitId;
 
     }
 }

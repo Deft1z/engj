@@ -13,5 +13,29 @@
         <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
     </resultMap>
+
+    <select id="selectTenantPage" resultType="com.kge.energy.crm.repository.entityext.result.TenantListResult">
+        select bt.id, bt.name, bt.contact_name, bt.contact_mobile, bt.status, bt.create_time
+        from b_tenant bt
+        where bt.flag = 1
+        <if test="param.id != null">
+            and bt.id = #{param.id}
+        </if>
+    </select>
+
+    <select id="getTenantDictList" resultType="com.kge.energy.crm.repository.entityext.result.TenantListForOrgResult">
+        select bt.id, bt.name
+        from b_tenant bt
+        where bt.flag = 1
+        <if test="tenantId != null">
+            and bt.id = #{tenantId}
+        </if>
+    </select>
+
+    <select id="getByIdWithDeleted" resultMap="BTenantMap">
+        select *
+        from b_tenant
+        where id = #{tenantId}
+    </select>
 </mapper>
 

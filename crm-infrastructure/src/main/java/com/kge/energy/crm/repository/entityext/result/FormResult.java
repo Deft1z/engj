@@ -1,5 +1,6 @@
 package com.kge.energy.crm.repository.entityext.result;
 
+import com.kge.energy.crm.common.dto.ContractDto;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -8,8 +9,9 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class FormResult {
+public class FormResult extends ContractDto{
 
+    private Integer rowNum;
     private Integer formId;
     private Integer formTypeId;
     private Integer formMetaId;
@@ -19,6 +21,7 @@ public class FormResult {
     private String timeSubmit;
     private String timeReception;
     private String timeFinished;
+    private String modifyTime;
     private Integer currentOrgId;
     private Integer currentRoleId;
     private Integer flag;
@@ -36,6 +39,7 @@ public class FormResult {
     private String detailedAddress;
     private String userStatus;
     private String orgName;
+    private Integer organizationId;
     private String realname;
 
 }

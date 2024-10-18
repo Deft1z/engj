@@ -1,8 +1,9 @@
 package com.kge.energy.crm.repository.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
 
 /**
  * r_form_consult_complain 咨询投诉工单表(RFormConsultComplain)实体类
@@ -28,6 +29,11 @@ public class RFormConsultComplain {
     /**
      * 投诉ID
      */
-    private Integer complainId; 
+    private Integer complainId;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 

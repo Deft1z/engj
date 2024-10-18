@@ -1,9 +1,9 @@
 package com.kge.energy.crm.repository.mapper;
 
-import com.kge.energy.crm.repository.entity.BResource;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.kge.energy.crm.repository.entityext.result.ResourcePermissionResult;
-import org.apache.ibatis.annotations.Param;
+import com.kge.energy.crm.repository.entity.BResource;
+import com.kge.energy.crm.repository.entityext.param.SystemResourceParam;
+import com.kge.energy.crm.repository.entityext.param.UserResourceParam;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import java.util.List;
  */
 public interface BResourceMapper extends BaseMapper<BResource> {
 
-    List<ResourcePermissionResult> findPermission(@Param("userId") Integer userId, @Param("urls") List<String> urls);
+    List<BResource> getSystemResources(SystemResourceParam param);
 
-    List<ResourcePermissionResult> findMenu(@Param("userId") Integer userId);
+    List<BResource> getUserResources(UserResourceParam param);
 }
 

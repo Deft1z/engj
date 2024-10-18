@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kge.energy.crm.repository.mapper.BAppMapper">
-
     <resultMap type="com.kge.energy.crm.repository.entity.BApp" id="BAppMap">
         <result property="appId" column="app_id" jdbcType="INTEGER"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
@@ -12,6 +11,7 @@
         <result property="bindType" column="bind_type" jdbcType="INTEGER"/>
         <result property="bindAddress" column="bind_address" jdbcType="VARCHAR"/>
         <result property="scope" column="scope" jdbcType="VARCHAR"/>
+        <result property="commonlyUsed" column="is_commonly_used" jdbcType="BOOLEAN"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -21,7 +21,8 @@
     </resultMap>
 
     <select id="contractPageByUserIdLoad" resultType="com.kge.energy.crm.repository.entityext.result.WxUserAppResult">
-        select a.name, a.app_id, DATE_FORMAT(b.binding_time, '%Y-%m-%d') AS binding_time, b.openid_id, b.binding_state, a.bind_type, b.external_account
+        select a.name, a.app_id, DATE_FORMAT(b.binding_time, '%Y-%m-%d') AS binding_time, b.openid_id, b.binding_state,
+        a.bind_type, b.external_account
         from b_app a
         LEFT JOIN b_openid b ON b.app_id = a.app_id
         <where>
@@ -37,12 +38,79 @@
         </where>
     </select>
 
+    <resultMap id="BindUserMap" type="com.kge.energy.crm.repository.entityext.result.BindUserResult">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="realname" column="realname" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <collection property="relateApp" ofType="com.kge.energy.crm.repository.entityext.result.BindUserResult$RelateApp"
+        column="{openidIds=openid_ids, userId=user_id}" select="getRelateApps"/>
+    </resultMap>
+
+    <resultMap id="BindUserRelateAppMap" type="com.kge.energy.crm.repository.entityext.result.BindUserResult$RelateApp">
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="openidId" column="openid_id" jdbcType="INTEGER"/>
+        <result property="appId" column="app_id" jdbcType="INTEGER"/>
+        <result property="appName" column="app_name" jdbcType="VARCHAR"/>
+        <collection property="relateProject" ofType="com.kge.energy.crm.repository.entityext.result.BindUserResult$RelateProject">
+            <result property="projectId" column="project_id" jdbcType="INTEGER"/>
+            <result property="projectName" column="project_name" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <!-- 用于覆盖原go开发团队的管理绑定列表实现 -->
+    <select id="getBindUsers" resultMap="BindUserMap">
+        select group_concat(bo.openid_id) as openid_ids, bu.user_id, bu.realname, bu.mobile
+        from b_openid bo
+        join b_user bu on bo.user_id = bu.user_id
+        where bo.binding_state = 1
+          and bo.flag = 1
+          and bu.flag = 1
+        <if test="appId != null and appId > 0">
+            and bo.app_id = #{appId}
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and bu.mobile = #{mobile}
+        </if>
+        <if test="name != null and name != ''">
+            and bu.realname like concat('%',#{name},'%')
+        </if>
+        group by bu.user_id, bu.realname, bu.mobile
+        order by bu.user_id
+    </select>
+
+    <select id="getRelateApps" resultMap="BindUserRelateAppMap">
+        select * from (
+            select bo.user_id, bo.openid_id, ba.app_id, ba.`name` app_name, bp.project_id, bp.name project_name
+            from b_app ba
+            join b_openid bo on bo.flag = 1 and bo.app_id = ba.app_id
+            left join r_openid_project rop on rop.open_id = bo.openid_id
+            left join b_project bp on bp.flag = 1 and bp.project_id = rop.project_id
+            where ba.flag = 1
+              and bo.openid_id in (${openidIds})
+              and bo.user_id = #{userId}
+            group by bo.user_id, bo.openid_id, ba.app_id, ba.`name`, bp.project_id, bp.name
+            /**特殊处理：当app_id=1时，同时会有app_id=2的记录，为原go开发团队写死的业务层面的逻辑*/
+            union all
+            select bo.user_id, bo.openid_id, 2 app_id, (select `name` from b_app where app_id = 2) app_name, bp.project_id, bp.name project_name
+            from b_app ba
+            join b_openid bo on bo.flag = 1 and bo.app_id = ba.app_id
+            left join r_openid_project rop on rop.open_id = bo.openid_id
+            left join b_project bp on bp.flag = 1 and bp.project_id = rop.project_id
+            where ba.flag = 1
+              and ba.app_id = 1
+              and bo.openid_id in (${openidIds})
+              and bo.user_id = #{userId}
+            group by bo.user_id, bo.openid_id, ba.app_id, ba.`name`, bp.project_id, bp.name
+        ) t
+        order by app_id
+    </select>
+
     <select id="userOpenId" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
         SELECT b_openid.user_id as uid FROM b_openid LEFT JOIN b_user ON b_openid.user_id = b_user.user_id
         <where>
-            binding_state = 1 AND b_openid.flag  = 1 AND b_user.flag = 1
+            binding_state = 1 AND b_openid.flag = 1 AND b_user.flag = 1
             <if test="appid != null and appid > 0">
-                AND b_openid.app_id =  #{appid}
+                AND b_openid.app_id = #{appid}
             </if>
             <if test="mobile != null and mobile != ''">
                 and b_user.mobile = #{mobile}
@@ -56,44 +124,44 @@
 
     <select id="userOpenIdProject" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
         SELECT
-            realname,
-            mobile,
-            o.user_id AS uid,
-            o.flag,
-            o.binding_state AS state,
-            o.remark AS remark,
-            o.app_id AS appid,
-            bp.app_id AS proaid,
-            bp.project_id AS pid,
-            bp.NAME AS pname,
-            o.openid_id AS oid,
-            rop.flag AS rflag
+        realname,
+        mobile,
+        o.user_id AS uid,
+        o.flag,
+        o.binding_state AS state,
+        o.remark AS remark,
+        o.app_id AS appid,
+        bp.app_id AS proaid,
+        bp.project_id AS pid,
+        bp.NAME AS pname,
+        o.openid_id AS oid,
+        rop.flag AS rflag
         FROM
-            b_openid o
-                LEFT JOIN b_user b ON o.user_id = b.user_id
-                LEFT JOIN r_openid_project rop ON rop.open_id = o.openid_id
-                LEFT JOIN b_project bp ON bp.project_id = rop.project_id
+        b_openid o
+        LEFT JOIN b_user b ON o.user_id = b.user_id
+        LEFT JOIN r_openid_project rop ON rop.open_id = o.openid_id
+        LEFT JOIN b_project bp ON bp.project_id = rop.project_id
         WHERE
-            o.flag = 1
-            <if test="uids != null and !uids.isEmpty()">
-                AND o.user_id IN
-                <foreach item="uid" collection="uids" open="(" separator="," close=")">
-                    #{uid}
-                </foreach>
-            </if>
+        o.flag = 1
+        <if test="uids != null and !uids.isEmpty()">
+            AND o.user_id IN
+            <foreach item="uid" collection="uids" open="(" separator="," close=")">
+                #{uid}
+            </foreach>
+        </if>
         ORDER BY
-            uid,
-            appid,
-            proaid
+        uid,
+        appid,
+        proaid
     </select>
 
 
     <select id="userOpenIdCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
         SELECT 1 FROM b_openid LEFT JOIN b_user ON b_openid.user_id = b_user.user_id
         <where>
-            binding_state = 1 AND b_openid.flag  = 1 AND b_user.flag = 1
+            binding_state = 1 AND b_openid.flag = 1 AND b_user.flag = 1
             <if test="appid != null and appid > 0">
-                AND b_openid.app_id =  #{appid}
+                AND b_openid.app_id = #{appid}
             </if>
             <if test="mobile != null and mobile != ''">
                 and b_user.mobile = #{mobile}
@@ -105,7 +173,7 @@
         GROUP BY b_openid.user_id
     </select>
 
-    <select id="FindBindList" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
+    <select id="findBindList" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
         SELECT bos.user_id as uid,realname,mobile
         FROM b_openid_share bos LEFT JOIN b_user u ON bos.user_id = u.user_id
         <where>
@@ -126,7 +194,7 @@
         GROUP BY bos.user_id limit #{offset},#{limit}
     </select>
 
-    <select id="FindBindListCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
+    <select id="findBindListCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
         SELECT 1
         FROM b_openid_share bos LEFT JOIN b_user u ON bos.user_id = u.user_id
         <where>
@@ -147,10 +215,10 @@
         GROUP BY bos.user_id
     </select>
 
-    <select id="FindByUidAndOid" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
+    <select id="findByUidAndOid" resultType="com.kge.energy.crm.repository.entityext.result.OpenIdModelList">
         SELECT b_openid.app_id as appid,
-               b_openid_share.share_openid_id as id,
-               b_openid_share.user_id as uid
+        b_openid_share.share_openid_id as id,
+        b_openid_share.user_id as uid
         FROM b_openid_share
         LEFT JOIN b_openid ON b_openid.openid_id = b_openid_share.share_openid_id
         <where>
@@ -171,21 +239,30 @@
     </select>
 
     <select id="getAppListByUserId" resultType="com.kge.energy.crm.repository.entityext.result.AppListResult">
-        SELECT a.app_id, a.name,  DATE_FORMAT(b.binding_time, '%Y-%m-%d') AS binding_time
+        SELECT a.app_id, a.name, DATE_FORMAT(b.binding_time, '%Y-%m-%d') AS binding_time
         FROM b_app a
-        LEFT JOIN b_openid b ON b.app_id = a.app_id
+                 LEFT JOIN b_openid b ON b.app_id = a.app_id
         WHERE b.user_id = #{userId}
-        AND a.flag != -1
-        AND b.flag != -1
-        AND b.binding_state != 0
+          AND a.flag != -1
+          AND b.flag != -1
+          AND b.binding_state != 0
     </select>
 
     <select id="getAppAvatarList" resultType="com.kge.energy.crm.repository.entityext.result.AppAvatarListResult">
-        SELECT filepath,a.app_id as appid from b_app a
-        LEFT JOIN cms_block_content c ON c.app_id = a.app_id
-        LEFT JOIN cms_block cb ON cb.block_id = c.block_id
-        LEFT JOIN s_file d ON d.file_id = c.image_url
-        WHERE  c.flag = 1 AND cb.flag = 1 AND c.app_id > 0 AND cb.type = '家园模块'
+        SELECT a.app_id as appid
+        from b_app a
+        WHERE a.flag = 1
+    </select>
+
+    <select id="selectAppPage" resultType="com.kge.energy.crm.repository.entityext.result.AppMgrListResult">
+        select ba.app_id, ba.name, ba.bind_type, ba.app_address, ba.interface_address, ba.bind_address, ba.flag,
+        ba.remark, ba.is_commonly_used commonlyUsed
+        from b_app ba
+        where ba.flag = 1
+        <if test="param.name != null and param.name != ''">
+            <bind name="name" value="'%' + param.name + '%'"/>
+            and ba.name like #{name}
+        </if>
     </select>
 </mapper>
 

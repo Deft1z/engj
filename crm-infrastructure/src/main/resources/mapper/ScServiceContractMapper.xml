@@ -32,40 +32,68 @@
 
     <select id="contractPageByUserIdLoad" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
         select a.service_contract_id,
-               a.form_id,
-               a.company,
-               a.`name`,
-               a.`code`,
-               ROUND(a.amount, 2)                            as amount,
-               a.project_code,
-               DATE_FORMAT(a.signing_time, '%Y-%m-%d')       AS signing_time,
-               DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
-               DATE_FORMAT(a.service_end_time, '%Y-%m-%d')   AS service_end_time,
-               a.service_unit,
-               DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
-               DATE_FORMAT(a.project_end_time, '%Y-%m-%d')   AS project_end_time,
-               a.content,
-               a.OWNER,
-               a.pm,
-               a.flag,
-               a.`status`,
-               b.NAME                                        AS service_provider,
-               g.satisfaction,
-               g.evaluate
+        a.form_id,
+        a.company,
+        a.`name`,
+        a.`code`,
+        ROUND(a.amount, 2) as amount,
+        a.project_code,
+        DATE_FORMAT(a.signing_time, '%Y-%m-%d') AS signing_time,
+        DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
+        DATE_FORMAT(a.service_end_time, '%Y-%m-%d') AS service_end_time,
+        a.service_unit,
+        DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
+        DATE_FORMAT(a.project_end_time, '%Y-%m-%d') AS project_end_time,
+        a.content,
+        a.OWNER,
+        a.pm,
+        a.flag,
+        a.`status`,
+        b.NAME AS service_provider,
+        a.service_unit AS organization_id,
+        g.satisfaction,
+        g.evaluate
         from sc_service_contract a
-                 LEFT JOIN b_organization b ON b.organization_id = a.service_unit
-                 LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
-                 LEFT JOIN wf_form c ON c.form_id = a.form_id
-                 LEFT JOIN b_user d ON d.user_id = c.create_user_id
-        <where>
-            c.create_user_id = #{listParam.userId} AND a.flag = 1
-            <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
-                and a.status = #{listParam.searchMap.status}
-            </if>
-            <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
-                and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
-            </if>
-        </where>
+        LEFT JOIN b_organization b ON b.organization_id = a.service_unit
+        LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
+        LEFT JOIN wf_form c ON c.form_id = a.form_id
+        LEFT JOIN b_user d ON d.user_id = c.create_user_id
+        where a.flag = 1
+        and c.create_user_id = #{listParam.userId}
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and a.service_unit in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and c.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+        <if test="listParam.tenantId != null">
+            and a.tenant_id = #{listParam.tenantId}
+        </if>
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
+            and a.status = #{listParam.searchMap.status}
+        </if>
+        <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+            and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
+        </if>
+        order by a.modify_time DESC
     </select>
 
     <select id="form" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
@@ -97,6 +125,179 @@
                  LEFT JOIN b_user d ON d.user_id = c.create_user_id
         where c.form_id = #{formId}
           AND a.flag != -1
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and a.service_unit in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
     </select>
+
+    <select id="findContractNum" resultType="java.lang.Long">
+        SELECT count(*)
+        FROM sc_service_contract
+        WHERE form_id = ANY (SELECT form_id
+                             FROM wf_form
+                             WHERE create_user_id = ANY (select u.user_id
+                                                         from b_user u,
+                                                              b_role r,
+                                                              r_user_role ur
+                                                         where u.flag = 1
+                                                           and r.flag = 1
+                                                           and ur.flag = 1
+                                                           and u.user_id = ur.user_id
+                                                           and r.role_id = ur.role_id
+                                                           and u.tenant_id = r.tenant_id
+                                                           and r.code = 'applet_user'
+                                                           and u.last_login_time BETWEEN #{startTime} AND #{endTime}))
+    </select>
+
+    <select id="findNewContractCount" resultType="java.lang.Long">
+        SELECT count(1)
+        FROM sc_service_contract
+        WHERE flag != -1
+          AND create_time between #{startTime} and #{endTime}
+    </select>
+
+    <select id="getPage" resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
+        select a.service_contract_id,
+        a.form_id,
+        a.company,
+        a.`name`,
+        a.`code`,
+        ROUND(a.amount, 2) as amount,
+        a.project_code,
+        DATE_FORMAT(a.signing_time, '%Y-%m-%d') AS signing_time,
+        DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
+        DATE_FORMAT(a.service_end_time, '%Y-%m-%d') AS service_end_time,
+        a.service_unit,
+        DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
+        DATE_FORMAT(a.project_end_time, '%Y-%m-%d') AS project_end_time,
+        a.content,
+        a.OWNER,
+        a.pm,
+        a.flag,
+        a.`status`,
+        b.NAME AS service_provider,
+        a.service_unit AS organization_id,
+        g.satisfaction,
+        g.evaluate
+        from sc_service_contract a
+        LEFT JOIN b_organization b ON b.organization_id = a.service_unit
+        LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
+        LEFT JOIN wf_form c ON c.form_id = a.form_id
+        LEFT JOIN b_user d ON d.user_id = c.create_user_id
+        where a.flag = 1
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and a.service_unit in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and c.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+        <if test="listParam.tenantId != null">
+            and a.tenant_id = #{listParam.tenantId}
+        </if>
+        <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
+            and a.status = #{listParam.searchMap.status}
+        </if>
+        <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
+            and a.name like CONCAT('%',#{listParam.searchMap.name},'%')
+        </if>
+        order by a.modify_time DESC
+    </select>
+
+    <select id="getContractDetailByContractId"
+            resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
+        select a.service_contract_id,
+        a.form_id,
+        a.company,
+        a.`name`,
+        a.`code`,
+        ROUND(a.amount, 2) as amount,
+        a.project_code,
+        DATE_FORMAT(a.signing_time, '%Y-%m-%d') AS signing_time,
+        DATE_FORMAT(a.service_start_time, '%Y-%m-%d') AS service_start_time,
+        DATE_FORMAT(a.service_end_time, '%Y-%m-%d') AS service_end_time,
+        a.service_unit,
+        DATE_FORMAT(a.project_start_time, '%Y-%m-%d') AS project_start_time,
+        DATE_FORMAT(a.project_end_time, '%Y-%m-%d') AS project_end_time,
+        a.content,
+        a.OWNER,
+        a.pm,
+        a.flag,
+        a.`status`,
+        b.NAME AS service_provider,
+        a.service_unit AS organization_id,
+        g.satisfaction,
+        g.evaluate
+        from sc_service_contract a
+        LEFT JOIN b_organization b ON b.organization_id = a.service_unit
+        LEFT JOIN sc_contract_evaluate g ON g.service_contract_id = a.service_contract_id
+        LEFT JOIN wf_form c ON c.form_id = a.form_id
+        LEFT JOIN b_user d ON d.user_id = c.create_user_id
+        where a.flag = 1
+        and a.service_contract_id = #{contractId}
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and a.service_unit in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+    </select>
+
 </mapper>
 

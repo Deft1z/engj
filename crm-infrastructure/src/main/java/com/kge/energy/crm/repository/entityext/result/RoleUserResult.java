@@ -15,4 +15,6 @@ public class RoleUserResult {
     private String realname;
 
     private String openId;
+
+    private String mobile;
 }

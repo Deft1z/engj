@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BUserMsgMapper">
+    <resultMap type="com.kge.energy.crm.repository.entity.BUserMsg" id="BUserMsgMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="realname" column="realname" jdbcType="VARCHAR"/>
+        <result property="systemType" column="system_type" jdbcType="VARCHAR"/>
+        <result property="msgBizId" column="msg_biz_id" jdbcType="VARCHAR"/>
+        <result property="msgBizType" column="msg_biz_type" jdbcType="INTEGER"/>
+        <result property="pathType" column="path_type" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="isRead" column="is_read" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="getUserAlarmMsgList" resultType="com.kge.energy.crm.repository.entityext.result.UserMsgListResult">
+        select bum.*
+        from b_user_msg bum
+        where json_unquote(json_extract(bum.content, '$.format')) is not null
+        <if test="param.msgBizType != null">
+            and bum.msg_biz_type = #{param.msgBizType}
+        </if>
+        <if test="param.startTime != null">
+            and bum.create_time &gt;= #{param.startTime}
+        </if>
+        <if test="param.endTime != null">
+            and bum.create_time &lt;= #{param.endTime}
+        </if>
+        <if test="param.isRead != null">
+            and bum.is_read = #{param.isRead}
+        </if>
+        <if test="param.onlyMe">
+            and bum.user_id = #{param.userId}
+        </if>
+        /* 超级管理员和租户管理员可查询全部数据 */
+        <choose>
+            <when test="param.roleCodes != null and param.roleCodes.contains('super_admin') or param.roleCodes.contains('tenant_admin')">
+                and 1 = 1
+            </when>
+            <otherwise>
+                and bum.user_id = #{param.userId}
+            </otherwise>
+        </choose>
+        /* msgBizType: 0 告警信息 1 工单通知 2 项目合同 3 投诉处理 */
+        <choose>
+            <when test="param.msgBizType == '0'.toString() and param.alarmLevel != null and param.alarmLevel != ''">
+                and json_unquote(json_extract(bum.content, '$.alarmLevel')) = #{param.alarmLevel}
+            </when>
+            <when test="param.msgBizType == '1'.toString() and param.functionName != null and param.functionName != ''">
+                and json_unquote(json_extract(bum.content, '$.functionName')) = #{param.functionName}
+            </when>
+        </choose>
+        order by bum.create_time desc
+    </select>
+
+    <select id="getUnreadCount" resultType="integer">
+        select count(1)
+        from b_user_msg bum
+        where bum.is_read is false
+        and json_unquote(json_extract(bum.content, '$.format')) is not null
+        and bum.user_id = #{userId}
+        <if test="msgBizType != null">
+            and bum.msg_biz_type = #{msgBizType}
+        </if>
+    </select>
+
+</mapper>
+

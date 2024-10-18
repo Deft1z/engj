@@ -10,7 +10,6 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.FlowResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,14 +35,8 @@ public class WfFormFlowService {
         return wfFormDao.findList(reqIpage, workOrderListParam, userInfoDto);
     }
 
-
-
-    public List<FlowResult> getFlowByFormId(Integer formId) {
-        return wfFormDao.getFlowByFormId(formId);
-    }
-
-    public IPage<FormResult> getWxUserWorkOrder(IPage<WxUserWorkOrderParam> reqIpage,WxUserWorkOrderParam wxUserWorkOrderParam) {
-        return wfFormDao.findWxUserWorkOrder(reqIpage,wxUserWorkOrderParam);
+    public IPage<FormResult> getWxUserWorkOrder(IPage<WxUserWorkOrderParam> reqIpage, WxUserWorkOrderParam wxUserWorkOrderParam) {
+        return wfFormDao.findWxUserWorkOrder(reqIpage, wxUserWorkOrderParam);
     }
 
     public List<WfFormFlow> selectFlowByFormIdAndActionType(Integer formId, String typef) {

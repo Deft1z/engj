@@ -21,7 +21,7 @@ public class SSystemConfigDao extends ServiceImpl<SSystemConfigMapper, SSystemCo
         LambdaQueryWrapper<SSystemConfig> wrapper = Wrappers.<SSystemConfig>lambdaQuery()
                 .eq(SSystemConfig::getName, saltbase);
 
-        return mapper.selectOne(wrapper);
+        return mapper.selectOne(wrapper, false);
     }
 }
 

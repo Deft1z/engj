@@ -1,10 +1,15 @@
 package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BOrganization;
+import com.kge.energy.crm.repository.entityext.param.OrgQueryParam;
 import com.kge.energy.crm.repository.entityext.result.OrgDictResult;
+import com.kge.energy.crm.repository.entityext.result.OrgListResult;
 import com.kge.energy.crm.repository.entityext.result.OrgResult;
 import com.kge.energy.crm.repository.mapper.BOrganizationMapper;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +26,11 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
 
     private final BOrganizationMapper mapper;
 
-    public List<UserInfoDto.Organization> findUserInfoDtoOrOrgs(Integer userId) {
+    public List<UserInfoDto.Organization> findUserInfoDtoOrgs(Integer userId) {
 
         Assert.notNull(userId, "userId must not be null");
 
-        return mapper.findUserInfoDtoOrOrgs(userId);
+        return mapper.findUserInfoDtoOrgs(userId);
     }
 
     public BOrganization getOrgByUserId(Integer userId) {
@@ -35,12 +40,62 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.getOrgByUserId(userId);
     }
 
-    public List<OrgDictResult> getOrgDictList() {
-        return mapper.getOrgDictList();
+    public List<OrgDictResult> getOrgDictList(Integer tenantId) {
+        return mapper.getOrgDictList(tenantId);
     }
 
-    public List<OrgResult> getCompanyList(){
-        return mapper.getCompanyList();
+    public List<OrgResult> getCompanyList(Integer tenantId) {
+        return mapper.getCompanyList(tenantId);
+    }
+
+    public List<OrgListResult> getOrgList(OrgQueryParam param) {
+        return mapper.getOrgList(param);
+    }
+
+    public Integer getTopLevel(Integer tenantId) {
+        return mapper.getTopLevel(tenantId);
+    }
+
+    public Long getNextLevelOrgCount(Integer orgId) {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getParentOrganizationId, orgId);
+        return mapper.selectCount(wrapper);
+    }
+
+    public List<OrgListResult> getAllOrgList(OrgQueryParam param) {
+        return mapper.getAllOrgList(param);
+    }
+
+    public List<BOrganization> getRootOrgList(Integer tenantId) {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .isNull(BOrganization::getParentOrganizationId);
+
+        if (ObjUtil.isNotNull(tenantId)) {
+            wrapper.eq(BOrganization::getTenantId, tenantId);
+        }
+
+        return mapper.selectList(wrapper);
+    }
+
+    public BOrganization findByTenantOrgName(Integer tenantId, String name) {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getTenantId, tenantId)
+                .eq(BOrganization::getName, name);
+        return mapper.selectOne(wrapper, false);
+    }
+
+    public String getEccOrgCode(Integer orgId) {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getOrganizationId, orgId);
+        return mapper.selectOne(wrapper, false).getEccOrgCode();
+    }
+
+    public List<BOrganization> getEccOrgList() {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getParentOrganizationId, 1)
+                .isNotNull(BOrganization::getEccOrgCode)
+                .orderByAsc(BOrganization::getEccOrgCode);
+        return mapper.selectList(wrapper);
     }
 }
 

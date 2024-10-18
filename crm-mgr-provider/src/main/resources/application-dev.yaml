@@ -15,10 +15,13 @@ spring:
       port: 6379
       password: iot
       database: 11
+      front: engjkfxcx_dev_
 
 ecc:
   appId: ntwx001
   appSecret: h9r2e2nd5bipf6z
+  baseUrl: https://ecc.nftz:8181
+  maintenanceListUrl: /publicApi/maintenance/list
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
@@ -33,3 +36,7 @@ epcpv:
   stagestat: api/v1/pv/project/stage/stat
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
+
+knife4j:
+  # 是否开启生产环境保护策略
+  production: false

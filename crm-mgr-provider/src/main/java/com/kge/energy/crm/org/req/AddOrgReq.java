@@ -1,0 +1,38 @@
+package com.kge.energy.crm.org.req;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+@Data
+@Schema(name = "新增组织name", description = "新增组织对象")
+public class AddOrgReq {
+
+    @Schema(description = "上级组织id")
+//    @NotNull
+    private Integer parentOrganizationId;
+
+    @Schema(description = "组织名称")
+    @NotBlank
+    private String name;
+
+    @Schema(description = "排序")
+    @NotNull
+    private Integer sort;
+
+    @Schema(description = "组织类别:0-集团 1-公司 2-部门 3-项目组")
+    @NotNull
+    private Integer orgType;
+
+    @Schema(description = "状态,0正常 1停用")
+    @NotNull
+    private Integer status;
+
+    @Schema(description = "租户id")
+    @NotNull
+    private Integer tenantId;
+
+    @Schema(description = "备注")
+    private String remark;
+}

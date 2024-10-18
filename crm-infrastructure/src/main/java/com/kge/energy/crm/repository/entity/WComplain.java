@@ -1,9 +1,10 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 投诉反馈(WComplain)实体类
@@ -118,6 +119,11 @@ public class WComplain {
     /**
      * 备注
      */
-    private String remark; 
+    private String remark;
+
+    /**
+     * 租户id
+     */
+    private Integer tenantId;
 }
 

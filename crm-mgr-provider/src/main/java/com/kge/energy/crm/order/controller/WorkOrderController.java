@@ -1,15 +1,23 @@
 package com.kge.energy.crm.order.controller;
 
+import com.kge.energy.crm.comment.req.WfFormCommentReq;
+import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.order.req.GetFlowByFormIdReq;
-import com.kge.energy.crm.order.req.WorkOrdeUpdateReq;
-import com.kge.energy.crm.order.req.WorkOrderListReq;
+import com.kge.energy.crm.order.req.WorkOrderExportReq;
 import com.kge.energy.crm.order.req.WxUserWorkOrderReq;
-import com.kge.energy.crm.order.resp.FlowResp;
 import com.kge.energy.crm.order.resp.FormResp;
 import com.kge.energy.crm.order.service.WorkOrderService;
+import com.kge.energy.crm.workorder.req.WfFormFlowReq;
+import com.kge.energy.crm.workorder.req.WfFormPageReq;
+import com.kge.energy.crm.workorder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workorder.resp.WfFormPageResp;
+import com.kge.energy.crm.workorder.service.WorkOrderDomainService;
+import com.kge.platform.framework.common.net.CommonResult;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.io.IOException;
 
 /**
  * 工单管理
@@ -31,13 +39,25 @@ public class WorkOrderController {
 
     private final WorkOrderService workOrderService;
 
+    private final CmsCommentService cmsCommentService;
+
+    private final WorkOrderDomainService workOrderDomainService;
+
     /**
      * 工单列表
      */
     @ConvertToGoFormats
     @PostMapping("/order")
-    public CommonResponse<PageResp<FormResp>> list(@Validated @RequestBody WorkOrderListReq req) {
-        return CommonResponse.suc(workOrderService.list(req));
+    public CommonResult<PageResp<WfFormPageResp>> getByPage(@Validated @RequestBody WfFormPageReq req) {
+        return CommonResult.suc(workOrderDomainService.getByPage(req));
+    }
+
+    /*
+     * 工单列表导出
+     * */
+    @PostMapping("/order/export")
+    public void workOrderExport(HttpServletResponse response, @Validated @RequestBody WorkOrderExportReq req) throws IOException {
+        workOrderService.exportWorkOrder(response, req);
     }
 
 
@@ -46,17 +66,18 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/getFlowByFormId")
-    public CommonResponse<List<FlowResp>> getFlowByFormId(@Validated @RequestBody GetFlowByFormIdReq req) {
-        return CommonResponse.suc(workOrderService.getFlowByFormId(req));
+    public CommonResult<WfFormFlowResp> getFlowByFormId(@Validated @RequestBody WfFormFlowReq req) {
+        return CommonResult.suc(workOrderDomainService.getFlowByFormId(req));
     }
+
 
     /**
      * 分派工单 终止工单 处理工单
      */
     @ConvertToGoFormats
-    @PostMapping("/workOrderUpdate")
-    public CommonResponse<Integer> workOrderUpdate(WorkOrdeUpdateReq req) {
-        return CommonResponse.suc(workOrderService.workOrderUpdate(req));
+    @PostMapping("/order/update")
+    public CommonResult<Object> workOrderUpdate(@Validated @RequestBody WorkOrderUpdateReq req) {
+        return CommonResult.suc(workOrderDomainService.updateWorkOrder(req));
 
     }
 
@@ -65,11 +86,14 @@ public class WorkOrderController {
      */
     @ConvertToGoFormats
     @PostMapping("/workOrderByUserIdLoad")
-    public CommonResponse<PageResp<FormResp>> workOrderByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
-        System.out.println("req = "+req);
-        System.out.println("req = "+req.getUserId());
-        System.out.println("req = "+req.getCurrentPage());
-        return CommonResponse.suc(workOrderService.getWxUserOrder(req));
+    public CommonResult<PageResp<FormResp>> workOrderByUserIdLoad(@Validated @RequestBody WxUserWorkOrderReq req) {
+        return CommonResult.suc(workOrderService.getWxUserOrder(req));
 
+    }
+
+    @Operation(summary = "工单节点评论")
+    @PostMapping(value = "/addComment")
+    public CommonResult<Boolean> addComment(@RequestBody @Valid WfFormCommentReq req) {
+        return CommonResult.suc(cmsCommentService.addWfFormFlowComment(req));
     }
 }

@@ -1,11 +1,10 @@
 package com.kge.energy.crm.repository.dao;
 
-import com.kge.energy.crm.repository.mapper.WfFormFileMapper;
-import com.kge.energy.crm.repository.entity.WfFormFile;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.WfFormFile;
+import com.kge.energy.crm.repository.mapper.WfFormFileMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * 表单附件(WfFormFile)表数据库访问层

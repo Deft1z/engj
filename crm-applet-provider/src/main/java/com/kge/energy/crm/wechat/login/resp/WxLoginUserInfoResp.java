@@ -14,15 +14,19 @@ import java.util.List;
 @Accessors(chain = true)
 public class WxLoginUserInfoResp {
 
+    /**
+     * 租户ID
+     */
+    private Integer tenantId;
+
+    /**
+     * 租户名称
+     */
+    private String tenantName;
+
     private Integer userId;
 
     private String userName;
-
-    private Integer roleId;
-
-    private String roleName;
-
-    private String type;
 
     private String mobile;
 
@@ -32,7 +36,24 @@ public class WxLoginUserInfoResp {
 
     private String address;
 
+    /**
+     * 角色列表
+     */
+    private List<Role> roleList;
+
     private List<Organization> organizationList;
+
+    @Data
+    @Accessors(chain = true)
+    public static class Role {
+
+        private Integer id;
+
+        private String name;
+
+        private String code;
+    }
+
 
     @NoArgsConstructor
     @Data
@@ -42,6 +63,5 @@ public class WxLoginUserInfoResp {
 
         private String name;
 
-        private String authCode;
     }
 }

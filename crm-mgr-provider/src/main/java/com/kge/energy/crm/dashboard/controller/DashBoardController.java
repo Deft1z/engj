@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
-import com.kge.energy.crm.common.net.CommonResponse;
 import com.kge.energy.crm.dashboard.req.DashBoardContractOrderReq;
 import com.kge.energy.crm.dashboard.req.DashBoardReq;
 import com.kge.energy.crm.dashboard.resp.*;
@@ -12,6 +11,9 @@ import com.kge.energy.crm.dashboard.service.DashBoardService;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic;
+import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
+import com.kge.platform.framework.common.net.CommonResult;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,37 +37,15 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/workMgrBack/contractBack/getAllCompany")
-    public CommonResponse<List<CompanyResp>> getCompanyList() {
+    public CommonResult<List<CompanyResp>> getCompanyList() {
         List<CompanyResp> resp = BeanUtil.copyToList(dashBoardService.getCompanyList(), CompanyResp.class);
-        return CommonResponse.suc(resp);
+        return CommonResult.suc(resp);
     }
 
-    /**
-     * 查询统计上半部分
-     */
-    @ConvertToGoFormats
-    @PostMapping("/externalBack/aggregateData/dashboardData")
-    public CommonResponse<StatisticResp1> getStatistic1(@Validated @RequestBody DashBoardReq req) {
-        StatisticResp1 resp = BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), StatisticResp1.class);
-        return CommonResponse.suc(resp);
-    }
-
-    // TODO 这个接口后续建议与上面的接口合并
-    /**
-     * 查询统计下半部分
-     */
-    @ConvertToGoFormats
-    @PostMapping("/workMgrBack/contractBack/showOderContractNum")
-    public CommonResponse<StatisticResp2> getStatistic2(@Validated @RequestBody DashBoardReq req) {
-        StatisticResp2 resp = new StatisticResp2();
-
-        HashMap<String, String> mapping = new HashMap<>();
-        mapping.put("sentNum", "sendDanNum");
-        mapping.put("terminateNum", "endNum");
-        mapping.put("processingNum", "startNum");
-
-        BeanUtil.copyProperties(dashBoardService.getStatistic(transDateTime(req)), resp, CopyOptions.create().setFieldMapping(mapping));
-        return CommonResponse.suc(resp);
+    @Operation(summary = "控制台客户、工单、合同统计")
+    @PostMapping("/dashBoard/statisticalData")
+    public CommonResult<StatisticalDataResult> statisticalData() {
+        return CommonResult.suc(dashBoardService.statisticalData());
     }
 
     /**
@@ -73,7 +53,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/contractBack/contractOrderChart")
-    public CommonResponse<List<OrderContractResp>> getOrderContractChart(@Validated @RequestBody DashBoardContractOrderReq req) {
+    public CommonResult<List<OrderContractResp>> getOrderContractChart(@Validated @RequestBody DashBoardContractOrderReq req) {
         HashMap<String, String> mapping = new HashMap<>();
         mapping.put("date", "timeStr");
 
@@ -85,7 +65,7 @@ public class DashBoardController {
             case 3 -> param.setArea(req.getArea());
         }
 
-        return CommonResponse.suc(BeanUtil.copyToList(dashBoardService.getOrderContractList(param), OrderContractResp.class, CopyOptions.create().setFieldMapping(mapping)));
+        return CommonResult.suc(BeanUtil.copyToList(dashBoardService.getOrderContractList(param), OrderContractResp.class, CopyOptions.create().setFieldMapping(mapping)));
     }
 
     /**
@@ -93,7 +73,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/userBackMrg/UserChart")
-    public CommonResponse<UserTransResp> getUserTransChart(@Validated @RequestBody DashBoardReq req) {
+    public CommonResult<UserTransResp> getUserTransChart(@Validated @RequestBody DashBoardReq req) {
         UserTransResp resp = new UserTransResp();
 
         HashMap<String, String> mapping = new HashMap<>();
@@ -101,7 +81,7 @@ public class DashBoardController {
         mapping.put("activeUserTransRate", "newUserTransRate");
 
         BeanUtil.copyProperties(dashBoardService.getUserTrans(transDateTime(req)), resp, CopyOptions.create().setFieldMapping(mapping));
-        return CommonResponse.suc(resp);
+        return CommonResult.suc(resp);
     }
 
     /**
@@ -109,7 +89,7 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/contractBack/evaluateChart")
-    public CommonResponse<EvaluateListResp> getEvaluateChart() {
+    public CommonResult<EvaluateListResp> getEvaluateChart() {
         EvaluateListResp resp = new EvaluateListResp();
 
         HashMap<String, String> mapping = new HashMap<>();
@@ -119,7 +99,7 @@ public class DashBoardController {
         List<EvaluateResp> evaList = BeanUtil.copyToList(dashBoardService.getEvaluateList(), EvaluateResp.class, CopyOptions.create().setFieldMapping(mapping));
         resp.setList(evaList);
         resp.setAverage(dashBoardService.getEvaluateAverage());
-        return CommonResponse.suc(resp);
+        return CommonResult.suc(resp);
     }
 
     /**
@@ -127,8 +107,8 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/complainBack/complainPerChart")
-    public CommonResponse<DashBoardComplainTypeStatistic> getComplainPieChart(@Validated @RequestBody DashBoardReq req) {
-        return CommonResponse.suc(dashBoardService.getComplainTypeStatistic(transDateTime(req)));
+    public CommonResult<DashBoardComplainTypeStatistic> getComplainPieChart(@Validated @RequestBody DashBoardReq req) {
+        return CommonResult.suc(dashBoardService.getComplainTypeStatistic(transDateTime(req)));
     }
 
     /**
@@ -136,8 +116,8 @@ public class DashBoardController {
      */
     @ConvertToGoFormats
     @PostMapping("/chart/complainBack/complainRankChart")
-    public CommonResponse<List<DashBoardComplainRank>> getComplainRank(@Validated @RequestBody DashBoardReq req) {
-        return CommonResponse.suc(dashBoardService.getComplainRankList(transDateTime(req)));
+    public CommonResult<List<DashBoardComplainRank>> getComplainRank(@Validated @RequestBody DashBoardReq req) {
+        return CommonResult.suc(dashBoardService.getComplainRankList(transDateTime(req)));
     }
 
     private DashBoardParam transDateTime(DashBoardReq req) {

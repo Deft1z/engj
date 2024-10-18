@@ -3,6 +3,7 @@ package com.kge.energy.crm.dashboard.service;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.DashBoardDao;
 import com.kge.energy.crm.repository.entity.BOrganization;
@@ -19,35 +20,48 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DashBoardService {
 
-    private final DashBoardDao dao;
+    private final DashBoardDao dashBoardDao;
     private final BOrganizationDao orgDao;
 
     public List<BOrganization> getCompanyList() {
         return orgDao.list();
     }
 
-    public DashBoardStatistic getStatistic(DashBoardParam param) {
-        return dao.getStatistic(param);
+    /**
+     * 控制台客户、工单、合同统计
+     */
+    public StatisticalDataResult statisticalData() {
+
+        Integer tenantId = UserInfoContextUtils.getCurrentTenantId();
+
+        StatisticalDataResult.User user = dashBoardDao.getUserStatistic(tenantId);
+        StatisticalDataResult.Consulting consulting = dashBoardDao.getConsultingStatistic(tenantId);
+        StatisticalDataResult.Contract contract = dashBoardDao.getContractStatistic(tenantId);
+
+        return new StatisticalDataResult()
+                .setUser(user)
+                .setConsulting(consulting)
+                .setContract(contract);
     }
 
     public DashBoardUserTrans getUserTrans(DashBoardParam param) {
-        return dao.getUserTrans(param);
+        return dashBoardDao.getUserTrans(param);
     }
 
     public List<DashBoardEvaluate> getEvaluateList() {
-        return dao.getEvaluateList();
+        return dashBoardDao.getEvaluateList();
     }
 
     public Double getEvaluateAverage() {
-        return dao.getEvaluateAverage();
+        return dashBoardDao.getEvaluateAverage();
     }
 
     public DashBoardComplainTypeStatistic getComplainTypeStatistic(DashBoardParam param) {
-        return dao.getComplainTypeStatistic(param);
+        return dashBoardDao.getComplainTypeStatistic(param);
     }
 
     public List<DashBoardComplainRank> getComplainRankList(DashBoardParam param) {
-        return dao.getComplainRankList(param);
+        return dashBoardDao.getComplainRankList(param);
     }
 
     public List<DashBoardOrderContract> getOrderContractList(DashBoardParam param) {
@@ -58,6 +72,7 @@ public class DashBoardService {
         List<DateTime> tmpList = DateUtil.rangeToList(startDate, endDate, DateField.MONTH);
         // 转String类型集合作为sql参数
         param.setDateList(tmpList.stream().map(date -> DateUtil.format(date, "yyyy-MM")).collect(Collectors.toList()));
-        return dao.getOrderContractList(param);
+        return dashBoardDao.getOrderContractList(param);
     }
+
 }

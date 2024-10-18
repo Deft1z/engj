@@ -4,19 +4,14 @@
     <resultMap type="com.kge.energy.crm.repository.entity.BOrganization" id="BOrganizationMap">
         <result property="organizationId" column="organization_id" jdbcType="INTEGER"/>
         <result property="parentOrganizationId" column="parent_organization_id" jdbcType="INTEGER"/>
-        <result property="regionId" column="region_id" jdbcType="INTEGER"/>
-        <result property="userTenantId" column="user_tenant_id" jdbcType="INTEGER"/>
         <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="orgType" column="org_type" jdbcType="INTEGER"/>
         <result property="level" column="level" jdbcType="INTEGER"/>
-        <result property="authCode" column="auth_code" jdbcType="VARCHAR"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="sort" column="sort" jdbcType="INTEGER"/>
         <result property="leaderUserId" column="leader_user_id" jdbcType="INTEGER"/>
         <result property="parameter" column="parameter"
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
-        <result property="variables" column="variables" jdbcType="VARCHAR"/>
-        <result property="referSource" column="refer_source" jdbcType="VARCHAR"/>
-        <result property="referId" column="refer_id" jdbcType="VARCHAR"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>
         <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -24,21 +19,25 @@
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+        <result property="eccOrgCode" column="ecc_org_code" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <select id="findUserInfoDtoOrOrgs" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Organization">
-        select b.organization_id id, b.name, b.auth_code
-        from r_user_tenant a
-                 LEFT JOIN b_organization b ON b.organization_id = a.organization_id
-        where a.user_id = #{userId}
+    <select id="findUserInfoDtoOrgs" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Organization">
+        select o.organization_id id, o.name
+        from b_organization o,
+             r_user_tenant rut
+        where o.flag = 1
+          and rut.flag = 1
+          and o.organization_id = rut.organization_id
+          and rut.user_id = #{userId}
     </select>
 
     <select id="getOrgByUserId" resultMap="BOrganizationMap">
         select a.*
         from b_organization a
-                 LEFT JOIN r_user_tenant b ON b.organization_id = a.organization_id
-                 LEFT JOIN b_user c ON c.user_id = b.user_id
-        where c.flag = 1
+        JOIN r_user_tenant b ON b.organization_id = a.organization_id
+        JOIN b_user c ON c.user_id = b.user_id
+        where b.flag =1 and c.flag = 1
           and c.user_id = #{userId}
     </select>
 
@@ -47,6 +46,7 @@
         from b_organization
         where flag != -1
           and parameter ->> "$.serviceType" != 0
+          and tenant_id = #{tenantId}
     </select>
 
     <select id="getCompanyList" resultType="com.kge.energy.crm.repository.entityext.result.OrgResult">
@@ -58,7 +58,86 @@
         from b_organization a
         where a.flag = 1
           and a.parameter ->> '$.serviceType' != 0
+          and a.tenant_id = #{tenantId}
         order by a.parameter ->> '$.serviceType', a.create_time asc
+    </select>
+
+    <select id="getOrgList" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
+        select bo.organization_id, bo.parent_organization_id, bo.level, bo.tenant_id, bo.name, bo.sort,
+        bo.org_type,bo.status, DATE_FORMAT(bo.create_time, '%Y-%m-%d %H:%i:%s') as create_time
+        from b_organization bo
+        where bo.flag = 1
+
+        <if test="param.tenantId != null">
+            and bo.tenant_id = #{param.tenantId}
+        </if>
+
+        <if test="param.level != null">
+            and bo.level = #{param.level}
+        </if>
+
+        <if test="param.parentOrganizationId != null">
+            and bo.parent_organization_id = #{param.parentOrganizationId}
+        </if>
+
+        <if test="param.name != null and param.name != ''">
+            <bind name="name" value="'%' + param.name + '%'"/>
+            and bo.name like #{name}
+        </if>
+
+        order by bo.sort asc
+    </select>
+
+    <select id="getTopLevel" resultType="java.lang.Integer">
+        select level
+        from b_organization
+        where flag = 1
+          and tenant_id = #{tenantId}
+        order by level asc
+        limit 1
+    </select>
+
+    <select id="getAllOrgList" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">
+        WITH RECURSIVE orgs AS (
+        SELECT bo.organization_id, bo.parent_organization_id, bo.level, bo.tenant_id, bo.name, bo.sort,
+        bo.org_type,bo.status, DATE_FORMAT(bo.create_time, '%Y-%m-%d %H:%i:%s') as create_time, bo.remark
+        FROM b_organization bo
+        WHERE bo.flag = 1
+
+        <if test="param.tenantId != null">
+            and bo.tenant_id = #{param.tenantId}
+        </if>
+
+        <choose>
+            <when test="param.name != null and param.name != ''">
+                <bind name="name" value="'%' + param.name + '%'"/>
+                and bo.organization_id in (
+                select s.organization_id from b_organization s where s.flag = 1 and bo.name like #{name}
+                <if test="param.tenantId != null">
+                    and s.tenant_id = #{param.tenantId}
+                </if>
+                )
+            </when>
+
+            <otherwise>
+                <if test="param.orgIds != null and !param.orgIds.isEmpty()">
+                    and bo.organization_id in
+                    <foreach item="item" index="index" collection="param.orgIds" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                </if>
+            </otherwise>
+        </choose>
+
+        UNION ALL
+
+        SELECT d.organization_id, d.parent_organization_id, d.level, d.tenant_id, d.name, d.sort,
+        d.org_type,d.status, DATE_FORMAT(d.create_time, '%Y-%m-%d %H:%i:%s') as create_time, d.remark
+        FROM b_organization d
+        JOIN orgs o ON d.parent_organization_id = o.organization_id
+        where d.flag = 1
+        )
+        SELECT * FROM orgs
     </select>
 </mapper>
 

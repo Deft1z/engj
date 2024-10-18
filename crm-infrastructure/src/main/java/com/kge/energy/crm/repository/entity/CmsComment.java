@@ -27,9 +27,9 @@ public class CmsComment {
     private Integer parentCommentId; 
 
     /**
-     * 用户
+     * 提交评论的用户
      */
-    private Integer userId; 
+    private Integer createUserId;
 
     /**
      * 评论内容
@@ -45,6 +45,21 @@ public class CmsComment {
      * 创建时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime createTime; 
+    private LocalDateTime createTime;
+
+    /**
+     * 数据状态：-1-删除，1-正常
+     */
+    private Integer flag;
+
+    /**
+     * 业务数据id
+     */
+    private Integer bizDataId;
+
+    /**
+     * 业务类型:1-南综光伏项目 2-业务工单 3-投诉建议
+     */
+    private Integer bizType;
 }
 
