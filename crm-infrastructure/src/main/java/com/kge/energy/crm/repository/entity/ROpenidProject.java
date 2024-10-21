@@ -1,9 +1,10 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 项目关系(ROpenidProject)实体类
@@ -16,50 +17,50 @@ import com.baomidou.mybatisplus.annotation.*;
 public class ROpenidProject {
 
     @TableId(type = IdType.AUTO)
-    private Integer openProjectId; 
+    private Integer id;
 
     /**
      * b_openid主键
      */
-    private Integer openId; 
+    private Integer openId;
 
     /**
      * b_project主键
      */
-    private Integer projectId; 
+    private Integer projectId;
 
     /**
      * 软删除标识
      */
-    private Integer flag; 
+    private Integer flag;
 
     /**
      * 创建用户ID
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer createUserId; 
+    private Integer createUserId;
 
     /**
      * 创建时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime createTime; 
+    private LocalDateTime createTime;
 
     /**
      * 修改用户ID
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer modifyUserId; 
+    private Integer modifyUserId;
 
     /**
      * 修改时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime modifyTime; 
+    private LocalDateTime modifyTime;
 
     /**
      * 备注
      */
-    private String remark; 
+    private String remark;
 }
 

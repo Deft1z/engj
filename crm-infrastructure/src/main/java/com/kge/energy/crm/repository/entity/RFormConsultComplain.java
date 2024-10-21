@@ -19,12 +19,12 @@ public class RFormConsultComplain {
      * 工单/合同-投诉对应表
      */
     @TableId(type = IdType.AUTO)
-    private Integer consultComplainId; 
+    private Integer id;
 
     /**
      * 工单ID，工单1对多投诉
      */
-    private Integer consultId; 
+    private Integer consultId;
 
     /**
      * 投诉ID

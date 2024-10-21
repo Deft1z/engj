@@ -1,11 +1,10 @@
 package com.kge.energy.crm.repository.dao;
 
-import com.kge.energy.crm.repository.mapper.ROrganizationServiceTypeMapper;
-import com.kge.energy.crm.repository.entity.ROrganizationServiceType;
-import jakarta.annotation.Resource;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.ROrganizationServiceType;
+import com.kge.energy.crm.repository.mapper.ROrganizationServiceTypeMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * 公司服务清单(ROrganizationServiceType)表数据库访问层

@@ -20,7 +20,7 @@ public class RRoleResource {
      * 角色资源表
      */
     @TableId(type = IdType.AUTO)
-    private Integer roleResourceId;
+    private Integer id;
 
     /**
      * b_role主键

@@ -1,9 +1,10 @@
 package com.kge.energy.crm.repository.entity;
 
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 公司服务清单(ROrganizationServiceType)实体类
@@ -19,55 +20,55 @@ public class ROrganizationServiceType {
      * 公司服务关系id
      */
     @TableId(type = IdType.AUTO)
-    private Integer organizationFormTypeId; 
+    private Integer id;
 
     /**
      * 公司
      */
-    private Integer organizationId; 
+    private Integer organizationId;
 
     /**
      * 服务
      */
-    private Integer formTypeId; 
+    private Integer formTypeId;
 
     /**
      * 排序
      */
-    private Integer sort; 
+    private Integer sort;
 
     /**
      * 软删除标识
      */
-    private Integer flag; 
+    private Integer flag;
 
     /**
      * 创建用户ID
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer createUserId; 
+    private Integer createUserId;
 
     /**
      * 创建时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime createTime; 
+    private LocalDateTime createTime;
 
     /**
      * 修改用户ID
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Integer modifyUserId; 
+    private Integer modifyUserId;
 
     /**
      * 修改时间
      */
     @TableField(insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
-    private LocalDateTime modifyTime; 
+    private LocalDateTime modifyTime;
 
     /**
      * 备注
      */
-    private String remark; 
+    private String remark;
 }
 

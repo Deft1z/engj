@@ -3,7 +3,7 @@
 <mapper namespace="com.kge.energy.crm.repository.mapper.ROrganizationServiceTypeMapper">
 
     <resultMap type="com.kge.energy.crm.repository.entity.ROrganizationServiceType" id="ROrganizationServiceTypeMap">
-        <result property="organizationFormTypeId" column="organization_form_type_id" jdbcType="INTEGER"/>
+        <result property="id" column="id" jdbcType="INTEGER"/>
         <result property="organizationId" column="organization_id" jdbcType="INTEGER"/>
         <result property="formTypeId" column="form_type_id" jdbcType="INTEGER"/>
         <result property="sort" column="sort" jdbcType="INTEGER"/>

@@ -3,7 +3,7 @@
 <mapper namespace="com.kge.energy.crm.repository.mapper.RFormConsultComplainMapper">
 
     <resultMap type="com.kge.energy.crm.repository.entity.RFormConsultComplain" id="RFormConsultComplainMap">
-        <result property="consultComplainId" column="consult_complain_id" jdbcType="INTEGER"/>
+        <result property="id" column="id" jdbcType="INTEGER"/>
         <result property="consultId" column="consult_id" jdbcType="INTEGER"/>
         <result property="complainId" column="complain_id" jdbcType="INTEGER"/>
     </resultMap>

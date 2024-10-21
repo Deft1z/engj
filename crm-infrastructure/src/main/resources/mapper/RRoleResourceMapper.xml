@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kge.energy.crm.repository.mapper.RRoleResourceMapper">
     <resultMap type="com.kge.energy.crm.repository.entity.RRoleResource" id="RRoleResourceMap">
-        <result property="roleResourceId" column="role_resource_id" jdbcType="INTEGER"/>
+        <result property="id" column="id" jdbcType="INTEGER"/>
         <result property="roleId" column="role_id" jdbcType="INTEGER"/>
         <result property="resourceId" column="resource_id" jdbcType="INTEGER"/>
         <result property="authRead" column="auth_read" jdbcType="INTEGER"/>
