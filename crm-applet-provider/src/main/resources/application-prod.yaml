@@ -47,7 +47,7 @@ epcpv:
   inststat: api/v1/pv/project/inst/capacity/stat
 
 edata:
-  baseUrl: http://localhost:9052
+  baseUrl: http://172.16.17.157:9052
 
 loginAttention:
   sendee: 13632243930,13288012316,13702470083,13250729542,13609089507,18613028815,13560226979,13538985351

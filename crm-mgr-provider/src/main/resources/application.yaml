@@ -62,7 +62,7 @@ wechat:
     contractFinishTemplate: ExldQ4nH-DN-RYHBRqmTEo153sPr-XswYZ5Buf1bqGU
     wxUrl: ${wechat.common.wxUrl}
     version: developer
-    envVersion: developer
+    envVersion: trial
     agencyOrderPage: /pages/user/order/order
   official-account:
     appId: wxa3cbdc535f7b834b

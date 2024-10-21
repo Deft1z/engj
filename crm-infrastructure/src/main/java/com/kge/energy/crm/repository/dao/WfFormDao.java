@@ -10,10 +10,7 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entityext.param.CmsCommentParam;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
-import com.kge.energy.crm.repository.entityext.result.FlowResult;
-import com.kge.energy.crm.repository.entityext.result.FormResult;
-import com.kge.energy.crm.repository.entityext.result.FormWithdrawReturnResult;
+import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.repository.mapper.CmsCommentMapper;
 import com.kge.energy.crm.repository.mapper.WfFormMapper;
 import lombok.RequiredArgsConstructor;
@@ -79,28 +76,8 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         return list;
     }
 
-    private CmsCommentResult findRootComment(List<CmsCommentResult> allComments, CmsCommentResult targetComment) {
-        // 用于快速查找记录的映射
-        Map<Integer, CmsCommentResult> recordMap = new HashMap<>();
-        for(CmsCommentResult comment : allComments){
-            recordMap.put(comment.getCommentId(), comment);
-        }
-        return findRootCommentRecursive(recordMap, targetComment);
-    }
-
-    private static CmsCommentResult findRootCommentRecursive(Map<Integer, CmsCommentResult> recordMap, CmsCommentResult currentRecord) {
-        if (currentRecord.getParentCommentId() == null) {
-            return currentRecord; // 找到根节点
-        }
-
-        // 获取当前记录的父记录
-        CmsCommentResult parentRecord = recordMap.get(currentRecord.getParentCommentId());
-        if (parentRecord == null) {
-            throw new IllegalArgumentException("Parent record not found");
-        }
-
-        // 递归查找父记录的根节点
-        return findRootCommentRecursive(recordMap, parentRecord);
+    public FormDetailResult getFormDetail(Integer formId, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.getFormDetail(formId, dataEnums);
     }
 
 }

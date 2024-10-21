@@ -61,7 +61,7 @@ wechat:
     feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
     wxUrl: ${wechat.common.wxUrl}
     version: developer
-    envVersion: developer
+    envVersion: trial
     agencyOrderPage: /pages/user/order/order
   official-account:
     appId: wxa3cbdc535f7b834b

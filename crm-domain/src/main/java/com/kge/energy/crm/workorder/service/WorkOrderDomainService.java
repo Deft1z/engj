@@ -33,14 +33,8 @@ import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.user.service.UserDomainService;
-import com.kge.energy.crm.workorder.req.WfFormFlowReq;
-import com.kge.energy.crm.workorder.req.WfFormPageReq;
-import com.kge.energy.crm.workorder.req.WorkOrderAddReq;
-import com.kge.energy.crm.workorder.req.WorkOrderUpdateReq;
-import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
-import com.kge.energy.crm.workorder.resp.WfFormFlowListResp;
-import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
-import com.kge.energy.crm.workorder.resp.WfFormPageResp;
+import com.kge.energy.crm.workorder.req.*;
+import com.kge.energy.crm.workorder.resp.*;
 import com.kge.energy.crm.workorder.util.WorkFlowCommentUtil;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
@@ -152,6 +146,12 @@ public class WorkOrderDomainService {
 
         return true;
     }
+
+    public WfFormDetailResp getFormDetail(WfFormDetailReq req) {
+        DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
+        return BeanUtil.copyProperties(wfFormDao.getFormDetail(req.getFormId(), dataEnums), WfFormDetailResp.class);
+    }
+
 
     public PageResp<WfFormPageResp> getByPage(WfFormPageReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();

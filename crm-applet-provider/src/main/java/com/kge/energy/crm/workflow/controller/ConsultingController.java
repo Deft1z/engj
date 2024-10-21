@@ -5,11 +5,9 @@ import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.controller.ComplainController;
-import com.kge.energy.crm.workorder.req.WfFormFlowReq;
-import com.kge.energy.crm.workorder.req.WfFormPageReq;
-import com.kge.energy.crm.workorder.req.WorkOrderAddReq;
-import com.kge.energy.crm.workorder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workorder.req.*;
 import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
+import com.kge.energy.crm.workorder.resp.WfFormDetailResp;
 import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workorder.resp.WfFormPageResp;
 import com.kge.energy.crm.workorder.service.WorkOrderDomainService;
@@ -54,6 +52,12 @@ public class ConsultingController {
         } else {
             return this.getByPage(req);
         }
+    }
+
+    @Operation(summary = "获取工单详情")
+    @PostMapping(value = "/getFormDetail")
+    public CommonResult<WfFormDetailResp> getFormDetail(@Valid @RequestBody WfFormDetailReq req) {
+        return CommonResult.suc(workOrderDomainService.getFormDetail(req));
     }
 
     @Operation(summary = "获取撤回退回工单列表")
