@@ -30,7 +30,6 @@
         <if test="systemType != null and systemType != ''">
             and system_type = #{systemType}
         </if>
-        and resource_id > 499
         order by sort
     </select>
 
@@ -50,7 +49,6 @@
           and ur.tenant_id = #{tenantId}
           and r.system_type = #{systemType}
           and ur.user_id = #{userId}
-          and r.resource_id > 499
         order by r.sort
     </select>
 </mapper>
