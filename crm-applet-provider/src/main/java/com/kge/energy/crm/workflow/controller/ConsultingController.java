@@ -56,7 +56,7 @@ public class ConsultingController {
 
     @Operation(summary = "获取工单详情")
     @PostMapping(value = "/getFormDetail")
-    public CommonResult<WfFormDetailResp> getFormDetail(@Valid @RequestBody WfFormDetailReq req) {
+    public CommonResult<WfFormPageResp> getFormDetail(@Valid @RequestBody WfFormDetailReq req) {
         return CommonResult.suc(workOrderDomainService.getFormDetail(req));
     }
 
