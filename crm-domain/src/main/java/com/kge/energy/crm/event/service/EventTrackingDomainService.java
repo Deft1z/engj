@@ -31,7 +31,7 @@ public class EventTrackingDomainService {
         Integer userId = Math.toIntExact(userInfoDto.getUserId());
         Integer tenantId = userInfoDto.getTenantId();
 
-        EtEvent etEvent = etEventDao.findExistsEvent(systemType, req.getEventKey());
+        EtEvent etEvent = etEventDao.findExistsEvent(systemType, req.getEventKey(), tenantId);
         if (ObjectUtil.isNull(etEvent)) {
             etEvent = new EtEvent()
                     .setSystemType(systemType)
