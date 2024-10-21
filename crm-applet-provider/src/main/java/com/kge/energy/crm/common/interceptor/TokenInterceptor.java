@@ -84,7 +84,11 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
             log.error("用户无挂靠组织，用户ID: {}", userInfoDto.getUserId());
         }
 
-        if (!checkPermission(systemType, method, url)) {
+        boolean isPermissionWhiteUrl = authProperties.getPermission()
+                .getWhiteList()
+                .stream()
+                .anyMatch(item -> ANT_PATH_MATCHER.match(item, url));
+        if (!isPermissionWhiteUrl && !checkPermission(systemType, method, url)) {
             log.error("用户Id {} 无权限访问接口：{}", uid, url);
             throw new ServiceException("权限不足");
         }

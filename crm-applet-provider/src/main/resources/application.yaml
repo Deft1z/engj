@@ -89,6 +89,9 @@ auth:
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
       - ${server.servlet.context-path}/wechat/login
+  permission:
+    white-list:
+      - ${server.servlet.context-path}/eventTracking/report
 
 epcpv:
   allregions: api/v1/pv/project/dim/regions
