@@ -1,6 +1,8 @@
 package com.kge.energy.crm.wechat.login.controller;
 
+import cn.hutool.json.JSONObject;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class WeChatLoginController {
 
     private final WeChatLoginService weChatLoginService;
+
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     /**
      * 用户登录
@@ -54,7 +58,10 @@ public class WeChatLoginController {
         return CommonResult.suc(weChatLoginService.getWxLoginUserInfo());
     }
 
-
+    @PostMapping("/baseData/wechat/getWeChatAppletUrlLink")
+    public CommonResult<String> getWeChatAppletUrlLink(@RequestBody JSONObject json) {
+        return CommonResult.suc(weChatAppletInfraService.getWeChatAppletUrlLink(json.getStr("path"), json.getStr("query")));
+    }
 }
 
 

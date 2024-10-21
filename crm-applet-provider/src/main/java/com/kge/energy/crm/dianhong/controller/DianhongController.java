@@ -2,11 +2,14 @@ package com.kge.energy.crm.dianhong.controller;
 
 import com.kge.energy.crm.dianhong.resp.DhStatisticResp;
 import com.kge.energy.crm.dianhong.service.DianhongService;
+import com.kge.energy.dh.req.DeviceControlReq;
+import com.kge.energy.dh.req.DeviceEnableReq;
+import com.kge.energy.dh.resp.DeviceControlResp;
+import com.kge.energy.dh.resp.DeviceEnableResp;
 import com.kge.platform.framework.common.net.CommonResult;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +21,16 @@ public class DianhongController {
     @GetMapping("/dianhong/getDianhongStatistic")
     public CommonResult<DhStatisticResp> selectPcsDeviceList() {
         return CommonResult.suc(dianhongService.getDianhongStatistic());
+    }
+
+    @PostMapping("/dianhong/setControlEnable")
+    public CommonResult<DeviceEnableResp> setControlEnable(@Valid @RequestBody DeviceEnableReq req){
+        return CommonResult.suc(dianhongService.setControlEnable(req));
+    }
+
+    @PostMapping("/dianhong/setControlPercent")
+    public CommonResult<DeviceControlResp> setControlPercent(@Valid @RequestBody DeviceControlReq req){
+        return CommonResult.suc(dianhongService.setControlPercent(req));
     }
 
 }
