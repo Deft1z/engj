@@ -5,10 +5,12 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.ConstParam;
+import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
@@ -19,21 +21,22 @@ import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishMsgReq;
 import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishValueReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
-import com.kge.energy.crm.repository.dao.BUserDao;
-import com.kge.energy.crm.repository.dao.ScServiceContractDao;
-import com.kge.energy.crm.repository.dao.WfFormDao;
-import com.kge.energy.crm.repository.dao.WfFormFlowDao;
+import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entity.ScServiceContract;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
+import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.workorder.req.ServiceContractAddReq;
 import com.kge.energy.crm.workorder.req.ServiceContractDetailReq;
 import com.kge.energy.crm.workorder.req.ServiceContractReq;
 import com.kge.energy.crm.workorder.req.ServiceContractUpdateProjectTimeReq;
 import com.kge.energy.crm.workorder.resp.ServiceContractResp;
+import com.kge.energy.msg.dto.UserContactDto;
+import com.kge.energy.msg.param.ContractAddMsgToUserParam;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -56,6 +60,9 @@ public class ServiceContractDomainService {
     private final WeChatAppletProperties weChatAppletProperties;
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final DataPermissionDomainService dataPermissionDomainService;
+    private final BOrganizationDao bOrganizationDao;
+    private final UserDomainService userDomainService;
+    private final MsgDomainService msgDomainService;
 
     public List<ServiceContractResp> getServiceContractList(ServiceContractReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
@@ -103,6 +110,8 @@ public class ServiceContractDomainService {
         scServiceContractDao.save(scServiceContract);
 
         //变更工单信息
+        WfForm wfForm = wfFormDao.getById(req.getFormId());
+        Integer currentOrgId = wfForm.getCurrentOrgId();
         LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
                 .set(WfForm::getStatus, ConstParam.Processed)
                 .set(WfForm::getSubStatus, ConstParam.Processed)
@@ -125,6 +134,24 @@ public class ServiceContractDomainService {
                 .setTenantId(operator.getTenantId())
                 .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
+
+        //发送微信小程序消息，通知客户
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
+        ContractAddMsgToUserParam msgParam = new ContractAddMsgToUserParam();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
+            List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
+            msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
+                    .setOrderCode(fromContent.getCode())
+                    .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
+                    .setServicePerson(bUserDao.getById(operator.getUserId()).getRealname())
+                    .setStatus(ConstParam.FlowCompanyContract)
+                    .setAddTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+            );
+        }
 
         return true;
     }
