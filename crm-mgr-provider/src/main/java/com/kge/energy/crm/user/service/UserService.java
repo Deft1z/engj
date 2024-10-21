@@ -29,7 +29,6 @@ import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.platform.framework.common.exception.ServiceException;
-import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -107,7 +106,8 @@ public class UserService {
         return MD5.create().digestHex(req.getName() + sSystemConfig.getConfig());
     }
 
-    public CommonResult<UserLoginResp> userLogin(UserLoginReq req) {
+    @Transactional
+    public UserLoginResp userLogin(UserLoginReq req) {
         BUser bUser = null;
 
         try {
@@ -159,7 +159,7 @@ public class UserService {
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.SUCCESS, null);
 
-            return CommonResult.suc(userLoginResp);
+            return userLoginResp;
 
         } catch (Exception e) {
             log.error("pc login error: ", e);
@@ -171,7 +171,6 @@ public class UserService {
 
             throw new ServiceException("登录失败");
         }
-
     }
 
     public CurrentUserInfoResp currentUserInfo() {
