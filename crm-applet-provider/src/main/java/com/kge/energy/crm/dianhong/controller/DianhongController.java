@@ -2,8 +2,10 @@ package com.kge.energy.crm.dianhong.controller;
 
 import com.kge.energy.crm.dianhong.resp.DhStatisticResp;
 import com.kge.energy.crm.dianhong.service.DianhongService;
+import com.kge.energy.dh.req.DeviceControlEnableReq;
 import com.kge.energy.dh.req.DeviceControlReq;
 import com.kge.energy.dh.req.DeviceEnableReq;
+import com.kge.energy.dh.resp.DeviceControlEnableResp;
 import com.kge.energy.dh.resp.DeviceControlResp;
 import com.kge.energy.dh.resp.DeviceEnableResp;
 import com.kge.platform.framework.common.net.CommonResult;
@@ -31,6 +33,11 @@ public class DianhongController {
     @PostMapping("/dianhong/setControlPercent")
     public CommonResult<DeviceControlResp> setControlPercent(@Valid @RequestBody DeviceControlReq req){
         return CommonResult.suc(dianhongService.setControlPercent(req));
+    }
+
+    @PostMapping("/dianhong/getControlEnable")
+    public CommonResult<DeviceControlEnableResp> getControlEnable(@Valid @RequestBody DeviceControlEnableReq req){
+        return CommonResult.suc(dianhongService.getControlEnable(req));
     }
 
 }
