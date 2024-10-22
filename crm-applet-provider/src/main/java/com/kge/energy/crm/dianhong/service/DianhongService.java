@@ -4,8 +4,10 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.util.NumberUtils;
 import com.kge.energy.crm.dianhong.resp.DhStatisticResp;
+import com.kge.energy.dh.req.DeviceControlEnableReq;
 import com.kge.energy.dh.req.DeviceControlReq;
 import com.kge.energy.dh.req.DeviceEnableReq;
+import com.kge.energy.dh.resp.DeviceControlEnableResp;
 import com.kge.energy.dh.resp.DeviceControlResp;
 import com.kge.energy.dh.resp.DeviceEnableResp;
 import com.kge.energy.dh.service.SuiliangPvService;
@@ -41,6 +43,10 @@ public class DianhongService {
         }
 
         return suiliangPvService.setControlPercent(req);
+    }
+
+    public DeviceControlEnableResp getControlEnable(DeviceControlEnableReq req) {
+        return suiliangPvService.getControlEnable(req);
     }
 
 }
