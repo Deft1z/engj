@@ -203,6 +203,7 @@ public class UserService {
         return new CurrentUserInfoResp()
                 .setUserId(Math.toIntExact(userInfoDto.getUserId()))
                 .setUserName(userInfoDto.getUserName())
+                .setTenantId(userInfoDto.getTenantId())
                 .setUserName(userInfoDto.getUserName())
                 .setRoleList(roles)
                 .setOrganizationList(orgs);
