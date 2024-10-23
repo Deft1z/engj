@@ -26,8 +26,7 @@ public class UpdateUserReq {
     @NotNull
     private Integer userId;
 
-    @Schema(description = "用户名称", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank
+    @Schema(description = "用户名称")
     private String name;
 
     @Schema(description = "真实姓名", requiredMode = Schema.RequiredMode.REQUIRED)

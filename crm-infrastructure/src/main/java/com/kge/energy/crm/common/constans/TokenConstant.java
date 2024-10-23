@@ -7,7 +7,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TokenConstant {
 
-    private TokenConstant(){}
+    private TokenConstant() {
+    }
 
     public static final String HEADER_KEY = "Authorization";
 
@@ -20,7 +21,7 @@ public class TokenConstant {
 
     public static final TimeUnit PC_EXPIRED_TIMEUNIT = TimeUnit.HOURS;
 
-    public static final long APPLET_EXPIRED_TIMEOUT = 7 * 24L;
+    public static final long APPLET_EXPIRED_TIMEOUT = 30 * 24L;
 
     public static final TimeUnit APPLET_EXPIRED_TIMEUNIT = TimeUnit.HOURS;
 

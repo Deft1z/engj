@@ -13,13 +13,11 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.LoginPlatformEnums;
-import com.kge.energy.crm.enums.LoginResultEnums;
-import com.kge.energy.crm.enums.RoleEnums;
-import com.kge.energy.crm.enums.SystemTypeEnum;
+import com.kge.energy.crm.enums.*;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.log.service.SysOperateLogHandleService;
 import com.kge.energy.crm.login.SysLoginLogHandleService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.repository.dao.*;
@@ -29,6 +27,7 @@ import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
+import com.kge.energy.crm.wechat.login.resp.WxAppletRecommendQrCodeResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.LeaderLoginMsgToRoleParam;
@@ -42,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,6 +66,7 @@ public class WeChatLoginService {
     private final UserDomainService userDomainService;
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final SysLoginLogHandleService sysLoginLogHandleService;
+    private final SysOperateLogHandleService sysOperateLogHandleService;
 
     private final BOrganizationDao bOrganizationDao;
     private final BRoleDao bRoleDao;
@@ -108,13 +109,16 @@ public class WeChatLoginService {
                         .findFirst()
                         .orElse(bUsers.get(0));
                 //判断是否禁用
-                if (ObjectUtil.equal(user.getStatus(), 1)) {
+                if (ObjectUtil.equal(user.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
                     throw new ServiceException("账号已禁用");
                 }
 
             } else {
                 // 新用户默认挂靠到南投-未挂靠组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
+                // 新用户的推荐用户字段绑定
+                if (ObjectUtil.isNotNull(req.getRecommendUserId()))
+                    user.setRecommendUserId(req.getRecommendUserId());
             }
 
             String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT,
@@ -298,7 +302,6 @@ public class WeChatLoginService {
         if (ObjUtil.isNull(bUser)) {
             return null;
         }
-
         return new WxLoginUserInfoResp()
                 .setTenantId(currentUserInfo.getTenantId())
                 .setTenantName(currentUserInfo.getTenantName())
@@ -323,4 +326,22 @@ public class WeChatLoginService {
                         ).collect(Collectors.toList()));
     }
 
+    /**
+     * 获取小程序url
+     */
+    public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode() {
+        UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
+
+        String query = "userId=" + currentUserInfo.getUserId().toString();
+        String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, query);
+        String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy:MM:dd:HH:mm:ss"));
+
+        sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
+                "生成推荐二维码【" + currentUserInfo.getUserId() + ", " + qrCodeUrl + "】"
+        );
+
+        return new WxAppletRecommendQrCodeResp()
+                .setUrl(qrCodeUrl)
+                .setExpireTime(expireTime);
+    }
 }

@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
@@ -147,7 +148,7 @@ public class ServiceContractDomainService {
                     .setServicePerson(bUserDao.getById(operator.getUserId()).getRealname())
                     .setStatus(ConstParam.FlowCompanyContract)
                     .setAddTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId())))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );

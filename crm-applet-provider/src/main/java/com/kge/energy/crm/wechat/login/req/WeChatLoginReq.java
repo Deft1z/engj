@@ -22,4 +22,9 @@ public class WeChatLoginReq {
      */
     private String jsCode;
 
+    /**
+     * 用户名
+     */
+    private Integer recommendUserId;
+
 }

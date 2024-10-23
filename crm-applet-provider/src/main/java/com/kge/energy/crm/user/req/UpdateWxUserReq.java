@@ -14,13 +14,10 @@ public class UpdateWxUserReq {
     @NotNull
     private Integer userId;
 
-    private String mobile;
-
     private String realname;
 
     private String company;
 
     private String address;
 
-    private String remark;
 }

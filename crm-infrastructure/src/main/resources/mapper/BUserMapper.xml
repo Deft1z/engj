@@ -22,6 +22,7 @@
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
         <result property="remark" column="remark" jdbcType="VARCHAR"/>
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+        <result property="recommendUserId" column="recommend_user_id" jdbcType="INTEGER"/>
     </resultMap>
 
     <select id="getUserRoles" resultType="com.kge.energy.crm.common.dto.UserInfoDto$Role">
