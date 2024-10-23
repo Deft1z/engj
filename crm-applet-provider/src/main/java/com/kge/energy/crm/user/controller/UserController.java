@@ -1,6 +1,5 @@
 package com.kge.energy.crm.user.controller;
 
-import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.user.req.UpdateWxUserReq;
 import com.kge.energy.crm.user.service.UserService;
 import com.kge.platform.framework.common.net.CommonResult;
@@ -24,7 +23,6 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/baseData/userMrg/wxUser/update")
-    @ConvertToGoFormats
     public CommonResult<Boolean> updateWxUser(@Validated @RequestBody UpdateWxUserReq req) {
         return CommonResult.suc(userService.updateWxUser(req));
     }
