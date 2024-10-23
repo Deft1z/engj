@@ -46,3 +46,5 @@ pom.xml.*
 **/pom.xml.*
 
 **/rebel.xml
+
+**/git-flow-plus.config

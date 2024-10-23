@@ -57,7 +57,7 @@ public class UserMsgService {
         List<UserMsgListResult> list = getByPage(req).getRecords();
         //数据转换
         List<UserMsgExcelResp> excelList = BeanUtil.copyToList(list, UserMsgExcelResp.class);
-        ExcelUtils.write(response, "用户消息数据.xls", "用户消息列表", UserMsgExcelResp.class, excelList);
+        ExcelUtils.write(response, "用户消息数据.xls", "用户消息列表", UserMsgExcelResp.class, excelList, req.getExportType());
     }
 
     public IPage<UserMsgListResult> getByPage(UserMsgListReq req) {

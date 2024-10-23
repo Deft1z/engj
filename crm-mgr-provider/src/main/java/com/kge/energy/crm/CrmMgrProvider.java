@@ -6,12 +6,14 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @EnableTransactionManagement
+@EnableScheduling
 @MapperScan("com.kge.**.mapper")
 @SpringBootApplication(scanBasePackages = "com.kge")
 public class CrmMgrProvider {

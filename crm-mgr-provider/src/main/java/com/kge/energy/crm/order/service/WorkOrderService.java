@@ -68,7 +68,7 @@ public class WorkOrderService {
         List<WfFormExportDto> exportDtoList = BeanUtil.copyToList(all, WfFormExportDto.class);
 
         //ExcelUtils写excel 响应给前端
-        ExcelUtils.write(response, "工单列表数据.xlsx", "工单列表数据", WfFormExportDto.class, exportDtoList);
+        ExcelUtils.write(response, "工单列表数据.xls", "工单列表数据", WfFormExportDto.class, exportDtoList, req.getExportType());
     }
 
 

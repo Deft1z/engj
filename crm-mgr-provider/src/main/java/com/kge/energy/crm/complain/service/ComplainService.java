@@ -170,7 +170,7 @@ public class ComplainService {
         //执行查询
         List<ComplainResult> complainListBySearch = wComplainDao.getComplainListForExport(complainListParam, userInfoDto, dataEnums);
         //ExcelUtils工具类写excel 响应给前端
-        ExcelUtils.write(response, "投诉列表数据.xlsx", "投诉列表数据", ComplainResult.class, complainListBySearch);
+        ExcelUtils.write(response, "投诉列表数据.xls", "投诉列表数据", ComplainResult.class, complainListBySearch, req.getExportType());
         return true;
     }
 }
