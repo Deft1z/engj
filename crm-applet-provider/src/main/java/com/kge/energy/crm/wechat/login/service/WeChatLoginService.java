@@ -109,7 +109,7 @@ public class WeChatLoginService {
                         .findFirst()
                         .orElse(bUsers.get(0));
                 //判断是否禁用
-                if (ObjectUtil.equal(user.getStatus(), 1)) {
+                if (ObjectUtil.equal(user.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
                     throw new ServiceException("账号已禁用");
                 }
 
@@ -117,7 +117,7 @@ public class WeChatLoginService {
                 // 新用户默认挂靠到南投-未挂靠组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
                 // 新用户的推荐用户字段绑定
-                if(ObjectUtil.isNotNull(req.getRecommendUserId()))
+                if (ObjectUtil.isNotNull(req.getRecommendUserId()))
                     user.setRecommendUserId(req.getRecommendUserId());
             }
 
@@ -333,10 +333,10 @@ public class WeChatLoginService {
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
 
         String query = "userId=" + currentUserInfo.getUserId().toString();
-        String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null,query);
+        String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, query);
         String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy:MM:dd:HH:mm:ss"));
 
-        sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(),OperateModuleEnums.USER,
+        sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
                 "生成推荐二维码【" + currentUserInfo.getUserId() + ", " + qrCodeUrl + "】"
         );
 
