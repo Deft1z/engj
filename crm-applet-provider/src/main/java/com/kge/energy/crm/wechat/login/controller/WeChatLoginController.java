@@ -63,7 +63,6 @@ public class WeChatLoginController {
      * 获取小程序个人推荐二维码
      */
     @PostMapping("/baseData/wechat/recommendQrCode")
-    @ConvertToGoFormats
     public CommonResult<WxAppletRecommendQrCodeResp> getWxAppletRecommendQrCode() {
         return CommonResult.suc(weChatLoginService.getWxAppletRecommendQrCode());
     }

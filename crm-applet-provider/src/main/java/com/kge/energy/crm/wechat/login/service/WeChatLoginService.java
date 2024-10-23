@@ -9,8 +9,6 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
-import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -114,14 +112,11 @@ public class WeChatLoginService {
                 if (ObjectUtil.equal(user.getStatus(), 1)) {
                     throw new ServiceException("账号已禁用");
                 }
-                //如果扫描用户已经注册 推荐用户进行绑定
-//                if(ObjectUtil.isNotNull(req.getRecommendUserId()))
-//                    user.setRecommendUserId(req.getRecommendUserId());
 
             } else {
                 // 新用户默认挂靠到南投-未挂靠组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
-                // 新用户的推荐用户进行绑定
+                // 新用户的推荐用户字段绑定
                 if(ObjectUtil.isNotNull(req.getRecommendUserId()))
                     user.setRecommendUserId(req.getRecommendUserId());
             }
@@ -331,19 +326,18 @@ public class WeChatLoginService {
                         ).collect(Collectors.toList()));
     }
 
+    /**
+     * 获取小程序url
+     */
     public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode() {
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
-        BUser bUser = bUserDao.getById(currentUserInfo.getUserId());
 
-        //获取小程序url
-        //query
-        String query = "userId=" + bUser.getUserId().toString();
+        String query = "userId=" + currentUserInfo.getUserId().toString();
         String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null,query);
         String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy:MM:dd:HH:mm:ss"));
 
-        //记录生成推荐二维码的操作
-        sysOperateLogHandleService.saveLog(bUser.getTenantId(),OperateModuleEnums.USER,
-                "生成推荐二维码【" + bUser.getUserId() + ", " + qrCodeUrl + "】"
+        sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(),OperateModuleEnums.USER,
+                "生成推荐二维码【" + currentUserInfo.getUserId() + ", " + qrCodeUrl + "】"
         );
 
         return new WxAppletRecommendQrCodeResp()
