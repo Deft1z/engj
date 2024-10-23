@@ -9,17 +9,17 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.LoginPlatformEnums;
-import com.kge.energy.crm.enums.LoginResultEnums;
-import com.kge.energy.crm.enums.RoleEnums;
-import com.kge.energy.crm.enums.SystemTypeEnum;
+import com.kge.energy.crm.enums.*;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.log.service.SysOperateLogHandleService;
 import com.kge.energy.crm.login.SysLoginLogHandleService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.repository.dao.*;
@@ -29,6 +29,7 @@ import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
+import com.kge.energy.crm.wechat.login.resp.WxAppletRecommendQrCodeResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.LeaderLoginMsgToRoleParam;
@@ -42,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,6 +68,7 @@ public class WeChatLoginService {
     private final UserDomainService userDomainService;
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final SysLoginLogHandleService sysLoginLogHandleService;
+    private final SysOperateLogHandleService sysOperateLogHandleService;
 
     private final BOrganizationDao bOrganizationDao;
     private final BRoleDao bRoleDao;
@@ -111,10 +114,16 @@ public class WeChatLoginService {
                 if (ObjectUtil.equal(user.getStatus(), 1)) {
                     throw new ServiceException("账号已禁用");
                 }
+                //如果扫描用户已经注册 推荐用户进行绑定
+//                if(ObjectUtil.isNotNull(req.getRecommendUserId()))
+//                    user.setRecommendUserId(req.getRecommendUserId());
 
             } else {
                 // 新用户默认挂靠到南投-未挂靠组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
+                // 新用户的推荐用户进行绑定
+                if(ObjectUtil.isNotNull(req.getRecommendUserId()))
+                    user.setRecommendUserId(req.getRecommendUserId());
             }
 
             String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT,
@@ -298,7 +307,6 @@ public class WeChatLoginService {
         if (ObjUtil.isNull(bUser)) {
             return null;
         }
-
         return new WxLoginUserInfoResp()
                 .setTenantId(currentUserInfo.getTenantId())
                 .setTenantName(currentUserInfo.getTenantName())
@@ -323,4 +331,23 @@ public class WeChatLoginService {
                         ).collect(Collectors.toList()));
     }
 
+    public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode() {
+        UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
+        BUser bUser = bUserDao.getById(currentUserInfo.getUserId());
+
+        //获取小程序url
+        //query
+        String query = "userId=" + bUser.getUserId().toString();
+        String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null,query);
+        String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy:MM:dd:HH:mm:ss"));
+
+        //记录生成推荐二维码的操作
+        sysOperateLogHandleService.saveLog(bUser.getTenantId(),OperateModuleEnums.USER,
+                "生成推荐二维码【" + bUser.getUserId() + ", " + qrCodeUrl + "】"
+        );
+
+        return new WxAppletRecommendQrCodeResp()
+                .setUrl(qrCodeUrl)
+                .setExpireTime(expireTime);
+    }
 }

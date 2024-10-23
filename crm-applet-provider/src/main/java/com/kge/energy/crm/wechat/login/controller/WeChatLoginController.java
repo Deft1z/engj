@@ -7,6 +7,7 @@ import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
+import com.kge.energy.crm.wechat.login.resp.WxAppletRecommendQrCodeResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.energy.crm.wechat.login.service.WeChatLoginService;
 import com.kge.platform.framework.common.net.CommonResult;
@@ -58,10 +59,22 @@ public class WeChatLoginController {
         return CommonResult.suc(weChatLoginService.getWxLoginUserInfo());
     }
 
+    /**
+     * 获取小程序个人推荐二维码
+     */
+    @PostMapping("/baseData/wechat/recommendQrCode")
+    @ConvertToGoFormats
+    public CommonResult<WxAppletRecommendQrCodeResp> getWxAppletRecommendQrCode() {
+        return CommonResult.suc(weChatLoginService.getWxAppletRecommendQrCode());
+    }
+
+
     @PostMapping("/baseData/wechat/getWeChatAppletUrlLink")
     public CommonResult<String> getWeChatAppletUrlLink(@RequestBody JSONObject json) {
         return CommonResult.suc(weChatAppletInfraService.getWeChatAppletUrlLink(json.getStr("path"), json.getStr("query")));
     }
+
+
 }
 
 
