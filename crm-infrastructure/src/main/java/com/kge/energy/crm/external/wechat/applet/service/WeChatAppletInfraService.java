@@ -1,6 +1,5 @@
 package com.kge.energy.crm.external.wechat.applet.service;
 
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
@@ -81,8 +80,12 @@ public class WeChatAppletInfraService {
         return RestUtils.postForObject(url, req, SendSubscribeResp.class);
     }
 
+    /**
+     * 获取加密URLLink
+     * https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/url-link/generateUrlLink.html
+     */
     public String getWeChatAppletUrlLink(String path, String query) {
-        try{
+        try {
             String url = String.format("%s/wxa/generate_urllink?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
             JSONObject req = new JSONObject();
             req.set("path", path);
@@ -92,19 +95,19 @@ public class WeChatAppletInfraService {
             req.set("env_version", wechatAppletProperties.getEnvVersion());
             JSONObject rs = RestUtils.postForObject(url, req, JSONObject.class);
 
-            if(rs.getInt("errcode") == 0){
+            if (rs.getInt("errcode") == 0) {
                 return rs.getStr("url_link");
             } else {
                 return "";
             }
-        }catch (Exception e){
-            log.error("获取小程序url失败:",e);
+        } catch (Exception e) {
+            log.error("获取小程序url失败:", e);
             return "";
         }
     }
 
     public String getWeChatAppletUrlLink1(String path) {
-        try{
+        try {
             String url = String.format("%s/wxa/generate_urllink?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
             JSONObject req = new JSONObject();
 
@@ -120,13 +123,13 @@ public class WeChatAppletInfraService {
             req.set("env_version", wechatAppletProperties.getEnvVersion());
             JSONObject rs = RestUtils.postForObject(url, req, JSONObject.class);
 
-            if(rs.getInt("errcode") == 0){
+            if (rs.getInt("errcode") == 0) {
                 return rs.getStr("url_link");
             } else {
                 return "";
             }
-        }catch (Exception e){
-            log.error("获取小程序url失败:",e);
+        } catch (Exception e) {
+            log.error("获取小程序url失败:", e);
             return "";
         }
     }
