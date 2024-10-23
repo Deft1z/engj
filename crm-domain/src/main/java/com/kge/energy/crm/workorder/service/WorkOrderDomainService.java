@@ -16,10 +16,7 @@ import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
-import com.kge.energy.crm.common.util.AuthVerifyUtils;
-import com.kge.energy.crm.common.util.RedisLockUtils;
-import com.kge.energy.crm.common.util.RedisUtils;
-import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.common.util.*;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
@@ -35,7 +32,6 @@ import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.workorder.req.*;
 import com.kge.energy.crm.workorder.resp.*;
-import com.kge.energy.crm.workorder.util.WorkFlowCommentUtil;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -138,7 +134,7 @@ public class WorkOrderDomainService {
             msgParam.setCustomerName(content.getCustomerName());
             msgParam.setMobile(content.getMobile());
             msgParam.setRemark(req.getRemark());
-            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(wfForm.getFormId())));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -227,7 +223,7 @@ public class WorkOrderDomainService {
         }
 
         //处理流程节点评论
-        WorkFlowCommentUtil.handleWorkFlowComment(flowList);
+        WorkFlowCommentUtils.handleWorkFlowComment(flowList);
 
         //获取工单操作按钮
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.CONTRACT_LIST);
@@ -342,7 +338,7 @@ public class WorkOrderDomainService {
             msgParam.setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             msgParam.setCustomerName(fromContent.getCustomerName());
             msgParam.setMobile(fromContent.getMobile());
-            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -357,7 +353,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupAssign)
                         .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
@@ -422,7 +418,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowHasFeedback)
                     .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -491,7 +487,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowFinished)
                     .setFinishTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -556,7 +552,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowTerminated)
                     .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
             );
@@ -620,7 +616,7 @@ public class WorkOrderDomainService {
             withdrawMsgParam.setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             withdrawMsgParam.setOperator(RoleEnums.JT_CUSTOMER.getDesc());
             withdrawMsgParam.setContent(req.getContent());
-            withdrawMsgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
+            withdrawMsgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)));
             withdrawMsgParam.setTenantId(operator.getTenantId());
             withdrawMsgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(withdrawMsgParam);
@@ -635,7 +631,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupWithdraw)
                         .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
@@ -705,7 +701,7 @@ public class WorkOrderDomainService {
             msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             msgParam.setCompanyName(serviceUnit);
             msgParam.setContent(req.getContent());
-            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)));
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
             msgDomainService.sendCrmMsg(msgParam);
@@ -720,7 +716,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowCompanyReturn)
                         .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                 );
@@ -742,5 +738,5 @@ public class WorkOrderDomainService {
         redisUtils.setEx(WORK_CODE_CACHE_KEY_PREFIX + code, code, 24, TimeUnit.HOURS);
         return code;
     }
-
+    
 }

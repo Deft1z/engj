@@ -1,4 +1,4 @@
-package com.kge.energy.crm.workorder.util;
+package com.kge.energy.crm.common.util;
 
 import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WorkFlowCommentUtil {
+public class WorkFlowCommentUtils {
 
     public static void handleWorkFlowComment(List<FlowResult> flowList) {
         for(FlowResult flowResult : flowList){
