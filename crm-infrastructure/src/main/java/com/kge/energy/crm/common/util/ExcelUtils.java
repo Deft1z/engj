@@ -95,12 +95,12 @@ public class ExcelUtils {
         final String pdfSuffix = ".pdf";
         // 临时输出目录，需定期清理
         final String tmpDir = "/tmp/crm-excel-pdf/";
-        FileUtil.mkParentDirs(tmpDir);
 
         // 设置基础样式
         HorizontalCellStyleStrategy horizontalCellStyleStrategy = new HorizontalCellStyleStrategy(getHeadStyle(), getContentStyle());
         // 输出 Excel
         String excelPathname = tmpDir + fileMainName + IdUtil.fastSimpleUUID() + excelSuffix;
+        FileUtil.mkParentDirs(excelPathname);
         EasyExcel.write(excelPathname, head)
                 .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
                 .registerWriteHandler(horizontalCellStyleStrategy) //自定义样式
