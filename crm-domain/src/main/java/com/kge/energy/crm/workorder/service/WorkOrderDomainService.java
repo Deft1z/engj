@@ -31,7 +31,10 @@ import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.workorder.req.*;
-import com.kge.energy.crm.workorder.resp.*;
+import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
+import com.kge.energy.crm.workorder.resp.WfFormFlowListResp;
+import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
+import com.kge.energy.crm.workorder.resp.WfFormPageResp;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -126,18 +129,19 @@ public class WorkOrderDomainService {
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
-            msgParam.setOrderName(content.getBusinessName());
-            msgParam.setArea(content.getArea());
-            msgParam.setElectricityCapacity(content.getElectricityCapacity());
-            msgParam.setOrderCode(content.getCode());
-            msgParam.setCreateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-            msgParam.setCustomerName(content.getCustomerName());
-            msgParam.setMobile(content.getMobile());
-            msgParam.setRemark(req.getRemark());
-            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(wfForm.getFormId())));
-            msgParam.setTenantId(operator.getTenantId());
-            msgParam.setNotifyUsers(userContact);
-            msgDomainService.sendCrmMsg(msgParam);
+            msgDomainService.sendCrmMsg(msgParam.setOrderName(content.getBusinessName())
+                    .setArea(content.getArea())
+                    .setElectricityCapacity(content.getElectricityCapacity())
+                    .setOrderCode(content.getCode())
+                    .setCreateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setCustomerName(content.getCustomerName())
+                    .setMobile(content.getMobile())
+                    .setRemark(req.getRemark())
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(wfForm.getFormId())))
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+                    .setMsgBizId(wfForm.getFormId())
+            );
         }
 
         return true;
@@ -333,15 +337,16 @@ public class WorkOrderDomainService {
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, req.getCurrentOrgId(), operator.getTenantId());
-            msgParam.setOrderName(fromContent.getBusinessName());
-            msgParam.setOrderCode(fromContent.getCode());
-            msgParam.setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-            msgParam.setCustomerName(fromContent.getCustomerName());
-            msgParam.setMobile(fromContent.getMobile());
-            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)));
-            msgParam.setTenantId(operator.getTenantId());
-            msgParam.setNotifyUsers(userContact);
-            msgDomainService.sendCrmMsg(msgParam);
+            msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
+                    .setOrderCode(fromContent.getCode())
+                    .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setCustomerName(fromContent.getCustomerName())
+                    .setMobile(fromContent.getMobile())
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+                    .setMsgBizId(formId)
+            );
 
             if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
                 //发送微信小程序消息，通知客户
@@ -356,6 +361,7 @@ public class WorkOrderDomainService {
                         .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
+                        .setMsgBizId(formId)
                 );
             }
         }
@@ -421,6 +427,7 @@ public class WorkOrderDomainService {
                     .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
+                    .setMsgBizId(formId)
             );
         }
 
@@ -490,6 +497,7 @@ public class WorkOrderDomainService {
                     .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
+                    .setMsgBizId(formId)
             );
         }
 
@@ -555,6 +563,7 @@ public class WorkOrderDomainService {
                     .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
+                    .setMsgBizId(formId)
             );
         }
 
@@ -611,15 +620,16 @@ public class WorkOrderDomainService {
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), withdrawMsgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, formCurrentOrgId, operator.getTenantId());
-            withdrawMsgParam.setOrderName(fromContent.getBusinessName());
-            withdrawMsgParam.setOrderCode(fromContent.getCode());
-            withdrawMsgParam.setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-            withdrawMsgParam.setOperator(RoleEnums.JT_CUSTOMER.getDesc());
-            withdrawMsgParam.setContent(req.getContent());
-            withdrawMsgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)));
-            withdrawMsgParam.setTenantId(operator.getTenantId());
-            withdrawMsgParam.setNotifyUsers(userContact);
-            msgDomainService.sendCrmMsg(withdrawMsgParam);
+            msgDomainService.sendCrmMsg(withdrawMsgParam.setOrderName(fromContent.getBusinessName())
+                    .setOrderCode(fromContent.getCode())
+                    .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setOperator(RoleEnums.JT_CUSTOMER.getDesc())
+                    .setContent(req.getContent())
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+                    .setMsgBizId(formId)
+            );
 
             if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
                 //发送微信小程序消息，通知客户
@@ -634,6 +644,7 @@ public class WorkOrderDomainService {
                         .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
+                        .setMsgBizId(formId)
                 );
             }
         }
@@ -696,15 +707,16 @@ public class WorkOrderDomainService {
         if (!roleEnums.isEmpty()) {
             String serviceUnit = bOrganizationDao.getById(currentOrgId).getName();
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
-            msgParam.setOrderName(fromContent.getBusinessName());
-            msgParam.setOrderCode(fromContent.getCode());
-            msgParam.setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-            msgParam.setCompanyName(serviceUnit);
-            msgParam.setContent(req.getContent());
-            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)));
-            msgParam.setTenantId(operator.getTenantId());
-            msgParam.setNotifyUsers(userContact);
-            msgDomainService.sendCrmMsg(msgParam);
+            msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
+                    .setOrderCode(fromContent.getCode())
+                    .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setCompanyName(serviceUnit)
+                    .setContent(req.getContent())
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+                    .setMsgBizId(formId)
+            );
 
             if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
                 //发送微信小程序消息，通知客户
@@ -719,6 +731,7 @@ public class WorkOrderDomainService {
                         .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId)))
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
+                        .setMsgBizId(formId)
                 );
             }
         }
@@ -738,5 +751,5 @@ public class WorkOrderDomainService {
         redisUtils.setEx(WORK_CODE_CACHE_KEY_PREFIX + code, code, 24, TimeUnit.HOURS);
         return code;
     }
-    
+
 }

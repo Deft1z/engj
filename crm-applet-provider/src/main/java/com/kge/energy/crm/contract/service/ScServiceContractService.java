@@ -166,17 +166,18 @@ public class ScServiceContractService {
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
-            msgParam.setContractCode(contract.getCode());
-            msgParam.setContractName(contract.getName());
-            msgParam.setSignedTime(contract.getSigningTime() != null ? contract.getSigningTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "");
-            msgParam.setStartTime(contract.getProjectStartTime() != null ? contract.getProjectStartTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "");
-            msgParam.setEndTime(contract.getProjectEndTime() != null ? contract.getProjectEndTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "");
-            msgParam.setSatisfaction(req.getSatisfaction().toString());
-            msgParam.setEvaluate(req.getEvaluate());
-            msgParam.setTenantId(operator.getTenantId());
-            msgParam.setNotifyUsers(userContact);
-            msgParam.setPathUrl(null);
-            msgDomainService.sendCrmMsg(msgParam);
+            msgDomainService.sendCrmMsg(msgParam.setContractCode(contract.getCode())
+                    .setContractName(contract.getName())
+                    .setSignedTime(contract.getSigningTime() != null ? contract.getSigningTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "")
+                    .setStartTime(contract.getProjectStartTime() != null ? contract.getProjectStartTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "")
+                    .setEndTime(contract.getProjectEndTime() != null ? contract.getProjectEndTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)) : "")
+                    .setSatisfaction(req.getSatisfaction().toString())
+                    .setEvaluate(req.getEvaluate())
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+                    .setPathUrl(null)
+                    .setMsgBizId(contract.getServiceContractId())
+            );
         }
     }
 

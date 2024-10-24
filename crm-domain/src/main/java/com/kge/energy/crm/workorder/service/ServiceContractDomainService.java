@@ -151,6 +151,7 @@ public class ServiceContractDomainService {
                     .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId())))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
+                    .setMsgBizId(scServiceContract.getServiceContractId())
             );
         }
 
