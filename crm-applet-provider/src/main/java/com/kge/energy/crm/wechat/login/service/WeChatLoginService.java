@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -334,7 +333,7 @@ public class WeChatLoginService {
 
         String query = "userId=" + currentUserInfo.getUserId().toString();
         String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, query);
-        String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy:MM:dd:HH:mm:ss"));
+        String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"));
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
                 "生成推荐二维码【" + currentUserInfo.getUserId() + ", " + qrCodeUrl + "】"
