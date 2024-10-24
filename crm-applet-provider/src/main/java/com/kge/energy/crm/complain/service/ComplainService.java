@@ -132,7 +132,7 @@ public class ComplainService {
                     .setContent(wComplain.getContent())
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null, 30))
                     .setMsgBizId(id)
             );
         }

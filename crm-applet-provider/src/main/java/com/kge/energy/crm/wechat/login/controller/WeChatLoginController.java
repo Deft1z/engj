@@ -66,14 +66,6 @@ public class WeChatLoginController {
     public CommonResult<WxAppletRecommendQrCodeResp> getWxAppletRecommendQrCode() {
         return CommonResult.suc(weChatLoginService.getWxAppletRecommendQrCode());
     }
-
-
-    @PostMapping("/baseData/wechat/getWeChatAppletUrlLink")
-    public CommonResult<String> getWeChatAppletUrlLink(@RequestBody JSONObject json) {
-        return CommonResult.suc(weChatAppletInfraService.getWeChatAppletUrlLink(json.getStr("path"), json.getStr("query")));
-    }
-
-
 }
 
 
