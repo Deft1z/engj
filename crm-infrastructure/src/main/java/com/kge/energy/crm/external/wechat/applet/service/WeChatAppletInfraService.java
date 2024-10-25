@@ -111,16 +111,14 @@ public class WeChatAppletInfraService {
      * 获取不限制的小程序码
      * https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/qr-code/getUnlimitedQRCode.html
      */
-    public String getUnlimitedQRCode(String page, String scene,Integer width) {
+    public byte[] getUnlimitedQRCode(String page, String scene,Integer width) {
             String url = String.format("%s/wxa/getwxacodeunlimit?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
             GetUnlimitedQrCodeReq req = new GetUnlimitedQrCodeReq()
                 .setPage(page)
                 .setScene(scene)
                 .setWidth(width)
                 .setEnvVersion(wechatAppletProperties.getEnvVersion());
-            String base64Str = RestUtils.postForObject(url, req, byte[].class).toString();
-            return base64Str;
-
+            return RestUtils.postForObject(url, req, byte[].class);
     }
 
     public String getWeChatAppletUrlLink1(String path) {

@@ -1,6 +1,7 @@
 package com.kge.energy.crm.wechat.login.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
@@ -335,13 +336,13 @@ public class WeChatLoginService {
         String page = "pages/index/index";
         String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
 
-        String base64Str = weChatAppletInfraService.getUnlimitedQRCode(page,scene,req.getWidth());
+        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page,scene,req.getWidth());
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
                 "生成个人推荐二维码【" + currentUserInfo.getUserId() + " , " + currentUserInfo.getRealname() +"】"
         );
 
         return new WxAppletRecommendQrCodeResp()
-                .setRecommendQrCodeBase64(base64Str);
+                .setRecommendQrCodeBase64(Base64.encode(bytes));
     }
 }
