@@ -11,5 +11,4 @@ public class QrCodeReq {
 
     private Double width;
 
-    private boolean auto_color;
 }
