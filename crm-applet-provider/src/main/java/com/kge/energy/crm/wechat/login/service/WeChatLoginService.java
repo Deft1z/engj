@@ -334,6 +334,7 @@ public class WeChatLoginService {
 
         String page = "pages/index/index";
         String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
+
         byte[] unlimitedQRCode = weChatAppletInfraService.getUnlimitedQRCode(page,scene,req.getWidth());
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,

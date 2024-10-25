@@ -10,5 +10,4 @@ import lombok.experimental.Accessors;
 public class QrCodeReq {
 
     private Double width;
-
 }

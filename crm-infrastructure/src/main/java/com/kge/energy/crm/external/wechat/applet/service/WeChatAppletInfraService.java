@@ -116,8 +116,7 @@ public class WeChatAppletInfraService {
             GetUnlimitedQrCodeReq req = new GetUnlimitedQrCodeReq()
                 .setPage(page)
                 .setScene(scene)
-                .setWidth(width)
-                .setEnv_version(wechatAppletProperties.getEnvVersion());
+                .setWidth(width).setEnv_version(wechatAppletProperties.getEnvVersion());
             byte[] bytes = RestUtils.postForObject(url, req, byte[].class);
             return bytes;
     }
