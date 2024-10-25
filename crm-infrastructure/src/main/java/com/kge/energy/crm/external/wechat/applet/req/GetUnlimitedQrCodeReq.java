@@ -14,8 +14,7 @@ public class GetUnlimitedQrCodeReq {
     @NotBlank
     private String scene;
 
-    private Double width;
-
+    private Integer width;
 
     private String env_version;
 

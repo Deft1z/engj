@@ -3,8 +3,8 @@ package com.kge.energy.crm.wechat.login.controller;
 import cn.hutool.json.JSONObject;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.wechat.login.req.GetRecommendQrCodeReq;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
-import com.kge.energy.crm.wechat.login.req.QrCodeReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
@@ -64,7 +64,7 @@ public class WeChatLoginController {
      * 获取个人推荐二维码
      */
     @PostMapping("/baseData/wechat/recommendQrCode")
-    public CommonResult<WxAppletRecommendQrCodeResp> getWxAppletRecommendQrCode(@Validated @RequestBody QrCodeReq req) {
+    public CommonResult<WxAppletRecommendQrCodeResp> getWxAppletRecommendQrCode(@Validated @RequestBody GetRecommendQrCodeReq req) {
         return CommonResult.suc(weChatLoginService.getWxAppletRecommendQrCode(req));
     }
 }

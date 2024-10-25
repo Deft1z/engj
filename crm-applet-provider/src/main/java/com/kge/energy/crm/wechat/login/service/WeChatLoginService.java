@@ -23,7 +23,7 @@ import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.user.service.UserDomainService;
-import com.kge.energy.crm.wechat.login.req.QrCodeReq;
+import com.kge.energy.crm.wechat.login.req.GetRecommendQrCodeReq;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
@@ -329,19 +329,19 @@ public class WeChatLoginService {
     /**
      * 获取小程序url
      */
-    public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode(QrCodeReq req) {
+    public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode(GetRecommendQrCodeReq req) {
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
 
         String page = "pages/index/index";
         String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
 
-        byte[] unlimitedQRCode = weChatAppletInfraService.getUnlimitedQRCode(page,scene,req.getWidth());
+        String base64Str = weChatAppletInfraService.getUnlimitedQRCode(page,scene,req.getWidth());
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
-                "生成个人推荐二维码【" + currentUserInfo.getUserId() +  "】"
+                "生成个人推荐二维码【" + currentUserInfo.getUserId() + " , " + currentUserInfo.getRealname() +"】"
         );
 
         return new WxAppletRecommendQrCodeResp()
-                .setBuffer(unlimitedQRCode);
+                .setRecommendQrCodeBase64(base64Str);
     }
 }

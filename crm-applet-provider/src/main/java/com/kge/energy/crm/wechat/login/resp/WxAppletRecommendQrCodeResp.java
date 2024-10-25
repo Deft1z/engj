@@ -10,5 +10,5 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class WxAppletRecommendQrCodeResp {
-    private byte[] buffer;
+    private String recommendQrCodeBase64;
 }
