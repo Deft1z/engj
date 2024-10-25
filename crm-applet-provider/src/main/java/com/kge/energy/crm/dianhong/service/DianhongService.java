@@ -2,8 +2,10 @@ package com.kge.energy.crm.dianhong.service;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.NumberUtils;
 import com.kge.energy.crm.dianhong.resp.DhStatisticResp;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.dh.req.DeviceControlDataReq;
 import com.kge.energy.dh.req.DeviceControlEnableReq;
 import com.kge.energy.dh.req.DeviceControlReq;
@@ -40,6 +42,11 @@ public class DianhongService {
     }
 
     public DeviceControlResp setControlPercent(DeviceControlReq req) {
+
+        if(!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())){
+            throw new ServiceException("权限不足");
+        }
+
         if(!NumberUtils.isPositiveInteger(req.getPowerPercent())){
             throw new ServiceException("参数错误");
         }
@@ -48,10 +55,20 @@ public class DianhongService {
     }
 
     public DeviceControlDataResp getDeviceControlData(DeviceControlDataReq req) {
+
+        if(!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())){
+            throw new ServiceException("权限不足");
+        }
+
         return suiliangPvService.getDeviceControlData(req);
     }
 
     public DeviceControlEnableResp getControlEnable(DeviceControlEnableReq req) {
+
+        if(!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())){
+            throw new ServiceException("权限不足");
+        }
+
         return suiliangPvService.getControlEnable(req);
     }
 

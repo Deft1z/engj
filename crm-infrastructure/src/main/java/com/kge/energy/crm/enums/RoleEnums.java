@@ -26,6 +26,8 @@ public enum RoleEnums {
     JT_LEADER("jt_leader", "集团领导"),
 
     COMPANY_LEADER("company_leader", "公司领导"),
+
+    HARMONY_POWER_CONTROL("harmony_power_control", "电鸿控制"),
     ;
 
 
