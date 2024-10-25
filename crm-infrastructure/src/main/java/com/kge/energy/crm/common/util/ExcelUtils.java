@@ -23,8 +23,8 @@ import lombok.experimental.UtilityClass;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -49,11 +49,11 @@ public class ExcelUtils {
         }
     }
 
-    public static <T> void writeWithTemplate(HttpServletResponse response, String templatePath, Map<String, Object> dataMap, List<T> dataList, Integer exportType) {
+    public static <T> void writeWithTemplate(HttpServletResponse response, InputStream templateInputStream, String filename, Map<String, Object> dataMap, List<T> dataList, Integer exportType) {
         if (exportType != null && exportType.equals(EXPORT_TYPE_PDF)) {
-            writeWithTemplateToPdf(response, templatePath, dataMap, dataList);
+            writeWithTemplateToPdf(response, templateInputStream, filename, dataMap, dataList);
         } else {
-            writeWithTemplate(response, templatePath, dataMap, dataList);
+            writeWithTemplate(response, templateInputStream, filename, dataMap, dataList);
         }
     }
 
@@ -128,15 +128,14 @@ public class ExcelUtils {
     }
 
     @SneakyThrows
-    public static <T> void writeWithTemplate(HttpServletResponse response, String templatePath, Map<String, Object> dataMap, List<T> dataList) {
-        final String fileMainName = FileUtil.mainName(templatePath);
+    public static <T> void writeWithTemplate(HttpServletResponse response, InputStream templateInputStream, String filename, Map<String, Object> dataMap, List<T> dataList) {
+        final String fileMainName = FileUtil.mainName(filename);
         // 文件重命名, 追加时间字符串
-        String filename = URLEncoder.encode(fileMainName + DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ExcelTypeEnum.XLS.getValue(), StandardCharsets.UTF_8.name());
+        filename = URLEncoder.encode(fileMainName + DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ExcelTypeEnum.XLS.getValue(), StandardCharsets.UTF_8.name());
         // 设置 header 和 contentType
         setContentDisposition(response, filename);
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
         // 输出 Excel
-        BufferedInputStream templateInputStream = FileUtil.getInputStream(templatePath);
         ExcelWriter excelWriter = EasyExcelFactory.write(response.getOutputStream())
                 .withTemplate(templateInputStream)
                 .autoCloseStream(false)
@@ -154,13 +153,12 @@ public class ExcelUtils {
     }
 
     @SneakyThrows
-    public static <T> void writeWithTemplateToPdf(HttpServletResponse response, String templatePath, Map<String, Object> dataMap, List<T> dataList) {
-        final String fileMainName = FileUtil.mainName(templatePath);
+    public static <T> void writeWithTemplateToPdf(HttpServletResponse response, InputStream templateInputStream, String filename, Map<String, Object> dataMap, List<T> dataList) {
+        final String fileMainName = FileUtil.mainName(filename);
         // 输出 Excel
         String excelPath = TMP_DIR + fileMainName + IdUtil.fastSimpleUUID() + ExcelTypeEnum.XLS.getValue();
         FileUtil.mkParentDirs(excelPath);
 
-        BufferedInputStream templateInputStream = FileUtil.getInputStream(templatePath);
         ExcelWriter excelWriter = EasyExcelFactory.write(excelPath)
                 .withTemplate(templateInputStream)
                 .autoCloseStream(false)
