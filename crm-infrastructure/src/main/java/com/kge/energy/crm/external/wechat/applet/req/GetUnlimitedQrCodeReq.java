@@ -1,5 +1,6 @@
 package com.kge.energy.crm.external.wechat.applet.req;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -16,6 +17,7 @@ public class GetUnlimitedQrCodeReq {
 
     private Integer width;
 
-    private String env_version;
+    @JsonProperty("env_version")
+    private String envVersion;
 
 }
