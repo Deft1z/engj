@@ -45,7 +45,6 @@ public class ComplainController {
 
     @Operation(summary = "用户提出投诉")
     @PostMapping(value = "/opt/insert")
-    @ConvertToGoFormats
     public CommonResult<Boolean> insert(@RequestBody @Valid ComplainAddReq req) {
         return CommonResult.suc(complainService.insert(req));
     }
