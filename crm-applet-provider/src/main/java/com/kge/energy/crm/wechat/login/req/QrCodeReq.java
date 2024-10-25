@@ -1,4 +1,4 @@
-package com.kge.energy.crm.external.wechat.applet.req;
+package com.kge.energy.crm.wechat.login.req;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -7,17 +7,9 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class GetUnlimitedQrCodeReq {
-
-    private String page;
-
-    @NotBlank
-    private String scene;
+public class QrCodeReq {
 
     private Double width;
 
     private boolean auto_color;
-
-    private String env_version;
-
 }

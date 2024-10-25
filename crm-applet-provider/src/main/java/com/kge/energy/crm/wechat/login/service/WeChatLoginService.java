@@ -23,6 +23,7 @@ import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.user.service.UserDomainService;
+import com.kge.energy.crm.wechat.login.req.QrCodeReq;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
@@ -39,11 +40,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.image.BufferedImage;
-import java.nio.Buffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -331,18 +329,18 @@ public class WeChatLoginService {
     /**
      * 获取小程序url
      */
-    public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode() {
+    public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode(QrCodeReq req) {
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
 
         String page = "pages/index/index";
-        String scene = "userId" + currentUserInfo.getUserId().toString();
-        Integer width = 400;
-        byte[] unlimitedQRCode = weChatAppletInfraService.getUnlimitedQRCode(page, scene,width);
+        String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
+        byte[] unlimitedQRCode = weChatAppletInfraService.getUnlimitedQRCode(page,scene,req.getWidth(), req.isAuto_color());
+
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
-                "生成推荐二维码【" + currentUserInfo.getUserId() + ", " + unlimitedQRCode + "】"
+                "生成个人推荐二维码【" + currentUserInfo.getUserId() +  "】"
         );
 
         return new WxAppletRecommendQrCodeResp()
-                .setBf(unlimitedQRCode);
+                .setBuffer(unlimitedQRCode);
     }
 }
