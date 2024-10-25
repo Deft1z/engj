@@ -361,5 +361,129 @@
         group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name
     </sql>
 
+    <select id="getWorkOrderComplainDetail"
+            resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
+        select a.complain_id
+        , a.user_id
+        , a.typef
+        , a.subject
+        , a.content
+        , (select name from b_organization where organization_id = a.organization_id) as service_company
+        , a.company
+        , a.contacts
+        , a.phone
+        , a.address
+        , a.status
+        , a.feedback
+        , a.process_user_id
+        , date_format(a.process_time, '%Y-%m-%d %T') AS process_time
+        , a.flag
+        , json_unquote(json_extract(w.content, '$.businessName')) AS business_name
+        , d.code AS order_code
+        , d.status AS order_status
+        , date_format( a.create_time, '%Y-%m-%d %T' ) AS create_time
+        , group_concat( i.filepath separator ',' ) AS filepath
+        , j.realname
+        , l.name AS org_name
+        from w_complain a
+        join r_form_consult_complain c on c.complain_id = a.complain_id
+        join sc_service_contract d on d.service_contract_id = c.consult_id
+        left join wf_form w on w.form_id = d.form_id
+        left join w_complain_file g on g.complain_id = a.complain_id
+        left join s_file i on i.flag = 1 and i.file_id = g.file_id
+        left join b_user j on j.flag = 1 and j.user_id = a.process_user_id
+        left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
+        left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
+        where a.complain_id = #{complainId}
+        and a.typef = 1 and d.flag = 1 and a.flag = 1
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and a.organization_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, d.code, d.status, a.create_time, j.realname, l.name
+    </select>
+
+    <select id="getContractComplainDetail"
+            resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
+        select a.complain_id
+        , a.user_id
+        , a.typef
+        , a.subject
+        , a.content
+        , (select name from b_organization where organization_id = a.organization_id) as service_company
+        , a.company
+        , a.contacts
+        , a.phone
+        , a.address
+        , a.status
+        , a.feedback
+        , a.process_user_id
+        , date_format(a.process_time, '%Y-%m-%d %T') AS process_time
+        , a.flag
+        , json_unquote(json_extract(d.content, '$.businessName')) AS business_name
+        , json_unquote(json_extract(d.content, '$.code')) AS order_code
+        , d.status AS order_status
+        , date_format( a.create_time, '%Y-%m-%d %T' ) AS create_time
+        , group_concat( i.filepath separator ',' ) AS filepath
+        , j.realname
+        , l.name AS org_name
+        from w_complain a
+        join r_form_consult_complain c on c.complain_id = a.complain_id
+        join wf_form d on d.form_id = c.consult_id
+        left join w_complain_file g on g.complain_id = a.complain_id
+        left join s_file i on i.flag = 1 and i.file_id = g.file_id
+        left join b_user j on j.flag = 1 and j.user_id = a.process_user_id
+        left join r_user_tenant k on k.flag = 1 and k.user_id = j.user_id
+        left join b_organization l on l.flag = 1 and l.organization_id = k.organization_id
+        where a.complain_id = #{complainId}
+        and a.typef = 2 and d.flag = 1 and a.flag = 1
+        <choose>
+            <when test="dataEnums != null and dataEnums.getCode() == 0">
+                /*数据范围：所有*/
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 1">
+                /*数据范围：当前租户*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 2">
+                /*数据范围：集团*/
+                and a.tenant_id = #{userInfo.tenantId}
+            </when>
+            <when test="dataEnums != null and dataEnums.getCode() == 3">
+                /*数据范围：公司*/
+                and a.organization_id in
+                <foreach collection="userInfo.organizationList" item="org" index="index" open="(" close=")" separator=",">
+                    #{org.id}
+                </foreach>
+            </when>
+            <otherwise>
+                /*数据范围：个人*/
+                and a.create_user_id = #{userInfo.userId}
+            </otherwise>
+        </choose>
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name
+    </select>
+
+
 </mapper>
 

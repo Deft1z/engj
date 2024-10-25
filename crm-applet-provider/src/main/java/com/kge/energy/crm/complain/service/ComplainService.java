@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.complain.req.ComplainAddReq;
 import com.kge.energy.crm.complain.resp.ComplainFormResp;
@@ -132,7 +133,7 @@ public class ComplainService {
                     .setContent(wComplain.getContent())
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getComplainDetailQuery(id), 30))
                     .setMsgBizId(id)
             );
         }

@@ -154,6 +154,7 @@
         <if test="param.status != null">
             and bu.status = #{param.status}
         </if>
+        order by bu.user_id
     </select>
 
     <select id="listByRole" resultType="com.kge.energy.crm.repository.entityext.result.UserListResult">

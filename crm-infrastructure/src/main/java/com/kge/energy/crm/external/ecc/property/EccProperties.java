@@ -17,4 +17,6 @@ public class EccProperties {
 
     private String maintenanceListUrl;
 
+    private String maintenanceDetailUrl;
+
 }

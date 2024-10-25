@@ -84,14 +84,14 @@ public class WeChatAppletInfraService {
      * 获取加密URLLink
      * https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/url-link/generateUrlLink.html
      */
-    public String getWeChatAppletUrlLink(String path, String query) {
+    public String getWeChatAppletUrlLink(String path, String query, Integer validDays) {
         try {
             String url = String.format("%s/wxa/generate_urllink?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
             JSONObject req = new JSONObject();
             req.set("path", path);
             req.set("query", query);
             req.set("expire_type", 1);
-            req.set("expire_interval", 3);
+            req.set("expire_interval", validDays);
             req.set("env_version", wechatAppletProperties.getEnvVersion());
             JSONObject rs = RestUtils.postForObject(url, req, JSONObject.class);
 

@@ -332,7 +332,7 @@ public class WeChatLoginService {
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
 
         String query = "userId=" + currentUserInfo.getUserId().toString();
-        String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, query);
+        String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, query, 30);
         String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"));
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,

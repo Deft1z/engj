@@ -148,7 +148,7 @@ public class ServiceContractDomainService {
                     .setServicePerson(bUserDao.getById(operator.getUserId()).getRealname())
                     .setStatus(ConstParam.FlowCompanyContract)
                     .setAddTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId())))
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId()), 30))
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(scServiceContract.getServiceContractId())
