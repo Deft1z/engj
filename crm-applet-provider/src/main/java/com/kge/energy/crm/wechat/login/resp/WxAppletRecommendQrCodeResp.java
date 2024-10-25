@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import java.util.List;
 
 
 @NoArgsConstructor
@@ -12,7 +11,7 @@ import java.util.List;
 @Accessors(chain = true)
 public class WxAppletRecommendQrCodeResp {
 
-    private String url;
 
-    private String expireTime;
+    private byte[] bf;
+
 }

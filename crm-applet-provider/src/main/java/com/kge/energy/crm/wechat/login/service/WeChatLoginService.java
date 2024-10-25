@@ -38,6 +38,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.awt.image.BufferedImage;
+import java.nio.Buffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -331,16 +334,15 @@ public class WeChatLoginService {
     public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode() {
         UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
 
-        String query = "userId=" + currentUserInfo.getUserId().toString();
-        String qrCodeUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, query, 30);
-        String expireTime = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"));
-
+        String page = "pages/index/index";
+        String scene = "userId" + currentUserInfo.getUserId().toString();
+        Integer width = 400;
+        byte[] unlimitedQRCode = weChatAppletInfraService.getUnlimitedQRCode(page, scene,width);
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
-                "生成推荐二维码【" + currentUserInfo.getUserId() + ", " + qrCodeUrl + "】"
+                "生成推荐二维码【" + currentUserInfo.getUserId() + ", " + unlimitedQRCode + "】"
         );
 
         return new WxAppletRecommendQrCodeResp()
-                .setUrl(qrCodeUrl)
-                .setExpireTime(expireTime);
+                .setBf(unlimitedQRCode);
     }
 }
