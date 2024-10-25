@@ -16,7 +16,6 @@ public class GetUnlimitedQrCodeReq {
 
     private Double width;
 
-    private boolean auto_color;
 
     private String env_version;
 
