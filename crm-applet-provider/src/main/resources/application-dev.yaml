@@ -2,8 +2,8 @@ server:
   port: 9151
 
 mysql:
-  host: 172.18.26.102
-  port: 6033
+  host: 172.18.26.131
+  port: 9306
   dbname: ntcrm_dev
   username: ntcrmDev
   password: ntcrmD@1113
@@ -11,8 +11,8 @@ mysql:
 spring:
   data:
     redis:
-      host: 172.18.26.112
-      port: 6379
+      host: 172.18.26.131
+      port: 9379
       password: iot
       database: 11
       front: engjkfxcx_dev_
@@ -47,3 +47,7 @@ edata:
 
 loginAttention:
   sendee: 13702470083,13288012316
+
+file:
+  upload:
+    upload-url: http://172.18.26.131:9090/fileservice/resourceManage/file/manage/upload

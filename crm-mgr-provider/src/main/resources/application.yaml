@@ -190,4 +190,3 @@ knife4j:
 file:
   upload:
     allow-types: jpg,jpeg,png,pdf
-    upload-url: http://172.18.26.112:80/fileservice/resourceManage/file/manage/upload

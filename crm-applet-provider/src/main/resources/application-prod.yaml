@@ -55,7 +55,6 @@ loginAttention:
 
 file:
   upload:
-    allow-types: jpg,jpeg,png,pdf
     upload-url: http://172.16.17.157:9030/resourceManage/file/manage/upload
 
 msg:

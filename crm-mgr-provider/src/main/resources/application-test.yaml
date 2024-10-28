@@ -46,3 +46,6 @@ epcpv:
   prolist: api/v1/pv/project/list
   inststat: api/v1/pv/project/inst/capacity/stat
 
+file:
+  upload:
+    upload-url: http://172.16.17.137:9230/resourceManage/file/manage/upload
