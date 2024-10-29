@@ -44,8 +44,8 @@ public class ConsultingController {
     @ConvertToGoFormats
     public CommonResult getFormPage(@RequestBody @Valid WfFormPageReq req) {
         //原go项目接口使用工单类型id区分业务工单和投诉工单，但响应的数据字段完全不同，为了接口文档能准确生成请求和响应参数，拆分原go业务代码逻辑，此接口的目的单纯只为兼容原接口的地址
-        //业务工单formTypeId=2调用 ConsultingController.getByPage
-        //投诉工单formTypeId=1调用 ComplainController.getByPage
+        //业务工单formTypeId=1调用 ConsultingController.getByPage
+        //投诉工单formTypeId=2调用 ComplainController.getByPage
         if (req.getFormTypeId().equals(2)) {
             return complainController.getByPage(req);
         } else {
