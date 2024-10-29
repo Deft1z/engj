@@ -2,6 +2,7 @@ package com.kge.energy.crm.workorder.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.*;
@@ -24,6 +25,7 @@ import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraServic
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.*;
+import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entity.ScServiceContract;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
@@ -93,6 +95,12 @@ public class WorkOrderDomainService {
         //登录用户信息
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
 
+        List<BOrganization> rootOrgList = bOrganizationDao.getRootOrgList(UserInfoContextUtils.getCurrentTenantId());
+        if (CollectionUtil.isEmpty(rootOrgList) || rootOrgList.size() > 1) {
+            throw new ServiceException("当前用户租户下不存在唯一根组织");
+        }
+        BOrganization handleOrg = rootOrgList.get(0);
+
         //保存工单信息
         Integer currentRoleId = bRoleDao.getRoleIdByCode(RoleEnums.JT_CUSTOMER.getCode(), operator.getTenantId());
         WfForm wfForm = new WfForm();
@@ -105,7 +113,7 @@ public class WorkOrderDomainService {
         wfForm.setCreateUserId(operator.getUserId().intValue());
         wfForm.setRemark(req.getRemark());
         //集团总部
-        wfForm.setCurrentOrgId(1);
+        wfForm.setCurrentOrgId(handleOrg.getOrganizationId());
         //集团客服
         wfForm.setCurrentRoleId(currentRoleId);
         //租户
@@ -122,7 +130,7 @@ public class WorkOrderDomainService {
         wfFormFlow.setSubStatus(ConstParam.FlowTagGroup);
         wfFormFlow.setCreateUserId(operator.getUserId().intValue());
         wfFormFlow.setTenantId(operator.getTenantId());
-        wfFormFlow.setServiceUnitId(1);
+        wfFormFlow.setServiceUnitId(handleOrg.getOrganizationId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送消息，通知集团客服
