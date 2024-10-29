@@ -419,7 +419,6 @@
         </choose>
         from wf_form a
         join b_organization d on d.organization_id = a.current_org_id
-        left join wf_form_flow b on b.form_id = a.form_id and b.create_user_id = #{userInfo.userId}
         where a.flag = 1
         and a.form_id = #{formId}
         <choose>

@@ -116,6 +116,7 @@ public class WorkOrderDomainService {
         WfFormFlow wfFormFlow = new WfFormFlow();
         wfFormFlow.setFormId(wfForm.getFormId());
         wfFormFlow.setTimeAction(now);
+        wfFormFlow.setUserId(UserInfoContextUtils.getCurrentUserId());
         wfFormFlow.setActionType(ConstParam.FlowStart);
         wfFormFlow.setStatus(ConstParam.FlowStart);
         wfFormFlow.setSubStatus(ConstParam.FlowTagGroup);
