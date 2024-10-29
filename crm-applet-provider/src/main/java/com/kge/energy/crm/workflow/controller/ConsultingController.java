@@ -7,7 +7,6 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.controller.ComplainController;
 import com.kge.energy.crm.workorder.req.*;
 import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
-import com.kge.energy.crm.workorder.resp.WfFormDetailResp;
 import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workorder.resp.WfFormPageResp;
 import com.kge.energy.crm.workorder.service.WorkOrderDomainService;

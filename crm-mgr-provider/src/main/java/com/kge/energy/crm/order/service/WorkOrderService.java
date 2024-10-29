@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +44,7 @@ public class WorkOrderService {
     /*
         工单导出
      */
-    public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
+    public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) {
         WorkOrderExportReq.SearchFormMap searchMap = Optional.ofNullable(req.getSearchMap()).orElse(new WorkOrderExportReq.SearchFormMap());
         if (searchMap.getStarttime() != null && searchMap.getEndtime() != null) {
             long days = Duration.between(searchMap.getStarttime(), searchMap.getEndtime()).toDays();

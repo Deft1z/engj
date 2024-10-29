@@ -22,7 +22,7 @@ public class BRoleDao extends ServiceImpl<BRoleMapper, BRole> {
 
     private final BRoleMapper mapper;
 
-    public Page selectPage(RoleListParam param) {
+    public Page<BRole> selectPage(RoleListParam param) {
         Page<BRole> page = new Page<>(param.getCurrentPage(), param.getPageSize());
 
         LambdaQueryWrapper<BRole> wrapper = new LambdaQueryWrapper<BRole>()

@@ -41,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -60,24 +59,13 @@ public class ComplainService {
     private final DataPermissionDomainService dataPermissionDomainService;
 
     public PageResp<ComplainListResp> getComplainList(ComplainListReq req) {
-        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.isNull(req.getTenantId())) {
-//            req.setTenantId(UserInfoContextUtils.getCurrentTenantId());
-//        }
-//        if (AuthVerifyUtils.notSuperAdmin() && ObjUtil.notEqual(UserInfoContextUtils.getCurrentTenantId(), req.getTenantId())) {
-//            throw new ServiceException("非法请求，不允许查看其他租户信息");
-//        }
+        //数据权限校验，超级管理员可查询全部租户数据，非超管默认只能查询同一租户下的数据，小程序用户只能看自己提的投诉单
 
         ComplainListParam complainListParam = BeanUtil.copyProperties(req, ComplainListParam.class);
         Opt.ofNullable(req.getSearchMap()).ifPresent(map -> {
             Opt.ofBlankAble(map.getName()).ifPresent(complainListParam::setName);
             Opt.ofNullable(map.getStatus()).ifPresent(status -> complainListParam.setStatus(ComplainStatusEnums.getCodeByDesc(status)));
         });
-
-        //小程序用户只能看自己提的投诉单
-//        if (AuthVerifyUtils.isOnlyAppletUser()) {
-//            complainListParam.setCreateUserId(UserInfoContextUtils.getCurrentUserId());
-//        }
 
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
@@ -158,7 +146,7 @@ public class ComplainService {
     /*
         投诉列表导出
      */
-    public Boolean exportComplainList(HttpServletResponse response, ComplainListExportReq req) throws IOException {
+    public Boolean exportComplainList(HttpServletResponse response, ComplainListExportReq req) {
         ComplainListParam complainListParam = BeanUtil.copyProperties(req, ComplainListParam.class);
         Opt.ofNullable(req.getSearchMap()).ifPresent(map -> {
             Opt.ofBlankAble(map.getName()).ifPresent(complainListParam::setName);

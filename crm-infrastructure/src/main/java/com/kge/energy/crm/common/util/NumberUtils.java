@@ -1,6 +1,5 @@
 package com.kge.energy.crm.common.util;
 
-import cn.hutool.core.util.NumberUtil;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

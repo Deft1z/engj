@@ -1,6 +1,5 @@
 package com.kge.energy.crm.wechat.login.controller;
 
-import cn.hutool.json.JSONObject;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.wechat.login.req.GetRecommendQrCodeReq;

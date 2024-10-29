@@ -1,6 +1,5 @@
 package com.kge.energy.crm.repository.dao;
 
-import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -10,16 +9,16 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entityext.param.CmsCommentParam;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.*;
+import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
+import com.kge.energy.crm.repository.entityext.result.FlowResult;
+import com.kge.energy.crm.repository.entityext.result.FormResult;
+import com.kge.energy.crm.repository.entityext.result.FormWithdrawReturnResult;
 import com.kge.energy.crm.repository.mapper.CmsCommentMapper;
 import com.kge.energy.crm.repository.mapper.WfFormMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -39,8 +38,7 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
     }
 
     public IPage<FormResult> findWxUserWorkOrder(IPage<WxUserWorkOrderParam> reqIpage, WxUserWorkOrderParam wxUserWorkOrderParam) {
-        IPage<FormResult> res = mapper.findWxUserWorkOrder(reqIpage, wxUserWorkOrderParam);
-        return res;
+        return mapper.findWxUserWorkOrder(reqIpage, wxUserWorkOrderParam);
     }
 
     public Long findOrderNum(String startTime, String endTime) {
@@ -68,7 +66,7 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
 
     public List<FlowResult> getFlowByFormId(Integer formId, UserInfoDto userInfoDto) {
         List<FlowResult> list = mapper.getFlowByFormId(formId, userInfoDto);
-        for(FlowResult flowResult : list){
+        for (FlowResult flowResult : list) {
             CmsCommentParam param = new CmsCommentParam(flowResult.getFormFlowId(), CmsCommentBizTypeEnums.ORDER.getCode());
             List<CmsCommentResult> commentResultList = commentMapper.getCmsCommentList(param);
             flowResult.setCommentList(commentResultList);
