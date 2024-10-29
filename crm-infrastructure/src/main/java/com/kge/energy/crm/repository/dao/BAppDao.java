@@ -1,7 +1,6 @@
 package com.kge.energy.crm.repository.dao;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -9,13 +8,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.repository.entityext.param.AppMgrListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.repository.mapper.*;
-import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -210,9 +207,6 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
      */
     @Transactional
     public Boolean bindApp(Integer uid, Integer openid) {
-        if (ObjectUtil.equals(uid, UserInfoContextUtils.getCurrentUserId())) {
-            throw new ServiceException("非当前用户");
-        }
         LambdaUpdateWrapper<BOpenid> wrapper = Wrappers.<BOpenid>update().lambda()
                 .set(BOpenid::getFlag, -1)
                 .eq(BOpenid::getUserId, uid);
