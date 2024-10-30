@@ -29,7 +29,7 @@ public class ComplainController {
 
     private final ComplainDomainService complainDomainService;
 
-    @Operation(summary = "获取工单列表")
+    @Operation(summary = "获取投诉列表")
     @PostMapping(value = "/getByPage")
     @ConvertToGoFormats
     public CommonResult<PageResp<ComplainFormResp>> getByPage(@RequestBody @Valid WfFormPageReq req) {

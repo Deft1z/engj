@@ -242,6 +242,7 @@
             , date_format(a.process_time, '%Y-%m-%d %T') as process_time
             , a.flag
             , b.order_code
+            , b.contract_code
             , b.business_name
             , b.order_status
             , b.create_time
@@ -308,7 +309,8 @@
             , date_format(a.process_time, '%Y-%m-%d %T') AS process_time
             , a.flag
             , json_unquote(json_extract(w.content, '$.businessName')) AS business_name
-            , d.code AS order_code
+            , json_unquote(json_extract(w.content, '$.code')) AS order_code
+            , d.code AS contract_code
             , d.status AS order_status
             , date_format( a.create_time, '%Y-%m-%d %T' ) AS create_time
             , group_concat( i.filepath separator ',' ) AS filepath
@@ -344,6 +346,7 @@
             , a.flag
             , json_unquote(json_extract(d.content, '$.businessName')) AS business_name
             , json_unquote(json_extract(d.content, '$.code')) AS order_code
+            , null contract_code
             , d.status AS order_status
             , date_format( a.create_time, '%Y-%m-%d %T' ) AS create_time
             , group_concat( i.filepath separator ',' ) AS filepath
