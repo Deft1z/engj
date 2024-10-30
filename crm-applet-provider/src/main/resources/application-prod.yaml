@@ -56,6 +56,7 @@ loginAttention:
 file:
   upload:
     upload-url: http://172.16.17.157:9030/resourceManage/file/manage/upload
+    tmp-dir: /home/appuser/tmpfiles
 
 msg:
   baseUrl: http://172.16.17.156:9002/msg

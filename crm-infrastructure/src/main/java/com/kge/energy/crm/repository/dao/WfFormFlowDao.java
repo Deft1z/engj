@@ -26,10 +26,9 @@ public class WfFormFlowDao extends ServiceImpl<WfFormFlowMapper, WfFormFlow> {
         return mapper.selectList(wrapper);
     }
 
-    public WfFormFlow getLatestFormFlow(Integer formId, Integer tenantId) {
+    public WfFormFlow getLatestFormFlow(Integer formId) {
         LambdaQueryWrapper<WfFormFlow> queryWrapper = Wrappers.<WfFormFlow>lambdaQuery()
                 .eq(WfFormFlow::getFormId, formId)
-                .eq(WfFormFlow::getTenantId, tenantId)
                 .orderByDesc(WfFormFlow::getCreateTime);
         return mapper.selectList(queryWrapper).get(0);
     }

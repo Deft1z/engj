@@ -269,7 +269,7 @@ public class WorkOrderDomainService {
             }
 
             //获取工单流转记录，时间倒序取最新的记录
-            WfFormFlow lastFlow = wfFormFlowDao.getLatestFormFlow(formId, operator.getTenantId());
+            WfFormFlow lastFlow = wfFormFlowDao.getLatestFormFlow(formId);
 
             return switch (req.getType()) {
 

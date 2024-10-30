@@ -115,7 +115,7 @@ public class WeChatLoginService {
                 }
 
             } else {
-                // 新用户默认挂靠到南投-未挂靠组织下
+                // 新用户默认挂靠到南投-个人用户组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
                 // 新用户的推荐用户字段绑定
                 if (ObjectUtil.isNotNull(req.getRecommendUserId()))
@@ -155,7 +155,7 @@ public class WeChatLoginService {
     }
 
     /**
-     * 新用户默认挂靠到南投-未挂靠组织下,没有未挂靠组织就挂到南投下
+     * 新用户默认挂靠到南投-个人用户组织下
      */
     private BUser saveNewUser(String openId, String mobile) {
 
@@ -177,7 +177,7 @@ public class WeChatLoginService {
                 .setTenantId(bUser.getTenantId());
         rUserRoleDao.save(rRole);
 
-        BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "未挂靠组织");
+        BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
         bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
 
         RUserTenant rUserTenant = new RUserTenant()
@@ -336,10 +336,10 @@ public class WeChatLoginService {
         String page = "pages/index/index";
         String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
 
-        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page,scene,req.getWidth());
+        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page, scene, req.getWidth());
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
-                "生成个人推荐二维码【" + currentUserInfo.getUserId() + " , " + currentUserInfo.getRealname() +"】"
+                "生成个人推荐二维码【" + currentUserInfo.getUserId() + " , " + currentUserInfo.getRealname() + "】"
         );
 
         return new WxAppletRecommendQrCodeResp()

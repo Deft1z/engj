@@ -51,7 +51,7 @@ public class CmsCommentService {
         if(ObjectUtil.isNull(req.getParentCommentId())){
             //如果是新增评论
             //获取当前工单最新节点
-            WfFormFlow latestFlow = wfFormFlowDao.getLatestFormFlow(req.getFormId(), UserInfoContextUtils.getCurrentTenantId());
+            WfFormFlow latestFlow = wfFormFlowDao.getLatestFormFlow(req.getFormId());
             req.setBizType(CmsCommentBizTypeEnums.ORDER.getCode());
             req.setBizDataId(latestFlow.getFormFlowId());
 
