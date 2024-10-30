@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.RedisLockUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.contract.req.ScServiceContractEvaAddReq;
@@ -22,6 +23,7 @@ import com.kge.energy.crm.contract.resp.ScServiceContractResp;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.ScContractEvaluateDao;
@@ -64,6 +66,8 @@ public class ScServiceContractService {
     private final UserDomainService userDomainService;
 
     private final MsgDomainService msgDomainService;
+
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     /**
      * 获取服务合同列表
@@ -175,7 +179,7 @@ public class ScServiceContractService {
                     .setEvaluate(req.getEvaluate())
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
-                    .setPathUrl(null)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(req.getServiceContractId()), 30))
                     .setMsgBizId(contract.getServiceContractId())
             );
         }
