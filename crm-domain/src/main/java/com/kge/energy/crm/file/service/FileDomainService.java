@@ -34,7 +34,7 @@ public class FileDomainService {
                 .setFilePath(sFile.getFilepath());
     }
 
-    public String uploadTmpFile(MultipartFile file) {
-        return fileInfraService.uploadTmpFile(file);
+    public String uploadTmpFile(MultipartFile file, String bizType) {
+        return fileInfraService.uploadTmpFile(file, bizType);
     }
 }

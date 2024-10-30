@@ -18,9 +18,6 @@ spring:
     allow-circular-references: true
     allow-bean-definition-overriding: true
 
-  mvc:
-    static-path-pattern: /static/**
-
   web:
     resources:
       static-locations: file:${file.upload.tmp-dir}
@@ -96,7 +93,7 @@ auth:
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
       - ${server.servlet.context-path}/wechat/login
-      - ${server.servlet.context-path}/static/**
+      - ${server.servlet.context-path}/recommendQrCode/**
   permission:
     white-list:
       - ${server.servlet.context-path}/eventTracking/report

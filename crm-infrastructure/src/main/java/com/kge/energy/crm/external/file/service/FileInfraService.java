@@ -89,7 +89,7 @@ public class FileInfraService {
     /**
      * 创建临时文件
      */
-    public String uploadTmpFile(MultipartFile multipartFile) {
+    public String uploadTmpFile(MultipartFile multipartFile, String bizType) {
 
         checkUploadFileType(multipartFile);
 
@@ -97,6 +97,7 @@ public class FileInfraService {
 
         try {
             String filePath = fileProperty.getUpload().getTmpDir() + FileUtil.FILE_SEPARATOR +
+                    bizType + FileUtil.FILE_SEPARATOR +
                     DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN);
             File dir = new File(filePath);
             if (!dir.exists()) {
@@ -104,7 +105,8 @@ public class FileInfraService {
             }
 
             String fileName = IdUtil.fastSimpleUUID() + "." + FileUtil.extName(multipartFile.getOriginalFilename());
-            resultPath = DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN) + FileUtil.FILE_SEPARATOR + fileName;
+            resultPath = FileUtil.FILE_SEPARATOR + bizType + FileUtil.FILE_SEPARATOR +
+                    DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN) + FileUtil.FILE_SEPARATOR + fileName;
 
             Path path = Paths.get(filePath, fileName);
             Files.copy(multipartFile.getInputStream(), path);
