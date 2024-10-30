@@ -55,3 +55,4 @@ loginAttention:
 file:
   upload:
     upload-url: http://172.16.17.137:9230/resourceManage/file/manage/upload
+    tmp-dir: /var/opt/nftzcrm_test/crm-applet-provider/tmpfiles
