@@ -18,6 +18,13 @@ spring:
     allow-circular-references: true
     allow-bean-definition-overriding: true
 
+  mvc:
+    static-path-pattern: /static/**
+
+  web:
+    resources:
+      static-locations: file:${file.upload.tmp-dir}
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname:test}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
@@ -89,6 +96,7 @@ auth:
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
       - ${server.servlet.context-path}/wechat/login
+      - ${server.servlet.context-path}/static/**
   permission:
     white-list:
       - ${server.servlet.context-path}/eventTracking/report
