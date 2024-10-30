@@ -140,19 +140,25 @@ public class ServiceContractDomainService {
         BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
         ContractAddMsgToUserParam msgParam = new ContractAddMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
-        if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
-            List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
-            msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
-                    .setOrderCode(fromContent.getCode())
-                    .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
-                    .setServicePerson(bUserDao.getById(operator.getUserId()).getRealname())
-                    .setStatus(ConstParam.FlowCompanyContract)
-                    .setAddTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId()), 30))
-                    .setTenantId(operator.getTenantId())
-                    .setNotifyUsers(userContact)
-                    .setMsgBizId(scServiceContract.getServiceContractId())
-            );
+        if (!roleEnums.isEmpty()) {
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+            msgParam.setOrderName(fromContent.getBusinessName());
+            msgParam.setOrderCode(fromContent.getCode());
+            msgParam.setServiceUnit(bOrganizationDao.getById(currentOrgId).getName());
+            msgParam.setServicePerson(bUserDao.getById(operator.getUserId()).getRealname());
+            msgParam.setStatus(ConstParam.FlowCompanyContract);
+            msgParam.setAddTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId()), 30));
+            msgParam.setTenantId(operator.getTenantId());
+            msgParam.setNotifyUsers(userContact);
+            msgParam.setMsgBizId(scServiceContract.getServiceContractId());
+            msgDomainService.sendCrmMsg(msgParam);
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
+                userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
+                msgParam.setNotifyUsers(userContact);
+                msgDomainService.sendCrmMsg(msgParam);
+            }
         }
 
         return true;
