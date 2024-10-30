@@ -56,5 +56,7 @@ public class WfFormFlow {
      * 服务单位id
      */
     private Integer serviceUnitId;
+
+    private Integer flag;
 }
 
