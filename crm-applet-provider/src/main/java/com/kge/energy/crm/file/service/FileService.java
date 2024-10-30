@@ -20,7 +20,7 @@ public class FileService {
         return fileDomainService.uploadFile(file);
     }
 
-    public String uploadTmpFile(MultipartFile file) {
-        return fileDomainService.uploadTmpFile(file);
+    public String uploadTmpFile(MultipartFile file, String bizType) {
+        return fileDomainService.uploadTmpFile(file, bizType);
     }
 }
