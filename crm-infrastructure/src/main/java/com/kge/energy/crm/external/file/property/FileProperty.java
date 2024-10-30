@@ -21,6 +21,8 @@ public class FileProperty {
 
         private String uploadUrl;
 
+        private String tmpDir;
+
     }
 
 }
