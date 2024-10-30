@@ -236,6 +236,12 @@ public class ServiceContractDomainService {
             msgParam.setMsgBizId(scServiceContract.getServiceContractId());
             msgDomainService.sendCrmMsg(msgParam);
 
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
+                ContractAddMsgToUserParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractAddMsgToUserParam.class);
+                msgParamCopy.setNotifyUsers(userDomainService.getUserContact(roleEnums, scServiceContract.getServiceUnit(), operator.getTenantId()));
+                msgDomainService.sendCrmMsg(msgParamCopy);
+            }
+
             if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
                 ContractAddMsgToUserParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractAddMsgToUserParam.class);
                 msgParamCopy.setNotifyUsers(userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId()));
