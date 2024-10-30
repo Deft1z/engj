@@ -36,7 +36,6 @@ import com.kge.energy.crm.workorder.req.ServiceContractDetailReq;
 import com.kge.energy.crm.workorder.req.ServiceContractReq;
 import com.kge.energy.crm.workorder.req.ServiceContractUpdateProjectTimeReq;
 import com.kge.energy.crm.workorder.resp.ServiceContractResp;
-import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.ContractAddMsgToUserParam;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
@@ -141,7 +140,6 @@ public class ServiceContractDomainService {
         ContractAddMsgToUserParam msgParam = new ContractAddMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
-            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             msgParam.setOrderName(fromContent.getBusinessName());
             msgParam.setOrderCode(fromContent.getCode());
             msgParam.setServiceUnit(bOrganizationDao.getById(currentOrgId).getName());
@@ -150,14 +148,12 @@ public class ServiceContractDomainService {
             msgParam.setAddTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
             msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId()), 30));
             msgParam.setTenantId(operator.getTenantId());
-            msgParam.setNotifyUsers(userContact);
             msgParam.setMsgBizId(scServiceContract.getServiceContractId());
-            msgDomainService.sendCrmMsg(msgParam);
+
+            msgDomainService.sendCrmMsg(msgParam.setNotifyUsers(userDomainService.getUserContact(roleEnums, operator.getTenantId())));
 
             if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
-                userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
-                msgParam.setNotifyUsers(userContact);
-                msgDomainService.sendCrmMsg(msgParam);
+                msgDomainService.sendCrmMsg(msgParam.setNotifyUsers(userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId())));
             }
         }
 
