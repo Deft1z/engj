@@ -1,5 +1,6 @@
 package com.kge.energy.crm.common.button.helper;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.button.enums.WorkOrderButtonEnum;
 import com.kge.energy.crm.common.button.resp.BaseButton;
@@ -68,8 +69,9 @@ public class ConsultingButtonHelper extends AbstractButtonHelper {
 
             buttonEnumList.add(WorkOrderButtonEnum.TERMINATE_WORK_ORDER);
 
-            //二级公司未处理工单才显示撤回按钮
-            if (flowList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))) {
+            //二级公司未处理工单或最新状态未处理才显示撤回按钮
+            if (flowList.stream().noneMatch(flow -> flow.getStatus().equals(ConstParam.FlowHasFeedback))
+            || !StrUtil.equals(CollUtil.getLast(flowList).getStatus(), ConstParam.FlowHasFeedback)) {
                 buttonEnumList.add(WorkOrderButtonEnum.WITHDRAW_WORK_ORDER);
             }
 
