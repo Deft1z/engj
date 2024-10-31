@@ -340,7 +340,7 @@ public class WeChatLoginService {
         String page = "pages/index/index";
         String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
 
-        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page, scene, req.getWidth());
+        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page, scene, req.getWidth(), req.getHyaline());
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
                 "生成个人推荐二维码【" + currentUserInfo.getUserId() + " , " + currentUserInfo.getRealname() + "】"
