@@ -66,6 +66,14 @@ public class WeChatLoginController {
     public CommonResult<WxAppletRecommendQrCodeResp> getWxAppletRecommendQrCode(@Validated @RequestBody GetRecommendQrCodeReq req) {
         return CommonResult.suc(weChatLoginService.getWxAppletRecommendQrCode(req));
     }
+
+    /**
+     * 获取个人推荐二维码图片
+     */
+    @PostMapping("/baseData/wechat/recommendQrCodePng")
+    public CommonResult<String> getWxAppletRecommendQrCodePng(@Validated @RequestBody GetRecommendQrCodeReq req) {
+        return CommonResult.suc(weChatLoginService.getWxAppletRecommendQrCodePng(req));
+    }
 }
 
 
