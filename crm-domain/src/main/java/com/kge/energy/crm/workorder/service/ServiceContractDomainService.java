@@ -246,7 +246,7 @@ public class ServiceContractDomainService {
             }
 
             if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
-                ContractAddMsgToUserParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractAddMsgToUserParam.class);
+                ContractFinishMsgToUserParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractFinishMsgToUserParam.class);
                 msgParamCopy.setNotifyUsers(userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId()));
                 msgDomainService.sendCrmMsg(msgParamCopy);
             }
