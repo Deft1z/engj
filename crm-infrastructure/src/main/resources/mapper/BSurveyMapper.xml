@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BSurveyMapper">
+
+    <resultMap id="SurveyResult" type="com.kge.energy.crm.repository.entityext.result.BSurveyResult">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="surveyCode" column="survey_code" jdbcType="VARCHAR"/>
+        <result property="surveyName" column="survey_name" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+        <collection property="surveyItems" ofType="com.kge.energy.crm.repository.entityext.result.BSurveyItemResult"
+                    column="{surveyId=id}" select="com.kge.energy.crm.repository.mapper.BSurveyItemMapper.getBySurveyId"/>
+    </resultMap>
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        id, survey_code, survey_name, remark, create_user_id, create_time, modify_user_id, modify_time, flag, tenant_id
+    </sql>
+
+    <select id="getBySurveyCode" resultMap="SurveyResult">
+        select *
+        from b_survey
+        where flag = 1
+        and survey_code = #{surveyCode}
+        and tenant_id = #{tenantId}
+    </select>
+
+</mapper>
+

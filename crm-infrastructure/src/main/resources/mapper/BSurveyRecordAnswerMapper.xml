@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BSurveyRecordAnswerMapper">
+
+    <resultMap id="BSurveyRecordAnswerResult"
+               type="com.kge.energy.crm.repository.entityext.result.BSurveyRecordAnswerResult">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="promoterId" column="promoter_id" jdbcType="INTEGER"/>
+        <result property="inviteeId" column="invitee_id" jdbcType="INTEGER"/>
+        <result property="surveyRecordId" column="survey_record_id" jdbcType="INTEGER"/>
+        <result property="surveyName" column="survey_name" jdbcType="VARCHAR"/>
+        <result property="fillJson" column="fill_json" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        id, promoter_id, invitee_id, survey_record_id, survey_name, fill_json, status, create_user_id, create_time, modify_user_id, modify_time, flag, tenant_id
+    </sql>
+
+</mapper>
+

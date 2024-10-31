@@ -9,6 +9,7 @@ public class AppletLinkUtils {
     private static final String ORDER_DETAIL_PATH = "/pages/user/order/detail/detail";
     private static final String CONTRACT_DETAIL_PATH = "/pages/user/contract/detail/detail";
     private static final String COMPLAIN_DETAIL_PATH = "/pages/user/complaint/detail/detail";
+    private static final String SURVEY_ANSWER_PATH = "/pages/survey/answer/add";
 
     //获取工单详情query
     public static String getFormDetailQuery(Integer formId) {
@@ -23,6 +24,11 @@ public class AppletLinkUtils {
     //获取投诉建议详情query
     public static String getComplainDetailQuery(Integer complainId) {
         return "type=" + BIZ_TYPE_COMPLAIN_DETAIL + "&path=" + COMPLAIN_DETAIL_PATH + "&detailId=" + complainId;
+    }
+
+    //获取调查问卷详情query
+    public static String getSurveyAnswerQuery(Integer recordId) {
+        return "type=smsUrl"+ "&path=" + SURVEY_ANSWER_PATH + "&recordId=" + recordId;
     }
 
 }
