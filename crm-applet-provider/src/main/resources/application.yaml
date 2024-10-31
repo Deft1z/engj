@@ -18,12 +18,12 @@ spring:
     allow-circular-references: true
     allow-bean-definition-overriding: true
 
-  mvc:
-    static-path-pattern: /static/**
-
-  web:
-    resources:
-      static-locations: file:${file.upload.tmp-dir}
+#  mvc:
+#    static-path-pattern: /static/**,/**
+#
+#  web:
+#    resources:
+#      static-locations: file:${file.upload.tmp-dir}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -120,7 +120,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     tags-sorter: alpha
-    operations-sorter: alpha
+    # 该参数是swagger默认的排序规则，如果设置为alpha，那么Knife4j提供的按照order排序的增强规则不生效
+    operations-sorter: order
   api-docs:
     path: /v3/api-docs
   group-configs:

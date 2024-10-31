@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BSurveyRecordMapper">
+
+    <resultMap id="BSurveyRecordResult" type="com.kge.energy.crm.repository.entityext.result.BSurveyRecordResult">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="surveyId" column="survey_id" jdbcType="INTEGER"/>
+        <result property="surveyName" column="survey_name" jdbcType="VARCHAR"/>
+        <result property="fillJson" column="fill_json" jdbcType="VARCHAR"/>
+        <result property="shareUrl" column="share_url" jdbcType="VARCHAR"/>
+        <result property="shareExpireAt" column="share_expire_at" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+        <result property="surveyObjCode" column="survey_obj_code" jdbcType="VARCHAR"/>
+        <result property="surveyObjName" column="survey_obj_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        id, survey_id, survey_name, fill_json, share_url, share_expire_at, status, create_user_id, create_time, modify_user_id, modify_time, flag, tenant_id
+    </sql>
+
+    <select id="getAll" resultMap="BSurveyRecordResult">
+        with t as (
+            select bsr.id
+                 , bsr.survey_id
+                 , group_concat(case when bsi.general_biz_key = 'survey_obj_code' then fill_val end) as survey_obj_code
+                 , group_concat(case when bsi.general_biz_key = 'survey_obj_name' then fill_val end) as survey_obj_name
+            from b_survey_record bsr, json_table(
+                    json_unquote(json_extract(fill_json, '$.surveyItems'))
+                    , '$[*]' columns (
+                        id int PATH '$.id',
+                        item_name varchar(100) PATH '$.itemName',
+                        fill_val VARCHAR(600) PATH '$.fillVal'
+                    )
+                ) AS tb, b_survey_item bsi
+            where bsi.survey_id = bsr.survey_id
+              and bsi.general_biz_key in ('survey_obj_code', 'survey_obj_name')
+              and tb.id = bsi.id
+            group by bsr.id, bsr.survey_id
+        )
+        select bsr.id
+             , bsr.survey_id
+             , bsr.survey_name
+             , bsr.share_url
+             , bsr.share_expire_at
+             , bsr.status
+             , t.survey_obj_code
+             , t.survey_obj_name
+             , bsr.create_time
+        from b_survey_record bsr
+        join t on t.id = bsr.id
+        left join b_survey_record_answer bsra on bsra.survey_record_id = bsr.id
+        where bsr.flag = 1
+        and bsr.tenant_id = #{param.tenantId}
+        <if test="param.userId != null">
+            and (bsr.create_user_id = #{param.userId} or bsra.invitee_id = #{param.userId})
+        </if>
+        <if test="param.status != null">
+            and bsr.status = #{param.status}
+        </if>
+        <if test="param.surveyObjCode != null and param.surveyObjCode != ''">
+            and t.survey_obj_code like concat('%', #{param.surveyObjCode}, '%')
+        </if>
+        <if test="param.surveyObjName != null and param.surveyObjName != ''">
+            and t.survey_obj_name like concat('%', #{param.surveyObjName}, '%')
+        </if>
+        group by bsr.id, bsr.survey_id, bsr.survey_name, bsr.fill_json, bsr.share_url, bsr.share_expire_at, bsr.status, bsr.create_time
+    </select>
+
+</mapper>
+
