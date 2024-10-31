@@ -1,5 +1,6 @@
 package com.kge.energy.crm.sso.service;
 
+import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.enums.SystemTypeEnum;
@@ -17,6 +18,7 @@ import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -32,7 +34,9 @@ public class SSOService {
 
     public SSOResp auth(SSOReq req) {
 
-        IamResp<IamCheckTicket> ict = iamService.checkTicket(req.getTicket());
+        String ticket = URLDecoder.decode(req.getTicket(), Charset.defaultCharset());
+
+        IamResp<IamCheckTicket> ict = iamService.checkTicket(ticket);
         if (ObjectUtil.notEqual(ict.getCode(), IamResp.SUCCESS_CODE)) {
             throw new ServiceException(ict.getMsg());
         }
