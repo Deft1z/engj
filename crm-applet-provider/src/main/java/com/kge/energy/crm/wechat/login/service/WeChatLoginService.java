@@ -34,6 +34,7 @@ import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.LeaderLoginMsgToRoleParam;
 import com.kge.platform.framework.common.exception.ServiceException;
+import com.kge.platform.framework.web.util.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,6 +90,9 @@ public class WeChatLoginService {
      */
     @Transactional
     public WeChatLoginResp login(WeChatLoginReq req) {
+
+        log.info("login接口请求参数：{}", JsonUtils.serialize(req));
+
         BUser user = null;
 
         try {
