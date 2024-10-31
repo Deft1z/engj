@@ -6,7 +6,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
@@ -25,10 +24,7 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
 import com.kge.energy.crm.user.service.UserDomainService;
-import com.kge.energy.crm.workorder.req.ServiceContractAddReq;
-import com.kge.energy.crm.workorder.req.ServiceContractDetailReq;
-import com.kge.energy.crm.workorder.req.ServiceContractReq;
-import com.kge.energy.crm.workorder.req.ServiceContractUpdateProjectTimeReq;
+import com.kge.energy.crm.workorder.req.*;
 import com.kge.energy.crm.workorder.resp.ServiceContractResp;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.ContractAddMsgToUserParam;
@@ -57,6 +53,7 @@ public class ServiceContractDomainService {
     private final BOrganizationDao bOrganizationDao;
     private final UserDomainService userDomainService;
     private final MsgDomainService msgDomainService;
+    private final WorkOrderDomainService workOrderDomainService;
 
     public List<ServiceContractResp> getServiceContractList(ServiceContractReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
@@ -103,18 +100,24 @@ public class ServiceContractDomainService {
         }
         scServiceContractDao.save(scServiceContract);
 
-        //变更工单信息
+        //合同所属工单
         WfForm wfForm = wfFormDao.getById(req.getFormId());
         Integer currentOrgId = wfForm.getCurrentOrgId();
-        LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
-                .set(WfForm::getStatus, ConstParam.Processed)
-                .set(WfForm::getSubStatus, ConstParam.Processed)
-                .set(WfForm::getModifyUserId, operator.getUserId())
-                .set(WfForm::getTimeFinished, now)
-                .set(WfForm::getCurrentOrgId, operator.getOrganizationList().iterator().next().getId())
-                .set(WfForm::getCurrentRoleId, operator.getRoleList().iterator().next().getId())
-                .eq(WfForm::getFormId, req.getFormId());
-        wfFormDao.update(wfUpdateWrapper);
+        //查询工单流转记录中是否有办理记录
+        List<WfFormFlow> handleRecords = wfFormFlowDao.list(Wrappers.<WfFormFlow>lambdaQuery()
+                .eq(WfFormFlow::getFormId, req.getFormId())
+                .eq(WfFormFlow::getActionType, ConstParam.FlowHasFeedback)
+        );
+        //校有无办理记录则执行工单办理
+        if (handleRecords.isEmpty()) {
+            workOrderDomainService.updateWorkOrder(new WorkOrderUpdateReq()
+                    .setFormId(req.getFormId())
+                    .setContent(req.getContent())
+                    .setType(2)
+                    .setLevel(2)
+                    .setCurrentOrgId(currentOrgId)
+            );
+        }
 
         //新增工单流转添加合同记录
         WfFormFlow wfFormFlow = new WfFormFlow()
