@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class GetRecommendQrCodeReq {
 
-    private Integer width = 400 ;
+    private Integer width = 400;
 
+    private Boolean hyaline = false;
 }

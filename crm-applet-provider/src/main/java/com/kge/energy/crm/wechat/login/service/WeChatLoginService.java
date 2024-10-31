@@ -4,9 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -15,6 +18,7 @@ import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.*;
+import com.kge.energy.crm.external.file.property.FileProperty;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
@@ -42,6 +46,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -75,6 +80,8 @@ public class WeChatLoginService {
     private final RUserTenantDao rUserTenantDao;
 
     private final MsgDomainService msgDomainService;
+
+    private final FileProperty fileProperty;
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
@@ -340,7 +347,7 @@ public class WeChatLoginService {
         String page = "pages/index/index";
         String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
 
-        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page, scene, req.getWidth());
+        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page, scene, req.getWidth(), req.getHyaline());
 
         sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
                 "生成个人推荐二维码【" + currentUserInfo.getUserId() + " , " + currentUserInfo.getRealname() + "】"
@@ -348,5 +355,34 @@ public class WeChatLoginService {
 
         return new WxAppletRecommendQrCodeResp()
                 .setRecommendQrCodeBase64(Base64.encode(bytes));
+    }
+
+    public String getWxAppletRecommendQrCodePng(GetRecommendQrCodeReq req) {
+
+        WxAppletRecommendQrCodeResp resp = getWxAppletRecommendQrCode(req);
+
+        String recommendQrCodeBase64 = resp.getRecommendQrCodeBase64();
+
+        String bizType = "recommendQrCode";
+        String fileType = "png";
+
+        String resultPath;
+        String filePath = fileProperty.getUpload().getTmpDir() + FileUtil.FILE_SEPARATOR +
+                bizType + FileUtil.FILE_SEPARATOR +
+                DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN);
+        File dir = new File(filePath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        String fileName = IdUtil.fastSimpleUUID() + "." + fileType;
+        resultPath = FileUtil.FILE_SEPARATOR + bizType + FileUtil.FILE_SEPARATOR +
+                DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN) + FileUtil.FILE_SEPARATOR + fileName;
+
+        filePath = filePath + FileUtil.FILE_SEPARATOR + fileName;
+
+        Base64.decodeToFile(recommendQrCodeBase64, new File(filePath));
+
+        return resultPath;
     }
 }

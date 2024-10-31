@@ -3,9 +3,9 @@ package com.kge.energy.crm.external.wechat.applet.service;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
+import com.kge.energy.crm.external.wechat.applet.req.GetUnlimitedQrCodeReq;
 import com.kge.energy.crm.external.wechat.applet.req.GetUserPhoneNumberReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
-import com.kge.energy.crm.external.wechat.applet.req.GetUnlimitedQrCodeReq;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.resp.SendSubscribeResp;
@@ -111,14 +111,15 @@ public class WeChatAppletInfraService {
      * 获取不限制的小程序码
      * https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/qr-code/getUnlimitedQRCode.html
      */
-    public byte[] getUnlimitedQRCode(String page, String scene,Integer width) {
-            String url = String.format("%s/wxa/getwxacodeunlimit?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
-            GetUnlimitedQrCodeReq req = new GetUnlimitedQrCodeReq()
+    public byte[] getUnlimitedQRCode(String page, String scene, Integer width, boolean hyaline) {
+        String url = String.format("%s/wxa/getwxacodeunlimit?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
+        GetUnlimitedQrCodeReq req = new GetUnlimitedQrCodeReq()
                 .setPage(page)
                 .setScene(scene)
                 .setWidth(width)
-                .setEnvVersion(wechatAppletProperties.getEnvVersion());
-            return RestUtils.postForObject(url, req, byte[].class);
+                .setEnvVersion(wechatAppletProperties.getEnvVersion())
+                .setHyaline(hyaline);
+        return RestUtils.postForObject(url, req, byte[].class);
     }
 
     public String getWeChatAppletUrlLink1(String path) {

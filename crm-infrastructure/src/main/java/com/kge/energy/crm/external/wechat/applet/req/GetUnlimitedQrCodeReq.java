@@ -20,4 +20,7 @@ public class GetUnlimitedQrCodeReq {
     @JsonProperty("env_version")
     private String envVersion;
 
+    @JsonProperty("is_hyaline")
+    private Boolean hyaline;
+
 }
