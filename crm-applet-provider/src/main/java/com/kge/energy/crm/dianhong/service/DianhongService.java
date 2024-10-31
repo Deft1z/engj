@@ -33,6 +33,11 @@ public class DianhongService {
     }
 
     public DeviceEnableResp setControlEnable(DeviceEnableReq req) {
+
+        if (!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())) {
+            throw new ServiceException("权限不足");
+        }
+
         if (!StrUtil.equals("0", req.getEnable()) && !StrUtil.equals("1", req.getEnable())) {
             throw new ServiceException("参数错误");
         }
