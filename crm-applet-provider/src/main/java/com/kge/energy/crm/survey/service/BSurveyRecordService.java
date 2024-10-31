@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.repository.dao.BSurveyRecordAnswerDao;
 import com.kge.energy.crm.repository.dao.BSurveyRecordDao;
 import com.kge.energy.crm.repository.entity.BSurveyRecord;
@@ -39,6 +41,8 @@ public class BSurveyRecordService {
     private final BSurveyRecordDao bSurveyRecordDao;
 
     private final BSurveyRecordAnswerDao bSurveyRecordAnswerDao;
+
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     public PageResp<SurveyRecordResp> getByPage(SurveyRecordReq req) {
         SurveyRecordParam param = BeanUtil.copyProperties(req, SurveyRecordParam.class);
@@ -102,9 +106,9 @@ public class BSurveyRecordService {
         if (Boolean.TRUE.equals(submitFlag)) {
             // 0 未提交 1 待评价 2 已评价 3 已完成
             surveyRecord.setStatus(1);
-            //todo 生成分享链接
-            surveyRecord.setShareUrl("https://www.baidu.com");
-            surveyRecord.setShareExpireAt(LocalDateTime.now().plusDays(30));
+            Integer expireDays = 30;
+            surveyRecord.setShareUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getSurveyAnswerQuery(surveyRecord.getId()), expireDays));
+            surveyRecord.setShareExpireAt(LocalDateTime.now().plusDays(expireDays));
         }
     }
 
