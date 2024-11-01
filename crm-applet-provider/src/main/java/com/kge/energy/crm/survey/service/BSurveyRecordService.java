@@ -9,6 +9,7 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.qrcode.QrCodeService;
 import com.kge.energy.crm.repository.dao.BSurveyRecordAnswerDao;
 import com.kge.energy.crm.repository.dao.BSurveyRecordDao;
 import com.kge.energy.crm.repository.entity.BSurveyRecord;
@@ -43,6 +44,8 @@ public class BSurveyRecordService {
     private final BSurveyRecordAnswerDao bSurveyRecordAnswerDao;
 
     private final WeChatAppletInfraService weChatAppletInfraService;
+
+    private final QrCodeService qrCodeService;
 
     public PageResp<SurveyRecordResp> getByPage(SurveyRecordReq req) {
         SurveyRecordParam param = BeanUtil.copyProperties(req, SurveyRecordParam.class);
@@ -97,9 +100,34 @@ public class BSurveyRecordService {
             }
         }
         //编辑记录
-        generateShareUrl(req.getSubmitFlag(), surveyRecord);
+        if (Boolean.TRUE.equals(req.getSubmitFlag())) {
+            // 0 未提交 1 待评价 2 已评价 3 已完成
+            surveyRecord.setStatus(1);
+            //生成分享链接
+            generateShareUrl(surveyRecord);
+        }
+
         surveyRecord.setFillJson(JSONUtil.toJsonStr(req));
         return bSurveyRecordDao.updateById(surveyRecord);
+    }
+
+    @Transactional
+    public Boolean delete(Integer id) {
+        Integer operatorId = UserInfoContextUtils.getCurrentUserId();
+        BSurveyRecord surveyRecord = bSurveyRecordDao.getById(id);
+        if (!surveyRecord.getCreateUserId().equals(operatorId)) {
+            throw new ServiceException("非调查表创建人，无权限操作！");
+        }
+        //若已有受邀请人填写调查表，不可删除
+        List<BSurveyRecordAnswer> answers = bSurveyRecordAnswerDao.list(Wrappers.<BSurveyRecordAnswer>lambdaQuery()
+                .eq(BSurveyRecordAnswer::getSurveyRecordId, id)
+                .eq(BSurveyRecordAnswer::getPromoterId, operatorId)
+        );
+        if (!answers.isEmpty()) {
+            throw new ServiceException("已有受邀请人填写调查表，不可删除！");
+        }
+
+        return bSurveyRecordDao.removeById(id);
     }
 
     @Transactional
@@ -115,14 +143,23 @@ public class BSurveyRecordService {
         return bSurveyRecordDao.updateById(surveyRecord);
     }
 
-    private void generateShareUrl(Boolean submitFlag, BSurveyRecord surveyRecord) {
-        if (Boolean.TRUE.equals(submitFlag)) {
-            // 0 未提交 1 待评价 2 已评价 3 已完成
-            surveyRecord.setStatus(1);
-            Integer expireDays = 30;
-            surveyRecord.setShareUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getSurveyAnswerQuery(surveyRecord.getId()), expireDays));
-            surveyRecord.setShareExpireAt(LocalDateTime.now().plusDays(expireDays));
+    public String getShareQrcode(Integer id) {
+        BSurveyRecord surveyRecord = bSurveyRecordDao.getById(id);
+        if (surveyRecord == null) {
+            throw new ServiceException("调查表单不存在！");
         }
+        if (surveyRecord.getShareExpireAt().isAfter(LocalDateTime.now())) {
+            //分享链接已过期，重新生成
+            generateShareUrl(surveyRecord);
+            bSurveyRecordDao.updateById(surveyRecord);
+        }
+        return qrCodeService.createCodeToBase64(surveyRecord.getShareUrl());
+    }
+
+    private void generateShareUrl(BSurveyRecord surveyRecord) {
+        Integer expireDays = 30;
+        surveyRecord.setShareUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getSurveyAnswerQuery(surveyRecord.getId()), expireDays));
+        surveyRecord.setShareExpireAt(LocalDateTime.now().plusDays(expireDays));
     }
 
 }
