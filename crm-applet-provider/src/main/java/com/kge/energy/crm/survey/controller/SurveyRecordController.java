@@ -88,7 +88,7 @@ public class SurveyRecordController {
     @ApiOperationSupport(order = 7)
     @Operation(summary = "获取调查评价二维码(base64)")
     @Parameter(name = "id", description = "表单记录id", required = true, in = ParameterIn.QUERY)
-    @PostMapping("/answer/qrcode")
+    @GetMapping("/answer/qrcode")
     public CommonResult<String> getQrcode(@RequestParam(value = "id", required = true) Integer id) {
         return CommonResult.suc(surveyRecordService.getShareQrcode(id));
     }

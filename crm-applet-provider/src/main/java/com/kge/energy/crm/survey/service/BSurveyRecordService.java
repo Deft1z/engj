@@ -133,6 +133,9 @@ public class BSurveyRecordService {
     @Transactional
     public Boolean complete(SurveyInitResp req) {
         BSurveyRecord surveyRecord = bSurveyRecordDao.getById(req.getRecordId());
+        if (!surveyRecord.getCreateUserId().equals(UserInfoContextUtils.getCurrentUserId())) {
+            throw new ServiceException("非调查表创建人，无权限操作！");
+        }
         // 0 未提交 1 待评价 2 已评价 3 已完成
         if (!surveyRecord.getStatus().equals(2)) {
             throw new ServiceException("已评价状态才可完成！");
