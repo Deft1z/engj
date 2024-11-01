@@ -118,6 +118,16 @@ public class WorkOrderDomainService {
         wfForm.setCurrentRoleId(currentRoleId);
         //租户
         wfForm.setTenantId(operator.getTenantId());
+
+        //预选公司
+        if(ObjectUtil.isNotNull(req.getPreselectedOrgId())){
+            BOrganization preselectedOrg = bOrganizationDao.getById(req.getPreselectedOrgId());
+            if(ObjectUtil.isNull(preselectedOrg)){
+                throw new ServiceException("当前用户租户下不存在唯一根组织");
+            }
+            wfForm.setPreselectedOrgId(req.getPreselectedOrgId());
+        }
+
         wfFormDao.save(wfForm);
 
         //保存流转记录
