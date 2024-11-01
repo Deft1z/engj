@@ -102,6 +102,19 @@ public class BSurveyRecordService {
         return bSurveyRecordDao.updateById(surveyRecord);
     }
 
+    @Transactional
+    public Boolean complete(SurveyInitResp req) {
+        BSurveyRecord surveyRecord = bSurveyRecordDao.getById(req.getRecordId());
+        // 0 未提交 1 待评价 2 已评价 3 已完成
+        if (!surveyRecord.getStatus().equals(2)) {
+            throw new ServiceException("已评价状态才可完成！");
+        }
+        surveyRecord.setStatus(3);
+        //编辑记录
+        surveyRecord.setFillJson(JSONUtil.toJsonStr(req));
+        return bSurveyRecordDao.updateById(surveyRecord);
+    }
+
     private void generateShareUrl(Boolean submitFlag, BSurveyRecord surveyRecord) {
         if (Boolean.TRUE.equals(submitFlag)) {
             // 0 未提交 1 待评价 2 已评价 3 已完成

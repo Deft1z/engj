@@ -92,5 +92,12 @@ public class SurveyRecordController {
         return CommonResult.suc(surveyRecordAnswerService.save(req));
     }
 
+    @ApiOperationSupport(order = 8)
+    @Operation(summary = "发起人确认完成受邀请人填写的调查表单")
+    @PostMapping("/record/complete")
+    public CommonResult<Boolean> completeRecord(@RequestBody SurveyInitResp req) {
+        return CommonResult.suc(surveyRecordService.complete(req));
+    }
+
 }
 
