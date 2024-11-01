@@ -212,7 +212,9 @@
              , DATE_FORMAT(a.modify_time, '%Y-%m-%d %T') AS modify_time
              , a.flag
              , a.remark
-             , d.`name` AS org_name,
+             , d.`name` AS org_name
+             , p.organization_id as preselected_org_id
+             , p.`name` as preselected_org_name,
             <choose>
                 <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
                     (case
@@ -249,6 +251,7 @@
             </choose>
         from wf_form a
         join b_organization d on d.organization_id = a.current_org_id
+        join b_organization p on p.organization_id = a.preselected_org_id
         left join wf_form_flow b on b.form_id = a.form_id and b.create_user_id = #{userInfo.userId}
         /*LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
         LEFT JOIN r_user_role f ON f.user_id = b.create_user_id*/
@@ -294,7 +297,7 @@
             and a.modify_time &gt;= #{listParam.searchMap.starttime}
             and a.modify_time &lt;= #{listParam.searchMap.endtime}
         </if>
-        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`, `user_status`
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`, p.`name`, `user_status`
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
             having user_status = #{listParam.searchMap.status}
         </if>
@@ -382,7 +385,9 @@
         , DATE_FORMAT(a.modify_time, '%Y-%m-%d %T') AS modify_time
         , a.flag
         , a.remark
-        , d.`name` AS org_name,
+        , d.`name` AS org_name
+        , p.organization_id as preselected_org_id
+        , p.`name` as preselected_org_name,
         <choose>
             <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
                 (case
@@ -419,6 +424,7 @@
         </choose>
         from wf_form a
         join b_organization d on d.organization_id = a.current_org_id
+        join b_organization p on p.organization_id = a.preselected_org_id
         where a.flag = 1
         and a.form_id = #{formId}
         <choose>
@@ -445,6 +451,7 @@
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`,p.`name`, `user_status`
     </select>
 
 </mapper>

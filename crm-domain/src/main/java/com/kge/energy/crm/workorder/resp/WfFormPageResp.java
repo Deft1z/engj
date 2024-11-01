@@ -40,4 +40,8 @@ public class WfFormPageResp {
     private Integer organizationId;
     private String realname;
 
+    //客户预选公司
+    private Integer preselectedOrgId;
+    private String preselectedOrgName;
+
 }

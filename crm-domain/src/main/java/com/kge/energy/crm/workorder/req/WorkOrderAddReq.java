@@ -23,6 +23,9 @@ public class WorkOrderAddReq {
     @Schema(description = "工单内容")
     private WorkOrderContent content;
 
+    @Schema(description = "客户预选的公司id")
+    private Integer preselectedOrgId;
+
     @Data
     @Accessors(chain = true)
     public static class WorkOrderContent {
