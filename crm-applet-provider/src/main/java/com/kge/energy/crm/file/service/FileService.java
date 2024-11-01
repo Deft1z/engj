@@ -19,4 +19,8 @@ public class FileService {
     public UploadFileResp uploadFileProxy(MultipartFile file) {
         return fileDomainService.uploadFile(file);
     }
+
+    public String uploadTmpFile(MultipartFile file, String bizType) {
+        return fileDomainService.uploadTmpFile(file, bizType);
+    }
 }

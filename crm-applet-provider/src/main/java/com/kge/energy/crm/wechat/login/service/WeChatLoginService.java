@@ -1,11 +1,15 @@
 package com.kge.energy.crm.wechat.login.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,26 +17,28 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.TokenConstant;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.enums.LoginPlatformEnums;
-import com.kge.energy.crm.enums.LoginResultEnums;
-import com.kge.energy.crm.enums.RoleEnums;
-import com.kge.energy.crm.enums.SystemTypeEnum;
+import com.kge.energy.crm.enums.*;
+import com.kge.energy.crm.external.file.property.FileProperty;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
 import com.kge.energy.crm.external.wechat.applet.resp.LoginResp;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.log.service.SysOperateLogHandleService;
 import com.kge.energy.crm.login.SysLoginLogHandleService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.*;
 import com.kge.energy.crm.user.service.UserDomainService;
+import com.kge.energy.crm.wechat.login.req.GetRecommendQrCodeReq;
 import com.kge.energy.crm.wechat.login.req.PhoneNumberReq;
 import com.kge.energy.crm.wechat.login.req.WeChatLoginReq;
 import com.kge.energy.crm.wechat.login.resp.WeChatLoginResp;
 import com.kge.energy.crm.wechat.login.resp.WeChatPhoneNumberResp;
+import com.kge.energy.crm.wechat.login.resp.WxAppletRecommendQrCodeResp;
 import com.kge.energy.crm.wechat.login.resp.WxLoginUserInfoResp;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.LeaderLoginMsgToRoleParam;
 import com.kge.platform.framework.common.exception.ServiceException;
+import com.kge.platform.framework.web.util.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +46,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -66,12 +73,15 @@ public class WeChatLoginService {
     private final UserDomainService userDomainService;
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final SysLoginLogHandleService sysLoginLogHandleService;
+    private final SysOperateLogHandleService sysOperateLogHandleService;
 
     private final BOrganizationDao bOrganizationDao;
     private final BRoleDao bRoleDao;
     private final RUserTenantDao rUserTenantDao;
 
     private final MsgDomainService msgDomainService;
+
+    private final FileProperty fileProperty;
 
     @Value("${spring.data.redis.front}")
     private String redisFront;
@@ -87,6 +97,9 @@ public class WeChatLoginService {
      */
     @Transactional
     public WeChatLoginResp login(WeChatLoginReq req) {
+
+        log.info("login接口请求参数：{}", JsonUtils.serialize(req));
+
         BUser user = null;
 
         try {
@@ -108,13 +121,16 @@ public class WeChatLoginService {
                         .findFirst()
                         .orElse(bUsers.get(0));
                 //判断是否禁用
-                if (ObjectUtil.equal(user.getStatus(), 1)) {
+                if (ObjectUtil.equal(user.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
                     throw new ServiceException("账号已禁用");
                 }
 
             } else {
-                // 新用户默认挂靠到南投-未挂靠组织下
+                // 新用户默认挂靠到南投-个人用户组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
+                // 新用户的推荐用户字段绑定
+                if (ObjectUtil.isNotNull(req.getRecommendUserId()))
+                    user.setRecommendUserId(req.getRecommendUserId());
             }
 
             String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT,
@@ -150,7 +166,7 @@ public class WeChatLoginService {
     }
 
     /**
-     * 新用户默认挂靠到南投-未挂靠组织下,没有未挂靠组织就挂到南投下
+     * 新用户默认挂靠到南投-个人用户组织下
      */
     private BUser saveNewUser(String openId, String mobile) {
 
@@ -172,7 +188,7 @@ public class WeChatLoginService {
                 .setTenantId(bUser.getTenantId());
         rUserRoleDao.save(rRole);
 
-        BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "未挂靠组织");
+        BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
         bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
 
         RUserTenant rUserTenant = new RUserTenant()
@@ -298,7 +314,6 @@ public class WeChatLoginService {
         if (ObjUtil.isNull(bUser)) {
             return null;
         }
-
         return new WxLoginUserInfoResp()
                 .setTenantId(currentUserInfo.getTenantId())
                 .setTenantName(currentUserInfo.getTenantName())
@@ -323,4 +338,51 @@ public class WeChatLoginService {
                         ).collect(Collectors.toList()));
     }
 
+    /**
+     * 获取小程序url
+     */
+    public WxAppletRecommendQrCodeResp getWxAppletRecommendQrCode(GetRecommendQrCodeReq req) {
+        UserInfoDto currentUserInfo = UserInfoContextUtils.getCurrentUserInfo();
+
+        String page = "pages/index/index";
+        String scene = "recommendUserId=" + currentUserInfo.getUserId().toString();
+
+        byte[] bytes = weChatAppletInfraService.getUnlimitedQRCode(page, scene, req.getWidth(), req.getHyaline());
+
+        sysOperateLogHandleService.saveLog(currentUserInfo.getTenantId(), OperateModuleEnums.USER,
+                "生成个人推荐二维码【" + currentUserInfo.getUserId() + " , " + currentUserInfo.getRealname() + "】"
+        );
+
+        return new WxAppletRecommendQrCodeResp()
+                .setRecommendQrCodeBase64(Base64.encode(bytes));
+    }
+
+    public String getWxAppletRecommendQrCodePng(GetRecommendQrCodeReq req) {
+
+        WxAppletRecommendQrCodeResp resp = getWxAppletRecommendQrCode(req);
+
+        String recommendQrCodeBase64 = resp.getRecommendQrCodeBase64();
+
+        String bizType = "recommendQrCode";
+        String fileType = "png";
+
+        String resultPath;
+        String filePath = fileProperty.getUpload().getTmpDir() + FileUtil.FILE_SEPARATOR +
+                bizType + FileUtil.FILE_SEPARATOR +
+                DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN);
+        File dir = new File(filePath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        String fileName = IdUtil.fastSimpleUUID() + "." + fileType;
+        resultPath = FileUtil.FILE_SEPARATOR + bizType + FileUtil.FILE_SEPARATOR +
+                DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN) + FileUtil.FILE_SEPARATOR + fileName;
+
+        filePath = filePath + FileUtil.FILE_SEPARATOR + fileName;
+
+        Base64.decodeToFile(recommendQrCodeBase64, new File(filePath));
+
+        return resultPath;
+    }
 }

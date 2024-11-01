@@ -117,5 +117,10 @@ public class BUser {
      * 租户id
      */
     private Integer tenantId;
+
+    /**
+     * 推荐用户id
+     */
+    private Integer recommendUserId;
 }
 

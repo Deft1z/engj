@@ -27,7 +27,6 @@
           and bre.resource_id = rrr.resource_id
           and br.role_id = #{roleId}
           and bre.system_type = #{systemType}
-          and bre.resource_id > 499
     </select>
 
     <select id="userRole" resultType="com.kge.energy.crm.repository.entity.BRole">

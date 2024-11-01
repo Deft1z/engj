@@ -1,6 +1,9 @@
 package com.kge.energy.crm.external.file.service;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.digest.MD5;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
@@ -18,6 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 /**
@@ -30,14 +37,18 @@ public class FileInfraService {
 
     private final FileProperty fileProperty;
 
-    @SneakyThrows
-    public String uploadFile(MultipartFile multipartFile) {
-
+    private void checkUploadFileType(MultipartFile multipartFile) {
         String fileType = FileUtil.extName(multipartFile.getOriginalFilename());
 
         if (!Arrays.asList(fileProperty.getUpload().getAllowTypes().split(",")).contains(fileType)) {
             throw new ServiceException("不允许的文件类型：" + fileType);
         }
+    }
+
+    @SneakyThrows
+    public String uploadFile(MultipartFile multipartFile) {
+
+        checkUploadFileType(multipartFile);
 
         String md5Code;
         try {
@@ -73,5 +84,38 @@ public class FileInfraService {
         }
 
         return filePath;
+    }
+
+    /**
+     * 创建临时文件
+     */
+    public String uploadTmpFile(MultipartFile multipartFile, String bizType) {
+
+        checkUploadFileType(multipartFile);
+
+        String resultPath;
+
+        try {
+            String filePath = fileProperty.getUpload().getTmpDir() + FileUtil.FILE_SEPARATOR +
+                    bizType + FileUtil.FILE_SEPARATOR +
+                    DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN);
+            File dir = new File(filePath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String fileName = IdUtil.fastSimpleUUID() + "." + FileUtil.extName(multipartFile.getOriginalFilename());
+            resultPath = FileUtil.FILE_SEPARATOR + bizType + FileUtil.FILE_SEPARATOR +
+                    DateUtil.format(LocalDateTime.now(), DatePattern.SIMPLE_MONTH_PATTERN) + FileUtil.FILE_SEPARATOR + fileName;
+
+            Path path = Paths.get(filePath, fileName);
+            Files.copy(multipartFile.getInputStream(), path);
+
+        } catch (IOException e) {
+            log.error("上传文件失败", e);
+            throw new ServiceException("上传文件失败");
+        }
+
+        return resultPath;
     }
 }

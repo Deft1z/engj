@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +44,7 @@ public class WorkOrderService {
     /*
         工单导出
      */
-    public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) throws IOException {
+    public void exportWorkOrder(HttpServletResponse response, WorkOrderExportReq req) {
         WorkOrderExportReq.SearchFormMap searchMap = Optional.ofNullable(req.getSearchMap()).orElse(new WorkOrderExportReq.SearchFormMap());
         if (searchMap.getStarttime() != null && searchMap.getEndtime() != null) {
             long days = Duration.between(searchMap.getStarttime(), searchMap.getEndtime()).toDays();
@@ -68,7 +67,7 @@ public class WorkOrderService {
         List<WfFormExportDto> exportDtoList = BeanUtil.copyToList(all, WfFormExportDto.class);
 
         //ExcelUtils写excel 响应给前端
-        ExcelUtils.write(response, "工单列表数据.xlsx", "工单列表数据", WfFormExportDto.class, exportDtoList);
+        ExcelUtils.write(response, "工单列表数据.xls", "工单列表数据", WfFormExportDto.class, exportDtoList, req.getExportType());
     }
 
 

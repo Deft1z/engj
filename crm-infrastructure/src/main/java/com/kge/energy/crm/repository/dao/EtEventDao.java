@@ -18,11 +18,12 @@ public class EtEventDao extends ServiceImpl<EtEventMapper, EtEvent> {
     private final EtEventMapper mapper;
 
     @Cacheable(value = "event_exists", key = "#systemType + '_' + #eventKey", unless = "#result == null")
-    public EtEvent findExistsEvent(String systemType, String eventKey) {
+    public EtEvent findExistsEvent(String systemType, String eventKey, Integer tenantId) {
 
         LambdaQueryWrapper<EtEvent> wrapper = new LambdaQueryWrapper<EtEvent>()
                 .eq(EtEvent::getSystemType, systemType)
-                .eq(EtEvent::getEventKey, eventKey);
+                .eq(EtEvent::getEventKey, eventKey)
+                .eq(EtEvent::getTenantId, tenantId);
 
         return mapper.selectOne(wrapper);
     }

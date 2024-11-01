@@ -35,7 +35,7 @@ public class TenantService {
 
     private final BTenantDao bTenantDao;
 
-    private final String TENANT_NAME_CACHE_KEY = "tenant:name:";
+    private static final String TENANT_NAME_CACHE_KEY = "tenant:name:";
 
     private final RedisUtils redisUtils;
 
@@ -107,7 +107,6 @@ public class TenantService {
     }
 
     public List<TenantListForOrgResult> getTenantDictList() {
-        //AuthVerifyUtils.mustAdmin();
         return AuthVerifyUtils.isSuperAdmin() ?
                 bTenantDao.getTenantDictList(null) :
                 bTenantDao.getTenantDictList(UserInfoContextUtils.getCurrentTenantId());

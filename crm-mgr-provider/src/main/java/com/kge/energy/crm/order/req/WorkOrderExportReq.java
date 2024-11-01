@@ -1,6 +1,7 @@
 package com.kge.energy.crm.order.req;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.kge.energy.crm.easyexcel.ExportReq;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @Accessors(chain = true)
 @Schema(description = "业务工单导出参数")
-public class WorkOrderExportReq {
+public class WorkOrderExportReq  extends ExportReq {
     @NotNull
     @Schema(description = "工单类型id, 1 业务工单 2 投诉工单")
     private Integer formTypeId;

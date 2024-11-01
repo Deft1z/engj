@@ -1,8 +1,9 @@
 package com.kge.energy.crm.external.wechat.applet.service;
 
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
+import com.kge.energy.crm.external.wechat.applet.req.GetUnlimitedQrCodeReq;
 import com.kge.energy.crm.external.wechat.applet.req.GetUserPhoneNumberReq;
 import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
 import com.kge.energy.crm.external.wechat.applet.resp.GetUserPhoneNumberResp;
@@ -14,6 +15,9 @@ import com.kge.platform.framework.web.util.RestUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author wangjihua
@@ -77,24 +81,71 @@ public class WeChatAppletInfraService {
         return RestUtils.postForObject(url, req, SendSubscribeResp.class);
     }
 
-    public String getWeChatAppletUrlLink(String path, String query) {
-        try{
+    /**
+     * 获取加密URLLink
+     * https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/url-link/generateUrlLink.html
+     */
+    public String getWeChatAppletUrlLink(String path, String query, Integer validDays) {
+        try {
             String url = String.format("%s/wxa/generate_urllink?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
             JSONObject req = new JSONObject();
             req.set("path", path);
             req.set("query", query);
             req.set("expire_type", 1);
-            req.set("expire_interval", 3);
+            req.set("expire_interval", validDays);
             req.set("env_version", wechatAppletProperties.getEnvVersion());
             JSONObject rs = RestUtils.postForObject(url, req, JSONObject.class);
 
-            if(rs.getInt("errcode") == 0){
+            if (rs.getInt("errcode") == 0) {
                 return rs.getStr("url_link");
             } else {
                 return "";
             }
-        }catch (Exception e){
-            log.error("获取小程序url失败:",e);
+        } catch (Exception e) {
+            log.error("获取小程序url失败:", e);
+            return "";
+        }
+    }
+
+    /**
+     * 获取不限制的小程序码
+     * https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/qrcode-link/qr-code/getUnlimitedQRCode.html
+     */
+    public byte[] getUnlimitedQRCode(String page, String scene, Integer width, boolean hyaline) {
+        String url = String.format("%s/wxa/getwxacodeunlimit?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
+        GetUnlimitedQrCodeReq req = new GetUnlimitedQrCodeReq()
+                .setPage(page)
+                .setScene(scene)
+                .setWidth(width)
+                .setEnvVersion(wechatAppletProperties.getEnvVersion())
+                .setHyaline(hyaline);
+        return RestUtils.postForObject(url, req, byte[].class);
+    }
+
+    public String getWeChatAppletUrlLink1(String path) {
+        try {
+            String url = String.format("%s/wxa/generate_urllink?access_token=%s", wechatAppletProperties.getWxUrl(), getAccessToken());
+            JSONObject req = new JSONObject();
+
+            JSONObject query = new JSONObject();
+            query.set("type", "smsUrl");
+            query.set("formId", 188);
+            String queryStr = JSONUtil.toJsonStr(query);
+            String encodedString = URLEncoder.encode(queryStr, StandardCharsets.UTF_8);
+            req.set("path", path);
+            req.set("query", encodedString);
+            req.set("expire_type", 1);
+            req.set("expire_interval", 3);
+            req.set("env_version", wechatAppletProperties.getEnvVersion());
+            JSONObject rs = RestUtils.postForObject(url, req, JSONObject.class);
+
+            if (rs.getInt("errcode") == 0) {
+                return rs.getStr("url_link");
+            } else {
+                return "";
+            }
+        } catch (Exception e) {
+            log.error("获取小程序url失败:", e);
             return "";
         }
     }

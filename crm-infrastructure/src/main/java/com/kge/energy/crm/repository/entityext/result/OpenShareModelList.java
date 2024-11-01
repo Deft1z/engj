@@ -9,7 +9,10 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class OpenShareModelList {
-    Integer Uid;
-    String  Realname;
-    String  Mobile;
+
+    private Integer uid;
+
+    private String realname;
+
+    private String mobile;
 }

@@ -34,4 +34,7 @@ public class UserMsgListReq extends PageReq {
 
     @Schema(description = "false 查看全部消息 true 仅查看个人消息")
     private Boolean onlyMe = true;
+
+    @Schema(description = "导出类型：0 excel 1 pdf")
+    private Integer exportType = 0;
 }

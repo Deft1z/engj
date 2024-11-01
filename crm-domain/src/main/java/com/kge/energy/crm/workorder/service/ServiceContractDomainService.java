@@ -4,36 +4,31 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kge.energy.crm.common.constans.ConstParam;
+import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
+import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
-import com.kge.energy.crm.external.wechat.applet.property.WeChatAppletProperties;
-import com.kge.energy.crm.external.wechat.applet.req.SendSubscribeReq;
-import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishMsgReq;
-import com.kge.energy.crm.external.wechat.applet.req.contract.ContractFinishValueReq;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
+import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
-import com.kge.energy.crm.repository.dao.BUserDao;
-import com.kge.energy.crm.repository.dao.ScServiceContractDao;
-import com.kge.energy.crm.repository.dao.WfFormDao;
-import com.kge.energy.crm.repository.dao.WfFormFlowDao;
-import com.kge.energy.crm.repository.entity.BUser;
+import com.kge.energy.crm.repository.dao.*;
 import com.kge.energy.crm.repository.entity.ScServiceContract;
 import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entity.WfFormFlow;
 import com.kge.energy.crm.repository.entityext.result.ContractResult;
-import com.kge.energy.crm.workorder.req.ServiceContractAddReq;
-import com.kge.energy.crm.workorder.req.ServiceContractDetailReq;
-import com.kge.energy.crm.workorder.req.ServiceContractReq;
-import com.kge.energy.crm.workorder.req.ServiceContractUpdateProjectTimeReq;
+import com.kge.energy.crm.user.service.UserDomainService;
+import com.kge.energy.crm.workorder.req.*;
 import com.kge.energy.crm.workorder.resp.ServiceContractResp;
+import com.kge.energy.msg.dto.UserContactDto;
+import com.kge.energy.msg.param.ContractAddMsgToUserParam;
+import com.kge.energy.msg.param.ContractFinishMsgToUserParam;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +36,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -53,9 +48,12 @@ public class ServiceContractDomainService {
     private final WfFormDao wfFormDao;
     private final WfFormFlowDao wfFormFlowDao;
     private final ScServiceContractDao scServiceContractDao;
-    private final WeChatAppletProperties weChatAppletProperties;
     private final WeChatAppletInfraService weChatAppletInfraService;
     private final DataPermissionDomainService dataPermissionDomainService;
+    private final BOrganizationDao bOrganizationDao;
+    private final UserDomainService userDomainService;
+    private final MsgDomainService msgDomainService;
+    private final WorkOrderDomainService workOrderDomainService;
 
     public List<ServiceContractResp> getServiceContractList(ServiceContractReq req) {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
@@ -102,16 +100,24 @@ public class ServiceContractDomainService {
         }
         scServiceContractDao.save(scServiceContract);
 
-        //变更工单信息
-        LambdaUpdateWrapper<WfForm> wfUpdateWrapper = Wrappers.<WfForm>update().lambda()
-                .set(WfForm::getStatus, ConstParam.Processed)
-                .set(WfForm::getSubStatus, ConstParam.Processed)
-                .set(WfForm::getModifyUserId, operator.getUserId())
-                .set(WfForm::getTimeFinished, now)
-                .set(WfForm::getCurrentOrgId, operator.getOrganizationList().iterator().next().getId())
-                .set(WfForm::getCurrentRoleId, operator.getRoleList().iterator().next().getId())
-                .eq(WfForm::getFormId, req.getFormId());
-        wfFormDao.update(wfUpdateWrapper);
+        //合同所属工单
+        WfForm wfForm = wfFormDao.getById(req.getFormId());
+        Integer currentOrgId = wfForm.getCurrentOrgId();
+        //查询工单流转记录中是否有办理记录
+        List<WfFormFlow> handleRecords = wfFormFlowDao.list(Wrappers.<WfFormFlow>lambdaQuery()
+                .eq(WfFormFlow::getFormId, req.getFormId())
+                .eq(WfFormFlow::getActionType, ConstParam.FlowHasFeedback)
+        );
+        //校有无办理记录则执行工单办理
+        if (handleRecords.isEmpty()) {
+            workOrderDomainService.updateWorkOrder(new WorkOrderUpdateReq()
+                    .setFormId(req.getFormId())
+                    .setContent(req.getContent())
+                    .setType(2)
+                    .setLevel(2)
+                    .setCurrentOrgId(currentOrgId)
+            );
+        }
 
         //新增工单流转添加合同记录
         WfFormFlow wfFormFlow = new WfFormFlow()
@@ -125,6 +131,33 @@ public class ServiceContractDomainService {
                 .setTenantId(operator.getTenantId())
                 .setServiceUnitId(operator.getOrganizationList().iterator().next().getId());
         wfFormFlowDao.save(wfFormFlow);
+
+        //发送微信小程序消息，通知客户
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
+        ContractAddMsgToUserParam msgParam = new ContractAddMsgToUserParam();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        if (!roleEnums.isEmpty()) {
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+            msgParam.setOrderName(fromContent.getBusinessName());
+            msgParam.setOrderCode(fromContent.getCode());
+            msgParam.setContractName(scServiceContract.getName());
+            msgParam.setContractCode(scServiceContract.getCode());
+            msgParam.setServiceUnit(bOrganizationDao.getById(currentOrgId).getName());
+            msgParam.setServicePerson(bUserDao.getById(operator.getUserId()).getRealname());
+            msgParam.setStatus(ConstParam.FlowCompanyContract);
+            msgParam.setAddTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId()), 30));
+            msgParam.setTenantId(operator.getTenantId());
+            msgParam.setNotifyUsers(userContact);
+            msgParam.setMsgBizId(scServiceContract.getServiceContractId());
+            msgDomainService.sendCrmMsg(msgParam);
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
+                ContractAddMsgToUserParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractAddMsgToUserParam.class);
+                msgParamCopy.setNotifyUsers(userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId()));
+                msgDomainService.sendCrmMsg(msgParamCopy);
+            }
+        }
 
         return true;
     }
@@ -184,27 +217,40 @@ public class ServiceContractDomainService {
     }
 
     private void sendServiceContractUpdateMsg(ScServiceContract scServiceContract) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                BUser bUser = bUserDao.findUserByContractId(scServiceContract.getServiceContractId());
-                if (ObjectUtil.isNotNull(bUser)) {
-                    scServiceContract.setStatus(ConstParam.RemainToBeEvaluated);
-                    boolean updateResult = scServiceContractDao.updateById(scServiceContract);
-                    if (updateResult) {
-                        ContractFinishMsgReq contractFinishMsgReq = new ContractFinishMsgReq()
-                                .setName(new ContractFinishValueReq().setValue(scServiceContract.getName()))
-                                .setRemark(new ContractFinishValueReq().setValue(scServiceContract.getRemark()));
-                        SendSubscribeReq<ContractFinishMsgReq> sendSubscribeReq = new SendSubscribeReq<ContractFinishMsgReq>()
-                                .setTemplateId(weChatAppletProperties.getContractFinishTemplate())
-                                .setPage(weChatAppletProperties.getContractFinishTemplate())
-                                .setToUserOpenId(bUser.getOpenId())
-                                .setData(contractFinishMsgReq);
-                        weChatAppletInfraService.sendSubscribe(sendSubscribeReq);
-                    }
-                }
-            } catch (Exception e) {
-                log.error("==> 发送服务合同id={}更新消息异常：{}", scServiceContract.getServiceContractId(), e.getMessage());
+        //发送微信小程序消息，通知客户
+        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
+        WfForm wfForm = wfFormDao.getById(scServiceContract.getFormId());
+        BizOrderFromContentDto fromContent = JSONUtil.toBean(wfForm.getContent(), BizOrderFromContentDto.class);
+        ContractFinishMsgToUserParam msgParam = new ContractFinishMsgToUserParam();
+        List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
+        if (!roleEnums.isEmpty()) {
+            List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
+            msgParam.setOrderName(fromContent.getBusinessName());
+            msgParam.setOrderCode(fromContent.getCode());
+            msgParam.setContractName(scServiceContract.getName());
+            msgParam.setContractCode(scServiceContract.getCode());
+            msgParam.setServiceUnit(bOrganizationDao.getById(scServiceContract.getServiceUnit()).getName());
+            msgParam.setServicePerson(bUserDao.getById(operator.getUserId()).getRealname());
+            msgParam.setStatus(ConstParam.RemainToBeEvaluated);
+            msgParam.setEndTime(scServiceContract.getProjectEndTime().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN)));
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(scServiceContract.getServiceContractId()), 30));
+            msgParam.setTenantId(operator.getTenantId());
+            msgParam.setNotifyUsers(userContact);
+            msgParam.setMsgBizId(scServiceContract.getServiceContractId());
+            msgDomainService.sendCrmMsg(msgParam);
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
+                ContractAddMsgToUserParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractAddMsgToUserParam.class);
+                msgParamCopy.setNotifyUsers(userDomainService.getUserContact(roleEnums, scServiceContract.getServiceUnit(), operator.getTenantId()));
+                msgDomainService.sendCrmMsg(msgParamCopy);
             }
-        });
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
+                ContractFinishMsgToUserParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractFinishMsgToUserParam.class);
+                msgParamCopy.setNotifyUsers(userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId()));
+                msgDomainService.sendCrmMsg(msgParamCopy);
+            }
+        }
+
     }
 }

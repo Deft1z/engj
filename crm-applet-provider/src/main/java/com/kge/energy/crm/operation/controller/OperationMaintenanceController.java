@@ -1,6 +1,7 @@
 package com.kge.energy.crm.operation.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
+import com.kge.energy.crm.external.ecc.req.EccOperationDetailReq;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.operation.req.PatrolRecordReq;
 import com.kge.energy.crm.operation.service.OperationMaintenanceService;
@@ -29,6 +30,11 @@ public class OperationMaintenanceController {
     @PostMapping("/external/getRecord")
     public CommonResult<Object> getRecordList(@RequestBody EccReq eccReq) throws NoSuchAlgorithmException {
         return CommonResult.suc(operationMaintenanceService.getRecordList(eccReq));
+    }
+
+    @PostMapping("/external/getRecordDetail")
+    public CommonResult<Object> getRecordList(@RequestBody EccOperationDetailReq req) throws NoSuchAlgorithmException {
+        return CommonResult.suc(operationMaintenanceService.getMaintenanceDetail(req));
     }
 
     @ConvertToGoFormats

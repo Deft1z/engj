@@ -18,6 +18,10 @@ spring:
     allow-circular-references: true
     allow-bean-definition-overriding: true
 
+  web:
+    resources:
+      static-locations: file:${file.upload.tmp-dir}
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.dbname:test}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
@@ -61,7 +65,7 @@ wechat:
     feebackTemplate: Hr0ohb8bNSisQZIRSgEGjDCnCrYwlO6goOw2KaV-b74
     wxUrl: ${wechat.common.wxUrl}
     version: developer
-    envVersion: developer
+    envVersion: trial
     agencyOrderPage: /pages/user/order/order
   official-account:
     appId: wxa3cbdc535f7b834b
@@ -89,6 +93,10 @@ auth:
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
       - ${server.servlet.context-path}/wechat/login
+      - ${server.servlet.context-path}/static/**
+  permission:
+    white-list:
+      - ${server.servlet.context-path}/eventTracking/report
 
 epcpv:
   allregions: api/v1/pv/project/dim/regions
@@ -162,7 +170,7 @@ knife4j:
     # 是否启用自定义Footer内容，默认false
     enable-footer-custom: true
     # 最终在Ui界面底部显示的Footer内容，支持Markdown格式
-    footer-custom-content: Apache License 2.0 | Copyright  2024 - ${springdoc.contact}
+    footer-custom-content: Apache License 2.0 | Copyright  2024 - ${springdoc.author}
     # 开启动态请求参数，true-开启，false-关闭
     enable-dynamic-parameter: true
     # 否启用调试功能,默认值为true(代表开启调试)，如果要禁用调试，该值设为false
@@ -181,4 +189,3 @@ knife4j:
 file:
   upload:
     allow-types: jpg,jpeg,png,pdf
-    upload-url: http://172.18.26.112:80/fileservice/resourceManage/file/manage/upload

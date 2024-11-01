@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PhoneUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -29,7 +30,6 @@ import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.crm.user.req.*;
 import com.kge.energy.crm.user.resp.*;
 import com.kge.platform.framework.common.exception.ServiceException;
-import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -107,7 +107,8 @@ public class UserService {
         return MD5.create().digestHex(req.getName() + sSystemConfig.getConfig());
     }
 
-    public CommonResult<UserLoginResp> userLogin(UserLoginReq req) {
+    @Transactional
+    public UserLoginResp userLogin(UserLoginReq req) {
         BUser bUser = null;
 
         try {
@@ -137,15 +138,15 @@ public class UserService {
             //账号密码正确 删除key
             redisUtils.delete(loginErrorCountCacheKey);
 
-            //判断是否禁用 帐号状态（0正常 1停用）
-            if (ObjectUtil.equal(bUser.getStatus(), 1)) {
+            if (ObjectUtil.equal(bUser.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
                 throw new ServiceException("账号已禁用");
             }
 
             // 获取uid关联的租户
             RUserTenant rUserTenant = rUserTenantDao.findTenantByUid(bUser.getUserId());
 
-            String authToken = userDomainService.genToken(bUser, SystemTypeEnum.MGR, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT, true);
+            String authToken = userDomainService.genToken(bUser, SystemTypeEnum.MGR, TokenConstant.PC_EXPIRED_TIMEOUT,
+                    TokenConstant.PC_EXPIRED_TIMEUNIT, true);
 
             bUser.setLastLoginTime(LocalDateTime.now());
             bUserDao.updateById(bUser);
@@ -159,7 +160,7 @@ public class UserService {
             //记录登录成功日志
             sysLoginLogHandleService.saveLoginLog(bUser, LoginPlatformEnums.PC, LoginResultEnums.SUCCESS, null);
 
-            return CommonResult.suc(userLoginResp);
+            return userLoginResp;
 
         } catch (Exception e) {
             log.error("pc login error: ", e);
@@ -171,7 +172,6 @@ public class UserService {
 
             throw new ServiceException("登录失败");
         }
-
     }
 
     public CurrentUserInfoResp currentUserInfo() {
@@ -204,6 +204,7 @@ public class UserService {
         return new CurrentUserInfoResp()
                 .setUserId(Math.toIntExact(userInfoDto.getUserId()))
                 .setUserName(userInfoDto.getUserName())
+                .setTenantId(userInfoDto.getTenantId())
                 .setUserName(userInfoDto.getUserName())
                 .setRoleList(roles)
                 .setOrganizationList(orgs);
@@ -415,7 +416,7 @@ public class UserService {
                     .setTenantId(req.getTenantId()));
         }
 
-        if (ObjectUtil.equal(req.getStatus(), 1)) {
+        if (ObjectUtil.equal(req.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
             // 删除用户的登录token
             userDomainService.deleteUserToken(bUser);
         }
@@ -568,6 +569,10 @@ public class UserService {
 
 
     private void checkUpdateExistedUser(UpdateUserReq req) {
+
+        if (StrUtil.isBlank(req.getName())) {
+            return;
+        }
 
         boolean existed = new LambdaQueryChainWrapper<>(BUser.class)
                 .ne(BUser::getUserId, req.getUserId())

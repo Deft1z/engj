@@ -11,7 +11,7 @@ public class EccMaintenance {
     /**
      * 合同id
      */
-    private Integer contractId;
+    private String contractId;
     /**
      * 合同名字
      */

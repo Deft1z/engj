@@ -31,6 +31,7 @@ ecc:
   appSecret: h9r2e2nd5bipf6z
   baseUrl: https://ecc.nftz:8181
   maintenanceListUrl: /publicApi/maintenance/list
+  maintenanceDetailUrl: /publicApi/maintenance/detail
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
@@ -49,3 +50,6 @@ epcpv:
 msg:
   baseUrl: http://172.16.17.156:9002/msg
 
+file:
+  upload:
+    upload-url: http://172.16.17.157:9030/resourceManage/file/manage/upload

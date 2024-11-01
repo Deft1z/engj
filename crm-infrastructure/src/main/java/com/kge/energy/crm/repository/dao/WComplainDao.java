@@ -47,5 +47,13 @@ public class WComplainDao extends ServiceImpl<WComplainMapper, WComplain> {
         return mapper.getComplainListForWx(page, listParam, userInfo, dataEnums);
     }
 
+    public ComplainResult getWorkOrderComplainDetail(Integer complainId, UserInfoDto userInfo, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.getWorkOrderComplainDetail(complainId, userInfo, dataEnums);
+    }
+
+    public ComplainResult getContractComplainDetail(Integer complainId, UserInfoDto userInfo, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.getContractComplainDetail(complainId, userInfo, dataEnums);
+    }
+
 }
 

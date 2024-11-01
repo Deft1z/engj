@@ -5,10 +5,7 @@ import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.controller.ComplainController;
-import com.kge.energy.crm.workorder.req.WfFormFlowReq;
-import com.kge.energy.crm.workorder.req.WfFormPageReq;
-import com.kge.energy.crm.workorder.req.WorkOrderAddReq;
-import com.kge.energy.crm.workorder.req.WorkOrderUpdateReq;
+import com.kge.energy.crm.workorder.req.*;
 import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
 import com.kge.energy.crm.workorder.resp.WfFormPageResp;
@@ -47,13 +44,19 @@ public class ConsultingController {
     @ConvertToGoFormats
     public CommonResult getFormPage(@RequestBody @Valid WfFormPageReq req) {
         //原go项目接口使用工单类型id区分业务工单和投诉工单，但响应的数据字段完全不同，为了接口文档能准确生成请求和响应参数，拆分原go业务代码逻辑，此接口的目的单纯只为兼容原接口的地址
-        //业务工单formTypeId=2调用 ConsultingController.getByPage
-        //投诉工单formTypeId=1调用 ComplainController.getByPage
+        //业务工单formTypeId=1调用 ConsultingController.getByPage
+        //投诉工单formTypeId=2调用 ComplainController.getByPage
         if (req.getFormTypeId().equals(2)) {
             return complainController.getByPage(req);
         } else {
             return this.getByPage(req);
         }
+    }
+
+    @Operation(summary = "获取工单详情")
+    @PostMapping(value = "/getFormDetail")
+    public CommonResult<WfFormPageResp> getFormDetail(@Valid @RequestBody WfFormDetailReq req) {
+        return CommonResult.suc(workOrderDomainService.getFormDetail(req));
     }
 
     @Operation(summary = "获取撤回退回工单列表")

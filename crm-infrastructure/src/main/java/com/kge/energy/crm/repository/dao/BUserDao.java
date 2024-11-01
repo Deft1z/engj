@@ -31,7 +31,7 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
 
     public List<BUser> findUserByOpenId(String openId) {
         if (Objects.equals(openId, "")) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         LambdaQueryWrapper<BUser> wrapper = Wrappers.<BUser>lambdaQuery()

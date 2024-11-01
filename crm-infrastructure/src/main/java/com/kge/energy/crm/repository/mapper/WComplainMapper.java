@@ -35,5 +35,13 @@ public interface WComplainMapper extends BaseMapper<WComplain> {
                                                      @Param("listParam") WorkOrderListParam listParam,
                                                      @Param("userInfo") UserInfoDto userInfo,
                                                      @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+
+    public ComplainResult getWorkOrderComplainDetail(@Param("complainId") Integer complainId,
+                                                     @Param("userInfo") UserInfoDto userInfo,
+                                                     @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+
+    public ComplainResult getContractComplainDetail(@Param("complainId") Integer complainId,
+                                                    @Param("userInfo") UserInfoDto userInfo,
+                                                    @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
 }
 

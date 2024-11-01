@@ -18,6 +18,8 @@ public class CurrentUserInfoResp {
 
     private String userName;
 
+    private Integer tenantId;
+
     private List<Role> roleList;
 
     private List<OrganizationListBean> organizationList;

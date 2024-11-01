@@ -3,7 +3,7 @@
 <mapper namespace="com.kge.energy.crm.repository.mapper.ROpenidProjectMapper">
 
     <resultMap type="com.kge.energy.crm.repository.entity.ROpenidProject" id="ROpenidProjectMap">
-        <result property="openProjectId" column="open_project_id" jdbcType="INTEGER"/>
+        <result property="id" column="id" jdbcType="INTEGER"/>
         <result property="openId" column="open_id" jdbcType="INTEGER"/>
         <result property="projectId" column="project_id" jdbcType="INTEGER"/>
         <result property="flag" column="flag" jdbcType="INTEGER"/>

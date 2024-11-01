@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * @author wangjihua
  */
@@ -32,11 +30,9 @@ public class UserService {
         BUser buser = bUserDao.getById(req.getUserId());
         Assert.notNull(buser);
 
-        buser.setMobile(req.getMobile())
-                .setRealname(req.getRealname())
+        buser.setRealname(req.getRealname())
                 .setCompany(req.getCompany())
-                .setAddress(req.getAddress())
-                .setRemark(req.getRemark());
+                .setAddress(req.getAddress());
 
         return bUserDao.updateById(buser);
     }

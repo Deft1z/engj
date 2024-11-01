@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.RedisLockUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.contract.req.ScServiceContractEvaAddReq;
@@ -22,6 +23,7 @@ import com.kge.energy.crm.contract.resp.ScServiceContractResp;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.msg.MsgDomainService;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.ScContractEvaluateDao;
@@ -60,6 +62,8 @@ public class ScServiceContractService {
     private final RedisLockUtils redisLockUtils;
 
     private final DataPermissionDomainService dataPermissionDomainService;
+
+    private final WeChatAppletInfraService weChatAppletInfraService;
 
     private final UserDomainService userDomainService;
 
@@ -175,8 +179,16 @@ public class ScServiceContractService {
             msgParam.setEvaluate(req.getEvaluate());
             msgParam.setTenantId(operator.getTenantId());
             msgParam.setNotifyUsers(userContact);
-            msgParam.setPathUrl(null);
+            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getContractDetailQuery(contract.getServiceContractId()), 30));
+            msgParam.setMsgBizId(contract.getServiceContractId());
             msgDomainService.sendCrmMsg(msgParam);
+
+            if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode())) {
+                ContractEvaluateMsgToRoleParam msgParamCopy = BeanUtil.copyProperties(msgParam, ContractEvaluateMsgToRoleParam.class);
+                msgParamCopy.setNotifyUsers(userDomainService.getUserContact(roleEnums, contract.getServiceUnit(), operator.getTenantId()));
+                msgDomainService.sendCrmMsg(msgParamCopy);
+            }
+
         }
     }
 

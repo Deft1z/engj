@@ -30,6 +30,7 @@ ecc:
   appSecret: h9r2e2nd5bipf6z
   baseUrl: https://ecc.nftz:8181
   maintenanceListUrl: /publicApi/maintenance/list
+  maintenanceDetailUrl: /publicApi/maintenance/detail
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
@@ -46,12 +47,12 @@ epcpv:
   inststat: api/v1/pv/project/inst/capacity/stat
 
 edata:
-  baseUrl: http://localhost:9252
+  baseUrl: http://172.16.17.137:9252
 
 loginAttention:
   sendee: 13702470083,13288012316
 
 file:
   upload:
-    allow-types: jpg,jpeg,png,pdf
     upload-url: http://172.16.17.137:9230/resourceManage/file/manage/upload
+    tmp-dir: /var/opt/nftzcrm_test/crm-applet-provider/tmpfiles

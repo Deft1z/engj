@@ -2,28 +2,59 @@ package com.kge.energy.crm.common.util;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileNameUtil;
-import com.alibaba.excel.EasyExcel;
+import cn.hutool.core.util.IdUtil;
+import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.converters.longconverter.LongStringConverter;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.kge.energy.crm.easyexcel.CustomMergeStrategy;
 import com.kge.energy.crm.easyexcel.FreezeAndFilterHandler;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
+@UtilityClass
 public class ExcelUtils {
 
-    private ExcelUtils() {
+    /**
+     * 临时输出目录，需定期清理
+     */
+    public static final String TMP_DIR = "/tmp/crm-excel-pdf/";
+
+    public static final Integer EXPORT_TYPE_PDF = 1;
+
+    public static <T> void write(HttpServletResponse response, String filename, String sheetName, Class<T> head, List<T> data, Integer exportType) {
+        if (exportType.equals(EXPORT_TYPE_PDF)) {
+            writeToPdf(response, filename, sheetName, head, data);
+        } else {
+            write(response, filename, sheetName, head, data);
+        }
+    }
+
+    public static <T> void writeWithTemplate(HttpServletResponse response, String templatePath, Map<String, Object> dataMap, List<T> dataList, Integer exportType) {
+        if (exportType != null && exportType.equals(EXPORT_TYPE_PDF)) {
+            writeWithTemplateToPdf(response, templatePath, dataMap, dataList);
+        } else {
+            writeWithTemplate(response, templatePath, dataMap, dataList);
+        }
     }
 
     /**
@@ -37,17 +68,18 @@ public class ExcelUtils {
      * @param <T>       泛型，保证 head 和 data 类型的一致性
      * @throws IOException 写入失败的情况
      */
+    @SneakyThrows
     public static <T> void write(HttpServletResponse response, String filename, String sheetName,
-                                 Class<T> head, List<T> data) throws IOException {
+                                 Class<T> head, List<T> data) {
         // 设置基础样式
         HorizontalCellStyleStrategy horizontalCellStyleStrategy = new HorizontalCellStyleStrategy(getHeadStyle(), getContentStyle());
         // 文件重命名, 追加时间字符串
         filename = URLEncoder.encode(FileNameUtil.mainName(filename) + DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + "." + FileNameUtil.getSuffix(filename), StandardCharsets.UTF_8.name());
         // 设置 header 和 contentType
-        response.addHeader("Content-Disposition", "attachment;filename=" + filename);
+        setContentDisposition(response, filename);
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
         // 输出 Excel
-        EasyExcel.write(response.getOutputStream(), head)
+        EasyExcelFactory.write(response.getOutputStream(), head)
                 .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
                 .registerWriteHandler(new FreezeAndFilterHandler()) //首行筛选及冻结
                 .registerWriteHandler(new CustomMergeStrategy(head)) //自定义单元格合并
@@ -59,9 +91,110 @@ public class ExcelUtils {
     }
 
     public static <T> List<T> read(MultipartFile file, Class<T> head) throws IOException {
-        return EasyExcel.read(file.getInputStream(), head, null)
+        return EasyExcelFactory.read(file.getInputStream(), head, null)
                 .autoCloseStream(false)  // 不要自动关闭，交给 Servlet 自己处理
                 .doReadAllSync();
+    }
+
+    /**
+     * 将列表导出excel后再转换成pdf，以pdf响应给前端
+     *
+     * @param response
+     * @param filename
+     * @param sheetName
+     * @param head
+     * @param data
+     * @param <T>
+     */
+    @SneakyThrows
+    public static <T> void writeToPdf(HttpServletResponse response, String filename, String sheetName,
+                                      Class<T> head, List<T> data) {
+        final String fileMainName = FileUtil.mainName(filename);
+
+        // 设置基础样式
+        HorizontalCellStyleStrategy horizontalCellStyleStrategy = new HorizontalCellStyleStrategy(getHeadStyle(), getContentStyle());
+        // 输出 Excel
+        String excelPath = TMP_DIR + fileMainName + IdUtil.fastSimpleUUID() + ExcelTypeEnum.XLS.getValue();
+        FileUtil.mkParentDirs(excelPath);
+        EasyExcelFactory.write(excelPath, head)
+                .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
+                .registerWriteHandler(horizontalCellStyleStrategy) //自定义样式
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
+                .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
+                .sheet(sheetName).doWrite(data);
+
+        // 转换 输出 pdf
+        writeExcelToPdf(response, excelPath, fileMainName);
+    }
+
+    @SneakyThrows
+    public static <T> void writeWithTemplate(HttpServletResponse response, String templatePath, Map<String, Object> dataMap, List<T> dataList) {
+        final String fileMainName = FileUtil.mainName(templatePath);
+        // 文件重命名, 追加时间字符串
+        String filename = URLEncoder.encode(fileMainName + DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ExcelTypeEnum.XLS.getValue(), StandardCharsets.UTF_8.name());
+        // 设置 header 和 contentType
+        setContentDisposition(response, filename);
+        response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+        // 输出 Excel
+        BufferedInputStream templateInputStream = FileUtil.getInputStream(templatePath);
+        ExcelWriter excelWriter = EasyExcelFactory.write(response.getOutputStream())
+                .withTemplate(templateInputStream)
+                .autoCloseStream(false)
+                .excelType(ExcelTypeEnum.XLS)
+                .build();
+
+        WriteSheet writeSheet = EasyExcelFactory.writerSheet().build();
+        if (dataMap != null) {
+            excelWriter.fill(dataMap, writeSheet);
+        }
+        if (dataList != null) {
+            excelWriter.fill(dataList, writeSheet);
+        }
+        excelWriter.finish();
+    }
+
+    @SneakyThrows
+    public static <T> void writeWithTemplateToPdf(HttpServletResponse response, String templatePath, Map<String, Object> dataMap, List<T> dataList) {
+        final String fileMainName = FileUtil.mainName(templatePath);
+        // 输出 Excel
+        String excelPath = TMP_DIR + fileMainName + IdUtil.fastSimpleUUID() + ExcelTypeEnum.XLS.getValue();
+        FileUtil.mkParentDirs(excelPath);
+
+        BufferedInputStream templateInputStream = FileUtil.getInputStream(templatePath);
+        ExcelWriter excelWriter = EasyExcelFactory.write(excelPath)
+                .withTemplate(templateInputStream)
+                .autoCloseStream(false)
+                .excelType(ExcelTypeEnum.XLS)
+                .build();
+        WriteSheet writeSheet = EasyExcelFactory.writerSheet().build();
+        if (dataMap != null) {
+            excelWriter.fill(dataMap, writeSheet);
+        }
+        if (dataList != null) {
+            excelWriter.fill(dataList, writeSheet);
+        }
+        excelWriter.finish();
+
+        writeExcelToPdf(response, excelPath, fileMainName);
+    }
+
+    private static void writeExcelToPdf(HttpServletResponse response, String excelPath, String fileMainName) throws IOException {
+        // 转换 输出 pdf
+        String pdfPath = excelPath.replaceAll(".xlsx|.xls", ".pdf");
+        ExcelToPdfUtils.excelToPdf(excelPath, pdfPath, ExcelTypeEnum.XLS.getValue());
+
+        // 响应前端，返回pdf文件
+        ServletOutputStream outputStream = response.getOutputStream();
+        response.setCharacterEncoding("utf-8");
+        setContentDisposition(response, URLEncoder.encode(fileMainName + DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATETIME_PATTERN) + ".pdf", "UTF-8"));
+        response.setContentType("application/pdf");
+        outputStream.write(FileUtil.readBytes(pdfPath));
+        outputStream.flush();
+        outputStream.close();
+    }
+
+    private static void setContentDisposition(HttpServletResponse response, String filename) {
+        response.addHeader("Content-Disposition", "attachment;filename=" + filename);
     }
 
     /**

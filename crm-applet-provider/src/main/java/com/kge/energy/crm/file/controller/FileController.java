@@ -29,4 +29,10 @@ public class FileController {
         return CommonResult.suc(fileService.uploadFileProxy(file));
     }
 
+    @Operation(summary = "上传临时文件，会被定时清除", description = "只适用单节点部署限制")
+    @PostMapping("/file/uploadTmpFile")
+    public CommonResult<String> uploadTmpFile(@RequestParam("file") MultipartFile file,
+                                              @RequestParam(name = "bizType") String bizType) {
+        return CommonResult.suc(fileService.uploadTmpFile(file, bizType));
+    }
 }

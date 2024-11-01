@@ -62,7 +62,7 @@ wechat:
     contractFinishTemplate: ExldQ4nH-DN-RYHBRqmTEo153sPr-XswYZ5Buf1bqGU
     wxUrl: ${wechat.common.wxUrl}
     version: developer
-    envVersion: developer
+    envVersion: trial
     agencyOrderPage: /pages/user/order/order
   official-account:
     appId: wxa3cbdc535f7b834b
@@ -118,7 +118,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     tags-sorter: alpha
-    operations-sorter: alpha
+    # 该参数是swagger默认的排序规则，如果设置为alpha，那么Knife4j提供的按照order排序的增强规则不生效
+    operations-sorter: order
   api-docs:
     path: /v3/api-docs
   group-configs:
@@ -171,7 +172,7 @@ knife4j:
     # 是否启用自定义Footer内容，默认false
     enable-footer-custom: true
     # 最终在Ui界面底部显示的Footer内容，支持Markdown格式
-    footer-custom-content: Apache License 2.0 | Copyright  2024 - ${springdoc.contact}
+    footer-custom-content: Apache License 2.0 | Copyright  2024 - ${springdoc.author}
     # 开启动态请求参数，true-开启，false-关闭
     enable-dynamic-parameter: true
     # 否启用调试功能,默认值为true(代表开启调试)，如果要禁用调试，该值设为false
@@ -190,4 +191,3 @@ knife4j:
 file:
   upload:
     allow-types: jpg,jpeg,png,pdf
-    upload-url: http://172.18.26.112:80/fileservice/resourceManage/file/manage/upload

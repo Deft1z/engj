@@ -2,8 +2,8 @@ server:
   port: 9151
 
 mysql:
-  host: 172.18.26.102
-  port: 6033
+  host: 172.18.26.131
+  port: 9306
   dbname: ntcrm_dev
   username: ntcrmDev
   password: ntcrmD@1113
@@ -11,8 +11,8 @@ mysql:
 spring:
   data:
     redis:
-      host: 172.18.26.112
-      port: 6379
+      host: 172.18.26.131
+      port: 9379
       password: iot
       database: 11
       front: engjkfxcx_dev_
@@ -22,6 +22,7 @@ ecc:
   appSecret: h9r2e2nd5bipf6z
   baseUrl: https://ecc.nftz:8181
   maintenanceListUrl: /publicApi/maintenance/list
+  maintenanceDetailUrl: /publicApi/maintenance/detail
 
 epcpv:
   appId: 9902df0531984b9fb68eda78309f2420
@@ -46,3 +47,8 @@ edata:
 
 loginAttention:
   sendee: 13702470083,13288012316
+
+file:
+  upload:
+    upload-url: http://172.18.26.131:9090/fileservice/resourceManage/file/manage/upload
+    tmp-dir: D:\tmpfiles

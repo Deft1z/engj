@@ -1,7 +1,20 @@
 package com.kge.energy.crm.dianhong.service;
 
+import cn.hutool.core.util.StrUtil;
+import com.kge.energy.crm.common.util.AuthVerifyUtils;
+import com.kge.energy.crm.common.util.NumberUtils;
 import com.kge.energy.crm.dianhong.resp.DhStatisticResp;
+import com.kge.energy.crm.enums.RoleEnums;
+import com.kge.energy.dh.req.DeviceControlDataReq;
+import com.kge.energy.dh.req.DeviceControlEnableReq;
+import com.kge.energy.dh.req.DeviceControlReq;
+import com.kge.energy.dh.req.DeviceEnableReq;
+import com.kge.energy.dh.resp.DeviceControlDataResp;
+import com.kge.energy.dh.resp.DeviceControlEnableResp;
+import com.kge.energy.dh.resp.DeviceControlResp;
+import com.kge.energy.dh.resp.DeviceEnableResp;
 import com.kge.energy.dh.service.SuiliangPvService;
+import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +30,50 @@ public class DianhongService {
         result.setDevices(suiliangPvService.selectPcsDeviceList());
         result.setTotal(suiliangPvService.getPvData());
         return result;
+    }
+
+    public DeviceEnableResp setControlEnable(DeviceEnableReq req) {
+
+        if (!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())) {
+            throw new ServiceException("权限不足");
+        }
+
+        if (!StrUtil.equals("0", req.getEnable()) && !StrUtil.equals("1", req.getEnable())) {
+            throw new ServiceException("参数错误");
+        }
+
+        return suiliangPvService.setControlEnable(req);
+    }
+
+    public DeviceControlResp setControlPercent(DeviceControlReq req) {
+
+        if (!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())) {
+            throw new ServiceException("权限不足");
+        }
+
+        if (!NumberUtils.isPositiveInteger(req.getPowerPercent())) {
+            throw new ServiceException("参数错误");
+        }
+
+        return suiliangPvService.setControlPercent(req);
+    }
+
+    public DeviceControlDataResp getDeviceControlData(DeviceControlDataReq req) {
+
+        if (!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())) {
+            throw new ServiceException("权限不足");
+        }
+
+        return suiliangPvService.getDeviceControlData(req);
+    }
+
+    public DeviceControlEnableResp getControlEnable(DeviceControlEnableReq req) {
+
+        if (!AuthVerifyUtils.isContainsRole(RoleEnums.HARMONY_POWER_CONTROL.getCode())) {
+            throw new ServiceException("权限不足");
+        }
+
+        return suiliangPvService.getControlEnable(req);
     }
 
 }

@@ -10,18 +10,31 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class OpenIdModelList {
 
-    Integer Id;
-    Integer Appid;
-    Integer State;
-    Integer Flag;
-    Integer Uid;
-    Integer Oid;
-    Integer Pid;
-    Integer Rflag;
-    Integer Proaid;
-    String  Pname;
-    String  Realname;
-    String  Name;
-    String  Mobile;
-    String  Remark;
+    private Integer id;
+
+    private Integer appid;
+
+    private Integer state;
+
+    private Integer flag;
+
+    private Integer uid;
+
+    private Integer oid;
+
+    private Integer pid;
+
+    private Integer rflag;
+
+    private Integer proaid;
+
+    private String pname;
+
+    private String realname;
+
+    private String name;
+
+    private String mobile;
+
+    private String remark;
 }

@@ -20,7 +20,7 @@ public class RUserRole {
      * 用户角色表
      */
     @TableId(type = IdType.AUTO)
-    private Integer rUserRoleId;
+    private Integer id;
 
     /**
      * b_user主键

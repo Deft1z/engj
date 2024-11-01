@@ -20,7 +20,7 @@ public class RUserTenant {
      * 用户机构归属表
      */
     @TableId(type = IdType.AUTO)
-    private Integer userTenantId;
+    private Integer id;
 
     /**
      * 用户ID

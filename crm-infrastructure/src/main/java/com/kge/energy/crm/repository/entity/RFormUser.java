@@ -1,8 +1,9 @@
 package com.kge.energy.crm.repository.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.baomidou.mybatisplus.annotation.*;
 
 /**
  * r_form_user 表单用户表(RFormUser)实体类
@@ -15,16 +16,16 @@ import com.baomidou.mybatisplus.annotation.*;
 public class RFormUser {
 
     @TableId(type = IdType.AUTO)
-    private Integer formUserId; 
+    private Integer id;
 
     /**
      * Wf_form主键
      */
-    private Integer formId; 
+    private Integer formId;
 
     /**
      * 用户ID
      */
-    private Integer userId; 
+    private Integer userId;
 }
 

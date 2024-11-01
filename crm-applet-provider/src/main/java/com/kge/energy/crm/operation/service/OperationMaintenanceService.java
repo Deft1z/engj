@@ -11,6 +11,7 @@ import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.external.ecc.property.EccProperties;
+import com.kge.energy.crm.external.ecc.req.EccOperationDetailReq;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
 import com.kge.energy.crm.external.ecc.resp.EccPageData;
@@ -186,6 +187,10 @@ public class OperationMaintenanceService {
         OperationParam param = new OperationParam();
         param.setPatrolRecordCode(patrolRecordReq.getPatrolRecordCode());
         return omReportDao.getPatrolRecordInfo(param);
+    }
+
+    public EccMaintenance getMaintenanceDetail(EccOperationDetailReq req) throws NoSuchAlgorithmException {
+        return eccService.getMaintenanceDetail(req);
     }
 
 }

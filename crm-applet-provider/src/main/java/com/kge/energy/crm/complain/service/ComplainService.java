@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.complain.req.ComplainAddReq;
 import com.kge.energy.crm.complain.resp.ComplainFormResp;
@@ -124,16 +125,17 @@ public class ComplainService {
         if (!roleEnums.isEmpty()) {
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             setBaseInfo(typef, id, msgParam);
-            msgParam.setSubject(wComplain.getSubject());
-            msgParam.setCompany(wComplain.getCompany());
-            msgParam.setCustomerName(operator.getRealname());
-            msgParam.setMobile(operator.getMobile());
-            msgParam.setCreateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)));
-            msgParam.setContent(wComplain.getContent());
-            msgParam.setTenantId(operator.getTenantId());
-            msgParam.setNotifyUsers(userContact);
-            msgParam.setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, null));
-            msgDomainService.sendCrmMsg(msgParam);
+            msgDomainService.sendCrmMsg(msgParam.setSubject(wComplain.getSubject())
+                    .setCompany(wComplain.getCompany())
+                    .setCustomerName(operator.getRealname())
+                    .setMobile(operator.getMobile())
+                    .setCreateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
+                    .setContent(wComplain.getContent())
+                    .setTenantId(operator.getTenantId())
+                    .setNotifyUsers(userContact)
+                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getComplainDetailQuery(id), 30))
+                    .setMsgBizId(id)
+            );
         }
     }
 

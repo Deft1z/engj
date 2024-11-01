@@ -1,6 +1,5 @@
 package com.kge.energy.crm.repository.dao;
 
-import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -19,10 +18,7 @@ import com.kge.energy.crm.repository.mapper.WfFormMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -42,8 +38,7 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
     }
 
     public IPage<FormResult> findWxUserWorkOrder(IPage<WxUserWorkOrderParam> reqIpage, WxUserWorkOrderParam wxUserWorkOrderParam) {
-        IPage<FormResult> res = mapper.findWxUserWorkOrder(reqIpage, wxUserWorkOrderParam);
-        return res;
+        return mapper.findWxUserWorkOrder(reqIpage, wxUserWorkOrderParam);
     }
 
     public Long findOrderNum(String startTime, String endTime) {
@@ -71,7 +66,7 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
 
     public List<FlowResult> getFlowByFormId(Integer formId, UserInfoDto userInfoDto) {
         List<FlowResult> list = mapper.getFlowByFormId(formId, userInfoDto);
-        for(FlowResult flowResult : list){
+        for (FlowResult flowResult : list) {
             CmsCommentParam param = new CmsCommentParam(flowResult.getFormFlowId(), CmsCommentBizTypeEnums.ORDER.getCode());
             List<CmsCommentResult> commentResultList = commentMapper.getCmsCommentList(param);
             flowResult.setCommentList(commentResultList);
@@ -79,28 +74,8 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         return list;
     }
 
-    private CmsCommentResult findRootComment(List<CmsCommentResult> allComments, CmsCommentResult targetComment) {
-        // 用于快速查找记录的映射
-        Map<Integer, CmsCommentResult> recordMap = new HashMap<>();
-        for(CmsCommentResult comment : allComments){
-            recordMap.put(comment.getCommentId(), comment);
-        }
-        return findRootCommentRecursive(recordMap, targetComment);
-    }
-
-    private static CmsCommentResult findRootCommentRecursive(Map<Integer, CmsCommentResult> recordMap, CmsCommentResult currentRecord) {
-        if (currentRecord.getParentCommentId() == null) {
-            return currentRecord; // 找到根节点
-        }
-
-        // 获取当前记录的父记录
-        CmsCommentResult parentRecord = recordMap.get(currentRecord.getParentCommentId());
-        if (parentRecord == null) {
-            throw new IllegalArgumentException("Parent record not found");
-        }
-
-        // 递归查找父记录的根节点
-        return findRootCommentRecursive(recordMap, parentRecord);
+    public FormResult getFormDetail(Integer formId, UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.getFormDetail(formId, userInfoDto, dataEnums);
     }
 
 }
