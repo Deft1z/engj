@@ -9,7 +9,7 @@ import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AppletLinkUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
-import com.kge.energy.crm.qrcode.QrCodeService;
+import com.kge.energy.crm.qrcode.QRCodeService;
 import com.kge.energy.crm.repository.dao.BSurveyRecordAnswerDao;
 import com.kge.energy.crm.repository.dao.BSurveyRecordDao;
 import com.kge.energy.crm.repository.entity.BSurveyRecord;
@@ -45,7 +45,7 @@ public class BSurveyRecordService {
 
     private final WeChatAppletInfraService weChatAppletInfraService;
 
-    private final QrCodeService qrCodeService;
+    private final QRCodeService qrCodeService;
 
     public PageResp<SurveyRecordResp> getByPage(SurveyRecordReq req) {
         SurveyRecordParam param = BeanUtil.copyProperties(req, SurveyRecordParam.class);

@@ -7,7 +7,6 @@ import cn.hutool.extra.qrcode.QrConfig;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -15,9 +14,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
-public class QrCodeService {
+public class QRCodeService {
 
     private final QrConfig config;
 
