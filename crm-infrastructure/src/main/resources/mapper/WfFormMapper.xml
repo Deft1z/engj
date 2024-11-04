@@ -251,7 +251,7 @@
             </choose>
         from wf_form a
         join b_organization d on d.organization_id = a.current_org_id
-        join b_organization p on p.organization_id = a.preselected_org_id
+        left join b_organization p on p.organization_id = a.preselected_org_id
         left join wf_form_flow b on b.form_id = a.form_id and b.create_user_id = #{userInfo.userId}
         /*LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
         LEFT JOIN r_user_role f ON f.user_id = b.create_user_id*/
