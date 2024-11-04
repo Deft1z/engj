@@ -424,7 +424,7 @@
         </choose>
         from wf_form a
         join b_organization d on d.organization_id = a.current_org_id
-        join b_organization p on p.organization_id = a.preselected_org_id
+        left join b_organization p on p.organization_id = a.preselected_org_id
         where a.flag = 1
         and a.form_id = #{formId}
         <choose>
