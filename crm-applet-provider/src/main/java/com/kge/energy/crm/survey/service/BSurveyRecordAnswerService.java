@@ -52,6 +52,8 @@ public class BSurveyRecordAnswerService {
         }
         SurveyInitResp resp = JSONUtil.toBean(answer.getFillJson(), SurveyInitResp.class);
         resp.setButtons(SurveyButtonHelper.getButtons(surveyRecord, invitee.getUserId().intValue()));
+        //遍历表单项是否可编辑填写
+        resp.setLockedSurveyItem(surveyRecord, invitee.getUserId().intValue(), resp.getSurveyItems());
         return resp;
     }
 

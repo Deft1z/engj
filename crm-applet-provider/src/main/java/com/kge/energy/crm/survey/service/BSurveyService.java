@@ -42,6 +42,8 @@ public class BSurveyService {
         SurveyInitResp resp = BeanUtil.copyProperties(survey, SurveyInitResp.class);
         resp.setSurveyId(survey.getId());
         resp.setButtons(SurveyButtonHelper.getButtons(null, operator.getUserId().intValue()));
+        //遍历表单项是否可编辑填写
+        resp.setLockedSurveyItem(null, operator.getUserId().intValue(), resp.getSurveyItems());
         return resp;
     }
 

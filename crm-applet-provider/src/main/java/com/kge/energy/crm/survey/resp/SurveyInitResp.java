@@ -3,6 +3,7 @@
   */
 package com.kge.energy.crm.survey.resp;
 import com.kge.energy.crm.common.button.resp.BaseButton;
+import com.kge.energy.crm.repository.entity.BSurveyRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -61,6 +62,9 @@ public class SurveyInitResp {
         @Schema(description = "优先级")
         private Integer priority;
 
+        @Schema(description = "是否可填写：true-可填写，false-不可填写")
+        private Boolean fillEnabled;
+
         @Schema(description = "可填写人：all-所有人, promoter-发起人, invitee-受邀请人")
         private String fillBy;
 
@@ -87,6 +91,21 @@ public class SurveyInitResp {
 
         @Schema(description = "优先级")
         private Integer priority;
+    }
+
+    public static void setLockedSurveyItem(BSurveyRecord surveyRecord, Integer operatorId, List<SurveyInitResp.SurveyItem> surveyItems) {
+        //是否是调查发起人
+        boolean isPromoter = surveyRecord == null? true : operatorId.equals(surveyRecord.getCreateUserId());
+        for (SurveyInitResp.SurveyItem surveyItem : surveyItems) {
+            if ((isPromoter && surveyItem.getFillBy().equals("invitee")) || (!isPromoter && surveyItem.getFillBy().equals("promoter"))) {
+                surveyItem.setFillEnabled(false);
+            } else {
+                surveyItem.setFillEnabled(true);
+            }
+            if (!surveyItem.getSubItems().isEmpty()) {
+                setLockedSurveyItem(surveyRecord, operatorId, surveyItem.getSubItems());
+            }
+        }
     }
 
 }

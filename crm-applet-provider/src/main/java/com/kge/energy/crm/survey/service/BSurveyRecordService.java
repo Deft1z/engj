@@ -85,6 +85,9 @@ public class BSurveyRecordService {
         }
         SurveyInitResp resp = JSONUtil.toBean(fillJson, SurveyInitResp.class);
         resp.setButtons(SurveyButtonHelper.getButtons(surveyRecord, userId));
+        //遍历表单项是否可编辑填写
+        resp.setLockedSurveyItem(surveyRecord, userId, resp.getSurveyItems());
+
         return resp;
     }
 
