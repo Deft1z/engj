@@ -2,6 +2,7 @@
   * Copyright 2024 json.cn 
   */
 package com.kge.energy.crm.survey.resp;
+import com.kge.energy.crm.common.button.resp.BaseButton;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,6 +16,9 @@ public class SurveyInitResp {
 
     @Schema(description = "提交标识：true-提交，false-临时保存")
     private Boolean submitFlag = false;
+
+    @Schema(description = "页面可用操作按钮")
+    private List<BaseButton> buttons;
 
     @Schema(description = "主键id")
     private Integer recordId;
