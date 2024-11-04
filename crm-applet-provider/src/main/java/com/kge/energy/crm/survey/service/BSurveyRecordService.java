@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.kge.energy.crm.common.button.helper.SurveyButtonHelper;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AppletLinkUtils;
@@ -63,6 +64,10 @@ public class BSurveyRecordService {
     }
 
     public SurveyInitResp getById(Integer id) {
+        BSurveyRecord surveyRecord = bSurveyRecordDao.getById(id);
+        if (surveyRecord == null) {
+            throw new ServiceException("调查表单不存在！");
+        }
         Integer userId = UserInfoContextUtils.getCurrentUserId();
         String fillJson;
         //查询是否有调查答复
@@ -76,10 +81,11 @@ public class BSurveyRecordService {
             fillJson = answers.get(0).getFillJson();
         } else {
             //无调查答复则返回未填写的调查表
-            fillJson = bSurveyRecordDao.getById(id).getFillJson();
+            fillJson = surveyRecord.getFillJson();
         }
-
-        return JSONUtil.toBean(fillJson, SurveyInitResp.class);
+        SurveyInitResp resp = JSONUtil.toBean(fillJson, SurveyInitResp.class);
+        resp.setButtons(SurveyButtonHelper.getButtons(surveyRecord, userId));
+        return resp;
     }
 
     @Transactional

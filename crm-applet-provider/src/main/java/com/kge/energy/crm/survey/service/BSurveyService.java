@@ -2,6 +2,8 @@ package com.kge.energy.crm.survey.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.kge.energy.crm.common.button.helper.SurveyButtonHelper;
+import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BSurveyDao;
 import com.kge.energy.crm.repository.entity.BSurvey;
@@ -35,10 +37,12 @@ public class BSurveyService {
     }
 
     public SurveyInitResp getBySurveyCode(String surveyCode) {
-        BSurveyResult survey = bSurveyDao.getBySurveyCode(surveyCode, UserInfoContextUtils.getCurrentTenantId());
-        SurveyInitResp surveyInitResp = BeanUtil.copyProperties(survey, SurveyInitResp.class);
-        surveyInitResp.setSurveyId(survey.getId());
-        return surveyInitResp;
+        UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
+        BSurveyResult survey = bSurveyDao.getBySurveyCode(surveyCode, operator.getTenantId());
+        SurveyInitResp resp = BeanUtil.copyProperties(survey, SurveyInitResp.class);
+        resp.setSurveyId(survey.getId());
+        resp.setButtons(SurveyButtonHelper.getButtons(null, operator.getUserId().intValue()));
+        return resp;
     }
 
 }

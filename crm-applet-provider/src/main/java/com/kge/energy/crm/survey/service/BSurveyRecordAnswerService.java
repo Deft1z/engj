@@ -3,6 +3,7 @@ package com.kge.energy.crm.survey.service;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.kge.energy.crm.common.button.helper.SurveyButtonHelper;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BSurveyRecordAnswerDao;
@@ -32,16 +33,15 @@ public class BSurveyRecordAnswerService {
     private final BSurveyRecordAnswerDao bSurveyRecordAnswerDao;
 
     public SurveyInitResp initAnswer(Integer recordId) {
+        BSurveyRecord surveyRecord = bSurveyRecordDao.getById(recordId);
+        if (surveyRecord == null) {
+            throw new ServiceException("调查表单不存在！");
+        }
         UserInfoDto invitee = UserInfoContextUtils.getCurrentUserInfo();
         BSurveyRecordAnswer answer = getInviteeAnswer(recordId, invitee.getUserId().intValue());
         //已填写，直接返回填写记录
         if (answer == null) {
             //未填写，新增记录
-            BSurveyRecord surveyRecord = bSurveyRecordDao.getById(recordId);
-            if (surveyRecord == null) {
-                throw new ServiceException("调查表不存在！");
-            }
-
             answer = new BSurveyRecordAnswer().setPromoterId(surveyRecord.getCreateUserId())
                     .setInviteeId(invitee.getUserId().intValue())
                     .setSurveyRecordId(recordId)
@@ -50,7 +50,9 @@ public class BSurveyRecordAnswerService {
                     .setTenantId(invitee.getTenantId());
             bSurveyRecordAnswerDao.save(answer);
         }
-        return JSONUtil.toBean(answer.getFillJson(), SurveyInitResp.class);
+        SurveyInitResp resp = JSONUtil.toBean(answer.getFillJson(), SurveyInitResp.class);
+        resp.setButtons(SurveyButtonHelper.getButtons(surveyRecord, invitee.getUserId().intValue()));
+        return resp;
     }
 
     /**
