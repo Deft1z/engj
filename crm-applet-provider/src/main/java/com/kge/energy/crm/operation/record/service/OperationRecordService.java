@@ -1,9 +1,9 @@
-package com.kge.energy.crm.operation.dashboard.service;
+package com.kge.energy.crm.operation.record.service;
 
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
-import com.kge.energy.crm.operation.dashboard.req.OperationDashboardReq;
 import com.kge.energy.crm.operation.data.resp.OperationDataOrgResp;
 import com.kge.energy.crm.operation.data.service.OperationDataDomainService;
+import com.kge.energy.crm.operation.record.req.OperationRecordReq;
 import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class OperationDashboardService {
+public class OperationRecordService {
 
     private final OperationDataDomainService operationDataDomainService;
 
@@ -31,7 +31,7 @@ public class OperationDashboardService {
     /**
      * 客户、工单、合同、投诉统计
      */
-    public StatisticalDataResult statisticalData(OperationDashboardReq req) {
+    public StatisticalDataResult statisticalData(OperationRecordReq req) {
         return operationDataDomainService.statisticalData(
                 req.getStartTime(), req.getEndTime(), UserInfoContextUtils.getCurrentTenantId(), req.getOrgId()
         );

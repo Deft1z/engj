@@ -1,4 +1,4 @@
-package com.kge.energy.crm.operation.dashboard.req;
+package com.kge.energy.crm.operation.record.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
  */
 @Data
 @Accessors(chain = true)
-public class OperationDashboardReq {
+public class OperationRecordReq {
 
     @Schema(description = "统计维度：week|month", requiredMode = Schema.RequiredMode.REQUIRED)
     @Pattern(regexp = "week|month", message = "统计维度只能是week或month")

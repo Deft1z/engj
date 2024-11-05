@@ -19,7 +19,7 @@ public enum OrgTypeEnum {
 
     DEPARTMENT(2, "部门"),
 
-    PROJECT_TEARM(3, "项目"),
+    PROJECT_TEARM(3, "项目组"),
 
     ;
 
