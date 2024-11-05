@@ -82,7 +82,7 @@ public class UserService {
 
         List<RoleUserResult> roleUserResults;
 
-        if (UserInfoContextUtils.getCurrentUserInfo().getRoleList().stream().anyMatch(role -> ObjectUtil.equals(role.getId(), RoleIdEnums.SYSTEM_ADMINISTRATOR.getCode()))) {
+        if (UserInfoContextUtils.getCurrentUserInfo().getRoleCodes().contains(RoleEnums.SUPER_ADMIN.getCode())) {
             roleUserResults = bUserDao.getUserByRoleId(req.getRoleId());
         } else {
             BOrganization bOrganization = bOrganizationDao.getOrgByUserId(userId);

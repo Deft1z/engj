@@ -11,9 +11,7 @@ import com.kge.energy.crm.dashboard.service.DashBoardService;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainRank;
 import com.kge.energy.crm.repository.entityext.result.DashBoardComplainTypeStatistic;
-import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import com.kge.platform.framework.common.net.CommonResult;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,11 +40,6 @@ public class DashBoardController {
         return CommonResult.suc(resp);
     }
 
-    @Operation(summary = "控制台客户、工单、合同统计")
-    @PostMapping("/dashBoard/statisticalData")
-    public CommonResult<StatisticalDataResult> statisticalData() {
-        return CommonResult.suc(dashBoardService.statisticalData());
-    }
 
     /**
      * 查询工单合同数量变化

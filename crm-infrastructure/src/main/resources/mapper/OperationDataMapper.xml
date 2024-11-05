@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.OperationDataMapper">
+
+    <select id="getUserStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$User">
+        SELECT (SELECT count(1)
+                FROM b_user bu,
+                     (SELECT bur.user_id
+                      FROM b_user bur,
+                           r_user_tenant rut
+                      WHERE bur.flag = 1
+                        AND rut.flag = 1
+                        AND bur.user_id = rut.user_id
+                        AND rut.tenant_id = #{tenantId}
+                          <if test="orgId != null">
+                              AND rut.organization_id = #{orgId}
+                          </if>
+                        ) tmp
+                WHERE bu.flag = 1
+                  AND bu.recommend_user_id = tmp.user_id
+                  AND bu.create_time BETWEEN #{startTime} AND #{endTime})              AS recommendCount,
+               (SELECT COUNT(1)
+                FROM b_user bu,
+                     r_user_tenant rut
+                WHERE bu.flag = 1
+                  AND rut.flag = 1
+                  AND bu.user_id = rut.user_id
+                  AND bu.tenant_id = #{tenantId}
+                    <if test="orgId != null">
+                        AND rut.organization_id = #{orgId}
+                    </if>
+                  AND rut.create_time BETWEEN #{startTime} AND #{endTime})           AS newCount,
+               (SELECT COUNT(1)
+                FROM b_user bu,
+                r_user_tenant rut
+                WHERE bu.flag = 1
+                AND rut.flag = 1
+                AND bu.user_id = rut.user_id
+                AND bu.tenant_id = #{tenantId}
+                <if test="orgId != null">
+                    AND rut.organization_id = #{orgId}
+                </if>
+                ) AS totalCount
+    </select>
+
+    <select id="getConsultingStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Consulting">
+        SELECT (SELECT COUNT(wf.form_id)
+                FROM wf_form wf
+                WHERE wf.flag = 1
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                   </if>
+                  AND wf.create_time BETWEEN #{startTime} AND #{endTime}) AS newCount,
+               (SELECT COUNT(wf.form_id)
+                FROM wf_form wf
+                WHERE wf.flag = 1
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                  </if>
+                ) AS totalCount
+    </select>
+
+    <select id="getContractStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Contract">
+        SELECT
+            IFNULL(t1.totalCount, 0) AS totalCount,
+            IFNULL(t1.totalAmount, 0) AS totalAmount,
+            IFNULL(t2.newCount, 0) AS newCount,
+            IFNULL(t2.newAmount, 0) AS newAmount
+        FROM
+            (
+                SELECT
+                    COUNT(sc.service_contract_id) AS totalCount,
+                    SUM(sc.amount) AS totalAmount
+                FROM
+                    wf_form wf,
+                    sc_service_contract sc
+                WHERE
+                    wf.flag = 1
+                  AND sc.flag = 1
+                  AND wf.form_id = sc.form_id
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                  </if>
+            ) t1,
+            (
+                SELECT
+                    COUNT(sc.service_contract_id) AS newCount,
+                    SUM(sc.amount) AS newAmount
+                FROM
+                    wf_form wf,
+                    sc_service_contract sc
+                WHERE
+                    wf.flag = 1
+                  AND sc.flag = 1
+                  AND wf.form_id = sc.form_id
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                  </if>
+                  AND sc.signing_time BETWEEN #{startTime} AND #{endTime}
+            ) t2
+    </select>
+
+    <select id="getComplainStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Complain">
+        SELECT (SELECT COUNT(wc.complain_id)
+                FROM w_complain wc,
+                     wf_form wf,
+                     r_form_consult_complain rfcc
+                WHERE wc.flag = 1
+                  AND wf.flag = 1
+                  AND wc.complain_id = rfcc.complain_id
+                  AND wf.form_id = rfcc.consult_id
+                  AND wc.typef = 1
+                  AND wc.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wc.organization_id = #{orgId}
+                  </if>
+                  AND wc.create_time BETWEEN #{startTime} AND #{endTime}
+               ) AS newOrderCount,
+               (SELECT COUNT(wc.complain_id)
+                FROM w_complain wc,
+                     sc_service_contract ssc,
+                     r_form_consult_complain rfcc
+                WHERE wc.flag = 1
+                  AND ssc.flag = 1
+                  AND wc.complain_id = rfcc.complain_id
+                  AND ssc.service_contract_id = rfcc.consult_id
+                  AND wc.typef = 2
+                  AND wc.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wc.organization_id = #{orgId}
+                  </if>
+                  AND wc.create_time BETWEEN #{startTime} AND #{endTime}
+                )    newContractCount
+    </select>
+</mapper>

@@ -11,22 +11,23 @@ import java.util.Objects;
  */
 @Getter
 @AllArgsConstructor
-public enum RoleIdEnums {
+public enum OrgTypeEnum {
 
-    SYSTEM_ADMINISTRATOR(1, "System Administrator"),
+    GROUP(0, "集团"),
 
-    GROUP_CS(2, "Group CS"),
+    COMPANY(1, "公司"),
 
-    SUB_CS(3, "Sub CS"),
+    DEPARTMENT(2, "部门"),
 
-    CUSTOMER(5, "Customer");
+    PROJECT_TEARM(3, "项目"),
 
+    ;
 
     private final Integer code;
 
     private final String desc;
 
-    public static RoleIdEnums getByCode(Integer code) {
+    public static OrgTypeEnum getByCode(Integer code) {
         return Arrays.stream(values())
                 .filter(e -> Objects.equals(e.getCode(), code))
                 .findFirst()

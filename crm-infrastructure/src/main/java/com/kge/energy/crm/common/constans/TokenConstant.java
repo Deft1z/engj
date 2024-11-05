@@ -25,6 +25,11 @@ public class TokenConstant {
 
     public static final TimeUnit APPLET_EXPIRED_TIMEUNIT = TimeUnit.HOURS;
 
+    /**
+     * 账号登录失败次数，格式：login:error:count:登录账号名
+     */
+    public static final String LOGIN_ERROR_COUNT_CACHE_KEY = "login:error:count:%s";
+
     /*
      * 连续登录失败次数
      * */
@@ -34,5 +39,4 @@ public class TokenConstant {
 
     public static final TimeUnit LOGIN_ERROR_BAN_TIMEUNIT = TimeUnit.HOURS;
 
-    public static final String LOGIN_ERROR_COUNT_CACHE_KEY = "login:error:count%s";
 }

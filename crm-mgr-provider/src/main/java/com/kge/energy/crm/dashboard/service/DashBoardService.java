@@ -3,7 +3,6 @@ package com.kge.energy.crm.dashboard.service;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.DashBoardDao;
 import com.kge.energy.crm.repository.entity.BOrganization;
@@ -27,23 +26,7 @@ public class DashBoardService {
         return orgDao.list();
     }
 
-    /**
-     * 控制台客户、工单、合同统计
-     */
-    public StatisticalDataResult statisticalData() {
-
-        Integer tenantId = UserInfoContextUtils.getCurrentTenantId();
-
-        StatisticalDataResult.User user = dashBoardDao.getUserStatistic(tenantId);
-        StatisticalDataResult.Consulting consulting = dashBoardDao.getConsultingStatistic(tenantId);
-        StatisticalDataResult.Contract contract = dashBoardDao.getContractStatistic(tenantId);
-
-        return new StatisticalDataResult()
-                .setUser(user)
-                .setConsulting(consulting)
-                .setContract(contract);
-    }
-
+  
     public DashBoardUserTrans getUserTrans(DashBoardParam param) {
         return dashBoardDao.getUserTrans(param);
     }
