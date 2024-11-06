@@ -1,6 +1,7 @@
 package com.kge.energy.crm.operation.data.service;
 
 import com.kge.energy.crm.CrmAppletProvider;
+import com.kge.energy.crm.repository.entityext.param.StatisticalDataParam;
 import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,12 @@ class OperationDataDomainServiceTest {
         LocalDate endTime = LocalDate.now();
         Integer tenantId = 1;
         Integer orgId = null;
-        StatisticalDataResult result = operationDataDomainService.statisticalData(startTime, endTime, tenantId, orgId);
+        StatisticalDataParam param = new StatisticalDataParam()
+                .setStartTime(startTime)
+                .setEndTime(endTime)
+                .setTenantId(tenantId)
+                .setOrgId(orgId);
+        StatisticalDataResult result = operationDataDomainService.statisticalData(param);
         log.info("result : {}", result);
     }
 }
