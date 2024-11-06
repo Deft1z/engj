@@ -1,22 +1,19 @@
 package com.kge.energy.crm.operation.data.service;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.OrgTypeEnum;
 import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.operation.data.resp.OperationDataOrgResp;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.OperationDataDao;
-import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.param.StatisticalDataParam;
+import com.kge.energy.crm.repository.entityext.result.NewUserGrowthDataResult;
 import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -69,22 +66,7 @@ public class OperationDataDomainService {
     /**
      * 客户、工单、合同、投诉统计
      */
-    public StatisticalDataResult statisticalData(LocalDate startTime, LocalDate endTime, Integer tenantId, Integer orgId) {
-
-        startTime = Optional.ofNullable(startTime).orElse(LocalDate.now().withDayOfMonth(1));
-        endTime = Optional.ofNullable(endTime).orElse(LocalDate.now());
-
-        BOrganization bOrganization = bOrganizationDao.getById(orgId);
-        // 选择集团则看所有业务公司总数据
-        if (ObjectUtil.isNotNull(bOrganization) && ObjectUtil.equals(bOrganization.getOrgType(), OrgTypeEnum.GROUP.getCode())) {
-            orgId = null;
-        }
-
-        StatisticalDataParam param = new StatisticalDataParam()
-                .setStartTime(startTime)
-                .setEndTime(endTime)
-                .setTenantId(tenantId)
-                .setOrgId(orgId);
+    public StatisticalDataResult statisticalData(StatisticalDataParam param) {
 
         StatisticalDataResult.User user = operationDataDao.getUserStatistic(param);
         StatisticalDataResult.Consulting consulting = operationDataDao.getConsultingStatistic(param);
@@ -98,4 +80,10 @@ public class OperationDataDomainService {
                 .setComplain(complain);
     }
 
+    /**
+     * 新用户增长曲线数据
+     */
+    public NewUserGrowthDataResult newUserGrowthData(StatisticalDataParam param) {
+        return null;
+    }
 }
