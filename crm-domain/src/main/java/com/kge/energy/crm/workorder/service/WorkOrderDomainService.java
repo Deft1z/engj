@@ -437,7 +437,7 @@ public class WorkOrderDomainService {
                     .setOrderCode(fromContent.getCode())
                     .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
-                    .setStatus(ConstParam.FlowHasFeedback)
+                    .setStatus(ConstParam.Processed)
                     .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
                     .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
                     .setTenantId(operator.getTenantId())
