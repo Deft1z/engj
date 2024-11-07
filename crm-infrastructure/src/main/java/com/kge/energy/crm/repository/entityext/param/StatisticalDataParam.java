@@ -12,6 +12,8 @@ import java.time.LocalDate;
 @Accessors(chain = true)
 public class StatisticalDataParam {
 
+    private String dimension;
+
     private LocalDate startTime;
 
     private LocalDate endTime;

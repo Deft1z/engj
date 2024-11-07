@@ -123,7 +123,7 @@ public class WorkOrderDomainService {
         if(ObjectUtil.isNotNull(req.getPreselectedOrgId())){
             BOrganization preselectedOrg = bOrganizationDao.getById(req.getPreselectedOrgId());
             if(ObjectUtil.isNull(preselectedOrg)){
-                throw new ServiceException("当前用户租户下不存在唯一根组织");
+                throw new ServiceException("预选公司不存在");
             }
             wfForm.setPreselectedOrgId(req.getPreselectedOrgId());
         }
