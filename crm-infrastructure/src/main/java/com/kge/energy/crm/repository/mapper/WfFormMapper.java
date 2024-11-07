@@ -8,7 +8,6 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
-import com.kge.energy.crm.repository.entityext.result.FormDetailResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.FormWithdrawReturnResult;
 import org.apache.ibatis.annotations.Param;
@@ -48,7 +47,7 @@ public interface WfFormMapper extends BaseMapper<WfForm> {
     List<FlowResult> getFlowByFormId(@Param("formId") Integer formId, @Param("userInfo") UserInfoDto userInfoDto);
 
     FormResult getFormDetail(@Param("formId") Integer formId,
-                             @Param("userInfo") UserInfoDto userInfoDto,
-                                   @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+                             @Param("code")String code, @Param("userInfo") UserInfoDto userInfoDto,
+                             @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
 }
 

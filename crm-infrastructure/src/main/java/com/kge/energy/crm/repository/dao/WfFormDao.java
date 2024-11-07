@@ -74,8 +74,8 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         return list;
     }
 
-    public FormResult getFormDetail(Integer formId, UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
-        return mapper.getFormDetail(formId, userInfoDto, dataEnums);
+    public FormResult getFormDetail(Integer formId,String code, UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
+        return mapper.getFormDetail(formId, code, userInfoDto, dataEnums);
     }
 
 }
