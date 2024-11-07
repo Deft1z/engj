@@ -12,7 +12,4 @@ public class WfFormDetailReq {
     @Schema(description = "工单id")
     private Integer formId;
 
-    @Schema(description = "工单编号")
-    private String code;
-
 }

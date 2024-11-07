@@ -47,7 +47,7 @@ public interface WfFormMapper extends BaseMapper<WfForm> {
     List<FlowResult> getFlowByFormId(@Param("formId") Integer formId, @Param("userInfo") UserInfoDto userInfoDto);
 
     FormResult getFormDetail(@Param("formId") Integer formId,
-                             @Param("code")String code, @Param("userInfo") UserInfoDto userInfoDto,
+                             @Param("userInfo") UserInfoDto userInfoDto,
                              @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
 }
 

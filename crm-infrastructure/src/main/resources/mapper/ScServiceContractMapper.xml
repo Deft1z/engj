@@ -246,7 +246,7 @@
             resultType="com.kge.energy.crm.repository.entityext.result.ContractResult">
         select a.service_contract_id,
         a.form_id,
-        c.content ->> "$.businessName" AS business_name,
+        c.content ->> "$.businessName" AS form_name,
         c.content ->> "$.code" AS form_code,
         a.company,
         a.`name`,

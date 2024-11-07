@@ -28,7 +28,7 @@ public class ContractResult {
     /**
      * 工单名称
      */
-    private String businessName;
+    private String formName;
 
     /**
      * 文件id
