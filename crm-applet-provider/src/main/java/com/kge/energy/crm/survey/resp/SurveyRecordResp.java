@@ -34,21 +34,29 @@ public class SurveyRecordResp {
     @Schema(description = "调查对象（项目、合同、设备、工单...）名称")
     private String surveyObjName;
 
-    @Schema(description = "分享评价链接")
+    /*@Schema(description = "分享评价链接")
     private String shareUrl;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "分享链接过期时间")
-    private LocalDateTime shareExpireAt;
+    private LocalDateTime shareExpireAt;*/
 
-    @Schema(description = "0 未提交 1 待评价 2 已评价 3 已完成")
+    @Schema(description = "0 未提交 1 待评价 2 已完成")
     private Integer status;
+
+    @Schema(description = "客户名称")
+    private String clientName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Schema(description = "创建时间")
+    @Schema(description = "创建时间(发起时间)")
     private LocalDateTime createTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "更新时间(完成时间)")
+    private LocalDateTime modifyTime;
 
 }
 

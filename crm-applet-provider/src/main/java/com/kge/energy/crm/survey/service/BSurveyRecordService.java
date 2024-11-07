@@ -4,7 +4,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.kge.energy.crm.common.button.enums.SurveyButtonEnum;
 import com.kge.energy.crm.common.button.helper.SurveyButtonHelper;
+import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AppletLinkUtils;
@@ -85,6 +87,15 @@ public class BSurveyRecordService {
         }
         SurveyInitResp resp = JSONUtil.toBean(fillJson, SurveyInitResp.class);
         resp.setButtons(SurveyButtonHelper.getButtons(surveyRecord, userId));
+
+        //分享二维码
+        if (resp.getButtons().stream().map(BaseButton::getCode).toList().contains(SurveyButtonEnum.SURVEY_SHARE.getCode())) {
+            resp.setShareQrCode(new SurveyInitResp.ShareQrCode()
+                    .setExpireAt(surveyRecord.getShareExpireAt())
+                    .setBase64Image(qrCodeService.createCodeToBase64(surveyRecord.getShareUrl()))
+            );
+        }
+
         //遍历表单项是否可编辑填写
         resp.setLockedSurveyItem(surveyRecord, userId, resp.getSurveyItems());
 
@@ -103,14 +114,14 @@ public class BSurveyRecordService {
             req.setRecordId(surveyRecord.getId());
         } else {
             surveyRecord = bSurveyRecordDao.getById(recordId);
-            // 0 未提交 1 待评价 2 已评价 3 已完成
+            // 0 未提交 1 待评价 2 已完成
             if (!surveyRecord.getStatus().equals(0)) {
                 throw new ServiceException("表单已提交，无法修改！");
             }
         }
         //编辑记录
         if (Boolean.TRUE.equals(req.getSubmitFlag())) {
-            // 0 未提交 1 待评价 2 已评价 3 已完成
+            // 0 未提交 1 待评价 2 已完成
             surveyRecord.setStatus(1);
             //生成分享链接
             generateShareUrl(surveyRecord);
@@ -145,7 +156,7 @@ public class BSurveyRecordService {
         if (!surveyRecord.getCreateUserId().equals(UserInfoContextUtils.getCurrentUserId())) {
             throw new ServiceException("非调查表创建人，无权限操作！");
         }
-        // 0 未提交 1 待评价 2 已评价 3 已完成
+        // 0 未提交 1 待评价 2 已完成
         if (!surveyRecord.getStatus().equals(2)) {
             throw new ServiceException("已评价状态才可完成！");
         }

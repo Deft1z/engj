@@ -17,15 +17,17 @@ public class SurveyButtonHelper extends AbstractButtonHelper {
 
     public static List<BaseButton> getButtons(BSurveyRecord surveyRecord, Integer operatorId) {
         if (surveyRecord == null) {
-            surveyRecord = new BSurveyRecord().setStatus(0).setCreateUserId(operatorId);
+            surveyRecord = new BSurveyRecord().setCreateUserId(operatorId);
         }
         List<BaseButton> buttons = Collections.emptyList();
         //是否是调查发起人
         boolean isPromoter = operatorId.equals(surveyRecord.getCreateUserId());
         if (isPromoter) {
-            //status: 0 未提交 1 待评价 2 已评价 3 已完成
+            //status: 0 未提交 1 待评价 2 已完成
             //调查发起人
-            if (surveyRecord.getStatus().equals(0)) {
+            if (surveyRecord.getStatus() == null) {
+                buttons = AbstractButtonHelper.createdButtonList(Arrays.asList(SurveyButtonEnum.SURVEY_SAVE, SurveyButtonEnum.SURVEY_SUBMIT));
+            } else if (surveyRecord.getStatus().equals(0)) {
                 buttons = AbstractButtonHelper.createdButtonList(Arrays.asList(SurveyButtonEnum.SURVEY_SAVE, SurveyButtonEnum.SURVEY_SUBMIT, SurveyButtonEnum.SURVEY_DELETE));
             } else if (surveyRecord.getStatus().equals(2)) {
                 buttons = AbstractButtonHelper.createdButtonList(Arrays.asList(SurveyButtonEnum.SURVEY_SHARE, SurveyButtonEnum.SURVEY_FINISH));

@@ -29,7 +29,7 @@ public class BSurveyItemResult {
     @Schema(description = "表单项名称")
     private String itemName;
 
-    @Schema(description = "表单项类型：title-标题，text-文本，radio-单选，checkbox-多选，select-下拉框，date-日期，time-时间，datetime-日期时间，number-数字，file-附件")
+    @Schema(description = "表单项类型：title-标题，text-文本，longtext-长文本，radio-单选，checkbox-多选，select-下拉框，date-日期，time-时间，datetime-日期时间，number-数字，stars-星级，file-附件")
     private String itemType;
 
     @Schema(description = "是否必填：false-否，true-是")

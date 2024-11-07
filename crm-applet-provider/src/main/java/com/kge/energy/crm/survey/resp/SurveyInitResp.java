@@ -2,12 +2,16 @@
   * Copyright 2024 json.cn 
   */
 package com.kge.energy.crm.survey.resp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.repository.entity.BSurveyRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -39,6 +43,9 @@ public class SurveyInitResp {
     @Schema(description = "调查表单项")
     private List<SurveyItem> surveyItems;
 
+    @Schema(description = "分享二维码")
+    private ShareQrCode shareQrCode;
+
     @Data
     public static class SurveyItem{
         @Schema(description = "主键id")
@@ -50,7 +57,7 @@ public class SurveyInitResp {
         @Schema(description = "表单项名称")
         private String itemName;
 
-        @Schema(description = "表单项类型：title-标题，text-文本，radio-单选，checkbox-多选，select-下拉框，date-日期，time-时间，datetime-日期时间，number-数字，file-附件")
+        @Schema(description = "表单项类型：title-标题，text-文本，longtext-长文本，radio-单选，checkbox-多选，select-下拉框，date-日期，time-时间，datetime-日期时间，number-数字，stars-星级，file-附件")
         private String itemType;
 
         @Schema(description = "是否必填：false-否，true-是")
@@ -91,6 +98,19 @@ public class SurveyInitResp {
 
         @Schema(description = "优先级")
         private Integer priority;
+    }
+
+    @Data
+    public static class ShareQrCode{
+
+        @Schema(description = "分享二维码Base64")
+        private String base64Image;
+
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        @Schema(description = "过期时间")
+        private LocalDateTime expireAt;
+
     }
 
     public static void setLockedSurveyItem(BSurveyRecord surveyRecord, Integer operatorId, List<SurveyInitResp.SurveyItem> surveyItems) {

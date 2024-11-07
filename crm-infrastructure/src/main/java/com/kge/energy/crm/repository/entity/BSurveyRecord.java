@@ -55,7 +55,7 @@ public class BSurveyRecord {
     private LocalDateTime shareExpireAt;
 
     /**
-     * 0 未提交 1 待评价 2 已评价 3 已完成
+     * 0 未提交 1 待评价 2 已完成
      */
     @TableField(value = "status")
     private Integer status;
