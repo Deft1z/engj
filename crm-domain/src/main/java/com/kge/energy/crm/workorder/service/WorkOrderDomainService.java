@@ -33,10 +33,7 @@ import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.workorder.req.*;
-import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
-import com.kge.energy.crm.workorder.resp.WfFormFlowListResp;
-import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
-import com.kge.energy.crm.workorder.resp.WfFormPageResp;
+import com.kge.energy.crm.workorder.resp.*;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -765,6 +762,17 @@ public class WorkOrderDomainService {
         }
         redisUtils.setEx(WORK_CODE_CACHE_KEY_PREFIX + code, code, 24, TimeUnit.HOURS);
         return code;
+    }
+
+    /**
+     * 获取最近工单处理记录内容
+     */
+    public WfFormRecentDealRecordResp getWfFormRecentDealRecord(WfFormRecentDealRecordReq req){
+
+        Integer userId = UserInfoContextUtils.getCurrentUserId();
+        return new WfFormRecentDealRecordResp()
+                .setDealRecord(wfFormDao.getRecentDealRecord(userId,req.getOperateType()));
+
     }
 
 }

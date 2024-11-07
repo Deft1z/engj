@@ -79,5 +79,9 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
         return mapper.getTimeoutNotifyForms(notifyStatus, startTime, endTime, templateCode);
     }
 
+    public List<String> getRecentDealRecord(Integer userId, String operateType){
+        return mapper.getRecentDealRecord(userId,operateType);
+    }
+
 }
 

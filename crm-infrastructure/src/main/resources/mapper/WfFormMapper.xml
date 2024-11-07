@@ -486,5 +486,32 @@
         order by wf.form_id
     </select>
 
+    <select id="getRecentDealRecord" resultType="String">
+        SELECT DISTINCT w.action_content
+        FROM wf_form_flow w
+        WHERE w.user_id = #{userId} AND w.action_content IS NOT NULL AND w.action_content !=""
+        <choose>
+            <when test="operateType != null and operateType == 'assignWorkOrder' ">
+                AND w.action_type = "流转二级公司处理"
+            </when>
+            <when test="operateType != null and operateType == 'withdrawWorkOrder' ">
+                AND w.action_type = "已撤回"
+            </when>
+            <when test="operateType != null and operateType == 'terminateWorkOrder' ">
+                AND w.action_type = "已终止"
+            </when>
+            <when test="operateType != null and operateType == 'dealWorkOrder' ">
+                AND (w.action_type = "添加合同" or w.action_type = "已回复")
+            </when>
+            <when test="operateType != null and operateType == 'returnWorker' ">
+                AND w.action_type = "已退回"
+            </when>
+            <when test="operateType != null and operateType == 'completeWorkOrder' ">
+                AND w.action_type = "已完结"
+            </when>
+        </choose>
+        ORDER BY w.create_time DESC
+        LIMIT 5
+    </select>
 </mapper>
 
