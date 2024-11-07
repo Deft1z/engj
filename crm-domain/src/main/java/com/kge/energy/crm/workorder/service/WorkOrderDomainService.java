@@ -169,7 +169,7 @@ public class WorkOrderDomainService {
     public WfFormPageResp getFormDetail(WfFormDetailReq req) {
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-        return BeanUtil.copyProperties(wfFormDao.getFormDetail(req.getFormId(), userInfoDto, dataEnums), WfFormPageResp.class);
+        return BeanUtil.copyProperties(wfFormDao.getFormDetail(req.getFormId(),userInfoDto, dataEnums), WfFormPageResp.class);
     }
 
 

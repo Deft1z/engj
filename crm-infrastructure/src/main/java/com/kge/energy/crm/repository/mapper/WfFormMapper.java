@@ -49,7 +49,7 @@ public interface WfFormMapper extends BaseMapper<WfForm> {
 
     FormResult getFormDetail(@Param("formId") Integer formId,
                              @Param("userInfo") UserInfoDto userInfoDto,
-                                   @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+                             @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
 
     List<TimeoutFormResult> getTimeoutNotifyForms(@Param("notifyStatus") List<String> notifyStatus, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("templateCode") String templateCode);
 }

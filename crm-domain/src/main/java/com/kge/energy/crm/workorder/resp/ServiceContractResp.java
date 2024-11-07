@@ -17,6 +17,16 @@ public class ServiceContractResp {
     private Integer formId;
 
     /**
+     * 工单编号
+     */
+    private String formCode;
+
+    /**
+     * 工单名称
+     */
+    private String formName;
+
+    /**
      * 文件id
      */
     private Integer fileId;
