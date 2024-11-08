@@ -10,8 +10,9 @@ import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.platform.framework.common.util.TraceIdUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class SysLoginLogHandleService {
 
     private final TenantDomainService tenantDomainService;
 
-    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveLoginLog(BUser bUser, LoginPlatformEnums loginPlatformEnums, LoginResultEnums loginResultEnums, String loginMessage) {
         try {
             SysLoginLog sysLoginLog = new SysLoginLog()
