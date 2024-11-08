@@ -175,6 +175,7 @@
         <if test="param.tenantId != null">
             and bu.tenant_id = #{param.tenantId}
             and br.tenant_id = #{param.tenantId}
+            and rur.tenant_id = #{param.tenantId}
         </if>
         <if test="param.roleId != null">
             and br.role_id = #{param.roleId}
@@ -188,37 +189,6 @@
         <if test="param.mobile != null and param.mobile != ''">
             and bu.mobile like CONCAT('%',#{param.mobile},'%')
         </if>
-    </select>
-
-    <!--查询集团总部的客服人员手机号-->
-    <select id="findJtCustomerPhones" resultType="string">
-        select a.mobile
-        from b_user a
-                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
-                 join b_organization c on c.flag = 1 and c.organization_id = b.organization_id
-                 join r_user_role d on d.flag = 1 and d.user_id = a.user_id
-                 join b_role e on e.flag = 1 and e.role_id = d.role_id
-        where a.flag = 1
-            /*集团总部*/
-          and c.parent_organization_id is null
-            /*集团客服*/
-          and e.code = 'jt_customer'
-          and a.tenant_id = #{tenantId}
-    </select>
-
-    <!--查询二级的客服人员手机号-->
-    <select id="findSubCustomerPhones" resultType="string">
-        select a.mobile
-        from b_user a
-                 join r_user_tenant b on b.flag = 1 and b.user_id = a.user_id
-                 join r_user_role c on c.flag = 1 and c.user_id = a.user_id
-                 join b_role d on d.flag = 1 and d.role_id = c.role_id
-        where a.flag = 1
-            /*二级公司*/
-          and b.organization_id = #{orgId}
-            /*二级公司客服*/
-          and d.code = 'sub_company_customer'
-          and a.tenant_id = #{tenantId}
     </select>
 
     <select id="getUserByRoleCodeAndOrgId" resultType="com.kge.energy.crm.repository.entityext.result.RoleUserResult">
@@ -250,6 +220,7 @@
         where bu.flag = 1
         and br.flag = 1
         and rrr.flag = 1
+        and bu.tenant_id = br.tenant_id
         and bu.user_id = rrr.user_id
         and br.role_id = rrr.role_id
         and br.code = 'applet_user'
@@ -269,7 +240,7 @@
         from b_user bu
         <if test="roleCodes != null and roleCodes.size > 0">
             join r_user_role rur on rur.flag = 1 and rur.user_id = bu.user_id
-            join b_role br on br.flag = 1 and br.role_id = rur.role_id
+            join b_role br on br.flag = 1 and br.tenant_id = bu.tenant_id and br.role_id = rur.role_id
         </if>
         <if test="organizationId != null">
             join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id

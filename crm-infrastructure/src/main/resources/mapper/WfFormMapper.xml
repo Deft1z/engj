@@ -113,7 +113,6 @@
         LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
         LEFT JOIN b_organization d ON d.organization_id = a.current_org_id
         LEFT JOIN b_user e ON e.user_id = g.user_id
-        LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
         <where>
             a.flag != -1
             <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleId == 5">

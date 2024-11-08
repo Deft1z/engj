@@ -41,6 +41,7 @@
           and br.role_id = rur.role_id
           and bu.user_id = #{userId}
           and br.tenant_id = #{tenantId}
+          and rur.tenant_id = #{tenantId}
     </select>
 
     <select id="getRoleIdByCode" resultType="integer">
