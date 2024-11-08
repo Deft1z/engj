@@ -1,14 +1,14 @@
 package com.kge.energy.crm.common.interceptor;
 
-import com.kge.energy.crm.auth.service.AuthDomainService;
-import com.kge.energy.crm.common.property.AuthProperties;
-import com.kge.energy.crm.common.util.RedisUtils;
-import com.kge.energy.crm.user.service.UserDomainService;
+import cn.hutool.core.util.ObjectUtil;
+import com.kge.energy.crm.common.property.ExperienceDataProperties;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.platform.framework.web.interceptor.DelegatedOrderedInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
@@ -22,15 +22,12 @@ import org.springframework.util.AntPathMatcher;
 @RequiredArgsConstructor
 public class ExperienceRedirectInterceptor implements DelegatedOrderedInterceptor {
 
-    private final RedisUtils redisUtils;
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
 
-    private final UserDomainService userDomainService;
-
-    private final AuthProperties authProperties;
+    private final ExperienceDataProperties experienceDataProperties;
 
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
-
-    private final AuthDomainService authDomainService;
 
     @Override
     public int getOrder() {
@@ -40,13 +37,21 @@ public class ExperienceRedirectInterceptor implements DelegatedOrderedIntercepto
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        String originalUrl = request.getRequestURI();
-        if (originalUrl.equals("/old-endpoint")) {
-            response.sendRedirect("/new-endpoint");
-            return false; // 阻止请求继续
+        if (ObjectUtil.notEqual(UserInfoContextUtils.getCurrentUserInfo().getTenantName(), experienceDataProperties.getTenantName())) {
+            return true;
+        }
+        
+        boolean isRedirectUrl = experienceDataProperties.getRedirectUrlList().stream()
+                .anyMatch(item -> ANT_PATH_MATCHER.match(item, request.getRequestURI()));
+        if (!isRedirectUrl) {
+            return true;
         }
 
-        return true;
+        String url = "/experience" + request.getRequestURI().replace(contextPath, "");
+
+        request.getRequestDispatcher(url)
+                .forward(request, response);
+        return false;
     }
 
 
