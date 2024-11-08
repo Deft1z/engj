@@ -486,30 +486,33 @@
     </select>
 
     <select id="getRecentDealRecord" resultType="String">
-        SELECT DISTINCT w.action_content
+        SELECT DISTINCT a.action_content
+        FROM (
+        SELECT  w.action_content , w.create_time
         FROM wf_form_flow w
         WHERE w.user_id = #{userId} AND w.action_content IS NOT NULL AND w.action_content !=""
         <choose>
-            <when test="operateType != null and operateType == 'assignWorkOrder' ">
+            <when test="operateType != null and operateType == 'assgin_work_order' ">
                 AND w.action_type = "流转二级公司处理"
             </when>
-            <when test="operateType != null and operateType == 'withdrawWorkOrder' ">
+            <when test="operateType != null and operateType == 'withdraw_work_order' ">
                 AND w.action_type = "已撤回"
             </when>
-            <when test="operateType != null and operateType == 'terminateWorkOrder' ">
+            <when test="operateType != null and operateType == 'terminate_work_order' ">
                 AND w.action_type = "已终止"
             </when>
-            <when test="operateType != null and operateType == 'dealWorkOrder' ">
+            <when test="operateType != null and operateType == 'handle_work_order' ">
                 AND (w.action_type = "添加合同" or w.action_type = "已回复")
             </when>
-            <when test="operateType != null and operateType == 'returnWorker' ">
+            <when test="operateType != null and operateType == 'return_work_order' ">
                 AND w.action_type = "已退回"
             </when>
-            <when test="operateType != null and operateType == 'completeWorkOrder' ">
+            <when test="operateType != null and operateType == 'finish_work_order' ">
                 AND w.action_type = "已完结"
             </when>
-        </choose>
-        ORDER BY w.create_time DESC
+        </choose> ) as a
+        GROUP BY a.action_content
+        ORDER BY MAX(a.create_time) DESC
         LIMIT 5
     </select>
 </mapper>
