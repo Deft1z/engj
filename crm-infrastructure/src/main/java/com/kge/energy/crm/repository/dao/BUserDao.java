@@ -109,14 +109,6 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.listByRole(page, param);
     }
 
-    public List<String> findJtCustomerPhones(Integer tenantId) {
-        return mapper.findJtCustomerPhones(tenantId);
-    }
-
-    public List<String> findSubCustomerPhones(Integer orgId, Integer tenantId) {
-        return mapper.findSubCustomerPhones(orgId, tenantId);
-    }
-
     public List<RoleUserResult> getUserByRoleCodeAndOrgId(String roleCode, Integer organizationId, Integer tenantId) {
         return mapper.getUserByRoleCodeAndOrgId(roleCode, organizationId, tenantId);
     }
