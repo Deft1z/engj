@@ -138,13 +138,13 @@
         j.realname,
         l.name AS org_name, a.tenant_id
         FROM w_complain a
-        LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
-        LEFT JOIN sc_service_contract d ON d.service_contract_id = c.consult_id and d.flag != - 1
-        LEFT JOIN wf_form w ON w.form_id = d.form_id
+        JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
+        JOIN sc_service_contract d ON d.service_contract_id = c.consult_id and d.flag != - 1
+        JOIN wf_form w ON w.form_id = d.form_id
         LEFT JOIN w_complain_file g ON g.complain_id = a.complain_id
         LEFT JOIN s_file i ON i.file_id = g.file_id
         LEFT JOIN b_user j ON j.user_id = a.process_user_id
-        LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
+        LEFT JOIN r_user_tenant k ON k.flag = 1 and k.user_id = j.user_id
         LEFT JOIN b_organization l ON l.organization_id = k.organization_id
         WHERE a.flag != -1 AND a.typef = 1
         GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,j.realname,l.name
@@ -163,12 +163,12 @@
         j.realname,
         l.name AS org_name, a.tenant_id
         FROM w_complain a
-        LEFT JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
-        LEFT JOIN wf_form d ON d.form_id = c.consult_id and d.flag != -1
+        JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
+        JOIN wf_form d ON d.form_id = c.consult_id and d.flag != -1
         LEFT JOIN w_complain_file g ON g.complain_id = a.complain_id
         LEFT JOIN s_file i ON i.file_id = g.file_id
         LEFT JOIN b_user j ON j.user_id = a.process_user_id
-        LEFT JOIN r_user_tenant k ON k.user_id = j.user_id
+        LEFT JOIN r_user_tenant k ON k.flag = 1 and k.user_id = j.user_id
         LEFT JOIN b_organization l ON l.organization_id = k.organization_id
         WHERE a.flag != -1 and a.typef = 2
         GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name
