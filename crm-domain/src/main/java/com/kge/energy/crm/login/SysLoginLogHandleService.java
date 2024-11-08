@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -38,7 +39,10 @@ public class SysLoginLogHandleService {
                         .setUserName(u.getName())
                         .setUserRealname(u.getRealname())
                         .setUserMobile(u.getMobile())
-                        .setTenantName(tenantDomainService.getTenantName(u.getTenantId()));
+                        .setTenantName(Optional.ofNullable(u.getTenantId())
+                                .map(id -> tenantDomainService.getTenantName(u.getTenantId()))
+                                .orElse(null)
+                        );
             });
             sysLoginLogDao.save(sysLoginLog);
         } catch (Exception e) {

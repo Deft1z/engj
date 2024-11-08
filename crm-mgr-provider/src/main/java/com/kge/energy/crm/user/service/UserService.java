@@ -170,7 +170,7 @@ public class UserService {
                     Optional.ofNullable(bUser).orElse(new BUser().setName(req.getName())),
                     LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
 
-            throw new ServiceException("登录失败");
+            throw new ServiceException(e.getMessage());
         }
     }
 
