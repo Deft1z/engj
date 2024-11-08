@@ -1,12 +1,12 @@
-package com.kge.energy.crm.operation.controller;
+package com.kge.energy.crm.operation.maintenance.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.external.ecc.service.EccService;
-import com.kge.energy.crm.operation.req.OperationDetailReq;
-import com.kge.energy.crm.operation.req.OperationListReq;
-import com.kge.energy.crm.operation.resp.OperationDetailResp;
-import com.kge.energy.crm.operation.service.OperationService;
+import com.kge.energy.crm.operation.maintenance.req.OperationDetailReq;
+import com.kge.energy.crm.operation.maintenance.req.OperationListReq;
+import com.kge.energy.crm.operation.maintenance.resp.OperationDetailResp;
+import com.kge.energy.crm.operation.maintenance.service.OperationService;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;

@@ -1,10 +1,10 @@
-package com.kge.energy.crm.operation.controller;
+package com.kge.energy.crm.operation.maintenance.controller;
 
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.external.ecc.req.EccOperationDetailReq;
 import com.kge.energy.crm.external.ecc.req.EccReq;
-import com.kge.energy.crm.operation.req.PatrolRecordReq;
-import com.kge.energy.crm.operation.service.OperationMaintenanceService;
+import com.kge.energy.crm.operation.maintenance.req.PatrolRecordReq;
+import com.kge.energy.crm.operation.maintenance.service.OperationMaintenanceService;
 import com.kge.platform.framework.common.net.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
