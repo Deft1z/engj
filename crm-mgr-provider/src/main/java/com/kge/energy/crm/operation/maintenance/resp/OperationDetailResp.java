@@ -1,4 +1,4 @@
-package com.kge.energy.crm.operation.resp;
+package com.kge.energy.crm.operation.maintenance.resp;
 
 import lombok.Data;
 

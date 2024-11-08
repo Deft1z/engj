@@ -1,28 +1,23 @@
-package com.kge.energy.crm.operation.service;
+package com.kge.energy.crm.operation.maintenance.service;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.kge.energy.crm.common.dto.UserInfoDto;
-import com.kge.energy.crm.common.util.AuthVerifyUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
-import com.kge.energy.crm.enums.RoleEnums;
-import com.kge.energy.crm.external.ecc.property.EccProperties;
 import com.kge.energy.crm.external.ecc.req.EccOperationDetailReq;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
 import com.kge.energy.crm.external.ecc.resp.EccPageData;
 import com.kge.energy.crm.external.ecc.resp.EccResp;
 import com.kge.energy.crm.external.ecc.service.EccService;
-import com.kge.energy.crm.operation.req.PatrolRecordReq;
+import com.kge.energy.crm.operation.maintenance.req.PatrolRecordReq;
 import com.kge.energy.crm.permission.service.DataPermissionDomainService;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BRoleDao;
 import com.kge.energy.crm.repository.dao.OmReportDao;
-import com.kge.energy.crm.repository.entity.BRole;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.OperationParam;
 import com.kge.energy.crm.repository.entityext.result.PatrolRecordResp;
@@ -30,12 +25,9 @@ import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -106,7 +98,7 @@ public class OperationMaintenanceService {
                     break;
                 default:
                     //防止currentUserPhone和firstPartyContactsPhone都为空查到全部数据
-                    if(StrUtil.isBlank(currentUserPhone)){
+                    if (StrUtil.isBlank(currentUserPhone)) {
                         currentUserPhone = "0";
                     }
                     eccReq.getCondition().setFirstPartyContactsPhone(StrUtil.isNotBlank(firstPartyContactsPhone) ? firstPartyContactsPhone : currentUserPhone);
@@ -130,7 +122,7 @@ public class OperationMaintenanceService {
                     break;
                 default:
                     //防止currentUserPhone和firstPartyContactsPhone都为空查到全部数据
-                    if(StrUtil.isBlank(currentUserPhone)){
+                    if (StrUtil.isBlank(currentUserPhone)) {
                         currentUserPhone = "0";
                     }
                     eccReq.getCondition().setFirstPartyContactsPhone(StrUtil.isNotBlank(firstPartyContactsPhone) ? firstPartyContactsPhone : currentUserPhone);
