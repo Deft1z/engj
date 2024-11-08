@@ -388,6 +388,7 @@
         , group_concat( i.filepath separator ',' ) AS filepath
         , j.realname
         , l.name AS org_name
+        , w.form_id
         from w_complain a
         join r_form_consult_complain c on c.complain_id = a.complain_id
         join wf_form w on w.form_id = c.consult_id
@@ -422,7 +423,7 @@
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
-        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, w.status, a.create_time, j.realname, l.name
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, w.status, a.create_time, j.realname, l.name, w.form_id
     </select>
 
     <select id="getContractComplainDetail"
@@ -451,6 +452,7 @@
         , l.name AS org_name
         , b.name contract_name
         , b.code contract_code
+        , d.form_id
         from w_complain a
         join r_form_consult_complain c on c.complain_id = a.complain_id
         join sc_service_contract b on b.service_contract_id = c.consult_id
@@ -486,7 +488,7 @@
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
-        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name, b.name, b.code
+        group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name, b.name, b.code, d.form_id
     </select>
 
 
