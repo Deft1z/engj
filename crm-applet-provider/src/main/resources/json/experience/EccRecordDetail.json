@@ -1,0 +1,21 @@
+[
+  {
+    "contractId": null,
+    "contractName": null,
+    "firstParty": null,
+    "firstPartyContactsPhone": null,
+    "prjId": "9475917ea387499b87f56bbd38ba7ecf",
+    "prjName": "广东华水建设工程有限公司",
+    "dept": "城北公司",
+    "planId": "dee7bf28e7084a27abc18e53bbc9ef94",
+    "workCode": "BDEX03q02411-2335",
+    "workDate": "2024-11-08 00:00:00",
+    "taskName": "设备巡检",
+    "riskRate": "设备巡检",
+    "workContent": "设备运维",
+    "checkinId": "ff80808193077ca101930aadc33a5920",
+    "remarkB": null,
+    "remarkC": "合格",
+    "attactments": []
+  }
+]
