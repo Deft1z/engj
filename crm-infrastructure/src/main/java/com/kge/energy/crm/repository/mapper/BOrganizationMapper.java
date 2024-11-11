@@ -29,5 +29,8 @@ public interface BOrganizationMapper extends BaseMapper<BOrganization> {
     Integer getTopLevel(Integer tenantId);
 
     List<OrgListResult> getAllOrgList(@Param("param") OrgQueryParam param);
+
+    BOrganization findByIamUserMobile(@Param("userMobile") String userMobile, @Param("tenantId") Integer tenantId);
+
 }
 

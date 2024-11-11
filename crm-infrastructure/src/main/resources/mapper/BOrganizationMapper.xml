@@ -139,5 +139,17 @@
         )
         SELECT * FROM orgs
     </select>
+
+    <select id="findByIamUserMobile" resultMap="BOrganizationMap">
+        select bo.name, bo.level, bo.tenant_id, user_cn, user_mobile, user_org_name_full_path
+        from b_organization bo
+        join iam_user iu on instr(iu.user_org_name_full_path, bo.name) > 0
+        where bo.flag = 1
+          and bo.tenant_id = #{tenantId}
+          and iu.user_mobile = #{userMobile}
+        order by user_cn, bo.level desc
+        limit 1
+    </select>
+
 </mapper>
 
