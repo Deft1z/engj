@@ -4,6 +4,7 @@ import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.external.ecc.resp.EccOrgResp;
 import com.kge.energy.crm.external.ecc.service.EccService;
 import com.kge.energy.crm.organization.req.OrgReq;
+import com.kge.energy.crm.repository.entityext.result.OrgDetailResult;
 import com.kge.energy.crm.organization.resp.OrgDictResp;
 import com.kge.energy.crm.organization.resp.OrgResp;
 import com.kge.energy.crm.organization.service.OrgService;
@@ -34,6 +35,14 @@ public class OrgController {
     @PostMapping("/baseData/company/list")
     public CommonResult<List<OrgResp>> getCompanyList(@RequestBody OrgReq orgReq) {
         return CommonResult.suc(orgService.getCompanyList(orgReq));
+    }
+
+    /**
+     *  小程序端获取组织详情接口
+     */
+    @PostMapping("/baseData/organizationMrg/getOrgDetail")
+    public CommonResult<List<OrgDetailResult>> getOrgDetailList() {
+        return CommonResult.suc(orgService.getOrgDetailList());
     }
 
     /**

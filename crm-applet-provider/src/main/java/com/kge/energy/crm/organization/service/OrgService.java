@@ -4,9 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Opt;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.organization.req.OrgReq;
+import com.kge.energy.crm.repository.entityext.result.OrgDetailResult;
 import com.kge.energy.crm.organization.resp.OrgDictResp;
 import com.kge.energy.crm.organization.resp.OrgResp;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
+import com.kge.energy.crm.repository.dao.BOrganizationDetailDao;
 import com.kge.energy.crm.repository.entityext.result.OrgDictResult;
 import com.kge.energy.crm.repository.entityext.result.OrgResult;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,9 @@ import java.util.List;
 public class OrgService {
 
     private final BOrganizationDao organizationDao;
+
+    private final BOrganizationDetailDao organizationDetailDao;
+
 
     /**
      * @description 获取服务商
@@ -68,5 +73,12 @@ public class OrgService {
         List<OrgDictResult> orgDictResults = organizationDao.getOrgDictList(UserInfoContextUtils.getCurrentTenantId());
 
         return BeanUtil.copyToList(orgDictResults, OrgDictResp.class);
+    }
+
+    public List<OrgDetailResult> getOrgDetailList( ) {
+        List<OrgDetailResult> orgDetailResults = organizationDetailDao.getOrgDetailList(UserInfoContextUtils.getCurrentTenantId());
+
+        return BeanUtil.copyToList(orgDetailResults, OrgDetailResult.class);
+
     }
 }
