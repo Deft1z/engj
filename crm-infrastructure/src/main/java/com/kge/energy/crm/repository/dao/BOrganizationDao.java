@@ -106,5 +106,10 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
                 .orderByAsc(BOrganization::getEccOrgCode);
         return mapper.selectList(wrapper);
     }
+
+    public BOrganization findByIamUserMobile(String userMobile, Integer tenantId) {
+        return mapper.findByIamUserMobile(userMobile, tenantId);
+    }
+
 }
 

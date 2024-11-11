@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.IamUserMapper">
+
+    <resultMap id="IamUserResult" type="com.kge.energy.crm.repository.entityext.result.IamUserResult">
+        <result property="simId" column="sim_id" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" jdbcType="VARCHAR"/>
+        <result property="userCn" column="user_cn" jdbcType="VARCHAR"/>
+        <result property="userJobId" column="user_job_id" jdbcType="VARCHAR"/>
+        <result property="userStatus" column="user_status" jdbcType="VARCHAR"/>
+        <result property="userMobile" column="user_mobile" jdbcType="VARCHAR"/>
+        <result property="userIdCardNumber" column="user_id_card_number" jdbcType="VARCHAR"/>
+        <result property="userLoginId" column="user_login_id" jdbcType="VARCHAR"/>
+        <result property="userInitMobile" column="user_init_mobile" jdbcType="VARCHAR"/>
+        <result property="userInitPasswd" column="user_init_passwd" jdbcType="VARCHAR"/>
+        <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
+        <result property="userCipherPassword" column="user_cipher_password" jdbcType="VARCHAR"/>
+        <result property="userOrgId" column="user_org_id" jdbcType="VARCHAR"/>
+        <result property="userOrgName" column="user_org_name" jdbcType="VARCHAR"/>
+        <result property="userOrgNumFullPath" column="user_org_num_full_path" jdbcType="VARCHAR"/>
+        <result property="userOrgNameFullPath" column="user_org_name_full_path" jdbcType="VARCHAR"/>
+        <result property="userParttimeOrg" column="user_parttime_org" jdbcType="VARCHAR"/>
+        <result property="userGender" column="user_gender" jdbcType="VARCHAR"/>
+        <result property="userObjectclass" column="user_objectclass" jdbcType="VARCHAR"/>
+        <result property="userType" column="user_type" jdbcType="VARCHAR"/>
+        <result property="userSsoAuthority" column="user_sso_authority" jdbcType="VARCHAR"/>
+        <result property="userSsoAuthorityBackUp" column="user_sso_authority_back_up" jdbcType="VARCHAR"/>
+        <result property="userNormalModifyTimestamp" column="user_normal_modify_timestamp" jdbcType="VARCHAR"/>
+        <result property="syncCreateTime" column="sync_create_time" jdbcType="TIMESTAMP"/>
+        <result property="syncUpdateTime" column="sync_update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 用于select查询公用抽取的列 -->
+    <sql id="columns">
+        sim_id, user_id, user_cn, user_job_id, user_status, user_mobile, user_id_card_number, user_login_id, user_init_mobile, user_init_passwd, user_password, user_cipher_password, user_org_id, user_org_name, user_org_num_full_path, user_org_name_full_path, user_parttime_org, user_gender, user_objectclass, user_type, user_sso_authority, user_sso_authority_back_up, user_normal_modify_timestamp, sync_create_time, sync_update_time
+    </sql>
+
+    <select id="getBySimId" resultMap="IamUserResult">
+        SELECT *
+        FROM iam_user
+        WHERE  sim_id = #{simId}
+          AND JSON_UNQUOTE(JSON_EXTRACT(user_normal_modify_timestamp, '$')) = #{modifyTime}
+    </select>
+
+    <select id="getLatestModifyTime" resultType="string">
+        select max(t.modify_time)
+        from iam_user iu, json_table(
+            json_unquote(json_extract(user_normal_modify_timestamp, '$'))
+            , '$[*]' columns (
+                modify_time varchar(50) PATH '$'
+            )
+        ) as t
+    </select>
+
+</mapper>
+
