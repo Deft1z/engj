@@ -37,7 +37,7 @@ public class ExperienceRedirectInterceptor implements DelegatedOrderedIntercepto
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        if (ObjectUtil.notEqual(UserInfoContextUtils.getCurrentUserInfo().getTenantName(), experienceDataProperties.getTenantName())) {
+        if (UserInfoContextUtils.getCurrentUserInfo() != null && ObjectUtil.notEqual(UserInfoContextUtils.getCurrentUserInfo().getTenantName(), experienceDataProperties.getTenantName())) {
             return true;
         }
         

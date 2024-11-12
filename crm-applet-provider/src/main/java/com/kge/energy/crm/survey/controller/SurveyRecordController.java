@@ -73,7 +73,7 @@ public class SurveyRecordController {
     @ApiOperationSupport(order = 5)
     @Operation(summary = "发起人保存/提交新增的调查表单")
     @PostMapping("/record/save")
-    public CommonResult<Boolean> saveRecord(@RequestBody SurveyInitResp req) {
+    public CommonResult<SurveyInitResp> saveRecord(@RequestBody SurveyInitResp req) {
         return CommonResult.suc(surveyRecordService.save(req));
     }
 

@@ -1,6 +1,6 @@
 /**
-  * Copyright 2024 json.cn 
-  */
+ * Copyright 2024 json.cn
+ */
 package com.kge.energy.crm.survey.resp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,9 +9,11 @@ import com.kge.energy.crm.repository.entity.BSurveyRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 
 @Data
@@ -47,7 +49,7 @@ public class SurveyInitResp {
     private ShareQrCode shareQrCode;
 
     @Data
-    public static class SurveyItem{
+    public static class SurveyItem {
         @Schema(description = "主键id")
         private Integer id;
 
@@ -86,7 +88,7 @@ public class SurveyInitResp {
     }
 
     @Data
-    public static class SurveyItemOption{
+    public static class SurveyItemOption {
         @Schema(description = "主键id")
         private Integer id;
 
@@ -101,7 +103,7 @@ public class SurveyInitResp {
     }
 
     @Data
-    public static class ShareQrCode{
+    public static class ShareQrCode {
 
         @Schema(description = "分享二维码Base64")
         private String base64Image;
@@ -113,19 +115,25 @@ public class SurveyInitResp {
 
     }
 
-    public static void setLockedSurveyItem(BSurveyRecord surveyRecord, Integer operatorId, List<SurveyInitResp.SurveyItem> surveyItems) {
+    public void lockOrRemoveSurveyItem(BSurveyRecord surveyRecord, Integer operatorId, List<SurveyInitResp.SurveyItem> surveyItems, String removeFillBy) {
         //是否是调查发起人
-        boolean isPromoter = surveyRecord == null? true : operatorId.equals(surveyRecord.getCreateUserId());
-        for (SurveyInitResp.SurveyItem surveyItem : surveyItems) {
+        boolean isPromoter = surveyRecord == null || operatorId.equals(surveyRecord.getCreateUserId());
+
+        Iterator<SurveyInitResp.SurveyItem> iterator = surveyItems.iterator();
+        while (iterator.hasNext()) {
+            SurveyItem surveyItem = iterator.next();
+            surveyItem.setFillEnabled(true);
             if ((isPromoter && surveyItem.getFillBy().equals("invitee")) || (!isPromoter && surveyItem.getFillBy().equals("promoter"))) {
                 surveyItem.setFillEnabled(false);
-            } else {
-                surveyItem.setFillEnabled(true);
             }
             if (!surveyItem.getSubItems().isEmpty()) {
-                setLockedSurveyItem(surveyRecord, operatorId, surveyItem.getSubItems());
+                lockOrRemoveSurveyItem(surveyRecord, operatorId, surveyItem.getSubItems(), removeFillBy);
+            }
+            if (StringUtils.isNotBlank(removeFillBy) && surveyItem.getFillBy().equals(removeFillBy)) {
+                iterator.remove();
             }
         }
+
     }
 
 }

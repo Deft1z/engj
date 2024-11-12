@@ -43,7 +43,7 @@ public class BSurveyService {
         resp.setSurveyId(survey.getId());
         resp.setButtons(SurveyButtonHelper.getButtons(null, operator.getUserId().intValue()));
         //遍历表单项是否可编辑填写
-        resp.setLockedSurveyItem(null, operator.getUserId().intValue(), resp.getSurveyItems());
+        resp.lockOrRemoveSurveyItem(null, operator.getUserId().intValue(), resp.getSurveyItems(), "invitee");
         return resp;
     }
 

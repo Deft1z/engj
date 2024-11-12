@@ -97,13 +97,13 @@ public class BSurveyRecordService {
         }
 
         //遍历表单项是否可编辑填写
-        resp.setLockedSurveyItem(surveyRecord, userId, resp.getSurveyItems());
+        resp.lockOrRemoveSurveyItem(surveyRecord, userId, resp.getSurveyItems(), null);
 
         return resp;
     }
 
     @Transactional
-    public Boolean save(SurveyInitResp req) {
+    public SurveyInitResp save(SurveyInitResp req) {
         BSurveyRecord surveyRecord;
         Integer recordId = req.getRecordId();
         if (recordId == null) {
@@ -128,7 +128,8 @@ public class BSurveyRecordService {
         }
 
         surveyRecord.setFillJson(JSONUtil.toJsonStr(req));
-        return bSurveyRecordDao.updateById(surveyRecord);
+        bSurveyRecordDao.updateById(surveyRecord);
+        return getById(surveyRecord.getId());
     }
 
     @Transactional
