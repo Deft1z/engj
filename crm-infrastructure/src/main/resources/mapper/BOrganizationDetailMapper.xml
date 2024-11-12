@@ -13,11 +13,12 @@
     </resultMap>
 
     <select id="getOrgDetailList" resultType="com.kge.energy.crm.repository.entityext.result.OrgDetailResult">
-        select *
+        select bd.organization_id,bd.full_name,bd.label,bd.filepath,bd.introduce,bd.address,bd.serviceType,bd.serviceRange
         from b_organization_detail bd , b_organization b
         where
             bd.organization_id = b.organization_id
             and b.tenant_id = #{tenantId}
+            and b.flag = 1
     </select>
 
 </mapper>

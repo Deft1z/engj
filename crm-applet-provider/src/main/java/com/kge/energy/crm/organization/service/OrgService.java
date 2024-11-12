@@ -76,9 +76,8 @@ public class OrgService {
     }
 
     public List<OrgDetailResult> getOrgDetailList( ) {
-        List<OrgDetailResult> orgDetailResults = organizationDetailDao.getOrgDetailList(UserInfoContextUtils.getCurrentTenantId());
 
-        return BeanUtil.copyToList(orgDetailResults, OrgDetailResult.class);
+        return organizationDetailDao.getOrgDetailList(UserInfoContextUtils.getCurrentTenantId());
 
     }
 }

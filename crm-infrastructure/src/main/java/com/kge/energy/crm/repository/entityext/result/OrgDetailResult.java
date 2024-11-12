@@ -1,6 +1,6 @@
 package com.kge.energy.crm.repository.entityext.result;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -9,48 +9,38 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@TableName(autoResultMap = true)
+@Schema(description = "组织详情对象")
 public class OrgDetailResult {
 
-    /**
-     * 组织ID
-     */
+
+    @Schema(description = "组织ID")
     private Integer organizationId;
 
-    /**
-     * 组织全称
-     */
+
+    @Schema(description = "组织全称")
     private String fullName;
 
-    /**
-     * 服务商页面的组织类型标签
-     */
+
+    @Schema(description = "服务商页面的组织类型标签")
     private String label;
 
-    /**
-     * 组织图片文件路径
-     */
+    @Schema(description = "组织图片文件路径")
     private String filepath;
 
 
-    /**
-     * 组织介绍
-     */
+    @Schema(description = "组织介绍")
     private String introduce;
 
-    /**
-     * 组织地址
-     */
+
+    @Schema(description = "组织地址")
     private String address;
 
-    /**
-     * 组织服务类型
-     */
+
+    @Schema(description = "组织服务类型")
     private Integer serviceType;
 
-    /**
-     * 组织业务范围
-     */
+
+    @Schema(description = "组织业务范围")
     private String serviceRange;
 
 }
