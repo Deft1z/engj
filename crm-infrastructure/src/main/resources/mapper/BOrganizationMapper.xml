@@ -50,16 +50,17 @@
     </select>
 
     <select id="getCompanyList" resultType="com.kge.energy.crm.repository.entityext.result.OrgResult">
-        select a.organization_id,
-               a.parameter ->> '$.fullName'    as full_name,
-               a.parameter ->> '$.serviceType' as service_type,
-               a.parameter ->> '$.type'        as type,
-               a.parameter ->> '$.filepath'    as filepath
-        from b_organization a
+        select ad.organization_id,
+               ad.full_name     as full_name,
+               ad.service_type  as service_type,
+               ad.label         as type,
+               ad.filepath      as filepath
+        from b_organization a ,b_organization_detail ad
         where a.flag = 1
-          and a.parameter ->> '$.serviceType' != 0
+          and a.organization_id = ad.organization_id
+          and ad.service_type != 0
           and a.tenant_id = #{tenantId}
-        order by a.parameter ->> '$.serviceType', a.create_time asc
+        order by ad.service_type, a.create_time asc
     </select>
 
     <select id="getOrgList" resultType="com.kge.energy.crm.repository.entityext.result.OrgListResult">

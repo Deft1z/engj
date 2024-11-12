@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BOrganizationDetailMapper">
+    <resultMap type="com.kge.energy.crm.repository.entity.BOrganizationDetail" id="BOrganizationDetailMap">
+        <result property="organizationId" column="organization_id" jdbcType="INTEGER"/>
+        <result property="label" column="label" jdbcType="VARCHAR"/>
+        <result property="filepath" column="filepath" jdbcType="VARCHAR"/>
+        <result property="fullName" column="full_name" jdbcType="VARCHAR"/>
+        <result property="serviceType" column="service_type" jdbcType="INTEGER"/>
+        <result property="serviceRange" column="service_range" jdbcType="VARCHAR"/>
+        <result property="introduce" column="introduce" jdbcType="VARCHAR"/>
+        <result property="address" column="address" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="getOrgDetailList" resultType="com.kge.energy.crm.repository.entityext.result.OrgDetailResult">
+        select bd.organization_id,bd.full_name,bd.label,bd.filepath,bd.introduce,bd.address,bd.serviceType,bd.serviceRange
+        from b_organization_detail bd , b_organization b
+        where
+            bd.organization_id = b.organization_id
+            and b.tenant_id = #{tenantId}
+            and b.flag = 1
+    </select>
+
+</mapper>
+
