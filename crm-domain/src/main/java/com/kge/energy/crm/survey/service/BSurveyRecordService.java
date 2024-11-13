@@ -19,6 +19,7 @@ import com.kge.energy.crm.repository.entity.BSurveyRecord;
 import com.kge.energy.crm.repository.entity.BSurveyRecordAnswer;
 import com.kge.energy.crm.repository.entityext.param.SurveyRecordParam;
 import com.kge.energy.crm.repository.entityext.result.BSurveyRecordResult;
+import com.kge.energy.crm.survey.req.SurveyRecordExcelReq;
 import com.kge.energy.crm.survey.req.SurveyRecordReq;
 import com.kge.energy.crm.survey.resp.SurveyInitResp;
 import com.kge.energy.crm.survey.resp.SurveyRecordResp;
@@ -30,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 调查表单记录表(BSurveyRecord)Service层
@@ -49,6 +52,8 @@ public class BSurveyRecordService {
     private final WeChatAppletInfraService weChatAppletInfraService;
 
     private final QRCodeService qrCodeService;
+
+    private final BSurveyService surveyService;
 
     public PageResp<SurveyRecordResp> getByPage(SurveyRecordReq req) {
         SurveyRecordParam param = BeanUtil.copyProperties(req, SurveyRecordParam.class);
@@ -75,7 +80,7 @@ public class BSurveyRecordService {
         //查询是否有调查答复
         List<BSurveyRecordAnswer> answers = bSurveyRecordAnswerDao.list(Wrappers.<BSurveyRecordAnswer>lambdaQuery()
                 .eq(BSurveyRecordAnswer::getSurveyRecordId, id)
-                .and(i -> i.eq(BSurveyRecordAnswer::getPromoterId, userId).or().eq(BSurveyRecordAnswer::getInviteeId, userId))
+                .and(i -> i.eq(BSurveyRecordAnswer::getInviteeId, userId).or(p -> p.eq(BSurveyRecordAnswer::getPromoterId, userId).eq(BSurveyRecordAnswer::getStatus, 2)))
                 .orderByDesc(BSurveyRecordAnswer::getCreateTime)
         );
         //有调查答复则返回已填写的调查表
@@ -165,6 +170,32 @@ public class BSurveyRecordService {
         //编辑记录
         surveyRecord.setFillJson(JSONUtil.toJsonStr(req));
         return bSurveyRecordDao.updateById(surveyRecord);
+    }
+
+    @Transactional
+    public Boolean importExcel(List<SurveyRecordExcelReq> list, String surveyCode) {
+        //获取初始化调查表单
+        SurveyInitResp initResp = surveyService.getBySurveyCode(surveyCode);
+        List<SurveyInitResp.SurveyItem> surveyItems = initResp.getSurveyItems();
+        for (SurveyRecordExcelReq excelReq : list) {
+            Map<String, Object> paramMap = BeanUtil.beanToMap(excelReq);
+            //表单项赋值
+            surveyItems.forEach(surveyItem ->
+                    surveyItem.setFillVal(Optional.ofNullable(paramMap.get(surveyItem.getItemCode())).map(String::valueOf).orElse(""))
+            );
+            //新增记录
+            BSurveyRecord surveyRecord = new BSurveyRecord().setTenantId(UserInfoContextUtils.getCurrentTenantId());
+            BeanUtil.copyProperties(initResp, surveyRecord);
+            bSurveyRecordDao.save(surveyRecord);
+            initResp.setRecordId(surveyRecord.getId());
+            // 0 未提交 1 待评价 2 已完成
+            surveyRecord.setStatus(1);
+            //生成分享链接
+            generateShareUrl(surveyRecord);
+            surveyRecord.setFillJson(JSONUtil.toJsonStr(initResp));
+            bSurveyRecordDao.updateById(surveyRecord);
+        }
+        return true;
     }
 
     public String getShareQrcode(Integer id) {

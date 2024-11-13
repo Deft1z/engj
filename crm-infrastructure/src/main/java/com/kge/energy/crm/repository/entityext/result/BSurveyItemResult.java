@@ -26,6 +26,9 @@ public class BSurveyItemResult {
     @Schema(description = "调查表单id")
     private Integer surveyId;
 
+    @Schema(description = "表单项code")
+    private String itemCode;
+
     @Schema(description = "表单项名称")
     private String itemName;
 

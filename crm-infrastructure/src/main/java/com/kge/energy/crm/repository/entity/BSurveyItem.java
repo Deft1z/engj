@@ -31,6 +31,12 @@ public class BSurveyItem {
     private Integer surveyId;
 
     /**
+     * 表单项code
+     */
+    @TableField(value = "item_code")
+    private String itemCode;
+
+    /**
      * 表单项名称
      */
     @TableField(value = "item_name")
