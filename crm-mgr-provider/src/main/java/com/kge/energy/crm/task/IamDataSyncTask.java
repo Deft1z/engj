@@ -3,8 +3,8 @@ package com.kge.energy.crm.task;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONUtil;
-import com.kge.energy.crm.iam.service.IamRemoteService;
 import com.kge.energy.crm.iam.service.IamSyncLogService;
 import com.kge.energy.crm.iam.service.IamUserService;
 import com.kge.energy.crm.repository.entity.IamSyncLog;
@@ -16,9 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.support.WebClientAdapter;
-import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -105,8 +102,7 @@ public class IamDataSyncTask {
             logSyncStartMsg(syncName);
 
             String filter = URLEncoder.encode("userNormalModifyTimestamp>=" + latestModifyTime, StandardCharsets.UTF_8);
-            IamRemoteService iamRemoteService = createIamUserClient(filter, defaultPageSize, pageCookie, TIME_ZONE);
-            Map<String, Object> response = iamRemoteService.getUserByPage("(" + filter + ")", defaultPageSize, pageCookie, TIME_ZONE);
+            Map<String, Object> response = getIamRequest(filter, defaultPageSize, pageCookie, TIME_ZONE);
 
             String code = response.get(IAM_RESP_CODE_KEY).toString();
             if (code.equals(IAM_RESP_CODE_SUCCESS_VAL)) {
@@ -149,7 +145,7 @@ public class IamDataSyncTask {
         }
     }
 
-    private IamRemoteService createIamUserClient(String filter, String pageSize, String cookie, String timeZone) {
+    private Map<String, Object> getIamRequest(String filter, String pageSize, String cookie, String timeZone) {
         final String randomCode = RandomUtil.randomString(16).toLowerCase();
         final String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DatePattern.PURE_DATETIME_PATTERN)) + "Z";
         final String encodeKey = DigestUtils.sha256Hex(StringUtils.join(appUser, randomCode, timestamp, "{", privateKey, "}"));
@@ -158,22 +154,20 @@ public class IamDataSyncTask {
         String uri = String.format(uriFormat, filter, pageSize, cookie, timeZone);
         final String sign = DigestUtils.md5Hex(StringUtils.join(uri, "&", null, "&", privateKey));
 
-        WebClient iamWebClient = WebClient.builder()
-                .defaultHeader("Content-Type", "application/json;charset=UTF-8")
-                .defaultHeader("appuser", appUser)
-                .defaultHeader("randomcode", randomCode)
-                .defaultHeader("timestamp", timestamp)
-                .defaultHeader("encodekey", encodeKey)
-                .defaultHeader("sign", sign)
-                .baseUrl(baseUrl)
-                .build();
-
         String curl = "curl -H 'Content-Type: application/json' -H 'appuser: %s' -H 'randomcode: %s' -H 'timestamp: %s' -H 'encodekey: %s' -H 'sign: %s' \"http://172.18.54.76:8080/sim%s\"";
         curl = String.format(curl, appUser, randomCode, timestamp, encodeKey, sign, uri);
         log.info("==> curl command: {}", curl);
 
-        HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(WebClientAdapter.create(iamWebClient)).build();
-        return factory.createClient(IamRemoteService.class);
+        String resp = HttpRequest.get(baseUrl + uri)
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .header("appuser", appUser)
+                .header("randomcode", randomCode)
+                .header("timestamp", timestamp)
+                .header("encodekey", encodeKey)
+                .header("sign", sign)
+                .execute().body();
+
+        return JSONUtil.toBean(resp, Map.class);
     }
 
     private void addLog(String syncName, String syncContent, String syncResult, Boolean successFlag) {
