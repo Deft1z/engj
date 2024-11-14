@@ -7,6 +7,7 @@
         <result property="typeId" column="type_id" jdbcType="INTEGER"/>
         <result property="title" column="title" jdbcType="VARCHAR"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="number" column="number" jdbcType="VARCHAR"/>
         <result property="attachment" column="attachment" jdbcType="VARCHAR"/>
         <result property="publishDate" column="publish_date" jdbcType="TIMESTAMP"/>
         <result property="sourceUrl" column="source_url" jdbcType="VARCHAR"/>

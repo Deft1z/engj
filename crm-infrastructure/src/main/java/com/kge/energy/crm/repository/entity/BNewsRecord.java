@@ -38,6 +38,11 @@ public class BNewsRecord {
     private String content;
 
     /**
+     * 新闻编号
+     */
+    private String number;
+
+    /**
      * 新闻附件
      */
     private String attachment;

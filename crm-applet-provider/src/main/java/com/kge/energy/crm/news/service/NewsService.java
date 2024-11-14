@@ -147,6 +147,7 @@ public class NewsService {
                 .map(record -> new NewsDetailResult()
                         .setId(record.getId())
                         .setTitle(record.getTitle())
+                        .setNumber(record.getNumber())
                         .setContent(record.getContent())
                         .setPublishDate(record.getPublishDate())
                         .setAttachments(
@@ -156,6 +157,7 @@ public class NewsService {
                                         }))
                                         .orElse(Collections.emptyList())
                         )
+                        .setSourceUrl(record.getSourceUrl())
                 ).orElse(null);
     }
 }
