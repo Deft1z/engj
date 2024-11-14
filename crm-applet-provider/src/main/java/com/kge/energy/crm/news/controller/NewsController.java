@@ -53,5 +53,12 @@ public class NewsController {
         return CommonResult.suc(newsService.newsDetail(newsId));
     }
 
+    @Operation(summary = "删除新闻")
+    @Parameter(name = "newsId", description = "新闻ID", in = ParameterIn.PATH)
+    @GetMapping("/delete/{newsId}")
+    public CommonResult<Boolean> delete(@Validated @PathVariable(name = "newsId") Integer newsId) {
+        return CommonResult.suc(newsService.delete(newsId));
+    }
+
 
 }

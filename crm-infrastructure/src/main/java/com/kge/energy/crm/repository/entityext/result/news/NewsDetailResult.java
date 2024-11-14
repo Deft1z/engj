@@ -21,6 +21,9 @@ public class NewsDetailResult {
     @Schema(description = "新闻标题")
     private String title;
 
+    @Schema(description = "新闻编号")
+    private String number;
+
     @Schema(description = "新闻内容")
     private String content;
 
@@ -29,6 +32,9 @@ public class NewsDetailResult {
 
     @Schema(description = "新闻发布日期")
     private LocalDateTime publishDate;
+
+    @Schema(description = "新闻源地址")
+    private String sourceUrl;
 
     @Data
     public static class Attachment {
