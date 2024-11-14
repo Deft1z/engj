@@ -14,13 +14,11 @@ import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,9 +67,8 @@ public class SurveyRecordController {
     @Operation(summary = "发起人新增调查表单初始化")
     @Parameter(name = "surveyCode", description = "表单编码", required = false, in = ParameterIn.QUERY)
     @GetMapping("/record/add")
-    public CommonResult<SurveyInitResp> initSurvey(@RequestParam(value = "surveyCode", required = false) String surveyCode) {
+    public CommonResult<SurveyInitResp> initSurvey(@RequestParam(value = "surveyCode", required = false, defaultValue = "customer-satisfaction") String surveyCode) {
         //暂时只有客户满意度调查表单 code=customer-satisfaction
-        surveyCode = StringUtils.isBlank(surveyCode) ? "customer-satisfaction" : surveyCode;
         return CommonResult.suc(surveyService.getBySurveyCode(surveyCode));
     }
 
@@ -94,11 +91,10 @@ public class SurveyRecordController {
     @GetMapping("/record/template/get")
     @Operation(summary = "获取调查表单导入模板")
     @Parameter(name = "surveyCode", description = "表单编码", required = false, in = ParameterIn.QUERY)
-    public void importTemplate(@RequestParam(value = "surveyCode", required = false) String surveyCode, HttpServletResponse response) {
+    public void importTemplate(@RequestParam(value = "surveyCode", required = false, defaultValue = "customer-satisfaction") String surveyCode, HttpServletResponse response) {
         //暂时只有客户满意度调查表单 code=customer-satisfaction
         String defaultCode = "customer-satisfaction";
-        surveyCode = StringUtils.isBlank(surveyCode) ? defaultCode : surveyCode;
-        if (surveyCode.equals(defaultCode)){
+        if (surveyCode.equals(defaultCode)) {
             List<SurveyRecordExcelReq> list = Arrays.asList(SurveyRecordExcelReq.builder()
                     .projectName("e能管家客户服务小程序").projectNum("PRJ-2024-001").projectType("XX项目").serviceUnit("科技公司")
                     .serviceAddr("平云路163号").returnVisitor("e能管家").returnPhone("13688888888").clientName("南投集团")
@@ -106,28 +102,27 @@ public class SurveyRecordController {
             );
             ExcelUtils.write(response, "调查表单导入模板.xls", "调查表单列表", SurveyRecordExcelReq.class, list);
         } else {
-            throw new ServiceException("请输入正确的表单编码！");
+            throw new ServiceException("表单编码错误，操作失败！");
         }
     }
 
     @ApiOperationSupport(order = 8)
     @PostMapping("/record/import")
     @Operation(summary = "导入调查表单")
-    @Parameters({
-            @Parameter(name = "surveyCode", description = "表单编码", required = false)
-    })
+    @Parameter(name = "surveyCode", description = "表单编码", required = false)
     @SneakyThrows
     public CommonResult<Boolean> importExcel(@RequestPart("file") MultipartFile file,
-                                             @RequestParam(value = "surveyCode", required = false) String surveyCode) {
+                                             @RequestParam(value = "surveyCode", required = false, defaultValue = "customer-satisfaction") String surveyCode) {
         //暂时只有客户满意度调查表单 code=customer-satisfaction
-        String defaultCode = "customer-satisfaction";
-        surveyCode = StringUtils.isBlank(surveyCode) ? defaultCode : surveyCode;
-        if (surveyCode.equals(defaultCode)){
-            List<SurveyRecordExcelReq> list = ExcelUtils.read(file, SurveyRecordExcelReq.class);
-            return CommonResult.suc(surveyRecordService.importExcel(list, surveyCode));
-        } else {
-            throw new ServiceException("请输入正确的表单编码！");
-        }
+        List<SurveyRecordExcelReq> list = ExcelUtils.read(file, SurveyRecordExcelReq.class);
+        return CommonResult.suc(surveyRecordService.importExcel(list, surveyCode));
+    }
+
+    @ApiOperationSupport(order = 9)
+    @PostMapping("/record/export")
+    @Operation(summary = "调查表单导出")
+    public void export(@RequestBody SurveyRecordReq req, HttpServletResponse response) {
+        surveyRecordService.exportExcel(req, response);
     }
 
 }

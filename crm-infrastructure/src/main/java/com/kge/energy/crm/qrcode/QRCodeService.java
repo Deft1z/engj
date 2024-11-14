@@ -46,12 +46,16 @@ public class QRCodeService {
      * @param content
      * @return
      */
+    public String createCodeToBase64Img(String content) {
+        return "data:image/png;base64," + createCodeToBase64(content);
+    }
+
     @SneakyThrows
     public String createCodeToBase64(String content) {
         BufferedImage image = QrCodeUtil.generate(content, config);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         ImageIO.write(image, "png", stream);
-        return "data:image/png;base64," + Base64.encode(stream.toByteArray());
+        return Base64.encode(stream.toByteArray());
     }
 
 }

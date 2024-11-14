@@ -1,6 +1,7 @@
 package com.kge.energy.crm.survey.resp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -34,13 +35,15 @@ public class SurveyRecordResp {
     @Schema(description = "调查对象（项目、合同、设备、工单...）名称")
     private String surveyObjName;
 
-    /*@Schema(description = "分享评价链接")
+    @JsonIgnore
+    @Schema(description = "分享评价链接")
     private String shareUrl;
 
+    @JsonIgnore
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "分享链接过期时间")
-    private LocalDateTime shareExpireAt;*/
+    private LocalDateTime shareExpireAt;
 
     @Schema(description = "0 未提交 1 待评价 2 已完成")
     private Integer status;

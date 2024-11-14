@@ -1,6 +1,7 @@
 package com.kge.energy.crm.survey.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -10,6 +11,7 @@ import com.kge.energy.crm.common.button.resp.BaseButton;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.common.util.AppletLinkUtils;
+import com.kge.energy.crm.common.util.ExcelUtils;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.external.wechat.applet.service.WeChatAppletInfraService;
 import com.kge.energy.crm.qrcode.QRCodeService;
@@ -22,8 +24,10 @@ import com.kge.energy.crm.repository.entityext.result.BSurveyRecordResult;
 import com.kge.energy.crm.survey.req.SurveyRecordExcelReq;
 import com.kge.energy.crm.survey.req.SurveyRecordReq;
 import com.kge.energy.crm.survey.resp.SurveyInitResp;
+import com.kge.energy.crm.survey.resp.SurveyRecordExcelResp;
 import com.kge.energy.crm.survey.resp.SurveyRecordResp;
 import com.kge.platform.framework.common.exception.ServiceException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -97,7 +101,7 @@ public class BSurveyRecordService {
         if (resp.getButtons().stream().map(BaseButton::getCode).toList().contains(SurveyButtonEnum.SURVEY_SHARE.getCode())) {
             resp.setShareQrCode(new SurveyInitResp.ShareQrCode()
                     .setExpireAt(surveyRecord.getShareExpireAt())
-                    .setBase64Image(qrCodeService.createCodeToBase64(surveyRecord.getShareUrl()))
+                    .setBase64Image(qrCodeService.createCodeToBase64Img(surveyRecord.getShareUrl()))
             );
         }
 
@@ -198,6 +202,17 @@ public class BSurveyRecordService {
         return true;
     }
 
+    public void exportExcel(SurveyRecordReq req, HttpServletResponse response) {
+        PageResp<SurveyRecordResp> pages = getByPage(req);
+        List<SurveyRecordExcelResp> excelResp = BeanUtil.copyToList(pages.getList(), SurveyRecordExcelResp.class);
+
+        excelResp.forEach(surveyRecordResp ->
+                surveyRecordResp.setShareQrCode(Base64.decode(qrCodeService.createCodeToBase64(surveyRecordResp.getShareUrl())))
+        );
+
+        ExcelUtils.write(response, "调查表单.xls", "调查表单列表", SurveyRecordExcelResp.class, excelResp);
+    }
+
     public String getShareQrcode(Integer id) {
         BSurveyRecord surveyRecord = bSurveyRecordDao.getById(id);
         if (surveyRecord == null) {
@@ -208,7 +223,7 @@ public class BSurveyRecordService {
             generateShareUrl(surveyRecord);
             bSurveyRecordDao.updateById(surveyRecord);
         }
-        return qrCodeService.createCodeToBase64(surveyRecord.getShareUrl());
+        return qrCodeService.createCodeToBase64Img(surveyRecord.getShareUrl());
     }
 
     private void generateShareUrl(BSurveyRecord surveyRecord) {

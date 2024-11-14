@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 零信任办公系统数据（组织、用户）同步任务
@@ -102,44 +103,38 @@ public class IamDataSyncTask {
             logSyncStartMsg(syncName);
             String filter = URLEncoder.encode("userNormalModifyTimestamp>=" + latestModifyTime, StandardCharsets.UTF_8);
             Map<String, Object> response = getIamRequest(filter, defaultPageSize, pageCookie, TIME_ZONE);
-            if (response.isEmpty()) {
-                syncResult = formatSyncResult(0, 0, 0);
+            String code = Optional.ofNullable(response.get(IAM_RESP_CODE_KEY)).map(String::valueOf).orElse("");
+            if (code.equals(IAM_RESP_CODE_SUCCESS_VAL)) {
+                Object data = response.get(IAM_RESP_DATA_KEY);
+                syncContent = JSONUtil.toJsonStr(data);
+                String nextPage = BeanUtil.beanToMap(data).get(IAM_RESP_DATA_NEXT_PAGE_KEY).toString();
+                String users = JSONUtil.toJsonStr(BeanUtil.beanToMap(data).get(IAM_RESP_DATA_USERS_KEY));
+
+                List<IamUser> iamUsers = JSONUtil.toList(users, IamUser.class);
+                int addRows = 0;
+                int updRows = 0;
+                int hadRows = 0;
+                for (IamUser iamUser : iamUsers) {
+                    IamUser user = iamUserService.getById(iamUser.getUserId());
+                    if (user == null && StringUtils.isNotBlank(iamUser.getUserId())) {
+                        iamUserService.insert(iamUser);
+                        addRows++;
+                    } else if (!iamUserService.checkHadSync(iamUser.getUserId(), iamUser.getUserNormalModifyTimestamp())) {
+                        iamUserService.update(iamUser);
+                        updRows++;
+                    } else {
+                        hadRows++;
+                    }
+                }
+                syncResult = formatSyncResult(addRows, updRows, hadRows);
                 successFlag = true;
                 logSuccessMsg(syncName, syncResult);
-            } else {
-                String code = response.get(IAM_RESP_CODE_KEY).toString();
-                if (code.equals(IAM_RESP_CODE_SUCCESS_VAL)) {
-                    Object data = response.get(IAM_RESP_DATA_KEY);
-                    syncContent = JSONUtil.toJsonStr(data);
-                    String nextPage = BeanUtil.beanToMap(data).get(IAM_RESP_DATA_NEXT_PAGE_KEY).toString();
-                    String users = JSONUtil.toJsonStr(BeanUtil.beanToMap(data).get(IAM_RESP_DATA_USERS_KEY));
-
-                    List<IamUser> iamUsers = JSONUtil.toList(users, IamUser.class);
-                    int addRows = 0;
-                    int updRows = 0;
-                    int hadRows = 0;
-                    for (IamUser iamUser : iamUsers) {
-                        IamUser user = iamUserService.getById(iamUser.getUserId());
-                        if (user == null && StringUtils.isNotBlank(iamUser.getUserId())) {
-                            iamUserService.insert(iamUser);
-                            addRows++;
-                        } else if (!iamUserService.checkHadSync(iamUser.getUserId(), iamUser.getUserNormalModifyTimestamp())) {
-                            iamUserService.update(iamUser);
-                            updRows++;
-                        } else {
-                            hadRows++;
-                        }
-                    }
-                    syncResult = formatSyncResult(addRows, updRows, hadRows);
-                    successFlag = true;
-                    logSuccessMsg(syncName, syncResult);
-                    if (StringUtils.isNotBlank(nextPage) && !nextPage.equals("null")) {
-                        syncUser(latestModifyTime, nextPage);
-                    }
-                } else {
-                    syncResult = JSONUtil.toJsonStr(response);
-                    logSyncFailMsg(syncName, syncResult);
+                if (StringUtils.isNotBlank(nextPage) && !nextPage.equals("null")) {
+                    syncUser(latestModifyTime, nextPage);
                 }
+            } else {
+                syncResult = JSONUtil.toJsonStr(response);
+                logSyncFailMsg(syncName, syncResult);
             }
         } catch (Exception e) {
             syncResult = e.getMessage();
@@ -190,7 +185,7 @@ public class IamDataSyncTask {
     }
 
     private String formatSyncResult(int addRows, int updRows, int hadRows) {
-        return String.format("新增[%s]条记录，更新[%s]条记录，已同步[%s]条记录。", addRows, updRows, hadRows);
+        return String.format("新增[%s]条记录，更新[%s]条记录，忽略[%s]条历史已同步记录。", addRows, updRows, hadRows);
     }
 
     private void logSuccessMsg(String syncName, String syncResult) {
