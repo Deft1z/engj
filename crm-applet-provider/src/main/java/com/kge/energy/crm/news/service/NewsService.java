@@ -168,7 +168,7 @@ public class NewsService {
         Set<String> roleCodes = UserInfoContextUtils.getCurrentUserInfo().getRoleCodes();
 
         Set<RoleEnums> CAN_DELETE_NEWS_ROLES = Set.of(
-                RoleEnums.SUPER_ADMIN, RoleEnums.TENANT_ADMIN, RoleEnums.OPERATE_ADMIN
+                RoleEnums.SUPER_ADMIN, RoleEnums.OPERATE_ADMIN
         );
 
         boolean match = CAN_DELETE_NEWS_ROLES.stream()
