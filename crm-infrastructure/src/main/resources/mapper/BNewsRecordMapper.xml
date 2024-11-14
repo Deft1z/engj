@@ -42,8 +42,7 @@
             and bnr.type_id = #{param.typeId}
           </if>
         <if test="param.searchKeyword != null and param.searchKeyword != ''">
-            and ( bnr.title like concat('%',#{param.searchKeyword},'%')
-                or bnr.content like concat('%',#{param.searchKeyword},'%')
+            and bnr.title like concat('%',#{param.searchKeyword},'%')
             )
         </if>
         ORDER BY bnr.publish_date DESC, bnr.create_time DESC
