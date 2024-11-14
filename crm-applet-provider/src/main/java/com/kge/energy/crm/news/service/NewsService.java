@@ -6,6 +6,8 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.enums.RoleEnums;
 import com.kge.energy.crm.news.req.IndexAllChannelNewsReq;
 import com.kge.energy.crm.news.req.PageNewsReq;
 import com.kge.energy.crm.news.resp.IndexAllChannelNewsResp;
@@ -22,10 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -159,5 +158,26 @@ public class NewsService {
                         )
                         .setSourceUrl(record.getSourceUrl())
                 ).orElse(null);
+    }
+
+    /**
+     * 删除新闻
+     */
+    public boolean delete(Integer newsId) {
+
+        Set<String> roleCodes = UserInfoContextUtils.getCurrentUserInfo().getRoleCodes();
+
+        Set<RoleEnums> CAN_DELETE_NEWS_ROLES = Set.of(
+                RoleEnums.SUPER_ADMIN, RoleEnums.TENANT_ADMIN, RoleEnums.OPERATE_ADMIN
+        );
+
+        boolean match = CAN_DELETE_NEWS_ROLES.stream()
+                .anyMatch(roleEnum -> roleCodes.contains(roleEnum.getCode()));
+
+        if (!match) {
+            return false;
+        }
+
+        return bNewsRecordDao.removeById(newsId);
     }
 }
