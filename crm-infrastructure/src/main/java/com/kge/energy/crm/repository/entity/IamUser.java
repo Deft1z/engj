@@ -23,7 +23,7 @@ public class IamUser {
     /**
      * 用户工号
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.INPUT)
     @TableField(value = "sim_id")
     private String SimId;
 

@@ -100,42 +100,46 @@ public class IamDataSyncTask {
         Boolean successFlag = false;
         try {
             logSyncStartMsg(syncName);
-
             String filter = URLEncoder.encode("userNormalModifyTimestamp>=" + latestModifyTime, StandardCharsets.UTF_8);
             Map<String, Object> response = getIamRequest(filter, defaultPageSize, pageCookie, TIME_ZONE);
-
-            String code = response.get(IAM_RESP_CODE_KEY).toString();
-            if (code.equals(IAM_RESP_CODE_SUCCESS_VAL)) {
-                Object data = response.get(IAM_RESP_DATA_KEY);
-                syncContent = JSONUtil.toJsonStr(data);
-                String nextPage = BeanUtil.beanToMap(data).get(IAM_RESP_DATA_NEXT_PAGE_KEY).toString();
-                String users = JSONUtil.toJsonStr(BeanUtil.beanToMap(data).get(IAM_RESP_DATA_USERS_KEY));
-
-                List<IamUser> iamUsers = JSONUtil.toList(users, IamUser.class);
-                int addRows = 0;
-                int updRows = 0;
-                int hadRows = 0;
-                for (IamUser iamUser : iamUsers) {
-                    IamUser user = iamUserService.getById(iamUser.getSimId());
-                    if (user == null) {
-                        iamUserService.insert(iamUser);
-                        addRows++;
-                    } else if (!iamUserService.checkHadSync(iamUser.getSimId(), iamUser.getUserNormalModifyTimestamp())) {
-                        iamUserService.update(iamUser);
-                        updRows++;
-                    } else {
-                        hadRows++;
-                    }
-                }
-                syncResult = formatSyncResult(addRows, updRows, hadRows);
+            if (response.isEmpty()) {
+                syncResult = formatSyncResult(0, 0, 0);
                 successFlag = true;
                 logSuccessMsg(syncName, syncResult);
-                if (StringUtils.isNotBlank(nextPage)) {
-                    syncUser(latestModifyTime, nextPage);
-                }
             } else {
-                syncResult = JSONUtil.toJsonStr(response);
-                logSyncFailMsg(syncName, syncResult);
+                String code = response.get(IAM_RESP_CODE_KEY).toString();
+                if (code.equals(IAM_RESP_CODE_SUCCESS_VAL)) {
+                    Object data = response.get(IAM_RESP_DATA_KEY);
+                    syncContent = JSONUtil.toJsonStr(data);
+                    String nextPage = BeanUtil.beanToMap(data).get(IAM_RESP_DATA_NEXT_PAGE_KEY).toString();
+                    String users = JSONUtil.toJsonStr(BeanUtil.beanToMap(data).get(IAM_RESP_DATA_USERS_KEY));
+
+                    List<IamUser> iamUsers = JSONUtil.toList(users, IamUser.class);
+                    int addRows = 0;
+                    int updRows = 0;
+                    int hadRows = 0;
+                    for (IamUser iamUser : iamUsers) {
+                        IamUser user = iamUserService.getById(iamUser.getSimId());
+                        if (user == null && StringUtils.isNotBlank(iamUser.getSimId())) {
+                            iamUserService.insert(iamUser);
+                            addRows++;
+                        } else if (!iamUserService.checkHadSync(iamUser.getSimId(), iamUser.getUserNormalModifyTimestamp())) {
+                            iamUserService.update(iamUser);
+                            updRows++;
+                        } else {
+                            hadRows++;
+                        }
+                    }
+                    syncResult = formatSyncResult(addRows, updRows, hadRows);
+                    successFlag = true;
+                    logSuccessMsg(syncName, syncResult);
+                    if (StringUtils.isNotBlank(nextPage) && !nextPage.equals("null")) {
+                        syncUser(latestModifyTime, nextPage);
+                    }
+                } else {
+                    syncResult = JSONUtil.toJsonStr(response);
+                    logSyncFailMsg(syncName, syncResult);
+                }
             }
         } catch (Exception e) {
             syncResult = e.getMessage();
