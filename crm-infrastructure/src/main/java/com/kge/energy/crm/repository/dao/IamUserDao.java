@@ -19,8 +19,8 @@ public class IamUserDao extends ServiceImpl<IamUserMapper, IamUser> {
 
     private final IamUserMapper mapper;
 
-    public IamUserResult getBySimId(String simId, String modifyTime) {
-        return mapper.getBySimId(simId, modifyTime);
+    public IamUserResult getByUserId(String userId, String modifyTime) {
+        return mapper.getByUserId(userId, modifyTime);
     }
 
     public String getLatestModifyTime() {

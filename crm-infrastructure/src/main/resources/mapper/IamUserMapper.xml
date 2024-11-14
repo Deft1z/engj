@@ -35,10 +35,10 @@
         sim_id, user_id, user_cn, user_job_id, user_status, user_mobile, user_id_card_number, user_login_id, user_init_mobile, user_init_passwd, user_password, user_cipher_password, user_org_id, user_org_name, user_org_num_full_path, user_org_name_full_path, user_parttime_org, user_gender, user_objectclass, user_type, user_sso_authority, user_sso_authority_back_up, user_normal_modify_timestamp, sync_create_time, sync_update_time
     </sql>
 
-    <select id="getBySimId" resultMap="IamUserResult">
+    <select id="getByUserId" resultMap="IamUserResult">
         SELECT *
         FROM iam_user
-        WHERE  sim_id = #{simId}
+        WHERE  user_id = #{userId}
           AND JSON_UNQUOTE(JSON_EXTRACT(user_normal_modify_timestamp, '$')) = #{modifyTime}
     </select>
 

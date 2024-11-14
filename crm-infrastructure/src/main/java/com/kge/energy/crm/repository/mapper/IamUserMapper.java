@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface IamUserMapper extends BaseMapper<IamUser> {
 
-    IamUserResult getBySimId(@Param("simId") String simId, @Param("modifyTime") String modifyTime);
+    IamUserResult getByUserId(@Param("userId") String userId, @Param("modifyTime") String modifyTime);
 
     String getLatestModifyTime();
 

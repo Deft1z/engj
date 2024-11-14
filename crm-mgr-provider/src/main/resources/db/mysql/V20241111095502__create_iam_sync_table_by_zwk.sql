@@ -12,8 +12,8 @@ create table iam_sync_log
 drop table if exists iam_user;
 create table iam_user
 (
-    sim_id                       varchar(50) primary key comment '用户工号',
-    user_id                      varchar(100) default null comment '用户id',
+    user_id                      varchar(100) primary key comment '用户id',
+    sim_id                       varchar(50) default null comment '用户工号',
     user_cn                      varchar(100) default null comment '用户姓名',
     user_job_id                  varchar(30)  default null comment '岗位ID',
     user_status                  varchar(10)  default null comment '员工状态：1-有效 0-无效',

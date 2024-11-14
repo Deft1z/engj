@@ -119,11 +119,11 @@ public class IamDataSyncTask {
                     int updRows = 0;
                     int hadRows = 0;
                     for (IamUser iamUser : iamUsers) {
-                        IamUser user = iamUserService.getById(iamUser.getSimId());
-                        if (user == null && StringUtils.isNotBlank(iamUser.getSimId())) {
+                        IamUser user = iamUserService.getById(iamUser.getUserId());
+                        if (user == null && StringUtils.isNotBlank(iamUser.getUserId())) {
                             iamUserService.insert(iamUser);
                             addRows++;
-                        } else if (!iamUserService.checkHadSync(iamUser.getSimId(), iamUser.getUserNormalModifyTimestamp())) {
+                        } else if (!iamUserService.checkHadSync(iamUser.getUserId(), iamUser.getUserNormalModifyTimestamp())) {
                             iamUserService.update(iamUser);
                             updRows++;
                         } else {

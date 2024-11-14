@@ -23,13 +23,13 @@ public class IamUser {
     /**
      * 用户工号
      */
-    @TableId(type = IdType.INPUT)
     @TableField(value = "sim_id")
     private String SimId;
 
     /**
      * 用户id
      */
+    @TableId(type = IdType.INPUT)
     @TableField(value = "user_id")
     private String userId;
 

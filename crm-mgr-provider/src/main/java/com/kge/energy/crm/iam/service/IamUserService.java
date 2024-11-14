@@ -24,8 +24,8 @@ public class IamUserService {
 
     private final IamUserDao iamUserDao;
 
-    public IamUser getById(String simId) {
-        return iamUserDao.getById(simId);
+    public IamUser getById(String userId) {
+        return iamUserDao.getById(userId);
     }
 
     @Transactional
@@ -42,8 +42,8 @@ public class IamUserService {
         return iamUserDao.updateById(iamUser);
     }
 
-    public boolean checkHadSync(String simId, String userNormalModifyTimestamp) {
-        IamUserResult iamUser = iamUserDao.getBySimId(simId, userNormalModifyTimestamp);
+    public boolean checkHadSync(String userId, String userNormalModifyTimestamp) {
+        IamUserResult iamUser = iamUserDao.getByUserId(userId, userNormalModifyTimestamp);
         return iamUser != null;
     }
 
