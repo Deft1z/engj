@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BNewsChannelMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.BNewsChannel" id="BNewsChannelMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="channelName" column="channel_name" jdbcType="VARCHAR"/>
+        <result property="channelCode" column="channel_code" jdbcType="VARCHAR"/>
+        <result property="channelWebsite" column="channel_website" jdbcType="VARCHAR"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="channels" resultType="com.kge.energy.crm.repository.entityext.result.news.NewsChannelResult">
+        SELECT bnc.id channel_id, bnc.channel_name, bnc.channel_code, bnt.id type_id, bnt.type_name, bnt.type_code
+        FROM b_news_channel bnc,
+             b_news_type bnt
+        WHERE bnc.flag = 1
+          AND bnt.flag = 1
+          AND bnc.id = bnt.channel_id
+    </select>
+</mapper>
+
