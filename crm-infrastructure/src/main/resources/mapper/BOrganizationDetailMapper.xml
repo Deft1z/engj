@@ -13,7 +13,7 @@
     </resultMap>
 
     <select id="getOrgDetailList" resultType="com.kge.energy.crm.repository.entityext.result.OrgDetailResult">
-        select bd.organization_id,bd.full_name,bd.label,bd.filepath,bd.introduce,bd.address,bd.serviceType,bd.serviceRange
+        select bd.organization_id,bd.full_name,bd.label,bd.filepath,bd.introduce,bd.address,bd.service_type,bd.service_range
         from b_organization_detail bd , b_organization b
         where
             bd.organization_id = b.organization_id
