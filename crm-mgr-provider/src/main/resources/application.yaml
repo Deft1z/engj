@@ -190,4 +190,4 @@ knife4j:
 
 file:
   upload:
-    allow-types: jpg,jpeg,png,pdf
+    allow-types: jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,txt
