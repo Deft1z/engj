@@ -16,8 +16,11 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,6 +39,7 @@ public class DianhongController {
     @Operation(summary = "电鸿数据导出")
     @Parameter(name = "exportType", description = "导出类型：0 excel 1 pdf", required = false, in = ParameterIn.QUERY)
     @GetMapping("/dianhong/exportDianhongStatistic")
+    @SneakyThrows
     public void exportDianhongStatistic(HttpServletResponse response, @RequestParam(value = "exportType", required = false) Integer exportType) {
         DhStatisticResp dianhongStatistic = dianhongService.getDianhongStatistic();
         Map<String, Object> dataMap = BeanUtil.beanToMap(dianhongStatistic.getTotal());
@@ -47,7 +51,8 @@ public class DianhongController {
         dataMap.put("fixingCount", Optional.ofNullable(status.getFixingCount()).map(PcsStatusResp::getCount).orElse(""));
         dataMap.put("fixingPer", Optional.ofNullable(status.getFixingCount()).map(PcsStatusResp::getPer).orElse(""));
 
-        ExcelUtils.writeWithTemplate(response, "template/电力鸿蒙.xls", dataMap, dianhongStatistic.getDevices(), exportType);
+        InputStream templateInputStream = ResourceUtils.getURL("classpath:template/电力鸿蒙.xls").openStream();
+        ExcelUtils.writeWithTemplate(response, templateInputStream, "电力鸿蒙.xls", dataMap, dianhongStatistic.getDevices(), exportType);
     }
 
     @PostMapping("/dianhong/setControlEnable")
