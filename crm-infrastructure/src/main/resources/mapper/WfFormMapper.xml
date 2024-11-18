@@ -496,7 +496,7 @@
                 AND w.action_type = "流转二级公司处理"
             </when>
             <when test="operateType != null and operateType == 'withdraw_work_order' ">
-                AND w.action_type = "已撤回"
+                AND w.action_type = "集团撤回"
             </when>
             <when test="operateType != null and operateType == 'terminate_work_order' ">
                 AND w.action_type = "已终止"
@@ -505,7 +505,7 @@
                 AND (w.action_type = "添加合同" or w.action_type = "已回复")
             </when>
             <when test="operateType != null and operateType == 'return_work_order' ">
-                AND w.action_type = "已退回"
+                AND w.action_type = "二级公司退回"
             </when>
             <when test="operateType != null and operateType == 'finish_work_order' ">
                 AND w.action_type = "已完结"
