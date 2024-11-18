@@ -17,5 +17,7 @@ public interface BNewsRecordMapper extends BaseMapper<BNewsRecord> {
     List<BNewsRecord> indexAllChannelNews(Integer pageSize);
 
     IPage<BNewsRecord> pageNews(Page<BNewsRecord> page, @Param("param") PageNewsParam param);
+
+    void saveUploadNews(List<BNewsRecord> bNewsRecords);
 }
 

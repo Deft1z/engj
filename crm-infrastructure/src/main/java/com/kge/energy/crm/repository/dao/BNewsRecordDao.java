@@ -28,5 +28,9 @@ public class BNewsRecordDao extends ServiceImpl<BNewsRecordMapper, BNewsRecord> 
         Page<BNewsRecord> page = new Page<>(param.getCurrentPage(), param.getPageSize());
         return mapper.pageNews(page, param);
     }
+
+    public void saveUploadNews(List<BNewsRecord> bNewsRecords) {
+        mapper.saveUploadNews(bNewsRecords);
+    }
 }
 
