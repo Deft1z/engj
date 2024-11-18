@@ -14,5 +14,15 @@
         <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+    <select id="selectOneByCode" resultMap="BNewsTypeMap">
+        SELECT bnt.*
+        FROM b_news_channel bnc,
+             b_news_type bnt
+        WHERE bnc.flag = 1
+          AND bnt.flag = 1
+          AND bnc.id = bnt.channel_id
+          AND bnc.channel_code = #{channelCode}
+          AND bnt.type_code = #{typeCode}
+    </select>
 </mapper>
 
