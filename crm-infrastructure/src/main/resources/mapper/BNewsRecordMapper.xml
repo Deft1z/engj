@@ -43,9 +43,17 @@
           </if>
         <if test="param.searchKeyword != null and param.searchKeyword != ''">
             and bnr.title like concat('%',#{param.searchKeyword},'%')
-            )
         </if>
         ORDER BY bnr.publish_date DESC, bnr.create_time DESC
     </select>
+
+    <insert id="saveUploadNews">
+        <foreach collection="list" item="item">
+            INSERT INTO b_news_record (type_id, title, number, content, attachment, publish_date, source_url)
+            SELECT #{item.typeId}, #{item.title}, #{item.number},#{item.content},#{item.attachment},#{item.publishDate},#{item.sourceUrl}
+            FROM dual
+            WHERE NOT EXISTS (SELECT 1 FROM b_news_record WHERE type_id = #{item.typeId} and title = #{item.title})
+        </foreach>
+    </insert>
 </mapper>
 

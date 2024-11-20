@@ -94,6 +94,10 @@ auth:
       - ${server.servlet.context-path}/v3/api-docs/**
       - ${server.servlet.context-path}/wechat/login
       - ${server.servlet.context-path}/recommendQrCode/**
+    persist-phone-list:
+      - 13660617465
+      - 15521607108
+      - 136****0001
   permission:
     white-list:
       - ${server.servlet.context-path}/eventTracking/report
@@ -189,7 +193,7 @@ knife4j:
 
 file:
   upload:
-    allow-types: jpg,jpeg,png,pdf
+    allow-types: jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,wps
 
 experience-data:
   tenant-name: "体验租户"

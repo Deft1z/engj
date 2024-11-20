@@ -86,7 +86,11 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
 
         // 续期
-        redisUtils.expire(tokenKey, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT);
+        if (authProperties.getToken().getPersistPhoneList().contains(UserInfoContextUtils.getCurrentMobile())) {
+            redisUtils.persist(tokenKey);
+        } else {
+            redisUtils.expire(tokenKey, TokenConstant.PC_EXPIRED_TIMEOUT, TokenConstant.PC_EXPIRED_TIMEUNIT);
+        }
 
         return true;
     }

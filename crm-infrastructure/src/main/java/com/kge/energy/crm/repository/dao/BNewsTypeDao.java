@@ -1,10 +1,10 @@
 package com.kge.energy.crm.repository.dao;
 
-import com.kge.energy.crm.repository.mapper.BNewsTypeMapper;
-import com.kge.energy.crm.repository.entity.BNewsType;
-import org.springframework.stereotype.Repository;
-import lombok.RequiredArgsConstructor;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kge.energy.crm.repository.entity.BNewsType;
+import com.kge.energy.crm.repository.mapper.BNewsTypeMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 /**
  * 新闻类型配置表(BNewsType)表数据库访问层
@@ -15,5 +15,8 @@ public class BNewsTypeDao extends ServiceImpl<BNewsTypeMapper, BNewsType> {
 
     private final BNewsTypeMapper mapper;
 
+    public BNewsType selectOneByCode(String channelCode, String typeCode) {
+        return mapper.selectOneByCode(channelCode, typeCode);
+    }
 }
 
