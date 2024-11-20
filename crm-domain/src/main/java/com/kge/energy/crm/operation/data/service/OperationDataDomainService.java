@@ -7,7 +7,7 @@ import com.kge.energy.crm.operation.data.resp.OperationDataOrgResp;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.OperationDataDao;
 import com.kge.energy.crm.repository.entityext.param.StatisticalDataParam;
-import com.kge.energy.crm.repository.entityext.result.NewUserGrowthDataResult;
+import com.kge.energy.crm.repository.entityext.result.DashboardStatResult;
 import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +83,44 @@ public class OperationDataDomainService {
     /**
      * 新用户增长曲线数据
      */
-    public NewUserGrowthDataResult newUserGrowthData(StatisticalDataParam param) {
-        return null;
+    public DashboardStatResult newUserGrowthData(StatisticalDataParam param) {
+        return operationDataDao.getNewUserGrowthStat(param);
     }
+
+    /**
+     * 工单合同数量变化
+     * @param param
+     * @return
+     */
+    public DashboardStatResult orderContractQtyData(StatisticalDataParam param) {
+        return operationDataDao.getOrderContractQtyStat(param);
+    }
+
+    /**
+     * 合同金额变化
+     * @param param
+     * @return
+     */
+    public DashboardStatResult orderContractAmountData(StatisticalDataParam param) {
+        return operationDataDao.getOrderContractAmountStat(param);
+    }
+
+    /**
+     * 投诉类型占比
+     * @param param
+     * @return
+     */
+    public DashboardStatResult complainPctData(StatisticalDataParam param) {
+        return operationDataDao.getComplainPctStat(param);
+    }
+
+    /**
+     * 投诉类型数量变化
+     * @param param
+     * @return
+     */
+    public DashboardStatResult complainQtyData(StatisticalDataParam param) {
+        return operationDataDao.getComplainQtyStat(param);
+    }
+
 }

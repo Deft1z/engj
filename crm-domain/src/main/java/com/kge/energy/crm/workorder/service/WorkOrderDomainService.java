@@ -342,7 +342,8 @@ public class WorkOrderDomainService {
                 .setStatus(ConstParam.FlowCompanyProcess)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(req.getCurrentOrgId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送elink消息通知，通知二级公司客服

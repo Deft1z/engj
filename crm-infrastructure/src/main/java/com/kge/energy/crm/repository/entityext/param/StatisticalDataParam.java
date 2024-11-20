@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * @author wangjihua
@@ -21,4 +22,6 @@ public class StatisticalDataParam {
     private Integer tenantId;
 
     private Integer orgId;
+
+    private List<String> statDims;
 }

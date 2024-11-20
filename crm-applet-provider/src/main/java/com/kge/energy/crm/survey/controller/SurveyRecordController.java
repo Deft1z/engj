@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,9 +63,8 @@ public class SurveyRecordController {
     @Operation(summary = "发起人新增调查表单初始化")
     @Parameter(name = "surveyCode", description = "表单编码", required = false, in = ParameterIn.QUERY)
     @GetMapping("/record/add")
-    public CommonResult<SurveyInitResp> initSurvey(@RequestParam(value = "surveyCode", required = false) String surveyCode) {
+    public CommonResult<SurveyInitResp> initSurvey(@RequestParam(value = "surveyCode", required = false, defaultValue = "customer-satisfaction") String surveyCode) {
         //暂时只有客户满意度调查表单 code=customer-satisfaction
-        surveyCode = StringUtils.isBlank(surveyCode) ? "customer-satisfaction" : surveyCode;
         return CommonResult.suc(surveyService.getBySurveyCode(surveyCode));
     }
 
