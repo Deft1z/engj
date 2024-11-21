@@ -191,3 +191,10 @@ knife4j:
 file:
   upload:
     allow-types: jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,wps
+
+experience-data:
+  tenant-name: "体验租户"
+  redirect-url-list:
+    - ${server.servlet.context-path}/external/getRecord
+    - ${server.servlet.context-path}/external/getRecordDetail
+    - ${server.servlet.context-path}/application/detail
