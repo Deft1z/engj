@@ -17,6 +17,7 @@ import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.property.ExperienceDataProperties;
 import com.kge.energy.crm.common.util.*;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
@@ -75,6 +76,7 @@ public class WorkOrderDomainService {
     private final UserDomainService userDomainService;
     private final MsgDomainService msgDomainService;
     private final WeChatAppletInfraService weChatAppletInfraService;
+    private final ExperienceDataProperties experienceDataProperties;
 
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean addWorkOrder(WorkOrderAddReq req) {
@@ -85,8 +87,10 @@ public class WorkOrderDomainService {
         WorkOrderAddReq.WorkOrderContent content = req.getContent();
         content.setCode(code);
         //参数校验
-        if (!PhoneUtil.isPhone(content.getMobile())) {
-            throw new ServiceException("手机号码不正确");
+        if (ObjectUtil.notEqual(UserInfoContextUtils.getCurrentUserInfo().getTenantName(), experienceDataProperties.getTenantName())) {
+            if (!PhoneUtil.isPhone(content.getMobile())) {
+                throw new ServiceException("手机号码不正确");
+            }
         }
 
         //登录用户信息
@@ -117,9 +121,9 @@ public class WorkOrderDomainService {
         wfForm.setTenantId(operator.getTenantId());
 
         //预选公司
-        if(ObjectUtil.isNotNull(req.getPreselectedOrgId())){
+        if (ObjectUtil.isNotNull(req.getPreselectedOrgId())) {
             BOrganization preselectedOrg = bOrganizationDao.getById(req.getPreselectedOrgId());
-            if(ObjectUtil.isNull(preselectedOrg)){
+            if (ObjectUtil.isNull(preselectedOrg)) {
                 throw new ServiceException("预选公司不存在");
             }
             wfForm.setPreselectedOrgId(req.getPreselectedOrgId());
@@ -167,7 +171,7 @@ public class WorkOrderDomainService {
     public WfFormPageResp getFormDetail(WfFormDetailReq req) {
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.BIZORDER_LIST);
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
-        return BeanUtil.copyProperties(wfFormDao.getFormDetail(req.getFormId(),userInfoDto, dataEnums), WfFormPageResp.class);
+        return BeanUtil.copyProperties(wfFormDao.getFormDetail(req.getFormId(), userInfoDto, dataEnums), WfFormPageResp.class);
     }
 
 
@@ -775,11 +779,11 @@ public class WorkOrderDomainService {
     /**
      * 获取最近工单处理记录内容
      */
-    public WfFormRecentDealRecordResp getWfFormRecentDealRecord(WfFormRecentDealRecordReq req){
+    public WfFormRecentDealRecordResp getWfFormRecentDealRecord(WfFormRecentDealRecordReq req) {
 
         Integer userId = UserInfoContextUtils.getCurrentUserId();
         return new WfFormRecentDealRecordResp()
-                .setDealRecord(wfFormDao.getRecentDealRecord(userId,req.getOperateType()));
+                .setDealRecord(wfFormDao.getRecentDealRecord(userId, req.getOperateType()));
 
     }
 
