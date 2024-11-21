@@ -1,7 +1,9 @@
 package com.kge.energy.crm.experience.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.kge.energy.crm.common.property.ExperienceDataProperties;
 import com.kge.energy.crm.common.util.RedisUtils;
+import com.kge.energy.crm.common.util.UserInfoContextUtils;
 import com.kge.energy.crm.experience.resp.EpControlEnabledResp;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,14 +24,20 @@ public class EpControlController {
 
     private final RedisUtils redisUtils;
 
+    private final ExperienceDataProperties experienceDataProperties;
+
     @Operation(summary = "获取是否允许处理")
     @GetMapping("/enabled")
     public CommonResult<EpControlEnabledResp> enabled() {
 
-        String enableSubmitWokrOrder = redisUtils.get("experience:control:submit_wokr_order");
+        boolean enableSubmitWokrOrder = true;
+
+        if (ObjectUtil.equals(UserInfoContextUtils.getCurrentUserInfo().getTenantName(), experienceDataProperties.getTenantName())) {
+            enableSubmitWokrOrder = ObjectUtil.equals(redisUtils.get("experience:control:submit_wokr_order"), "true");
+        }
 
         EpControlEnabledResp resp = new EpControlEnabledResp()
-                .setSubmitWokrOrder(ObjectUtil.equals(enableSubmitWokrOrder, "true"));
+                .setSubmitWokrOrder(enableSubmitWokrOrder);
 
         return CommonResult.suc(resp);
     }
