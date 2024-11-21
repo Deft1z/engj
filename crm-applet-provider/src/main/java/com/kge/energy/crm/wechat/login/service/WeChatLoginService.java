@@ -188,19 +188,19 @@ public class WeChatLoginService {
                 .setTenantId(bUser.getTenantId());
         rUserRoleDao.save(rRole);
 
-        //根据iam同步的用户数据获取用户组织
-        BOrganization bOrganization = bOrganizationDao.findByIamUserMobile(mobile, defaultTenantId);
-        if (bOrganization == null) {
-            bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
-            bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
-        }
-
-        RUserTenant rUserTenant = new RUserTenant()
-                .setUserId(bUser.getUserId())
-                .setOrganizationId(bOrganization.getOrganizationId())
-                .setTenantId(bUser.getTenantId())
-                .setFlag(1);
-        rUserTenantDao.save(rUserTenant);
+//        //根据iam同步的用户数据获取用户组织
+//        BOrganization bOrganization = bOrganizationDao.findByIamUserMobile(mobile, defaultTenantId);
+//        if (bOrganization == null) {
+//            bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
+//            bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
+//        }
+//
+//        RUserTenant rUserTenant = new RUserTenant()
+//                .setUserId(bUser.getUserId())
+//                .setOrganizationId(bOrganization.getOrganizationId())
+//                .setTenantId(bUser.getTenantId())
+//                .setFlag(1);
+//        rUserTenantDao.save(rUserTenant);
 
         return bUser;
     }
@@ -287,6 +287,20 @@ public class WeChatLoginService {
 
         bUser.setLastLoginTime(LocalDateTime.now());
         bUserDao.updateById(bUser);
+
+        //根据iam同步的用户数据获取用户组织
+        Integer defaultTenantId = 1;
+        BOrganization bOrganization = bOrganizationDao.findByIamUserMobile(mobile, defaultTenantId);
+        if (bOrganization == null) {
+            bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
+            bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
+        }
+        RUserTenant rUserTenant = new RUserTenant()
+                .setUserId(bUser.getUserId())
+                .setOrganizationId(bOrganization.getOrganizationId())
+                .setTenantId(bUser.getTenantId())
+                .setFlag(1);
+        rUserTenantDao.save(rUserTenant);
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
                 .setTimestamp(phoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())
