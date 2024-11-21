@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 小程序运维托管接口
@@ -41,21 +43,33 @@ public class EpOperationMaintenanceController {
 
         ClassPathResource resource = new ClassPathResource("json/experience/EccRecordList.json");
 
-        EccResp<EccPageData<EccMaintenance>> data = null;
+        EccResp<EccPageData<EccMaintenance>> resp = null;
         // 暂时写死一页，后续多页要改查json文件做分页
         if (ObjectUtil.equals(eccReq.getPageNo(), 1)) {
-            data = JsonUtils.getSource().readValue(resource.getStream(), new TypeReference<EccResp<EccPageData<EccMaintenance>>>() {
+            resp = JsonUtils.getSource().readValue(resource.getStream(), new TypeReference<EccResp<EccPageData<EccMaintenance>>>() {
             });
 
+            List<EccMaintenance> dataList = resp.getData()
+                    .getList()
+                    .stream()
+                    .filter(item -> Arrays.stream(eccReq.getCondition().getRiskRates())
+                            .toList().contains(item.getRiskRate()))
+                    .collect(Collectors.toList());
+            resp.getData().setList(dataList);
+
             if (ObjectUtil.equals(env, "prod")) {
-                data.getData().getList()
+                resp.getData().getList()
                         .forEach(item -> item.getAttactments()
                                 .forEach(att -> att.setUrl(att.getUrl().replace("/fsbt", "")))
                         );
             }
         }
 
-        return CommonResult.suc(data);
+        resp.getData()
+                .setSize(resp.getData().getList().size())
+                .setTotal(resp.getData().getList().size());
+
+        return CommonResult.suc(resp);
     }
 
     @PostMapping("/external/getRecordDetail")
