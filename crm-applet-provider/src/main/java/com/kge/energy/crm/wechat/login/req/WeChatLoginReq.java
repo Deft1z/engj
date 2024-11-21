@@ -15,7 +15,7 @@ public class WeChatLoginReq {
     /**
      * 手机
      */
-    private String mobile;
+//    private String mobile;
 
     /**
      * 用户名

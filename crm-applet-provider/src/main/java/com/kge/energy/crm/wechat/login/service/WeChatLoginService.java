@@ -8,7 +8,6 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -106,7 +105,7 @@ public class WeChatLoginService {
             //请求微信接口
             LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
             if (StrUtil.isBlank(appletLoginResp.getOpenId())) {
-                throw new ServiceException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
+                throw new ServiceException("获取openid失败");
             }
             // 现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}
 //        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
@@ -117,9 +116,10 @@ public class WeChatLoginService {
             List<BUser> bUsers = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
             if (CollectionUtil.isNotEmpty(bUsers)) {
-                user = bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getMobile(), req.getMobile()))
-                        .findFirst()
-                        .orElse(bUsers.get(0));
+                user = bUsers.get(0);
+//                bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getMobile(), req.getMobile()))
+//                        .findFirst()
+//                        .orElse(bUsers.get(0));
                 //判断是否禁用
                 if (ObjectUtil.equal(user.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
                     throw new ServiceException("账号已禁用");
@@ -127,7 +127,7 @@ public class WeChatLoginService {
 
             } else {
                 // 新用户默认挂靠到南投-个人用户组织下
-                user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
+                user = saveNewUser(appletLoginResp.getOpenId(), null);
                 // 新用户的推荐用户字段绑定
                 if (ObjectUtil.isNotNull(req.getRecommendUserId()))
                     user.setRecommendUserId(req.getRecommendUserId());
