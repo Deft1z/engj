@@ -1,227 +1,128 @@
 {
   "code": 1,
-  "msg": "请求成功",
-  "traceId": "b1fc5733ce104baa91f947ba1dc78c14",
+  "msg": "请求处理成功",
   "data": {
-    "code": 1,
-    "msg": "请求处理成功",
-    "data": {
-      "pageNum": 1,
-      "pageSize": 10,
-      "size": 10,
-      "total": 13319,
-      "list": [
-        {
-          "contractId": "",
-          "contractName": "广州海谊投资置业发展有限公司2023年10kV电气设备及线路维护项目",
-          "firstParty": "",
-          "firstPartyContactsPhone": "",
-          "prjId": "0e5621fed74a4a67b7fc2bc173b47886",
-          "prjName": "广州海谊投资置业发展有限公司2023年10kV电气设备及线路维护项目",
-          "dept": "技术公司",
-          "planId": "e24271c894eb40589751d2d38d434d20",
-          "workCode": "BDEX03w_2411-2373",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca10193097e66644bcb",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": [
-            {
-              "url": "https://ecc.nftz:8181/epcsys/2024/10/fe7f7f8193077e0d01930abfb5b6088e.pdf",
-              "type": "19"
-            }
-          ]
-        },
-        {
-          "contractId": "czdy465",
-          "contractName": "广州虹宇物业管理有限公司（江南雅居）2023年10kV电气设备及线路维护项目",
-          "firstParty": "",
-          "firstPartyContactsPhone": "13602404208",
-          "prjId": "39f2543c244c42e5b4a79ddf3e371817",
-          "prjName": "广州虹宇物业管理有限公司（江南雅居）2023年10kV电气设备及线路维护项目",
-          "dept": "技术公司",
-          "planId": "3ea57879b47843d9b0524ded42e99ea9",
-          "workCode": "BDEX03w_2411-2367",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca1019309973e3a18cd",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": [
-            {
-              "url": "https://ecc.nftz:8181/epcsys/2024/10/fe7f7f8193077e0d01930abf5cf9088d.pdf",
-              "type": "19"
-            }
-          ]
-        },
-        {
-          "contractId": "1001A1100000008OSBFO",
-          "contractName": "广州欣诚物业管理有限公司（江南大道中111号）10kV电气设备及线路维护服务合同",
-          "firstParty": "广州欣诚物业管理有限公司",
-          "firstPartyContactsPhone": "13922481179",
-          "prjId": "5daada545a6843019395f6a0a0adddd3",
-          "prjName": "广州欣诚物业管理有限公司（江南大道中111号）2024年10kV电气设备及线路维护项目",
-          "dept": "技术公司",
-          "planId": "1f01c05d088b48668dc42586da7a1598",
-          "workCode": "BDEX03w_2411-2366",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca1019309afd9186998",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": [
-            {
-              "url": "https://ecc.nftz:8181/epcsys/2024/10/fe7f7f8193077e0d01930abf073d088c.pdf",
-              "type": "19"
-            }
-          ]
-        },
-        {
-          "contractId": "",
-          "contractName": "广州市南武中学（岭南画派纪念校区）2024年10kV电气设备及线路维护项目",
-          "firstParty": "",
-          "firstPartyContactsPhone": "",
-          "prjId": "ff059147f07844e88b5182a8c7930422",
-          "prjName": "广州市南武中学（岭南画派纪念校区）2024年10kV电气设备及线路维护项目",
-          "dept": "技术公司",
-          "planId": "cfec8989f43f4396a484d93985694663",
-          "workCode": "BDEX03w_2411-2365",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca1019309bfdd39178f",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": [
-            {
-              "url": "https://ecc.nftz:8181/epcsys/2024/10/fe7f7f8193077e0d01930abeadc80885.pdf",
-              "type": "19"
-            }
-          ]
-        },
-        {
-          "contractId": "",
-          "contractName": "广州市汇沣园食品有限公司",
-          "firstParty": "",
-          "firstPartyContactsPhone": "",
-          "prjId": "a1e70b40f98941edb93dd4787603c285",
-          "prjName": "广州市汇沣园食品有限公司",
-          "dept": "城北公司",
-          "planId": "8fcfed7547c24b7ab6624e02330701d0",
-          "workCode": "BDEX03q02411-2195",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca101930ab9f312056b",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": []
-        },
-        {
-          "contractId": "1001A11000000084XSFC",
-          "contractName": "广州市吉鑫祥装饰建材有限公司(CBGC-2024-60025-YWTB)",
-          "firstParty": "广州市吉鑫祥装饰建材有限公司",
-          "firstPartyContactsPhone": "13825056707",
-          "prjId": "5e5f241aaa2643a99aba1a17d4bb6617",
-          "prjName": "广州市吉鑫祥装饰建材有限公司(CBGC-2024-60025-YWTB)",
-          "dept": "城北公司",
-          "planId": "b255614d3568478e83ccbf85b636aa02",
-          "workCode": "BDEX03q02411-2173",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca101930ab2948a6a47",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": []
-        },
-        {
-          "contractId": "czdy98",
-          "contractName": "广州市兆禾物业管理有限公司(华南理工大学石牌南门苑)10kV电气设备及线路维护项目",
-          "firstParty": "",
-          "firstPartyContactsPhone": "13312877620",
-          "prjId": "d4a145461d754b84baa64c41de8093c8",
-          "prjName": "广州市兆禾物业管理有限公司(华南理工大学石牌南门苑)10kV电气设备及线路维护项目",
-          "dept": "技术公司",
-          "planId": "e157e1de67df42d7a6b9cfb67ae601a7",
-          "workCode": "BDEX03w_2411-2377",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca101930ab14b3765e1",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": []
-        },
-        {
-          "contractId": "",
-          "contractName": "广东华水建设工程有限公司",
-          "firstParty": "",
-          "firstPartyContactsPhone": "",
-          "prjId": "9475917ea387499b87f56bbd38ba7ecf",
-          "prjName": "广东华水建设工程有限公司",
-          "dept": "城北公司",
-          "planId": "dee7bf28e7084a27abc18e53bbc9ef94",
-          "workCode": "BDEX03q02411-2335",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca101930aadc33a5920",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": []
-        },
-        {
-          "contractId": "",
-          "contractName": "高艳娟设备维护工程运维GCGS2022-084",
-          "firstParty": "",
-          "firstPartyContactsPhone": "",
-          "prjId": "a72d9d35e73f48279771975da9211224",
-          "prjName": "高艳娟设备维护工程运维GCGS2022-084",
-          "dept": "从化公司",
-          "planId": "635c6be7bc414fbfb19e3c296fc0ad19",
-          "workCode": "BDEX03982411-2452",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca101930aad41b15752",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": []
-        },
-        {
-          "contractId": "",
-          "contractName": "刘凤莺",
-          "firstParty": "",
-          "firstPartyContactsPhone": "",
-          "prjId": "a47c8ecac6004ddd98583436d3426558",
-          "prjName": "刘凤莺",
-          "dept": "城北公司",
-          "planId": "15c3545ae8394f578bba2bdad6537fa4",
-          "workCode": "BDEX03q02411-2197",
-          "workDate": "2024-11-08 00:00:00",
-          "taskName": "设备巡检",
-          "riskRate": "设备巡检",
-          "workContent": "设备运维",
-          "checkinId": "ff80808193077ca101930aad2f865705",
-          "remarkB": "",
-          "remarkC": "合格",
-          "attactments": []
-        }
-      ]
-    }
+    "pageNum": 1,
+    "pageSize": 10,
+    "size": 5,
+    "total": 5,
+    "list": [
+      {
+        "contractId": "",
+        "contractName": "广州xx有限公司202X年10kV电气设备及线路维护项目",
+        "firstParty": "",
+        "firstPartyContactsPhone": "",
+        "prjId": "0e5621fed74a4a67b7fc2bc173b47886",
+        "prjName": "广州xx有限公司202X年10kV电气设备及线路维护项目",
+        "dept": "科技公司",
+        "planId": "e24271c894eb40589751d2d38d434d20",
+        "workCode": "BDEX03w_2411-XXXX",
+        "workDate": "2024-11-08 00:00:00",
+        "taskName": "设备巡检",
+        "riskRate": "设备巡检",
+        "workContent": "设备运维",
+        "checkinId": "ff80808193077ca10193097e66644bcb",
+        "remarkB": "",
+        "remarkC": "合格",
+        "attactments": [
+          {
+            "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d53fce8f49018bd342d546000004",
+            "type": "19"
+          }
+        ]
+      },
+      {
+        "contractId": "czdy465",
+        "contractName": "广州XX物业管理有限公司202X年10kV电气设备及线路维护项目",
+        "firstParty": "",
+        "firstPartyContactsPhone": "1360240XXXX",
+        "prjId": "39f2543c244c42e5b4a79ddf3e371817",
+        "prjName": "广州XX物业管理有限公司202X年10kV电气设备及线路维护项目",
+        "dept": "科技公司",
+        "planId": "3ea57879b47843d9b0524ded42e99ea9",
+        "workCode": "BDEX03w_2411-XXXX",
+        "workDate": "2024-11-08 00:00:00",
+        "taskName": "设备巡检",
+        "riskRate": "设备巡检",
+        "workContent": "设备运维",
+        "checkinId": "ff80808193077ca1019309973e3a18cd",
+        "remarkB": "",
+        "remarkC": "合格",
+        "attactments": [
+          {
+            "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d54a4e8cbfb28bd342d546000005",
+            "type": "19"
+          }
+        ]
+      },
+      {
+        "contractId": "1001A1100000008OSBFO",
+        "contractName": "广州XX物业管理有限公司10kV电气设备及线路维护服务合同",
+        "firstParty": "广州XX物业管理有限公司",
+        "firstPartyContactsPhone": "1392248XXXX",
+        "prjId": "5daada545a6843019395f6a0a0adddd3",
+        "prjName": "广州XX物业管理有限公司2024年10kV电气设备及线路维护项目",
+        "dept": "科技公司",
+        "planId": "1f01c05d088b48668dc42586da7a1598",
+        "workCode": "BDEX03w_2411-XXXX",
+        "workDate": "2024-11-08 00:00:00",
+        "taskName": "设备试验",
+        "riskRate": "设备试验",
+        "workContent": "设备运维",
+        "checkinId": "ff80808193077ca1019309afd9186998",
+        "remarkB": "",
+        "remarkC": "合格",
+        "attactments": [
+          {
+            "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d566a2c534d38bd342d546000006",
+            "type": "19"
+          }
+        ]
+      },
+      {
+        "contractId": "",
+        "contractName": "广州市XX中学202X年10kV电气设备及线路维护项目",
+        "firstParty": "",
+        "firstPartyContactsPhone": "",
+        "prjId": "ff059147f07844e88b5182a8c7930422",
+        "prjName": "广州市XX中学202X年10kV电气设备及线路维护项目",
+        "dept": "科技公司",
+        "planId": "cfec8989f43f4396a484d93985694663",
+        "workCode": "BDEX03w_2411-XXXX",
+        "workDate": "2024-11-08 00:00:00",
+        "taskName": "检修抢修",
+        "riskRate": "检修抢修",
+        "workContent": "设备运维",
+        "checkinId": "ff80808193077ca1019309bfdd39178f",
+        "remarkB": "",
+        "remarkC": "合格",
+        "attactments": [
+          {
+            "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d56dad9129df8bd342d546000007",
+            "type": "19"
+          }
+        ]
+      },
+      {
+        "contractId": "",
+        "contractName": "广州市XXXX食品有限公司",
+        "firstParty": "",
+        "firstPartyContactsPhone": "",
+        "prjId": "a1e70b40f98941edb93dd4787603c285",
+        "prjName": "广州市XXXX食品有限公司",
+        "dept": "科技公司",
+        "planId": "8fcfed7547c24b7ab6624e02330701d0",
+        "workCode": "BDEX03q02411-XXXX",
+        "workDate": "2024-11-08 00:00:00",
+        "taskName": "设备维修",
+        "riskRate": "设备维修",
+        "workContent": "设备运维",
+        "checkinId": "ff80808193077ca101930ab9f312056b",
+        "remarkB": "",
+        "remarkC": "合格",
+        "attactments": []
+      }
+    ]
   }
 }
+

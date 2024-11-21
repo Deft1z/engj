@@ -7,11 +7,12 @@ import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.external.ecc.req.EccOperationDetailReq;
 import com.kge.energy.crm.external.ecc.req.EccReq;
 import com.kge.energy.crm.external.ecc.resp.EccMaintenance;
-import com.kge.energy.crm.operation.maintenance.req.PatrolRecordReq;
-import com.kge.energy.crm.operation.maintenance.service.OperationMaintenanceService;
+import com.kge.energy.crm.external.ecc.resp.EccPageData;
+import com.kge.energy.crm.external.ecc.resp.EccResp;
 import com.kge.platform.framework.common.net.CommonResult;
 import com.kge.platform.framework.web.util.JsonUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 小程序运维托管接口
@@ -31,15 +34,42 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EpOperationMaintenanceController {
 
-    private final OperationMaintenanceService operationMaintenanceService;
+    @Value("${spring.profiles.active}")
+    private String env;
 
     @ConvertToGoFormats
     @PostMapping("/external/getRecord")
-    public Object getRecordList(@RequestBody EccReq eccReq) throws NoSuchAlgorithmException, IOException {
+    public CommonResult<EccResp<EccPageData<EccMaintenance>>> getRecordList(@RequestBody EccReq eccReq) throws NoSuchAlgorithmException, IOException {
 
         ClassPathResource resource = new ClassPathResource("json/experience/EccRecordList.json");
 
-        return JsonUtils.getSource().readValue(resource.getStream(), Object.class);
+        EccResp<EccPageData<EccMaintenance>> resp = null;
+        // 暂时写死一页，后续多页要改查json文件做分页
+        if (ObjectUtil.equals(eccReq.getPageNo(), 1)) {
+            resp = JsonUtils.getSource().readValue(resource.getStream(), new TypeReference<EccResp<EccPageData<EccMaintenance>>>() {
+            });
+
+            List<EccMaintenance> dataList = resp.getData()
+                    .getList()
+                    .stream()
+                    .filter(item -> Arrays.stream(eccReq.getCondition().getRiskRates())
+                            .toList().contains(item.getRiskRate()))
+                    .collect(Collectors.toList());
+            resp.getData().setList(dataList);
+
+            if (ObjectUtil.equals(env, "prod")) {
+                resp.getData().getList()
+                        .forEach(item -> item.getAttactments()
+                                .forEach(att -> att.setUrl(att.getUrl().replace("/fsbt", "")))
+                        );
+            }
+        }
+
+        resp.getData()
+                .setSize(resp.getData().getList().size())
+                .setTotal(resp.getData().getList().size());
+
+        return CommonResult.suc(resp);
     }
 
     @PostMapping("/external/getRecordDetail")
@@ -50,18 +80,20 @@ public class EpOperationMaintenanceController {
         List<EccMaintenance> eccMaintenances = JsonUtils.getSource().readValue(resource.getStream(), new TypeReference<List<EccMaintenance>>() {
         });
 
-        return CommonResult.suc(
-                eccMaintenances.stream()
-                        .filter(item -> ObjectUtil.equals(item.getPlanId(), req.getPlanId()))
-                        .findFirst()
-                        .orElse(null)
-        );
+        EccMaintenance eccMaintenance = eccMaintenances.stream()
+                .filter(item -> ObjectUtil.equals(item.getPlanId(), req.getPlanId()))
+                .findFirst()
+
+                .orElse(null);
+
+        if (ObjectUtil.isNotNull(eccMaintenance) && ObjectUtil.equals(env, "prod")) {
+            eccMaintenance.getAttactments()
+                    .forEach(att -> att.setUrl(att.getUrl().replace("/fsbt", ""))
+                    );
+        }
+
+        return CommonResult.suc(eccMaintenance);
     }
 
-    @ConvertToGoFormats
-    @PostMapping("/om/report/info/load")
-    public CommonResult<Object> getPatrolRecordInfo(@RequestBody PatrolRecordReq patrolRecordReq) {
-        return CommonResult.suc(operationMaintenanceService.getPatrolRecordInfo(patrolRecordReq));
-    }
 
 }

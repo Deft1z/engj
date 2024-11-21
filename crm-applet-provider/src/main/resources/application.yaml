@@ -200,3 +200,4 @@ experience-data:
   redirect-url-list:
     - ${server.servlet.context-path}/external/getRecord
     - ${server.servlet.context-path}/external/getRecordDetail
+    - ${server.servlet.context-path}/application/detail
