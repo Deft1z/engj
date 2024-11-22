@@ -42,11 +42,12 @@
     </select>
 
     <select id="getOrgDictList" resultType="com.kge.energy.crm.repository.entityext.result.OrgDictResult">
-        select name AS label, organization_id AS value
-        from b_organization
-        where flag != -1
-          and parameter ->> "$.serviceType" != 0
-          and tenant_id = #{tenantId}
+        select name AS label, b.organization_id AS value
+        from b_organization b
+        JOIN b_organization_detail bd ON b.organization_id = bd.organization_id
+        where b.flag != -1
+          and bd.service_type != 0
+          and b.tenant_id = #{tenantId}
     </select>
 
     <select id="getCompanyList" resultType="com.kge.energy.crm.repository.entityext.result.OrgResult">
@@ -142,7 +143,7 @@
     </select>
 
     <select id="findByIamUserMobile" resultMap="BOrganizationMap">
-        select bo.organization_id, bo.name, bo.level, bo.tenant_id, user_cn, user_mobile, user_org_name_full_path
+        select bo.organization_id,bo.name, bo.level, bo.tenant_id, user_cn, user_mobile, user_org_name_full_path
         from b_organization bo
         join iam_user iu on instr(iu.user_org_name_full_path, bo.name) > 0
         where bo.flag = 1
