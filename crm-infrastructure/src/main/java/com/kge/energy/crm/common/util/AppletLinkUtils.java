@@ -5,6 +5,7 @@ public class AppletLinkUtils {
     private static final String BIZ_TYPE_ORDER_DETAIL = "orderDetail";
     private static final String BIZ_TYPE_CONTRACT_DETAIL = "contractDetail";
     private static final String BIZ_TYPE_COMPLAIN_DETAIL = "complainDetail";
+    private static final String BIZ_TYPE_SURVEY_ANSWER = "surveyAnswer";
 
     private static final String ORDER_DETAIL_PATH = "/pages/user/order/detail/detail";
     private static final String CONTRACT_DETAIL_PATH = "/pages/user/contract/detail/detail";
@@ -26,9 +27,9 @@ public class AppletLinkUtils {
         return "type=" + BIZ_TYPE_COMPLAIN_DETAIL + "&path=" + COMPLAIN_DETAIL_PATH + "&detailId=" + complainId;
     }
 
-    //获取调查问卷详情query
+    //获取调查问卷答复query
     public static String getSurveyAnswerQuery(Integer recordId) {
-        return "type=smsUrl"+ "&path=" + SURVEY_ANSWER_PATH + "&recordId=" + recordId;
+        return "type=" + BIZ_TYPE_SURVEY_ANSWER + "&path=" + SURVEY_ANSWER_PATH + "&recordId=" + recordId;
     }
 
 }

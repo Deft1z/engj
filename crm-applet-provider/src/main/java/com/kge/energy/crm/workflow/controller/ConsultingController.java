@@ -5,6 +5,8 @@ import com.kge.energy.crm.comment.service.CmsCommentService;
 import com.kge.energy.crm.common.go.ConvertToGoFormats;
 import com.kge.energy.crm.common.page.PageResp;
 import com.kge.energy.crm.complain.controller.ComplainController;
+import com.kge.energy.crm.workorder.req.WfFormRecentDealRecordReq;
+import com.kge.energy.crm.workorder.resp.WfFormRecentDealRecordResp;
 import com.kge.energy.crm.workorder.req.*;
 import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
 import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
@@ -15,10 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/workMgr/consulting")
@@ -91,5 +90,12 @@ public class ConsultingController {
     public CommonResult<Boolean> addComment(@RequestBody @Valid WfFormCommentReq req) {
         return CommonResult.suc(cmsCommentService.addWfFormFlowComment(req));
     }
+
+    @Operation(summary = "获取最近处理记录内容")
+    @PostMapping(value = "/getRecentDealRecord")
+    public CommonResult<WfFormRecentDealRecordResp> getRecentDealRecord(@RequestBody @Valid WfFormRecentDealRecordReq req) {
+        return CommonResult.suc(workOrderDomainService.getWfFormRecentDealRecord(req));
+    }
+
 
 }

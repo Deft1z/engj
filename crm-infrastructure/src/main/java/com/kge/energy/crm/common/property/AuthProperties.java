@@ -24,7 +24,15 @@ public class AuthProperties {
 
         private String redisFront;
 
+        /**
+         * 不需要token验证的url
+         */
         private List<String> whiteList = new ArrayList<>();
+
+        /**
+         * 持久化不过期的手机账号
+         */
+        private List<String> persistPhoneList = new ArrayList<>();
     }
 
     @Data

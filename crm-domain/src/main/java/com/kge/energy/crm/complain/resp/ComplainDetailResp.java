@@ -65,4 +65,6 @@ public class ComplainDetailResp {
 
     private String contractName;
 
+    private Integer contractId;
+
 }

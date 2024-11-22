@@ -1,5 +1,6 @@
 package com.kge.energy.crm.task;
 
+import com.kge.energy.crm.common.util.ExcelUtils;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -25,7 +26,7 @@ public class DeleteTmpDataFileTask {
      */
     @Scheduled(cron = "${tmp.clean-cron:0 30 0 * * ?}")
     public void deleteTmpFileTask() {
-        final String tmpDir = "/tmp/crm-excel-pdf";
+        final String tmpDir = ExcelUtils.TMP_DIR;
         final int expireDay = 1;
         log.info("==> 执行{}目录的文件(最新修改时间为{}天以前)删除", tmpDir, expireDay);
         File file = new File(tmpDir);

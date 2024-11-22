@@ -37,15 +37,5 @@ public class DashBoardDao {
         return mapper.selectComplainRankList(param);
     }
 
-    public StatisticalDataResult.User getUserStatistic(Integer tenantId) {
-        return mapper.getUserStatistic(tenantId);
-    }
 
-    public StatisticalDataResult.Consulting getConsultingStatistic(Integer tenantId) {
-        return mapper.getConsultingStatistic(tenantId);
-    }
-
-    public StatisticalDataResult.Contract getContractStatistic(Integer tenantId) {
-        return mapper.getContractStatistic(tenantId);
-    }
 }

@@ -8,7 +8,6 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -106,7 +105,7 @@ public class WeChatLoginService {
             //请求微信接口
             LoginResp appletLoginResp = weChatAppletInfraService.appletLogin(req.getJsCode());
             if (StrUtil.isBlank(appletLoginResp.getOpenId())) {
-                throw new ServiceException(Opt.ofNullable(req.getMobile()).orElse("") + "获取openid失败");
+                throw new ServiceException("获取openid失败");
             }
             // 现在接口只返回了  {"session_key":"VI6GJ52tcpCQx9eSpLPZlA==","openid":"ocgqB6988rYAugtnawmR6RE2YavE"}
 //        if (ObjUtil.notEqual(appletLoginResp.getErrCode(), LoginResp.SUCCESS_CODE)) {
@@ -117,9 +116,10 @@ public class WeChatLoginService {
             List<BUser> bUsers = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
             if (CollectionUtil.isNotEmpty(bUsers)) {
-                user = bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getMobile(), req.getMobile()))
-                        .findFirst()
-                        .orElse(bUsers.get(0));
+                user = bUsers.get(0);
+//                bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getMobile(), req.getMobile()))
+//                        .findFirst()
+//                        .orElse(bUsers.get(0));
                 //判断是否禁用
                 if (ObjectUtil.equal(user.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
                     throw new ServiceException("账号已禁用");
@@ -127,7 +127,7 @@ public class WeChatLoginService {
 
             } else {
                 // 新用户默认挂靠到南投-个人用户组织下
-                user = saveNewUser(appletLoginResp.getOpenId(), req.getMobile());
+                user = saveNewUser(appletLoginResp.getOpenId(), null);
                 // 新用户的推荐用户字段绑定
                 if (ObjectUtil.isNotNull(req.getRecommendUserId()))
                     user.setRecommendUserId(req.getRecommendUserId());
@@ -188,15 +188,19 @@ public class WeChatLoginService {
                 .setTenantId(bUser.getTenantId());
         rUserRoleDao.save(rRole);
 
-        BOrganization bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
-        bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
-
-        RUserTenant rUserTenant = new RUserTenant()
-                .setUserId(bUser.getUserId())
-                .setOrganizationId(bOrganization.getOrganizationId())
-                .setTenantId(bUser.getTenantId())
-                .setFlag(1);
-        rUserTenantDao.save(rUserTenant);
+//        //根据iam同步的用户数据获取用户组织
+//        BOrganization bOrganization = bOrganizationDao.findByIamUserMobile(mobile, defaultTenantId);
+//        if (bOrganization == null) {
+//            bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
+//            bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
+//        }
+//
+//        RUserTenant rUserTenant = new RUserTenant()
+//                .setUserId(bUser.getUserId())
+//                .setOrganizationId(bOrganization.getOrganizationId())
+//                .setTenantId(bUser.getTenantId())
+//                .setFlag(1);
+//        rUserTenantDao.save(rUserTenant);
 
         return bUser;
     }
@@ -283,6 +287,23 @@ public class WeChatLoginService {
 
         bUser.setLastLoginTime(LocalDateTime.now());
         bUserDao.updateById(bUser);
+
+        RUserTenant tenantByUid = rUserTenantDao.findTenantByUid(bUser.getUserId());
+        if (ObjectUtil.isNull(tenantByUid)) {
+            //根据iam同步的用户数据获取用户组织
+            Integer defaultTenantId = 1;
+            BOrganization bOrganization = bOrganizationDao.findByIamUserMobile(mobile, defaultTenantId);
+            if (bOrganization == null) {
+                bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
+                bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
+            }
+            RUserTenant rUserTenant = new RUserTenant()
+                    .setUserId(bUser.getUserId())
+                    .setOrganizationId(bOrganization.getOrganizationId())
+                    .setTenantId(bUser.getTenantId())
+                    .setFlag(1);
+            rUserTenantDao.save(rUserTenant);
+        }
 
         WeChatPhoneNumberResp.Watermark watermark = new WeChatPhoneNumberResp.Watermark()
                 .setTimestamp(phoneNumberResp.getPhoneInfo().getWatermark().getTimestamp())

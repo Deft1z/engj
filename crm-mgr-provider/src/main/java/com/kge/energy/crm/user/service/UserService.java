@@ -82,7 +82,7 @@ public class UserService {
 
         List<RoleUserResult> roleUserResults;
 
-        if (UserInfoContextUtils.getCurrentUserInfo().getRoleList().stream().anyMatch(role -> ObjectUtil.equals(role.getId(), RoleIdEnums.SYSTEM_ADMINISTRATOR.getCode()))) {
+        if (UserInfoContextUtils.getCurrentUserInfo().getRoleCodes().contains(RoleEnums.SUPER_ADMIN.getCode())) {
             roleUserResults = bUserDao.getUserByRoleId(req.getRoleId());
         } else {
             BOrganization bOrganization = bOrganizationDao.getOrgByUserId(userId);
@@ -170,7 +170,7 @@ public class UserService {
                     Optional.ofNullable(bUser).orElse(new BUser().setName(req.getName())),
                     LoginPlatformEnums.PC, LoginResultEnums.FAIL, e.toString());
 
-            throw new ServiceException("登录失败");
+            throw new ServiceException(e.getMessage());
         }
     }
 
@@ -481,8 +481,6 @@ public class UserService {
             throw new ServiceException("非法请求，不允分配其他租户用户角色");
         }
 
-        rUserRoleDao.removeByUserId(bUser.getUserId());
-
         // 限定不能同时拥有2种业务角色，后续有需要可考虑是否通过角色类型判断，目前先通过角色编码判断
         List<String> businessCodes = List.of(RoleEnums.APPLET_USER.getCode(), RoleEnums.JT_CUSTOMER.getCode(), RoleEnums.SUB_COMPANY_CUSTOMER.getCode());
         List<String> roleCodes = bRoles.stream().map(BRole::getCode).toList();
@@ -491,7 +489,8 @@ public class UserService {
             throw new ServiceException("不能同时分配2种业务角色: 集团客服|二级公司客服|小程序用户");
         }
 
-        String roleNames = bRoles.stream().map(BRole::getName).collect(Collectors.joining("、"));
+        // 只清除当前租户的角色
+        rUserRoleDao.removeByTenantUser(bUser.getTenantId(), bUser.getUserId());
 
         Set<RUserRole> rUserRoles = bRoles.stream()
                 .map(role -> new RUserRole()
@@ -501,6 +500,7 @@ public class UserService {
                 ).collect(Collectors.toSet());
         rUserRoleDao.saveBatch(rUserRoles);
 
+        String roleNames = bRoles.stream().map(BRole::getName).collect(Collectors.joining("、"));
         sysOperateLogService.saveLog(
                 bUser.getTenantId(), OperateModuleEnums.USER,
                 "分配用户角色【" + bUser.getUserId() + ", " + bUser.getName() + ", " + bUser.getRealname() +

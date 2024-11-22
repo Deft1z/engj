@@ -37,7 +37,7 @@ public class WfForm {
 
     private Integer currentRoleId; 
 
-    private Integer currentOrgId; 
+    private Integer currentOrgId;
 
     private Integer flag; 
 
@@ -59,5 +59,10 @@ public class WfForm {
      * 租户id
      */
     private Integer tenantId;
+
+    /**
+     * 客户预选的公司id
+     */
+    private Integer preselectedOrgId;
 }
 

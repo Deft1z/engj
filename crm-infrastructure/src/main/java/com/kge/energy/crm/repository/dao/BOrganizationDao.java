@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 机构表(BOrganization)表数据库访问层
@@ -84,6 +85,14 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
         return mapper.selectOne(wrapper, false);
     }
 
+    public List<BOrganization> findByTenantOrgTypes(Integer tenantId, Set<Integer> orgTypes) {
+        LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
+                .eq(BOrganization::getTenantId, tenantId)
+                .in(BOrganization::getType, orgTypes)
+                .orderByAsc(BOrganization::getOrganizationId);
+        return mapper.selectList(wrapper);
+    }
+
     public String getEccOrgCode(Integer orgId) {
         LambdaQueryWrapper<BOrganization> wrapper = Wrappers.<BOrganization>lambdaQuery()
                 .eq(BOrganization::getOrganizationId, orgId);
@@ -97,5 +106,10 @@ public class BOrganizationDao extends ServiceImpl<BOrganizationMapper, BOrganiza
                 .orderByAsc(BOrganization::getEccOrgCode);
         return mapper.selectList(wrapper);
     }
+
+    public BOrganization findByIamUserMobile(String userMobile, Integer tenantId) {
+        return mapper.findByIamUserMobile(userMobile, tenantId);
+    }
+
 }
 

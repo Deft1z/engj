@@ -181,5 +181,11 @@ public class ComplainResult {
     @ExcelIgnore
     private String orgName;
 
+    /**
+     * 合同id
+     */
+    @ExcelIgnore
+    private Integer contractId;
+
 
 }

@@ -22,42 +22,57 @@ public class StatisticalDataResult {
     @Schema(description = "合同统计")
     private Contract contract;
 
+    @Schema(description = "投诉统计")
+    private Complain complain;
 
     @Data
     public static class User {
 
+        @Schema(description = "推广客户数")
+        private Integer recommendCount;
+
+        @Schema(description = "新增客户数")
+        private Integer newCount;
+
         @Schema(description = "累计客户数")
         private Integer totalCount;
-
-        @Schema(description = "本月新增客户数")
-        private Integer currentMonthCount;
     }
 
     @Data
     public static class Consulting {
 
+        @Schema(description = "新增咨询单数")
+        private Integer newCount;
+
         @Schema(description = "咨询单总数")
         private Integer totalCount;
-
-        @Schema(description = "本月咨询单数")
-        private Integer currentMonthCount;
     }
 
 
     @Data
     public static class Contract {
 
+        @Schema(description = "新签订合同数")
+        private Integer newCount;
+
         @Schema(description = "已签订合同总数")
         private Integer totalCount;
 
-        @Schema(description = "合同金额")
+        @Schema(description = "新增合同金额")
+        private BigDecimal newAmount;
+
+        @Schema(description = "合同总金额")
         private BigDecimal totalAmount;
+    }
 
-        @Schema(description = "本月新签合同数")
-        private Integer currentMonthCount;
+    @Data
+    public static class Complain {
 
-        @Schema(description = "本月新增合同金额")
-        private BigDecimal currentMonthAmount;
+        @Schema(description = "新增工单投诉")
+        private Integer newOrderCount;
+
+        @Schema(description = "新增合同投诉")
+        private Integer newContractCount;
     }
 
 }

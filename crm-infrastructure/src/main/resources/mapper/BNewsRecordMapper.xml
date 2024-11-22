@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.BNewsRecordMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.BNewsRecord" id="BNewsRecordMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="typeId" column="type_id" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="number" column="number" jdbcType="VARCHAR"/>
+        <result property="attachment" column="attachment" jdbcType="VARCHAR"/>
+        <result property="publishDate" column="publish_date" jdbcType="TIMESTAMP"/>
+        <result property="sourceUrl" column="source_url" jdbcType="VARCHAR"/>
+        <result property="flag" column="flag" jdbcType="INTEGER"/>
+        <result property="createUserId" column="create_user_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyUserId" column="modify_user_id" jdbcType="INTEGER"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="indexAllChannelNews" resultMap="BNewsRecordMap">
+        WITH RankedRecords AS (SELECT bnr.*,
+                                ROW_NUMBER() OVER (PARTITION BY bnr.type_id ORDER BY bnr.publish_date DESC,bnr.create_time DESC) AS rn
+                                FROM b_news_type bnt,
+                                b_news_record bnr
+                                WHERE bnt.flag = 1
+                                AND bnr.flag = 1
+                                AND bnt.id = bnr.type_id)
+        SELECT *
+        FROM RankedRecords
+        WHERE rn &lt;= #{pageSize}
+    </select>
+
+    <select id="pageNews" resultMap="BNewsRecordMap">
+        SELECT bnr.*
+        FROM b_news_type bnt,
+             b_news_record bnr
+        WHERE bnt.flag = 1
+          AND bnr.flag = 1
+          AND bnt.id = bnr.type_id
+          <if test="param.typeId != null">
+            and bnr.type_id = #{param.typeId}
+          </if>
+        <if test="param.searchKeyword != null and param.searchKeyword != ''">
+            and bnr.title like concat('%',#{param.searchKeyword},'%')
+        </if>
+        ORDER BY bnr.publish_date DESC, bnr.create_time DESC
+    </select>
+
+    <insert id="saveUploadNews">
+        <foreach collection="list" item="item">
+            INSERT INTO b_news_record (type_id, title, number, content, attachment, publish_date, source_url)
+            SELECT #{item.typeId}, #{item.title}, #{item.number},#{item.content},#{item.attachment},#{item.publishDate},#{item.sourceUrl}
+            FROM dual
+            WHERE NOT EXISTS (SELECT 1 FROM b_news_record WHERE type_id = #{item.typeId} and title = #{item.title})
+        </foreach>
+    </insert>
+</mapper>
+

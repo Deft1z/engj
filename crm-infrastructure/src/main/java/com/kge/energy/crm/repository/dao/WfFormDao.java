@@ -9,10 +9,7 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entityext.param.CmsCommentParam;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
-import com.kge.energy.crm.repository.entityext.result.CmsCommentResult;
-import com.kge.energy.crm.repository.entityext.result.FlowResult;
-import com.kge.energy.crm.repository.entityext.result.FormResult;
-import com.kge.energy.crm.repository.entityext.result.FormWithdrawReturnResult;
+import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.repository.mapper.CmsCommentMapper;
 import com.kge.energy.crm.repository.mapper.WfFormMapper;
 import lombok.RequiredArgsConstructor;
@@ -76,6 +73,14 @@ public class WfFormDao extends ServiceImpl<WfFormMapper, WfForm> {
 
     public FormResult getFormDetail(Integer formId, UserInfoDto userInfoDto, DataPermissionRangeTypeEnums dataEnums) {
         return mapper.getFormDetail(formId, userInfoDto, dataEnums);
+    }
+
+    public List<TimeoutFormResult> getTimeoutNotifyForms(List<String> notifyStatus, String startTime, String endTime, String templateCode){
+        return mapper.getTimeoutNotifyForms(notifyStatus, startTime, endTime, templateCode);
+    }
+
+    public List<String> getRecentDealRecord(Integer userId, String operateType){
+        return mapper.getRecentDealRecord(userId,operateType);
     }
 
 }

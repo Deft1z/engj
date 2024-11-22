@@ -11,8 +11,11 @@ import com.kge.platform.framework.common.util.TraceIdUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -23,6 +26,7 @@ public class SysLoginLogHandleService {
 
     private final TenantDomainService tenantDomainService;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveLoginLog(BUser bUser, LoginPlatformEnums loginPlatformEnums, LoginResultEnums loginResultEnums, String loginMessage) {
         try {
             SysLoginLog sysLoginLog = new SysLoginLog()
@@ -38,7 +42,10 @@ public class SysLoginLogHandleService {
                         .setUserName(u.getName())
                         .setUserRealname(u.getRealname())
                         .setUserMobile(u.getMobile())
-                        .setTenantName(tenantDomainService.getTenantName(u.getTenantId()));
+                        .setTenantName(Optional.ofNullable(u.getTenantId())
+                                .map(id -> tenantDomainService.getTenantName(u.getTenantId()))
+                                .orElse(null)
+                        );
             });
             sysLoginLogDao.save(sysLoginLog);
         } catch (Exception e) {

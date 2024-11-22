@@ -39,7 +39,7 @@ public class BSurveyRecordResult {
     @Schema(description = "分享链接过期时间")
     private LocalDateTime shareExpireAt;
 
-    @Schema(description = "0 未提交 1 待评价 2 已评价 3 已完成")
+    @Schema(description = "0 未提交 1 待评价 2 已完成")
     private Integer status;
 
     @Schema(description = "创建人ID")
@@ -69,6 +69,9 @@ public class BSurveyRecordResult {
 
     @Schema(description = "调查对象（项目、合同、设备、工单...）名称")
     private String surveyObjName;
+
+    @Schema(description = "客户名称")
+    private String clientName;
 
 }
 

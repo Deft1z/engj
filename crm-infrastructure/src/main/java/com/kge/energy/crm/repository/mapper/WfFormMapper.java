@@ -8,9 +8,9 @@ import com.kge.energy.crm.repository.entity.WfForm;
 import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.param.WxUserWorkOrderParam;
 import com.kge.energy.crm.repository.entityext.result.FlowResult;
-import com.kge.energy.crm.repository.entityext.result.FormDetailResult;
 import com.kge.energy.crm.repository.entityext.result.FormResult;
 import com.kge.energy.crm.repository.entityext.result.FormWithdrawReturnResult;
+import com.kge.energy.crm.repository.entityext.result.TimeoutFormResult;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -49,6 +49,10 @@ public interface WfFormMapper extends BaseMapper<WfForm> {
 
     FormResult getFormDetail(@Param("formId") Integer formId,
                              @Param("userInfo") UserInfoDto userInfoDto,
-                                   @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+                             @Param("dataEnums") DataPermissionRangeTypeEnums dataEnums);
+
+    List<TimeoutFormResult> getTimeoutNotifyForms(@Param("notifyStatus") List<String> notifyStatus, @Param("startTime") String startTime, @Param("endTime") String endTime, @Param("templateCode") String templateCode);
+
+    List<String> getRecentDealRecord(@Param("userId")Integer userId, @Param("operateType")String operateType);
 }
 

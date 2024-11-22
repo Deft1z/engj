@@ -27,6 +27,8 @@ public enum RoleEnums {
 
     COMPANY_LEADER("company_leader", "公司领导"),
 
+    OPERATE_ADMIN("operate_admin", "运营管理员"),
+
     HARMONY_POWER_CONTROL("harmony_power_control", "电鸿控制"),
     ;
 

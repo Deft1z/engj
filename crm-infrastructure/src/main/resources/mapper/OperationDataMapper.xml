@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.OperationDataMapper">
+
+    <select id="getUserStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$User">
+        SELECT (SELECT count(1)
+                FROM b_user bu,
+                     (SELECT bur.user_id
+                      FROM b_user bur,
+                           r_user_tenant rut
+                      WHERE bur.flag = 1
+                        AND rut.flag = 1
+                        AND bur.user_id = rut.user_id
+                        AND rut.tenant_id = #{tenantId}
+                          <if test="orgId != null">
+                              AND rut.organization_id = #{orgId}
+                          </if>
+                        ) tmp
+                WHERE bu.flag = 1
+                  AND bu.recommend_user_id = tmp.user_id
+                  AND bu.create_time BETWEEN #{startTime} AND #{endTime})              AS recommendCount,
+               (SELECT COUNT(1)
+                FROM b_user bu,
+                     r_user_tenant rut
+                WHERE bu.flag = 1
+                  AND rut.flag = 1
+                  AND bu.user_id = rut.user_id
+                  AND bu.tenant_id = #{tenantId}
+                    <if test="orgId != null">
+                        AND rut.organization_id = #{orgId}
+                    </if>
+                  AND rut.create_time BETWEEN #{startTime} AND #{endTime})           AS newCount,
+               (SELECT COUNT(1)
+                FROM b_user bu,
+                r_user_tenant rut
+                WHERE bu.flag = 1
+                AND rut.flag = 1
+                AND bu.user_id = rut.user_id
+                AND bu.tenant_id = #{tenantId}
+                <if test="orgId != null">
+                    AND rut.organization_id = #{orgId}
+                </if>
+                ) AS totalCount
+    </select>
+
+    <select id="getConsultingStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Consulting">
+        SELECT (SELECT COUNT(wf.form_id)
+                FROM wf_form wf
+                WHERE wf.flag = 1
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                   </if>
+                  AND wf.create_time BETWEEN #{startTime} AND #{endTime}) AS newCount,
+               (SELECT COUNT(wf.form_id)
+                FROM wf_form wf
+                WHERE wf.flag = 1
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                  </if>
+                ) AS totalCount
+    </select>
+
+    <select id="getContractStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Contract">
+        SELECT
+            IFNULL(t1.totalCount, 0) AS totalCount,
+            IFNULL(t1.totalAmount, 0) AS totalAmount,
+            IFNULL(t2.newCount, 0) AS newCount,
+            IFNULL(t2.newAmount, 0) AS newAmount
+        FROM
+            (
+                SELECT
+                    COUNT(sc.service_contract_id) AS totalCount,
+                    SUM(sc.amount) AS totalAmount
+                FROM
+                    wf_form wf,
+                    sc_service_contract sc
+                WHERE
+                    wf.flag = 1
+                  AND sc.flag = 1
+                  AND wf.form_id = sc.form_id
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                  </if>
+            ) t1,
+            (
+                SELECT
+                    COUNT(sc.service_contract_id) AS newCount,
+                    SUM(sc.amount) AS newAmount
+                FROM
+                    wf_form wf,
+                    sc_service_contract sc
+                WHERE
+                    wf.flag = 1
+                  AND sc.flag = 1
+                  AND wf.form_id = sc.form_id
+                  AND wf.form_type_id = 1
+                  AND wf.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wf.current_org_id = #{orgId}
+                  </if>
+                  AND sc.signing_time BETWEEN #{startTime} AND #{endTime}
+            ) t2
+    </select>
+
+    <select id="getComplainStatistic"
+            resultType="com.kge.energy.crm.repository.entityext.result.StatisticalDataResult$Complain">
+        SELECT (SELECT COUNT(wc.complain_id)
+                FROM w_complain wc,
+                     wf_form wf,
+                     r_form_consult_complain rfcc
+                WHERE wc.flag = 1
+                  AND wf.flag = 1
+                  AND wc.complain_id = rfcc.complain_id
+                  AND wf.form_id = rfcc.consult_id
+                  AND wc.typef = 1
+                  AND wc.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wc.organization_id = #{orgId}
+                  </if>
+                  AND wc.create_time BETWEEN #{startTime} AND #{endTime}
+               ) AS newOrderCount,
+               (SELECT COUNT(wc.complain_id)
+                FROM w_complain wc,
+                     sc_service_contract ssc,
+                     r_form_consult_complain rfcc
+                WHERE wc.flag = 1
+                  AND ssc.flag = 1
+                  AND wc.complain_id = rfcc.complain_id
+                  AND ssc.service_contract_id = rfcc.consult_id
+                  AND wc.typef = 2
+                  AND wc.tenant_id = #{tenantId}
+                  <if test="orgId != null">
+                    AND wc.organization_id = #{orgId}
+                  </if>
+                  AND wc.create_time BETWEEN #{startTime} AND #{endTime}
+                )    newContractCount
+    </select>
+
+    <resultMap id="DashboardStatResult" type="com.kge.energy.crm.repository.entityext.result.DashboardStatResult">
+        <result property="statDesc" column="stat_desc" jdbcType="VARCHAR"/>
+        <result property="statDim" column="stat_dim" jdbcType="VARCHAR"/>
+        <collection property="statObjs" ofType="com.kge.energy.crm.repository.entityext.result.DashboardStatResult$StatObj">
+            <result property="statName" column="stat_name" jdbcType="VARCHAR"/>
+            <result property="statUnit" column="stat_unit" jdbcType="VARCHAR"/>
+            <collection property="statItems" ofType="com.kge.energy.crm.repository.entityext.result.DashboardStatResult$StatItem">
+                <result property="itemName" column="item_name" jdbcType="VARCHAR"/>
+                <result property="itemVal" column="item_val" jdbcType="DECIMAL"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getNewUserGrowthStat" resultMap="DashboardStatResult">
+        <choose>
+            <when test="dimension == 'month'">
+                with tm as (
+                    <foreach item="statDim" collection="statDims" separator="union all">
+                        select '新用户增长曲线' as stat_desc, 'month' as stat_dim, '新增客户数' as stat_name, '个' as stat_unit, #{statDim} as item_name from dual
+                        union all
+                        select '新用户增长曲线' as stat_desc, 'month' as stat_dim, '推广客户数' as stat_name, '个' as stat_unit, #{statDim} as item_name from dual
+                    </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, ifnull(ts.item_val, 0) as item_val
+                from tm left join (
+                    (
+                        select '新增客户数' as stat_name
+                            , date_format(bu.create_time, '%Y%m') as item_name
+                            , count(distinct bu.user_id) as item_val
+                        from b_user bu
+                        left join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+                        where bu.flag = 1
+                        and bu.create_time is not null
+                        and bu.tenant_id = #{tenantId}
+                        and bu.create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND rut.organization_id = #{orgId}
+                        </if>
+                        group by date_format(bu.create_time, '%Y%m')
+                    )
+                    union all
+                    (
+                        select '推广客户数' as stat_name
+                            , date_format(bu.create_time, '%Y%m') as item_name
+                            , count(distinct bu.user_id) as item_val
+                        from b_user bu
+                        left join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.recommend_user_id
+                        where bu.flag = 1
+                        and bu.create_time is not null
+                        and bu.recommend_user_id is not null
+                        and bu.tenant_id = #{tenantId}
+                        and bu.create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND rut.organization_id = #{orgId}
+                        </if>
+                        group by date_format(bu.create_time, '%Y%m')
+                    )
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name
+            </when>
+            <otherwise>
+                with tm as (
+                    <foreach item="statDim" collection="statDims" separator="union all">
+                        select '新用户增长曲线' as stat_desc, 'week' as stat_dim, '新增客户数' as stat_name, '个' as stat_unit, #{statDim} as item_name from dual
+                        union all
+                        select '新用户增长曲线' as stat_desc, 'week' as stat_dim, '推广客户数' as stat_name, '个' as stat_unit, #{statDim} as item_name from dual
+                    </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, ifnull(ts.item_val, 0) as item_val
+                from tm left join (
+                    (
+                        select '新增客户数' as stat_name
+                            , yearweek(bu.create_time, 1) as item_name
+                            , count(distinct bu.user_id) as item_val
+                        from b_user bu
+                        left join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.user_id
+                        where bu.flag = 1
+                        and bu.create_time is not null
+                        and bu.tenant_id = #{tenantId}
+                        and bu.create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND rut.organization_id = #{orgId}
+                        </if>
+                        group by yearweek(bu.create_time, 1)
+                    )
+                    union all
+                    (
+                        select '推广客户数' as stat_name
+                            , yearweek(bu.create_time, 1) as item_name
+                            , count(distinct bu.user_id) as item_val
+                        from b_user bu
+                        left join r_user_tenant rut on rut.flag = 1 and rut.user_id = bu.recommend_user_id
+                        where bu.flag = 1
+                        and bu.create_time is not null
+                        and bu.recommend_user_id is not null
+                        and bu.tenant_id = #{tenantId}
+                        and bu.create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND rut.organization_id = #{orgId}
+                        </if>
+                        group by yearweek(bu.create_time, 1)
+                    )
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name
+            </otherwise>
+        </choose>
+    </select>
+
+    <sql id="v_order_contract">
+        select wf.form_id
+             , wf.create_time as form_create_time
+             , wf.current_org_id
+             , wf.tenant_id
+             , ssc.service_contract_id
+             , ssc.create_time as contract_create_time
+             , ssc.amount
+             , ssc.service_unit
+        from wf_form wf
+        left join sc_service_contract ssc on ssc.flag = 1 and ssc.form_id = wf.form_id
+        where wf.flag = 1
+    </sql>
+
+    <select id="getOrderContractQtyStat" resultMap="DashboardStatResult">
+        <choose>
+            <when test="dimension == 'month'">
+                with tm as (
+                <foreach item="statDim" collection="statDims" separator="union all">
+                    select '工单合同数量变化' as stat_desc, 'month' as stat_dim, '工单' as stat_name, '单' as stat_unit, #{statDim} as item_name from dual
+                    union all
+                    select '工单合同数量变化' as stat_desc, 'month' as stat_dim, '合同' as stat_name, '个' as stat_unit, #{statDim} as item_name from dual
+                </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, ifnull(ts.item_val, 0) as item_val
+                from tm left join (
+                    (
+                        select '工单' as stat_name
+                            , date_format(form_create_time, '%Y%m') as item_name
+                            , count(distinct form_id) as item_val
+                        from (<include refid="v_order_contract"/>) as voc
+                        where tenant_id = #{tenantId}
+                        and form_create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND current_org_id = #{orgId}
+                        </if>
+                        group by date_format(form_create_time, '%Y%m')
+                    )
+                    union all
+                    (
+                        select '合同' as stat_name
+                            , date_format(contract_create_time, '%Y%m') as item_name
+                            , count(distinct service_contract_id) as item_val
+                        from (<include refid="v_order_contract"/>) as voc
+                        where tenant_id = #{tenantId}
+                        and contract_create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND service_unit = #{orgId}
+                        </if>
+                        group by date_format(contract_create_time, '%Y%m')
+                    )
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name desc
+            </when>
+            <otherwise>
+                with tm as (
+                <foreach item="statDim" collection="statDims" separator="union all">
+                select '工单合同数量变化' as stat_desc, 'week' as stat_dim, '工单' as stat_name, '单' as stat_unit, #{statDim} as item_name from dual
+                union all
+                select '工单合同数量变化' as stat_desc, 'week' as stat_dim, '合同' as stat_name, '个' as stat_unit, #{statDim} as item_name from dual
+                </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, ifnull(ts.item_val, 0) as item_val
+                from tm left join (
+                    (
+                        select '工单' as stat_name
+                            , yearweek(form_create_time, 1) as item_name
+                            , count(distinct form_id) as item_val
+                        from (<include refid="v_order_contract"/>) as voc
+                        where tenant_id = #{tenantId}
+                        and form_create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND current_org_id = #{orgId}
+                        </if>
+                        group by yearweek(form_create_time, 1)
+                    )
+                    union all
+                    (
+                        select '合同' as stat_name
+                            , yearweek(contract_create_time, 1) as item_name
+                            , count(distinct service_contract_id) as item_val
+                        from (<include refid="v_order_contract"/>) as voc
+                        where tenant_id = #{tenantId}
+                        and contract_create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND service_unit = #{orgId}
+                        </if>
+                        group by yearweek(contract_create_time, 1)
+                    )
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name desc
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getOrderContractAmountStat" resultMap="DashboardStatResult">
+        <choose>
+            <when test="dimension == 'month'">
+                with tm as (
+                <foreach item="statDim" collection="statDims" separator="union all">
+                    select '合同金额变化（单位：万元）' as stat_desc, 'month' as stat_dim, '新增合同金额' as stat_name, '万元' as stat_unit, #{statDim} as item_name from dual
+                    union all
+                    select '合同金额变化（单位：万元）' as stat_desc, 'month' as stat_dim, '合同总金额' as stat_name, '万元' as stat_unit, #{statDim} as item_name from dual
+                </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, round(ifnull(ts.item_val, 0) / 10000, 2) as item_val
+                from tm left join (
+                    (
+                        select '新增合同金额' as stat_name
+                            , date_format(contract_create_time, '%Y%m') as item_name
+                            , sum(amount) as item_val
+                        from (<include refid="v_order_contract"/>) as voc
+                        where tenant_id = #{tenantId}
+                        and contract_create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND service_unit = #{orgId}
+                        </if>
+                        group by date_format(contract_create_time, '%Y%m')
+                    )
+                    union all
+                    (
+                        select tm.stat_name, tm.item_name, sum(item_val) over(order by tm.item_name asc) as item_val
+                        from (
+                            select '合同总金额' as stat_name
+                                , date_format(contract_create_time, '%Y%m') as item_name
+                                , sum(amount) as item_val
+                            from (<include refid="v_order_contract"/>) as voc
+                            where tenant_id = #{tenantId}
+                            and contract_create_time between #{startTime} and #{endTime}
+                            <if test="orgId != null">
+                                AND service_unit = #{orgId}
+                            </if>
+                            group by date_format(contract_create_time, '%Y%m')
+                        )as tr
+                        right join tm on tm.stat_name = tr.stat_name and tm.item_name = tr.item_name
+                        where tm.stat_name = '合同总金额'
+                        order by tm.item_name
+                    )
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name desc
+            </when>
+            <otherwise>
+                with tm as (
+                <foreach item="statDim" collection="statDims" separator="union all">
+                    select '合同金额变化（单位：万元）' as stat_desc, 'week' as stat_dim, '新增合同金额' as stat_name, '万元' as stat_unit, #{statDim} as item_name from dual
+                    union all
+                    select '合同金额变化（单位：万元）' as stat_desc, 'week' as stat_dim, '合同总金额' as stat_name, '万元' as stat_unit, #{statDim} as item_name from dual
+                </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, round(ifnull(ts.item_val, 0) / 10000, 2) as item_val
+                from tm left join (
+                    (
+                        select '新增合同金额' as stat_name
+                            , yearweek(contract_create_time, 1) as item_name
+                            , sum(amount) as item_val
+                        from (<include refid="v_order_contract"/>) as voc
+                        where tenant_id = #{tenantId}
+                        and contract_create_time between #{startTime} and #{endTime}
+                        <if test="orgId != null">
+                            AND service_unit = #{orgId}
+                        </if>
+                        group by yearweek(contract_create_time, 1)
+                    )
+                    union all
+                    (
+                        select tm.stat_name, tm.item_name, sum(item_val) over(order by tm.item_name asc) as item_val
+                        from (
+                            select '合同总金额' as stat_name
+                                , yearweek(contract_create_time, 1) as item_name
+                                , sum(amount) as item_val
+                            from (<include refid="v_order_contract"/>) as voc
+                            where tenant_id = #{tenantId}
+                            and contract_create_time between #{startTime} and #{endTime}
+                            <if test="orgId != null">
+                                AND service_unit = #{orgId}
+                            </if>
+                            group by yearweek(contract_create_time, 1)
+                        )as tr
+                        right join tm on tm.stat_name = tr.stat_name and tm.item_name = tr.item_name
+                        where tm.stat_name = '合同总金额'
+                        order by tm.item_name
+                    )
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name desc
+            </otherwise>
+        </choose>
+    </select>
+
+    <sql id="v_complain">
+        select '合同' as stat_name, wc.complain_id, wc.subject, wc.create_time, ssc.service_unit as org_id, ssc.tenant_id
+        from w_complain wc
+        join r_form_consult_complain rfcc on rfcc.complain_id = wc.complain_id
+        join sc_service_contract ssc on ssc.flag = 1 and ssc.service_contract_id = rfcc.consult_id
+        where wc.flag = 1
+        and wc.typef = 1
+        and ssc.tenant_id = #{tenantId}
+        and ssc.create_time between #{startTime} and #{endTime}
+        <if test="orgId != null">
+            AND ssc.service_unit = #{orgId}
+        </if>
+        union all
+        select '工单' as stat_name, wc.complain_id, wc.subject, wc.create_time, wf.current_org_id as org_id, wf.tenant_id
+        from w_complain wc
+        join r_form_consult_complain rfcc on rfcc.complain_id = wc.complain_id
+        join wf_form wf on wf.flag = 1 and wf.form_id = rfcc.consult_id
+        where wc.flag = 1
+        and wc.typef = 2
+        and wf.tenant_id = #{tenantId}
+        and wc.create_time between #{startTime} and #{endTime}
+        <if test="orgId != null">
+            AND wf.current_org_id = #{orgId}
+        </if>
+    </sql>
+
+    <select id="getComplainPctStat" resultMap="DashboardStatResult">
+        with vc as ( <include refid="v_complain"/> )
+        select '投诉类型占比' as stat_desc, '' as stat_dim, stat_name, '件' as stat_unit, '进度慢' as item_name, count(case when instr(subject, '进度慢') > 0 then 1 end) as item_val
+        from vc
+        group by stat_name
+        union all
+        select '投诉类型占比' as stat_desc, '' as stat_dim, stat_name, '件' as stat_unit, '质量差' as item_name, count(case when instr(subject, '质量差') > 0 then 1 end) as item_val
+        from vc
+        group by stat_name
+        union all
+        select '投诉类型占比' as stat_desc, '' as stat_dim, stat_name, '件' as stat_unit, '态度恶劣' as item_name, count(case when instr(subject, '态度恶劣') > 0 then 1 end) as item_val
+        from vc
+        group by stat_name
+        union all
+        select '投诉类型占比' as stat_desc, '' as stat_dim, stat_name, '%' as stat_unit, '进度慢' as item_name, round(count(case when instr(subject, '进度慢') > 0 then 1 end) / count(1) * 100, 2) as item_val
+        from vc
+        group by stat_name
+        union all
+        select '投诉类型占比' as stat_desc, '' as stat_dim, stat_name, '%' as stat_unit, '质量差' as item_name, round(count(case when instr(subject, '质量差') > 0 then 1 end) / count(1) * 100, 2) as item_val
+        from vc
+        group by stat_name
+        union all
+        select '投诉类型占比' as stat_desc, '' as stat_dim, stat_name, '%' as stat_unit, '态度恶劣' as item_name, round(count(case when instr(subject, '态度恶劣') > 0 then 1 end) / count(1) * 100, 2) as item_val
+        from vc
+        group by stat_name
+    </select>
+
+    <select id="getComplainQtyStat" resultMap="DashboardStatResult">
+        <choose>
+            <when test="dimension == 'month'">
+                with tm as (
+                <foreach item="statDim" collection="statDims" separator="union all">
+                    select '投诉类型数量变化' as stat_desc, 'month' as stat_dim, '工单' as stat_name, '件' as stat_unit, #{statDim} as item_name from dual
+                    union all
+                    select '投诉类型数量变化' as stat_desc, 'month' as stat_dim, '合同' as stat_name, '件' as stat_unit, #{statDim} as item_name from dual
+                </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, ifnull(ts.item_val, 0) as item_val
+                from tm left join (
+                    select stat_name
+                        , date_format(create_time, '%Y%m') as item_name
+                        , count(distinct complain_id) as item_val
+                    from (<include refid="v_complain"/>) as vc
+                    group by stat_name, date_format(create_time, '%Y%m')
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name desc
+            </when>
+            <otherwise>
+                with tm as (
+                <foreach item="statDim" collection="statDims" separator="union all">
+                    select '投诉类型数量变化' as stat_desc, 'week' as stat_dim, '工单' as stat_name, '件' as stat_unit, #{statDim} as item_name from dual
+                    union all
+                    select '投诉类型数量变化' as stat_desc, 'week' as stat_dim, '合同' as stat_name, '件' as stat_unit, #{statDim} as item_name from dual
+                </foreach>
+                )
+                select tm.stat_desc, tm.stat_dim, tm.stat_name, tm.stat_unit, tm.item_name, ifnull(ts.item_val, 0) as item_val
+                from tm left join (
+                    select stat_name
+                        , yearweek(create_time, 1) as item_name
+                        , count(distinct complain_id) as item_val
+                    from (<include refid="v_complain"/>) as vc
+                    group by stat_name, yearweek(create_time, 1)
+                ) as ts on ts.stat_name = tm.stat_name and ts.item_name = tm.item_name
+                order by tm.item_name, tm.stat_name desc
+            </otherwise>
+        </choose>
+    </select>
+
+</mapper>

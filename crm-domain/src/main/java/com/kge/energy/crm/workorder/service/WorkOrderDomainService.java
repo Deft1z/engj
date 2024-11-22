@@ -17,6 +17,7 @@ import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.page.PageResp;
+import com.kge.energy.crm.common.property.ExperienceDataProperties;
 import com.kge.energy.crm.common.util.*;
 import com.kge.energy.crm.enums.BizFunctionEnums;
 import com.kge.energy.crm.enums.DataPermissionRangeTypeEnums;
@@ -33,10 +34,7 @@ import com.kge.energy.crm.repository.entityext.param.WorkOrderListParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.energy.crm.user.service.UserDomainService;
 import com.kge.energy.crm.workorder.req.*;
-import com.kge.energy.crm.workorder.resp.FormWithdrawReturnResp;
-import com.kge.energy.crm.workorder.resp.WfFormFlowListResp;
-import com.kge.energy.crm.workorder.resp.WfFormFlowResp;
-import com.kge.energy.crm.workorder.resp.WfFormPageResp;
+import com.kge.energy.crm.workorder.resp.*;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -78,6 +76,7 @@ public class WorkOrderDomainService {
     private final UserDomainService userDomainService;
     private final MsgDomainService msgDomainService;
     private final WeChatAppletInfraService weChatAppletInfraService;
+    private final ExperienceDataProperties experienceDataProperties;
 
     @Transactional(rollbackFor = RuntimeException.class)
     public Boolean addWorkOrder(WorkOrderAddReq req) {
@@ -88,8 +87,10 @@ public class WorkOrderDomainService {
         WorkOrderAddReq.WorkOrderContent content = req.getContent();
         content.setCode(code);
         //参数校验
-        if (!PhoneUtil.isPhone(content.getMobile())) {
-            throw new ServiceException("手机号码不正确");
+        if (ObjectUtil.notEqual(UserInfoContextUtils.getCurrentUserInfo().getTenantName(), experienceDataProperties.getTenantName())) {
+            if (!PhoneUtil.isPhone(content.getMobile())) {
+                throw new ServiceException("手机号码不正确");
+            }
         }
 
         //登录用户信息
@@ -118,6 +119,16 @@ public class WorkOrderDomainService {
         wfForm.setCurrentRoleId(currentRoleId);
         //租户
         wfForm.setTenantId(operator.getTenantId());
+
+        //预选公司
+        if (ObjectUtil.isNotNull(req.getPreselectedOrgId())) {
+            BOrganization preselectedOrg = bOrganizationDao.getById(req.getPreselectedOrgId());
+            if (ObjectUtil.isNull(preselectedOrg)) {
+                throw new ServiceException("预选公司不存在");
+            }
+            wfForm.setPreselectedOrgId(req.getPreselectedOrgId());
+        }
+
         wfFormDao.save(wfForm);
 
         //保存流转记录
@@ -137,6 +148,7 @@ public class WorkOrderDomainService {
         BizOrderCreateMsgToRoleParam msgParam = new BizOrderCreateMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
+            String pathUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(wfForm.getFormId()), 30);
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(content.getBusinessName())
                     .setArea(content.getArea())
@@ -146,7 +158,7 @@ public class WorkOrderDomainService {
                     .setCustomerName(content.getCustomerName())
                     .setMobile(content.getMobile())
                     .setRemark(req.getRemark())
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(wfForm.getFormId()), 30))
+                    .setPathUrl(pathUrl)
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(wfForm.getFormId())
@@ -334,20 +346,22 @@ public class WorkOrderDomainService {
                 .setStatus(ConstParam.FlowCompanyProcess)
                 .setCreateUserId(operatorUserId.intValue())
                 .setSubStatus(req.getLevel().equals(1) ? ConstParam.FlowTagGroup : ConstParam.FlowTagSub)
-                .setTenantId(operator.getTenantId());
+                .setTenantId(operator.getTenantId())
+                .setServiceUnitId(req.getCurrentOrgId());
         wfFormFlowDao.save(wfFormFlow);
 
         //发送elink消息通知，通知二级公司客服
         BizOrderAssignMsgToRoleParam msgParam = new BizOrderAssignMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
+            String pathUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30);
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, req.getCurrentOrgId(), operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
                     .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
                     .setCustomerName(fromContent.getCustomerName())
                     .setMobile(fromContent.getMobile())
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                    .setPathUrl(pathUrl)
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(formId)
@@ -363,7 +377,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupAssign)
                         .setAssignTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                        .setPathUrl(pathUrl)
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                         .setMsgBizId(formId)
@@ -422,14 +436,15 @@ public class WorkOrderDomainService {
         BizOrderHandleMsgToUserParam msgParam = new BizOrderHandleMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
+            String pathUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30);
             List<UserContactDto> userContact = userDomainService.getUserContact(wfForm.getCreateUserId(), operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
                     .setServiceUnit(bOrganizationDao.getById(currentOrgId).getName())
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
-                    .setStatus(ConstParam.FlowHasFeedback)
+                    .setStatus(ConstParam.Processed)
                     .setHandleTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                    .setPathUrl(pathUrl)
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(formId)
@@ -492,6 +507,7 @@ public class WorkOrderDomainService {
         BizOrderFinishMsgToUserParam msgParam = new BizOrderFinishMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
+            String pathUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30);
             List<UserContactDto> userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
@@ -499,7 +515,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowFinished)
                     .setFinishTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                    .setPathUrl(pathUrl)
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(formId)
@@ -558,6 +574,7 @@ public class WorkOrderDomainService {
         BizOrderTerminateMsgToUserParam msgParam = new BizOrderTerminateMsgToUserParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (roleEnums.stream().map(RoleEnums::getCode).toList().contains(RoleEnums.APPLET_USER.getCode())) {
+            String pathUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30);
             List<UserContactDto> userContact = userDomainService.getUserContact(customerUserId, operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
@@ -565,7 +582,7 @@ public class WorkOrderDomainService {
                     .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                     .setStatus(ConstParam.FlowTerminated)
                     .setTerminateTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                    .setPathUrl(pathUrl)
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(formId)
@@ -624,13 +641,14 @@ public class WorkOrderDomainService {
         BizOrderWithdrawMsgToRoleParam withdrawMsgParam = new BizOrderWithdrawMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), withdrawMsgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
+            String pathUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30);
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, formCurrentOrgId, operator.getTenantId());
             msgDomainService.sendCrmMsg(withdrawMsgParam.setOrderName(fromContent.getBusinessName())
                     .setOrderCode(fromContent.getCode())
                     .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
                     .setOperator(RoleEnums.JT_CUSTOMER.getDesc())
                     .setContent(req.getContent())
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                    .setPathUrl(pathUrl)
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(formId)
@@ -646,7 +664,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowGroupWithdraw)
                         .setWithdrawTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                        .setPathUrl(pathUrl)
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                         .setMsgBizId(formId)
@@ -710,6 +728,7 @@ public class WorkOrderDomainService {
         BizOrderReturnMsgToRoleParam msgParam = new BizOrderReturnMsgToRoleParam();
         List<RoleEnums> roleEnums = dataPermissionDomainService.getFunctionRoleEnums(operator.getTenantId(), msgParam.getFunctionCode());
         if (!roleEnums.isEmpty()) {
+            String pathUrl = weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30);
             String serviceUnit = bOrganizationDao.getById(currentOrgId).getName();
             List<UserContactDto> userContact = userDomainService.getUserContact(roleEnums, operator.getTenantId());
             msgDomainService.sendCrmMsg(msgParam.setOrderName(fromContent.getBusinessName())
@@ -717,7 +736,7 @@ public class WorkOrderDomainService {
                     .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
                     .setCompanyName(serviceUnit)
                     .setContent(req.getContent())
-                    .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                    .setPathUrl(pathUrl)
                     .setTenantId(operator.getTenantId())
                     .setNotifyUsers(userContact)
                     .setMsgBizId(formId)
@@ -733,7 +752,7 @@ public class WorkOrderDomainService {
                         .setServicePerson(bUserDao.getById(operatorUserId).getRealname())
                         .setStatus(ConstParam.FlowCompanyReturn)
                         .setReturnTime(now.format(DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN)))
-                        .setPathUrl(weChatAppletInfraService.getWeChatAppletUrlLink(null, AppletLinkUtils.getFormDetailQuery(formId), 30))
+                        .setPathUrl(pathUrl)
                         .setTenantId(operator.getTenantId())
                         .setNotifyUsers(userContact)
                         .setMsgBizId(formId)
@@ -755,6 +774,17 @@ public class WorkOrderDomainService {
         }
         redisUtils.setEx(WORK_CODE_CACHE_KEY_PREFIX + code, code, 24, TimeUnit.HOURS);
         return code;
+    }
+
+    /**
+     * 获取最近工单处理记录内容
+     */
+    public WfFormRecentDealRecordResp getWfFormRecentDealRecord(WfFormRecentDealRecordReq req) {
+
+        Integer userId = UserInfoContextUtils.getCurrentUserId();
+        return new WfFormRecentDealRecordResp()
+                .setDealRecord(wfFormDao.getRecentDealRecord(userId, req.getOperateType()));
+
     }
 
 }

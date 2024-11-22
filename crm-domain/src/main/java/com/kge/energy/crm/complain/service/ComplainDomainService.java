@@ -35,9 +35,9 @@ public class ComplainDomainService {
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
         complainDetailResp = switch (complain.getTypef()) {
             case 1 ->
-                    BeanUtil.copyProperties(wComplainDao.getWorkOrderComplainDetail(complain.getComplainId(), userInfoDto, dataEnums), ComplainDetailResp.class);
-            case 2 ->
                     BeanUtil.copyProperties(wComplainDao.getContractComplainDetail(complain.getComplainId(), userInfoDto, dataEnums), ComplainDetailResp.class);
+            case 2 ->
+                    BeanUtil.copyProperties(wComplainDao.getWorkOrderComplainDetail(complain.getComplainId(), userInfoDto, dataEnums), ComplainDetailResp.class);
             default -> throw new ServiceException("投诉单类型错误!");
         };
         return complainDetailResp;

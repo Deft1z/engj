@@ -1,0 +1,117 @@
+[
+  {
+    "contractId": null,
+    "contractName": "广州xx有限公司202X年10kV电气设备及线路维护项目",
+    "firstParty": null,
+    "firstPartyContactsPhone": null,
+    "prjId": "0e5621fed74a4a67b7fc2bc173b47886",
+    "prjName": "广州xx有限公司202X年10kV电气设备及线路维护项目",
+    "dept": "科技公司",
+    "planId": "e24271c894eb40589751d2d38d434d20",
+    "workCode": "BDEX03w_2411-XXXX",
+    "workDate": "2024-11-08 00:00:00",
+    "taskName": "设备巡检",
+    "riskRate": "设备巡检",
+    "workContent": "设备运维",
+    "checkinId": "ff80808193077ca10193097e66644bcb",
+    "remarkB": null,
+    "remarkC": "合格",
+    "attactments": [
+      {
+        "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d53fce8f49018bd342d546000004",
+        "type": "19"
+      }
+    ]
+  },
+  {
+    "contractId": "czdy465",
+    "contractName": "广州XX物业管理有限公司202X年10kV电气设备及线路维护项目",
+    "firstParty": null,
+    "firstPartyContactsPhone": "1360240XXXX",
+    "prjId": "39f2543c244c42e5b4a79ddf3e371817",
+    "prjName": "广州XX物业管理有限公司202X年10kV电气设备及线路维护项目",
+    "dept": "科技公司",
+    "planId": "3ea57879b47843d9b0524ded42e99ea9",
+    "workCode": "BDEX03w_2411-XXXX",
+    "workDate": "2024-11-08 00:00:00",
+    "taskName": "设备巡检",
+    "riskRate": "设备巡检",
+    "workContent": "设备运维",
+    "checkinId": "ff80808193077ca1019309973e3a18cd",
+    "remarkB": null,
+    "remarkC": "合格",
+    "attactments": [
+      {
+        "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d54a4e8cbfb28bd342d546000005",
+        "type": "19"
+      }
+    ]
+  },
+  {
+    "contractId": "1001A1100000008OSBFO",
+    "contractName": "广州XX物业管理有限公司10kV电气设备及线路维护服务合同",
+    "firstParty": "广州XX物业管理有限公司",
+    "firstPartyContactsPhone": "1392248XXXX",
+    "prjId": "5daada545a6843019395f6a0a0adddd3",
+    "prjName": "广州XX物业管理有限公司2024年10kV电气设备及线路维护项目",
+    "dept": "科技公司",
+    "planId": "1f01c05d088b48668dc42586da7a1598",
+    "workCode": "BDEX03w_2411-XXXX",
+    "workDate": "2024-11-08 00:00:00",
+    "taskName": "设备试验",
+    "riskRate": "设备试验",
+    "workContent": "设备运维",
+    "checkinId": "ff80808193077ca1019309afd9186998",
+    "remarkB": null,
+    "remarkC": "合格",
+    "attactments": [
+      {
+        "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d566a2c534d38bd342d546000006",
+        "type": "19"
+      }
+    ]
+  },
+  {
+    "contractId": null,
+    "contractName": "广州市XX中学202X年10kV电气设备及线路维护项目",
+    "firstParty": null,
+    "firstPartyContactsPhone": null,
+    "prjId": "ff059147f07844e88b5182a8c7930422",
+    "prjName": "广州市XX中学202X年10kV电气设备及线路维护项目",
+    "dept": "科技公司",
+    "planId": "cfec8989f43f4396a484d93985694663",
+    "workCode": "BDEX03w_2411-XXXX",
+    "workDate": "2024-11-08 00:00:00",
+    "taskName": "检修抢修",
+    "riskRate": "检修抢修",
+    "workContent": "设备运维",
+    "checkinId": "ff80808193077ca1019309bfdd39178f",
+    "remarkB": null,
+    "remarkC": "合格",
+    "attactments": [
+      {
+        "url": "https://nftzcrm.en168.net/nftzcrm/fileserver/fsbt/resourceManage/file/manage/get?name=1809d56dad9129df8bd342d546000007",
+        "type": "19"
+      }
+    ]
+  },
+  {
+    "contractId": null,
+    "contractName": "广州市XXXX食品有限公司",
+    "firstParty": null,
+    "firstPartyContactsPhone": null,
+    "prjId": "a1e70b40f98941edb93dd4787603c285",
+    "prjName": "广州市XXXX食品有限公司",
+    "dept": "科技公司",
+    "planId": "8fcfed7547c24b7ab6624e02330701d0",
+    "workCode": "BDEX03q02411-XXXX",
+    "workDate": "2024-11-08 00:00:00",
+    "taskName": "设备维修",
+    "riskRate": "设备维修",
+    "workContent": "设备运维",
+    "checkinId": "ff80808193077ca101930ab9f312056b",
+    "remarkB": null,
+    "remarkC": "合格",
+    "attactments": []
+  }
+]

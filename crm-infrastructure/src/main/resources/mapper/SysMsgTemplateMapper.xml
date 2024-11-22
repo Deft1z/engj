@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kge.energy.crm.repository.mapper.SysMsgTemplateMapper">
+
+    <resultMap type="com.kge.energy.crm.repository.entity.SysMsgTemplate" id="SysMsgTemplateMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="bizFunctionId" column="biz_function_id" jdbcType="INTEGER"/>
+        <result property="templateCode" column="template_code" jdbcType="VARCHAR"/>
+        <result property="templateContent" column="template_content" jdbcType="VARCHAR"/>
+        <result property="elinkParams" column="elink_params" jdbcType="VARCHAR"/>
+        <result property="eSmsParams" column="e_sms_params" jdbcType="VARCHAR"/>
+        <result property="smsParams" column="sms_params" jdbcType="VARCHAR"/>
+        <result property="appletParams" column="applet_params" jdbcType="VARCHAR"/>
+        <result property="offiaccountParams" column="offiaccount_params" jdbcType="VARCHAR"/>
+        <result property="emailParams" column="email_params" jdbcType="VARCHAR"/>
+        <result property="isEnabled" column="is_enabled" jdbcType="INTEGER"/>
+        <result property="msgTarget" column="msg_target" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+        <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="list" resultMap="SysMsgTemplateMap">
+        select id,biz_function_id,template_code,template_content,elink_params,e_sms_params,sms_params,
+            applet_params,offiaccount_params,email_params,is_enabled,msg_target,remark
+        from sys_msg_template
+        <where>
+            <if test="param.bizFunctionId != null">
+                biz_function_id = #{param.bizFunctionId}
+            </if>
+            <if test="param.tenantId != null">
+                and tenant_id = #{param.tenantId}
+            </if>
+        </where>
+
+    </select>
+
+</mapper>
+

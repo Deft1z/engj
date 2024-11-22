@@ -44,4 +44,5 @@ knife4j:
 
 file:
   upload:
-    upload-url: http://172.18.26.131:80/fileservice/resourceManage/file/manage/upload
+    upload-url: http://172.18.26.131:9090/crm_fileserver/resourceManage/file/manage/upload
+#    upload-url: http://localhost:9230/resourceManage/file/manage/upload

@@ -20,6 +20,9 @@ public enum DictEnum {
     MSG_BIZ_TYPE_2("msg-biz-type", "2", "项目合同"),
     MSG_BIZ_TYPE_3("msg-biz-type", "3", "投诉处理"),
     MSG_BIZ_TYPE_4("msg-biz-type", "4", "登录提醒"),
+    SURVEY_STATUS_0("survey-status", "0", "未提交"),
+    SURVEY_STATUS_1("survey-status", "1", "待评价"),
+    SURVEY_STATUS_2("survey-status", "2", "已完成"),
     ;
 
     final String type;

@@ -24,6 +24,13 @@ public class RUserRoleDao extends ServiceImpl<RUserRoleMapper, RUserRole> {
         return mapper.delete(wrapper);
     }
 
+    public int removeByTenantUser(Integer tenantId, Integer userId) {
+        LambdaUpdateWrapper wrapper = new LambdaUpdateWrapper<>(RUserRole.class)
+                .eq(RUserRole::getTenantId, tenantId)
+                .eq(RUserRole::getUserId, userId);
+        return mapper.delete(wrapper);
+    }
+
     public int removeByUserAndRoleIds(Integer userId, Set<Integer> roleIds) {
         LambdaUpdateWrapper wrapper = new LambdaUpdateWrapper<>(RUserRole.class)
                 .eq(RUserRole::getUserId, userId)

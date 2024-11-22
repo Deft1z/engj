@@ -18,6 +18,7 @@
         <result property="tenantId" column="tenant_id" jdbcType="INTEGER"/>
         <result property="surveyObjCode" column="survey_obj_code" jdbcType="VARCHAR"/>
         <result property="surveyObjName" column="survey_obj_name" jdbcType="VARCHAR"/>
+        <result property="clientName" column="client_name" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!-- 用于select查询公用抽取的列 -->
@@ -31,6 +32,7 @@
                  , bsr.survey_id
                  , group_concat(case when bsi.general_biz_key = 'survey_obj_code' then fill_val end) as survey_obj_code
                  , group_concat(case when bsi.general_biz_key = 'survey_obj_name' then fill_val end) as survey_obj_name
+                 , group_concat(case when bsi.general_biz_key = 'client_name' then fill_val end) as client_name
             from b_survey_record bsr, json_table(
                     json_unquote(json_extract(fill_json, '$.surveyItems'))
                     , '$[*]' columns (
@@ -40,7 +42,7 @@
                     )
                 ) AS tb, b_survey_item bsi
             where bsi.survey_id = bsr.survey_id
-              and bsi.general_biz_key in ('survey_obj_code', 'survey_obj_name')
+              and bsi.general_biz_key in ('survey_obj_code', 'survey_obj_name', 'client_name')
               and tb.id = bsi.id
             group by bsr.id, bsr.survey_id
         )
@@ -52,7 +54,9 @@
              , bsr.status
              , t.survey_obj_code
              , t.survey_obj_name
+             , t.client_name
              , bsr.create_time
+             , min(case when bsra.status = 2 then bsra.modify_time end) modify_time
         from b_survey_record bsr
         join t on t.id = bsr.id
         left join b_survey_record_answer bsra on bsra.survey_record_id = bsr.id

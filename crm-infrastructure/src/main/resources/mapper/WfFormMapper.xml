@@ -113,7 +113,6 @@
         LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
         LEFT JOIN b_organization d ON d.organization_id = a.current_org_id
         LEFT JOIN b_user e ON e.user_id = g.user_id
-        LEFT JOIN r_user_role f ON f.user_id = b.create_user_id
         <where>
             a.flag != -1
             <if test="listParam.searchMap.status != null and listParam.searchMap.status != '' and userInfo.roleId == 5">
@@ -212,7 +211,9 @@
              , DATE_FORMAT(a.modify_time, '%Y-%m-%d %T') AS modify_time
              , a.flag
              , a.remark
-             , d.`name` AS org_name,
+             , d.`name` AS org_name
+             , p.organization_id as preselected_org_id
+             , p.`name` as preselected_org_name,
             <choose>
                 <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
                     (case
@@ -249,6 +250,7 @@
             </choose>
         from wf_form a
         join b_organization d on d.organization_id = a.current_org_id
+        left join b_organization p on p.organization_id = a.preselected_org_id
         left join wf_form_flow b on b.form_id = a.form_id and b.create_user_id = #{userInfo.userId}
         /*LEFT JOIN r_user_tenant c ON c.user_id = b.user_id
         LEFT JOIN r_user_role f ON f.user_id = b.create_user_id*/
@@ -294,7 +296,7 @@
             and a.modify_time &gt;= #{listParam.searchMap.starttime}
             and a.modify_time &lt;= #{listParam.searchMap.endtime}
         </if>
-        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`, `user_status`
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`, p.`name`, `user_status`
         <if test="listParam.searchMap.status != null and listParam.searchMap.status != ''">
             having user_status = #{listParam.searchMap.status}
         </if>
@@ -382,7 +384,9 @@
         , DATE_FORMAT(a.modify_time, '%Y-%m-%d %T') AS modify_time
         , a.flag
         , a.remark
-        , d.`name` AS org_name,
+        , d.`name` AS org_name
+        , p.organization_id as preselected_org_id
+        , p.`name` as preselected_org_name,
         <choose>
             <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
                 (case
@@ -419,8 +423,9 @@
         </choose>
         from wf_form a
         join b_organization d on d.organization_id = a.current_org_id
+        left join b_organization p on p.organization_id = a.preselected_org_id
         where a.flag = 1
-        and a.form_id = #{formId}
+             and a.form_id = #{formId}
         <choose>
             <when test="dataEnums != null and dataEnums.getCode() == 0">
                 /*数据范围：所有*/
@@ -445,7 +450,70 @@
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`,p.`name`, `user_status`
     </select>
 
+    <select id="getTimeoutNotifyForms" resultType="com.kge.energy.crm.repository.entityext.result.TimeoutFormResult">
+        with t as (
+            /* 查询业务工单最新流转节点 */
+            select form_id, max(form_flow_id) form_flow_id
+            from wf_form_flow
+            where flag = 1
+            group by form_id
+        )
+        select wf.form_id
+            , json_unquote(json_extract(wf.content, '$.businessName')) AS order_name
+            , json_unquote(json_extract(wf.content, '$.code')) AS order_code
+            , json_unquote(json_extract(wf.content, '$.customerName')) AS customer_name
+            , wf.current_org_id
+            , wff.create_time flow_time
+            , wff.action_content
+            , wff.tenant_id
+            , max(sm.create_time) last_notify_time
+        from wf_form_flow wff
+        join t on t.form_flow_id = wff.form_flow_id
+        join wf_form wf on wf.form_id = wff.form_id
+        left join sys_msg sm on sm.template_code = #{templateCode} and json_unquote(json_extract(sm.template_param, '$.msgBizId')) = wf.form_id
+        where wff.flag = 1 and wf.flag = 1
+            and wff.create_time &gt;= #{startTime}
+            and wff.create_time &lt;= #{endTime}
+            and wff.status in
+            <foreach collection="notifyStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        group by wf.form_id, wf.content, wff.action_content, wff.create_time, wff.tenant_id
+        order by wf.form_id
+    </select>
+
+    <select id="getRecentDealRecord" resultType="String">
+        SELECT DISTINCT a.action_content
+        FROM (
+        SELECT  w.action_content , w.create_time
+        FROM wf_form_flow w
+        WHERE w.user_id = #{userId} AND w.action_content IS NOT NULL AND w.action_content !=""
+        <choose>
+            <when test="operateType != null and operateType == 'assgin_work_order' ">
+                AND w.action_type = "流转二级公司处理"
+            </when>
+            <when test="operateType != null and operateType == 'withdraw_work_order' ">
+                AND w.action_type = "集团撤回"
+            </when>
+            <when test="operateType != null and operateType == 'terminate_work_order' ">
+                AND w.action_type = "已终止"
+            </when>
+            <when test="operateType != null and operateType == 'handle_work_order' ">
+                AND (w.action_type = "添加合同" or w.action_type = "已回复")
+            </when>
+            <when test="operateType != null and operateType == 'return_work_order' ">
+                AND w.action_type = "二级公司退回"
+            </when>
+            <when test="operateType != null and operateType == 'finish_work_order' ">
+                AND w.action_type = "已完结"
+            </when>
+        </choose> ) as a
+        GROUP BY a.action_content
+        ORDER BY MAX(a.create_time) DESC
+        LIMIT 5
+    </select>
 </mapper>
 

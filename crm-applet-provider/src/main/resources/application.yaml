@@ -93,7 +93,11 @@ auth:
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
       - ${server.servlet.context-path}/wechat/login
-      - ${server.servlet.context-path}/static/**
+      - ${server.servlet.context-path}/recommendQrCode/**
+    persist-phone-list:
+      - 13660617465
+      - 15521607108
+      - 136****0001
   permission:
     white-list:
       - ${server.servlet.context-path}/eventTracking/report
@@ -117,7 +121,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     tags-sorter: alpha
-    operations-sorter: alpha
+    # 该参数是swagger默认的排序规则，如果设置为alpha，那么Knife4j提供的按照order排序的增强规则不生效
+    operations-sorter: order
   api-docs:
     path: /v3/api-docs
   group-configs:
@@ -188,4 +193,11 @@ knife4j:
 
 file:
   upload:
-    allow-types: jpg,jpeg,png,pdf
+    allow-types: jpg,jpeg,png,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,wps
+
+experience-data:
+  tenant-name: "体验租户"
+  redirect-url-list:
+    - ${server.servlet.context-path}/external/getRecord
+    - ${server.servlet.context-path}/external/getRecordDetail
+    - ${server.servlet.context-path}/application/detail
