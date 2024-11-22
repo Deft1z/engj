@@ -19,7 +19,7 @@ import java.util.Date;
  */
 @Component
 @Slf4j
-public class DeleteTmpDataFileTask {
+public class TmpFileDeleteTask {
 
     /**
      * 每天00:30执行删除任务，删除tmp/crm-excel-pdf目录下的临时数据文件，避免磁盘空间占用

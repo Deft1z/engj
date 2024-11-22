@@ -14,6 +14,7 @@ import com.kge.energy.crm.enums.SystemTypeEnum;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.BUserDao;
 import com.kge.energy.crm.repository.entity.BUser;
+import com.kge.energy.crm.repository.entityext.result.UserContactResult;
 import com.kge.energy.crm.tenant.service.TenantDomainService;
 import com.kge.energy.msg.dto.UserContactDto;
 import com.kge.platform.framework.common.exception.ServiceException;
@@ -135,7 +136,7 @@ public class UserDomainService {
      */
     public List<UserContactDto> getUserContact(Integer userId, Integer tenantId) {
         if (userId != null) {
-            List<BUser> userContact = bUserDao.getUserContact(userId, null, null, tenantId);
+            List<UserContactResult> userContact = bUserDao.getUserContact(userId, null, null, tenantId);
             return BeanUtil.copyToList(userContact, UserContactDto.class);
         }
         return Collections.emptyList();
@@ -155,7 +156,7 @@ public class UserDomainService {
                     .filter(item -> !item.equals(RoleEnums.APPLET_USER) && !item.equals(RoleEnums.SUB_COMPANY_CUSTOMER))
                     .map(RoleEnums::getCode).toList();
             if (!roleCods.isEmpty()) {
-                List<BUser> userContact = bUserDao.getUserContact(null, roleCods, null, tenantId);
+                List<UserContactResult> userContact = bUserDao.getUserContact(null, roleCods, null, tenantId);
                 return BeanUtil.copyToList(userContact, UserContactDto.class);
             }
         }
@@ -176,7 +177,7 @@ public class UserDomainService {
                     .filter(item -> !item.equals(RoleEnums.APPLET_USER))
                     .map(RoleEnums::getCode).toList();
             if (!roleCods.isEmpty()) {
-                List<BUser> userContact = bUserDao.getUserContact(null, roleCods, organizationId, tenantId);
+                List<UserContactResult> userContact = bUserDao.getUserContact(null, roleCods, organizationId, tenantId);
                 return BeanUtil.copyToList(userContact, UserContactDto.class);
             }
         }
