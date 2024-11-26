@@ -4,8 +4,10 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
+import com.kge.energy.crm.repository.dao.BOrganizationDetailDao;
 import com.kge.energy.crm.repository.dao.DashBoardDao;
 import com.kge.energy.crm.repository.entity.BOrganization;
+import com.kge.energy.crm.repository.entity.BOrganizationDetail;
 import com.kge.energy.crm.repository.entityext.param.DashBoardParam;
 import com.kge.energy.crm.repository.entityext.result.*;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +23,20 @@ public class DashBoardService {
 
     private final DashBoardDao dashBoardDao;
     private final BOrganizationDao orgDao;
+    private final BOrganizationDetailDao orgDetailDao;
 
     public List<BOrganization> getCompanyList() {
-        return orgDao.list();
+        List<BOrganization> list = orgDao.list();
+        for(BOrganization org : list) {
+            BOrganizationDetail detail = orgDetailDao.getById(org.getOrganizationId());
+            OrganizationParameter organizationParameter = new OrganizationParameter()
+                    .setFilepath(detail.getFilepath())
+                    .setServiceType(detail.getServiceType())
+                    .setType(detail.getLabel())
+                    .setFullName(detail.getFullName());
+            org.setParameter(organizationParameter);
+        }
+        return list;
     }
 
   

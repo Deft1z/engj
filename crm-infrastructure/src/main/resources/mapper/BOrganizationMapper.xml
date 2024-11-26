@@ -153,5 +153,25 @@
         limit 1
     </select>
 
+
+    <update id="updateCompany">
+        UPDATE b_organization bo
+        JOIN b_organization_detail bod ON bo.organization_id = bod.organization_id
+        SET
+            bo.name = #{param.name},
+            bo.remark = #{param.remark},
+            bod.full_name = #{param.fullName},
+            bod.service_type = #{param.serviceType},
+            bod.filePath = #{param.filePath}
+        WHERE bo.organization_id = #{param.organizationId}
+    </update>
+
+    <update id="updateCompanyCover">
+        UPDATE b_organization bo
+            JOIN b_organization_detail bod ON bo.organization_id = bod.organization_id
+        SET
+            bod.filePath = #{param.filePath}
+        WHERE bo.organization_id = #{param.organizationId}
+    </update>
 </mapper>
 
