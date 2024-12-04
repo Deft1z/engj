@@ -31,16 +31,16 @@
                         AND rut.organization_id = #{orgId}
                     </if>
                   AND rut.create_time BETWEEN #{startTime} AND #{endTime})           AS newCount,
-               (SELECT COUNT(1)
-                FROM b_user bu,
-                r_user_tenant rut
-                WHERE bu.flag = 1
-                AND rut.flag = 1
-                AND bu.user_id = rut.user_id
-                AND bu.tenant_id = #{tenantId}
-                <if test="orgId != null">
-                    AND rut.organization_id = #{orgId}
-                </if>
+               (SELECT COUNT( 1 )
+                    FROM b_user bu
+                    LEFT JOIN r_user_tenant rut
+                    ON rut.flag = 1
+                    AND bu.user_id = rut.user_id
+                    WHERE bu.flag = 1
+                    AND bu.tenant_id = 1
+                    <if test="orgId != null">
+                        AND rut.organization_id = #{orgId}
+                    </if>
                 ) AS totalCount
     </select>
 

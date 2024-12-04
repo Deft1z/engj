@@ -191,6 +191,7 @@
                 and u.realname like CONCAT('%',#{name},'%')
             </if>
         </where>
+        order by bos.user_id ASC
         GROUP BY bos.user_id limit #{offset},#{limit}
     </select>
 
