@@ -191,8 +191,9 @@
                 and u.realname like CONCAT('%',#{name},'%')
             </if>
         </where>
+        GROUP BY bos.user_id
         order by bos.user_id ASC
-        GROUP BY bos.user_id limit #{offset},#{limit}
+        limit #{offset},#{limit}
     </select>
 
     <select id="findBindListCount" resultType="com.kge.energy.crm.repository.entityext.result.OpenShareModelList">
