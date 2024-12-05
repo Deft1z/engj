@@ -48,6 +48,19 @@ public class UserDomainService {
 
     private final TenantDomainService tenantDomainService;
 
+    /**
+     * 获取token用户
+     */
+    public BUser getUserByToken(String token) {
+        String tokenKey = authProperties.getToken().getRedisFront() + token;
+        String uid = redisUtils.get(tokenKey);
+        if (StrUtil.isBlank(uid)) {
+            return null;
+        }
+        return bUserDao.getById(Integer.valueOf(uid));
+    }
+
+
     public UserInfoDto findUserInfoDto(String systemType, Integer userId) {
 
         BUser user = bUserDao.getById(userId);

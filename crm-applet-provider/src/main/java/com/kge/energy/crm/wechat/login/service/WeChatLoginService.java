@@ -112,15 +112,18 @@ public class WeChatLoginService {
 //            throw new ServiceException(appletLoginResp.getErrMsg());
 //        }
 
+            // 获取当前token中的用户，用于同个openid有多个手机号时，再次登录能区分出上一次登录的是哪个用户
+            BUser tokenUser = userDomainService.getUserByToken(req.getToken());
+
             //根据openid查找小程序用户
             List<BUser> bUsers = bUserDao.findUserByOpenId(appletLoginResp.getOpenId());
 
             if (CollectionUtil.isNotEmpty(bUsers)) {
-                user = bUsers.get(0);
-//                bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getMobile(), req.getMobile()))
-//                        .findFirst()
-//                        .orElse(bUsers.get(0));
-                //判断是否禁用
+
+                user = ObjectUtil.isNotNull(tokenUser)
+                        ? bUsers.stream().filter(bUser -> ObjectUtil.equal(bUser.getUserId(), tokenUser.getUserId())).findFirst().orElse(bUsers.get(0))
+                        : bUsers.get(0);
+
                 if (ObjectUtil.equal(user.getStatus(), UserStatusEnums.FORBIDDEN.getCode())) {
                     throw new ServiceException("账号已禁用");
                 }
@@ -129,8 +132,9 @@ public class WeChatLoginService {
                 // 新用户默认挂靠到南投-个人用户组织下
                 user = saveNewUser(appletLoginResp.getOpenId(), null);
                 // 新用户的推荐用户字段绑定
-                if (ObjectUtil.isNotNull(req.getRecommendUserId()))
+                if (ObjectUtil.isNotNull(req.getRecommendUserId())) {
                     user.setRecommendUserId(req.getRecommendUserId());
+                }
             }
 
             String token = userDomainService.genToken(user, SystemTypeEnum.APPLET, TokenConstant.APPLET_EXPIRED_TIMEOUT,
@@ -187,20 +191,6 @@ public class WeChatLoginService {
                 .setCreateUserId(bUser.getUserId())
                 .setTenantId(bUser.getTenantId());
         rUserRoleDao.save(rRole);
-
-//        //根据iam同步的用户数据获取用户组织
-//        BOrganization bOrganization = bOrganizationDao.findByIamUserMobile(mobile, defaultTenantId);
-//        if (bOrganization == null) {
-//            bOrganization = bOrganizationDao.findByTenantOrgName(defaultTenantId, "个人用户");
-//            bOrganization = ObjectUtil.isNull(bOrganization) ? bOrganizationDao.getRootOrgList(defaultTenantId).get(0) : bOrganization;
-//        }
-//
-//        RUserTenant rUserTenant = new RUserTenant()
-//                .setUserId(bUser.getUserId())
-//                .setOrganizationId(bOrganization.getOrganizationId())
-//                .setTenantId(bUser.getTenantId())
-//                .setFlag(1);
-//        rUserTenantDao.save(rUserTenant);
 
         return bUser;
     }
