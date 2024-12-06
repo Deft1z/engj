@@ -489,6 +489,18 @@ public class UserService {
             throw new ServiceException("不能同时分配2种业务角色: 集团客服|二级公司客服|小程序用户");
         }
 
+        //判断用户所在的组织是否为根组织，限定根组织下用户不能分配二级公司客服角色
+        boolean containsSubCompanyCustomer = roleCodes.contains(RoleEnums.SUB_COMPANY_CUSTOMER.getCode());
+        if(containsSubCompanyCustomer) {
+            RUserTenant userTenant = rUserTenantDao.findTenantByUid(req.getUserId());
+            List<BOrganization> rootOrgList = bOrganizationDao.getRootOrgList(userTenant.getTenantId());
+            rootOrgList.stream().forEach(bOrganization -> {
+                if(bOrganization.getOrganizationId().equals(userTenant.getOrganizationId())){
+                    throw new ServiceException("根组织下用户不允许分配二级客服角色!");
+                }
+            });
+        }
+
         // 只清除当前租户的角色
         rUserRoleDao.removeByTenantUser(bUser.getTenantId(), bUser.getUserId());
 

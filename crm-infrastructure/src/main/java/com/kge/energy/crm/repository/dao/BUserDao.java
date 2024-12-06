@@ -11,6 +11,7 @@ import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
+import com.kge.energy.crm.repository.entityext.result.UserContactResult;
 import com.kge.energy.crm.repository.entityext.result.UserListResult;
 import com.kge.energy.crm.repository.mapper.BUserMapper;
 import lombok.RequiredArgsConstructor;
@@ -117,7 +118,7 @@ public class BUserDao extends ServiceImpl<BUserMapper, BUser> {
         return mapper.findUserByContractId(scid);
     }
 
-    public List<BUser> getUserContact(Integer userId, List<String> roleCodes, Integer organizationId, Integer tenantId) {
+    public List<UserContactResult> getUserContact(Integer userId, List<String> roleCodes, Integer organizationId, Integer tenantId) {
         return mapper.getUserContact(userId, roleCodes, organizationId, tenantId);
     }
 

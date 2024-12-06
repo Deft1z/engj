@@ -13,6 +13,11 @@ import lombok.experimental.Accessors;
 public class WeChatLoginReq {
 
     /**
+     * token值
+     */
+    private String token;
+
+    /**
      * 手机
      */
 //    private String mobile;

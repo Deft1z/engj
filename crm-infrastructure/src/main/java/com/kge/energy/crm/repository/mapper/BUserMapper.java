@@ -8,6 +8,7 @@ import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.UserListParam;
 import com.kge.energy.crm.repository.entityext.result.RoleUserResult;
 import com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult;
+import com.kge.energy.crm.repository.entityext.result.UserContactResult;
 import com.kge.energy.crm.repository.entityext.result.UserListResult;
 import org.apache.ibatis.annotations.Param;
 
@@ -44,6 +45,6 @@ public interface BUserMapper extends BaseMapper<BUser> {
 
     IPage<BUser> findAppletUser(Page<BUser> page, @Param("tenantId") Integer tenantId, @Param("name") String name);
 
-    List<BUser> getUserContact(@Param("userId") Integer userId, @Param("roleCodes") List<String> roleCodes, @Param("organizationId") Integer organizationId, @Param("tenantId") Integer tenantId);
+    List<UserContactResult> getUserContact(@Param("userId") Integer userId, @Param("roleCodes") List<String> roleCodes, @Param("organizationId") Integer organizationId, @Param("tenantId") Integer tenantId);
 }
 

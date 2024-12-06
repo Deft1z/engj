@@ -30,6 +30,9 @@ public enum RoleEnums {
     OPERATE_ADMIN("operate_admin", "运营管理员"),
 
     HARMONY_POWER_CONTROL("harmony_power_control", "电鸿控制"),
+
+    /* Operation Report Receiver */
+    OP_REPORT_RX("op_report_rx", "运营报告查收用户"),
     ;
 
 
