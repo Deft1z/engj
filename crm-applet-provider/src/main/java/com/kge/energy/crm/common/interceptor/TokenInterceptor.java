@@ -94,7 +94,11 @@ public class TokenInterceptor implements DelegatedOrderedInterceptor {
         }
 
         // 续期
-        redisUtils.expire(tokenKey, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT);
+        if (authProperties.getToken().getPersistPhoneList().contains(UserInfoContextUtils.getCurrentMobile())) {
+            redisUtils.persist(tokenKey);
+        } else {
+            redisUtils.expire(tokenKey, TokenConstant.APPLET_EXPIRED_TIMEOUT, TokenConstant.APPLET_EXPIRED_TIMEUNIT);
+        }
 
         return true;
     }

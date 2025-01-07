@@ -94,6 +94,10 @@ auth:
       - ${server.servlet.context-path}/doc.html
       - ${server.servlet.context-path}/webjars/**
       - ${server.servlet.context-path}/v3/api-docs/**
+    persist-phone-list:
+      - 13660617465
+      - 15521607108
+      - 136****0001
 
   permission:
     white-list:
