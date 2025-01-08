@@ -7,6 +7,12 @@
 - crm-applet-provider：小程序应用层
 - crm-mgr-provider：后台管理系统应用层
 
+## 代码质量扫描 SonarQube
+> 使用 Maven 扫描：
+> * 使用 IDEA 打开 Terminal 终端，在 根目录 下直接执行 mvn clean verify sonar:sonar -DskipTests 命令。
+> * 指定参数命令：mvn clean verify sonar:sonar -Dsonar.projectName='crm-service' -Dsonar.host.url=http://172.18.26.131:9010 -Dsonar.token=sqp_42d59c2962c88e57d5aa65ce8da43ad965802c1f -DskipTests
+> * 扫描结果访问 http://172.18.26.131:9010 查看 (默认账号密码：admin/bitnami)
+
 ## API规范 
 使用OpenAPI3的规范注解，添加在实体类和REST接口，示例代码如下：  
 ```java
