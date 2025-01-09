@@ -48,7 +48,8 @@ public class ExcelToPdfUtils {
      * @param excelSuffix Excel类型 .xls 和 .xlsx
      * @throws Exception 异常信息
      */
-    public static void excelToPdf(InputStream inStream, OutputStream outStream, String excelSuffix) throws Exception {
+    @SneakyThrows
+    public static void excelToPdf(InputStream inStream, OutputStream outStream, String excelSuffix) {
         // 输入流转workbook，获取sheet
         Sheet sheet = getPoiSheetByFileStream(inStream, 0, excelSuffix);
         // 获取列宽度占比
@@ -301,7 +302,11 @@ public class ExcelToPdfUtils {
 
         float[] colWidthPer = new float[cellCount];
         for (int i = row.getFirstCellNum(); i < cellCount; i++) {
-            colWidthPer[i] = (float) colWidths[i] / sum * 100;
+            if (sum != 0) {
+                colWidthPer[i] = (float) colWidths[i] / sum * 100;
+            } else {
+                colWidthPer[i] = 30;
+            }
         }
         return colWidthPer;
     }
