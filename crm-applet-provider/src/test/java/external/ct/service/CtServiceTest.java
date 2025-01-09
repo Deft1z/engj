@@ -1,7 +1,7 @@
 package external.ct.service;
 
-import cn.hutool.json.JSONObject;
 import com.kge.energy.crm.CrmAppletProvider;
+import com.kge.energy.crm.external.ct.req.CtRemoteResp;
 import com.kge.energy.crm.external.ct.req.CtTokenReq;
 import com.kge.energy.crm.external.ct.service.CtService;
 import jakarta.annotation.Resource;
@@ -23,7 +23,7 @@ class CtServiceTest {
                 .setAppId(1)
                 .setAppSecret("179dd20e0d1cdf48f791355430000001")
                 .setInterfaceAddress("https://gznt.gzzhhw.com:8100/api/pbp-system/v1");
-        JSONObject ctToken = ctService.getCtToken(ctTokenReq);
+        CtRemoteResp ctToken = ctService.getCtToken(ctTokenReq);
         log.info("{}", ctToken);
     }
 
