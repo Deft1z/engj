@@ -9,9 +9,10 @@
 
 ## 代码质量扫描 SonarQube
 > 使用 Maven 扫描：
-> * 使用 IDEA 打开 Terminal 终端，在 根目录 下直接执行 mvn clean verify sonar:sonar -DskipTests 命令。
-> * 指定参数命令：mvn clean verify sonar:sonar -Dsonar.projectName='crm-service' -Dsonar.host.url=http://172.18.26.131:9010 -Dsonar.token=sqp_42d59c2962c88e57d5aa65ce8da43ad965802c1f -DskipTests
+> * 使用 IDEA 打开 Terminal 终端，在根目录下直接执行mvn命令。
+> * mvn clean verify sonar:sonar -Dsonar.host.url=http://172.18.26.131:9010 -Dsonar.token=sqa_8175149efb1abc311504a0abb8e308e8c19634a8 -DskipTests
 > * 扫描结果访问 http://172.18.26.131:9010 查看 (默认账号密码：admin/bitnami)
+> * PS：原则上扫描结果的安全问题、可靠性问题必须清零才算代码质量合格，可维护性问题则尽量能处理则处理
 
 ## API规范 
 使用OpenAPI3的规范注解，添加在实体类和REST接口，示例代码如下：  
