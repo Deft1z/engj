@@ -457,7 +457,7 @@
         from w_complain a
         join r_form_consult_complain c on c.complain_id = a.complain_id
         join sc_service_contract b on b.service_contract_id = c.consult_id
-        join wf_form d on d.form_id = c.consult_id
+        join wf_form d on d.form_id = b.form_id
         left join w_complain_file g on g.complain_id = a.complain_id
         left join s_file i on i.flag = 1 and i.file_id = g.file_id
         left join b_user j on j.flag = 1 and j.user_id = a.process_user_id
