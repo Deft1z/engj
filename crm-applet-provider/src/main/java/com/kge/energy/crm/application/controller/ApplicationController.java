@@ -1,6 +1,5 @@
 package com.kge.energy.crm.application.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kge.energy.crm.application.req.AppBindReq;
 import com.kge.energy.crm.application.req.AppDetailReq;
 import com.kge.energy.crm.application.req.AppTokenReq;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -63,7 +61,7 @@ public class ApplicationController {
 
     @ConvertToGoFormats
     @PostMapping("/tokenMgr/info/load")
-    public CommonResult<Object> getAppToken(@Validated @RequestBody AppTokenReq appTokenReq) throws NoSuchAlgorithmException, JsonProcessingException {
+    public CommonResult<Object> getAppToken(@Validated @RequestBody AppTokenReq appTokenReq) {
         return applicationService.getAppToken(appTokenReq);
     }
 

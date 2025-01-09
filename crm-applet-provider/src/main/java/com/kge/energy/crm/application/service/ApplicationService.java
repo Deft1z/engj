@@ -1,13 +1,11 @@
 package com.kge.energy.crm.application.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kge.energy.crm.application.req.AppBindReq;
 import com.kge.energy.crm.application.req.AppDetailReq;
 import com.kge.energy.crm.application.req.AppTokenReq;
@@ -16,6 +14,7 @@ import com.kge.energy.crm.application.resp.AppDetailResp;
 import com.kge.energy.crm.application.resp.AppTokenResp;
 import com.kge.energy.crm.common.dto.UserInfoDto;
 import com.kge.energy.crm.common.util.UserInfoContextUtils;
+import com.kge.energy.crm.external.ct.req.CtRemoteResp;
 import com.kge.energy.crm.external.ct.req.CtTokenReq;
 import com.kge.energy.crm.external.ct.service.CtService;
 import com.kge.energy.crm.repository.dao.BAppDao;
@@ -32,12 +31,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -92,7 +89,7 @@ public class ApplicationService {
         return true;
     }
 
-    public CommonResult<Object> getAppToken(AppTokenReq appTokenReq) throws NoSuchAlgorithmException, JsonProcessingException {
+    public CommonResult<Object> getAppToken(AppTokenReq appTokenReq) {
         AppTokenResp appTokenResp = new AppTokenResp();
 
         // 2024-04-19临时解决多对多问题
@@ -128,36 +125,34 @@ public class ApplicationService {
         BApp bApp = appDao.getById(appTokenReq.getAppId());
         CtTokenReq ctTokenReq = BeanUtil.copyProperties(bApp, CtTokenReq.class);
         ctTokenReq.setOpenid(shareOpenId);
-        JSONObject jsonObject = ctService.getCtToken(ctTokenReq);
-
-        if (!jsonObject.containsKey("ret")) {
-            log.error("响应未找到ret字段,{}", jsonObject.toString());
+        CtRemoteResp<Object> ctRemoteResp = ctService.getCtToken(ctTokenReq);
+        String ret = ctRemoteResp.getRet();
+        if (CharSequenceUtil.isBlank(ret)) {
             return CommonResult.suc("用户不存在");
         }
-        String ret = jsonObject.getStr("ret");
-        if (StrUtil.equals("4005", ret)) {
-            log.error("用户未绑定,{}", jsonObject.getStr("msg"));
+        if (CharSequenceUtil.equals(CtService.RESP_CODE_UNBOUND, ret)) {
+            log.error("用户未绑定,{}", ctRemoteResp.getMsg());
             bOpenid.setBindingState(0);
             openidDao.updateById(bOpenid);
             appTokenResp.setOpenId(bOpenid.getOpenidId().toString());
             return CommonResult.suc(ResultCode.SUCCESS.getCode(), "当前账号未绑定该业务系统，请先进行绑定", appTokenResp);
         } else {
-            if (!StrUtil.equals("0", ret)) {
-                return CommonResult.suc(jsonObject.getStr("msg"));
+            if (!CharSequenceUtil.equals(CtService.RESP_CODE_SUCCESS, ret)) {
+                return CommonResult.suc(ctRemoteResp.getMsg());
             }
         }
 
-        if (!jsonObject.containsKey("data")) {
-            log.error("响应未找到data字段,{}", jsonObject.toString());
+        Object data = ctRemoteResp.getData();
+        if (ObjectUtil.isNull(data) || ObjectUtil.isEmpty(data)) {
             return CommonResult.suc("用户不存在");
         }
-        JSONObject data = jsonObject.getJSONObject("data");
-        if (!data.containsKey("token")) {
-            log.error("响应未找到token字段,{}", jsonObject.toString());
+
+        appTokenResp = JSONUtil.toBean(JSONUtil.toJsonStr(ctRemoteResp.getData()), AppTokenResp.class);
+
+        if (CharSequenceUtil.isBlank(appTokenResp.getToken())) {
             throw new ServiceException("应用出现错误");
         }
 
-        appTokenResp = JSONUtil.toBean(data, AppTokenResp.class);
         return CommonResult.suc(appTokenResp);
     }
 
@@ -214,6 +209,6 @@ public class ApplicationService {
                         .setAppAddress(app.getAppAddress())
                         .setBindAddress(app.getBindAddress())
                         .setCommonlyUsed(app.getCommonlyUsed())
-                ).collect(Collectors.toList());
+                ).toList();
     }
 }
