@@ -32,27 +32,20 @@ public class CtService {
      */
     public static final String RESP_CODE_UNBOUND = "4005";
 
-    private static final String TOKEN_GET_PATH = "/token_get";
-    private static final String ACCOUNT_UNBIND_PATH = "/account_unbind";
-
-    public CtRemoteResp getCtToken(CtTokenReq ctTokenReq) {
+    public CtRemoteResp<Object> getCtToken(CtTokenReq ctTokenReq) {
         // 构建远程 API 请求参数
         CtRemoteReq reqParam = buildRemoteReqParam(ctTokenReq.getOpenid(), ctTokenReq.getAppId(), ctTokenReq.getAppSecret());
-
-        return RestUtils.postForObject(ctTokenReq.getInterfaceAddress() + TOKEN_GET_PATH, reqParam, CtRemoteResp.class);
+        return RestUtils.postForObject(ctTokenReq.getInterfaceAddress() + "/token_get", reqParam, CtRemoteResp.class);
     }
 
     public void accountUnbind(CtAccountUnbindReq req) {
         // 构建远程 API 请求参数
         CtRemoteReq reqParam = buildRemoteReqParam(req.getOpenId(), req.getAppId(), req.getAppSecret());
-
-        CtRemoteResp resp = RestUtils.postForObject(req.getInterfaceAddress() + ACCOUNT_UNBIND_PATH, reqParam, CtRemoteResp.class);
+        CtRemoteResp<Object> resp = RestUtils.postForObject(req.getInterfaceAddress() + "/account_unbind", reqParam, CtRemoteResp.class);
         String ret = resp.getRet();
-
         if (CharSequenceUtil.isBlank(ret)) {
             throw new ServiceException("远程接口请求处理失败！");
         }
-
         if (!CharSequenceUtil.equals(RESP_CODE_SUCCESS, ret)) {
             throw new ServiceException(resp.getMsg());
         }

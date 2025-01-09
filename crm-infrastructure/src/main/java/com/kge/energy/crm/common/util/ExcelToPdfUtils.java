@@ -63,31 +63,39 @@ public class ExcelToPdfUtils {
         for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
             Row row = sheet.getRow(rowIndex);
             if (Objects.isNull(row)) {
-                // 插入空对象
-                for (int i = 0; i < colCount; i++) {
-                    table.addCell(createPdfPCell(null, 1, 13f, null));
-                }
+                addNullCell(colCount, table);
             } else {
-                // 遍历单元格
-                for (int columnIndex = 0; (columnIndex < row.getLastCellNum() || columnIndex < colCount) && columnIndex > -1; columnIndex++) {
-                    PdfPCell pCell = excelCellToPdfCell(sheet, row.getCell(columnIndex), baseFont);
-                    // 是否合并单元格
-                    if (isMergedRegion(sheet, rowIndex, columnIndex)) {
-                        int[] span = getMergedSpan(sheet, rowIndex, columnIndex);
-                        //忽略合并过的单元格
-                        boolean mergedCell = span[0] == 1 && span[1] == 1;
-                        if (mergedCell) {
-                            continue;
-                        }
-                        pCell.setRowspan(span[0]);
-                        pCell.setColspan(span[1]);
-                    }
-                    table.addCell(pCell);
-                }
+                addCell(row, colCount, sheet, baseFont, rowIndex, table);
             }
         }
         // 初始化PDF文档对象
         createPdfTableAndWriteDocument(outStream, table);
+    }
+
+    private static void addCell(Row row, int colCount, Sheet sheet, BaseFont baseFont, int rowIndex, PdfPTable table) {
+        // 遍历单元格
+        for (int columnIndex = 0; (columnIndex < row.getLastCellNum() || columnIndex < colCount) && columnIndex > -1; columnIndex++) {
+            PdfPCell pCell = excelCellToPdfCell(sheet, row.getCell(columnIndex), baseFont);
+            // 是否合并单元格
+            if (isMergedRegion(sheet, rowIndex, columnIndex)) {
+                int[] span = getMergedSpan(sheet, rowIndex, columnIndex);
+                //忽略合并过的单元格
+                boolean mergedCell = span[0] == 1 && span[1] == 1;
+                if (mergedCell) {
+                    continue;
+                }
+                pCell.setRowspan(span[0]);
+                pCell.setColspan(span[1]);
+            }
+            table.addCell(pCell);
+        }
+    }
+
+    private static void addNullCell(int colCount, PdfPTable table) {
+        // 插入空对象
+        for (int i = 0; i < colCount; i++) {
+            table.addCell(createPdfPCell(null, 1, 13f, null));
+        }
     }
 
     /**
