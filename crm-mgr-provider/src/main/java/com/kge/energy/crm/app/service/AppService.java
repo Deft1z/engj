@@ -13,17 +13,13 @@ import com.kge.energy.crm.repository.entity.BApp;
 import com.kge.energy.crm.repository.entity.BUser;
 import com.kge.energy.crm.repository.entityext.param.WxUserAppParam;
 import com.kge.energy.crm.repository.entityext.result.BindUserResult;
-import com.kge.energy.crm.repository.entityext.result.OpenIdModelList;
-import com.kge.energy.crm.repository.entityext.result.OpenShareModelList;
 import com.kge.energy.crm.repository.entityext.result.UserBindByMobileResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author wangrongjun
@@ -69,9 +65,13 @@ public class AppService {
             appid = 1;
         }
         Page<BindUserResult> pageParam = new Page<>(page, limit);
-        //todo 应用关联项目的逻辑需进一步梳理
+        //应用关联项目的逻辑或许需进一步梳理，当前未实际应用
         IPage<BindUserResult> bindUsers = bAppDao.getBindUsers(pageParam, appid, mobile, name);
-        //重构原go开发团队的代码逻辑，为不增加前端的对接工作量，使用原来的数据结构返回
+        //重构原go开发团队的代码逻辑，为不增加前端的对接工作量，转换成原来的数据结构返回
+        return convertListResp(bindUsers);
+    }
+
+    private ListResp convertListResp(IPage<BindUserResult> bindUsers) {
         ListResp resp = new ListResp();
         resp.setTotal(Math.toIntExact(bindUsers.getTotal()));
         List<ListContent> content = new ArrayList<>();
@@ -80,87 +80,56 @@ public class AppService {
             listContent.setUid(bindUser.getUserId());
             listContent.setName(bindUser.getRealname());
             listContent.setMobile(bindUser.getMobile());
-            List<App> apps = new ArrayList<>();
-            if (!bindUser.getRelateApp().isEmpty()) {
-                for (BindUserResult.RelateApp relateApp : bindUser.getRelateApp()) {
-                    App app = new App();
-                    app.setId(relateApp.getAppId());
-                    app.setName(relateApp.getAppName());
-                    app.setOid(relateApp.getOpenidId());
-                    List<Project> projects = new ArrayList<>();
-                    if (!relateApp.getRelateProject().isEmpty()) {
-                        for (BindUserResult.RelateProject relateProject : relateApp.getRelateProject()) {
-                            Project project = new Project();
-                            project.setId(relateProject.getProjectId());
-                            project.setName(relateProject.getProjectName());
-                            projects.add(project);
-                        }
-                    }
-                    app.setProjects(projects);
-                    apps.add(app);
-                }
-            }
-            listContent.setApps(apps);
+            listContent.setApps(convertListApp(bindUser));
             content.add(listContent);
         }
         resp.setContent(content);
-
         return resp;
     }
 
+    private List<App> convertListApp(BindUserResult bindUser) {
+        List<App> apps = new ArrayList<>();
+        if (!bindUser.getRelateApp().isEmpty()) {
+            for (BindUserResult.RelateApp relateApp : bindUser.getRelateApp()) {
+                App app = new App();
+                app.setId(relateApp.getAppId());
+                app.setName(relateApp.getAppName());
+                app.setOid(relateApp.getOpenidId());
+                List<Project> projects = new ArrayList<>();
+                if (!relateApp.getRelateProject().isEmpty()) {
+                    for (BindUserResult.RelateProject relateProject : relateApp.getRelateProject()) {
+                        Project project = new Project();
+                        project.setId(relateProject.getProjectId());
+                        project.setName(relateProject.getProjectName());
+                        projects.add(project);
+                    }
+                }
+                app.setProjects(projects);
+                apps.add(app);
+            }
+        }
+        return apps;
+    }
+
     public DetailResp findBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
-        List<OpenShareModelList> users = bAppDao.findBindList(page, limit, mobile, name, ids);
-        Integer resultCount = bAppDao.findBindListCount(mobile, name, ids);
-        List<Integer> uids = new ArrayList<>();
-        for (OpenShareModelList osml : users) {
-            uids.add(osml.getUid());
-        }
-        List<BApp> apps = bAppDao.getApps();
-        Map<Integer, Integer> recordMap = new HashMap<>();
-        for (int k = 0; k < apps.size(); k++) {
-            recordMap.put(apps.get(k).getAppId(), k + 1);
-        }
+        Page<BindUserResult> pageParam = new Page<>(page, limit);
+        IPage<BindUserResult> bindShareUsers = bAppDao.getBindShareUsers(pageParam, mobile, name, ids);
 
-        List<OpenIdModelList> oms = bAppDao.findByUidAndOid(uids, ids);
-        Map<Integer, List<Integer>> omMap = new HashMap<>();
-
-        for (OpenIdModelList omsk : oms) {
-            if (omMap.get(omsk.getUid()) == null) {
-//                omMap.get(omsk.getUid()).set(0,omsk.getAppid());
-                List<Integer> appIdTemp = new ArrayList<>();
-                appIdTemp.add(omsk.getAppid());
-                if (omsk.getAppid() == 1) {
-                    appIdTemp.add(2);
-                }
-                omMap.put(omsk.getUid(), appIdTemp);
-            } else {
-                List<Integer> tmp = omMap.get(omsk.getUid());
-                tmp.add(omsk.getAppid());
-                if (omsk.getAppid() == 1) {
-                    tmp.add(2);
-                }
-                omMap.put(omsk.getUid(), tmp);
-            }
-        }
-        List<DetailC> result = new ArrayList<>();
-        for (OpenShareModelList usersk : users) {
-            DetailC content = new DetailC();
-            content.setUid(usersk.getUid());
-            content.setName(usersk.getRealname());
-            content.setMobile(usersk.getMobile());
-            List<App> appsNew = new ArrayList<>();
-            for (Integer m : omMap.get(usersk.getUid())) {
-                App appTemp = new App();
-                appTemp.setName(apps.get(m - 1).getName());
-                appTemp.setId(apps.get(m - 1).getAppId());
-                appsNew.add(appTemp);
-            }
-            content.setApps(appsNew);
-            result.add(content);
-        }
+        // 重构原go开发团队的代码逻辑，为不增加前端的对接工作量，转换成原来的数据结构返回
         DetailResp resp = new DetailResp();
-        resp.setTotal(resultCount);
-        resp.setContent(result);
+        resp.setTotal(Math.toIntExact(bindShareUsers.getTotal()));
+
+        List<DetailC> content = new ArrayList<>();
+        for (BindUserResult bindShareUser : bindShareUsers.getRecords()) {
+            DetailC detailC = new DetailC();
+            detailC.setUid(bindShareUser.getUserId());
+            detailC.setName(bindShareUser.getRealname());
+            detailC.setMobile(bindShareUser.getMobile());
+            detailC.setApps(convertListApp(bindShareUser));
+            content.add(detailC);
+        }
+        resp.setContent(content);
+
         return resp;
     }
 
