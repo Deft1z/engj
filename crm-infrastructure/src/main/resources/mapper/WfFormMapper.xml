@@ -370,7 +370,7 @@
             from wf_form_flow t1
             join (select max(form_flow_id) as form_flow_id from wf_form_flow where flag = 1 group by form_id) t2 on t1.form_flow_id = t2.form_flow_id
             join b_user bu on bu.user_id = t1.create_user_id
-            where t1.status in('已回复', '已完结', '已终止')
+            where t1.status in('已回复', '添加合同', '已完结', '已终止')
         )
         select row_number() over (order by a.modify_time desc) as row_num
         , json_unquote(json_extract(a.content, '$.businessName')) AS business_name
