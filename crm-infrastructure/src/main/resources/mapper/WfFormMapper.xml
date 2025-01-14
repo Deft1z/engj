@@ -364,6 +364,14 @@
     </select>
 
     <select id="getFormDetail" resultType="com.kge.energy.crm.repository.entityext.result.FormResult">
+        /* 查询业务工单最新受理人 */
+        with th as (
+            select t1.form_flow_id, t1.form_id, t1.create_user_id, t1.status, t1.service_unit_id, bu.realname
+            from wf_form_flow t1
+            join (select max(form_flow_id) as form_flow_id from wf_form_flow where flag = 1 group by form_id) t2 on t1.form_flow_id = t2.form_flow_id
+            join b_user bu on bu.user_id = t1.create_user_id
+            where t1.status in('已回复', '已完结', '已终止')
+        )
         select row_number() over (order by a.modify_time desc) as row_num
         , json_unquote(json_extract(a.content, '$.businessName')) AS business_name
         , json_unquote(json_extract(a.content, '$.area')) AS area
@@ -387,8 +395,9 @@
         , d.`name` AS org_name
         , p.organization_id as preselected_org_id
         , p.`name` as preselected_org_name
-        , bu.realname as owner_real_name
-        , bu.mobile as owner_mobile
+        , bu.realname as creator_real_name
+        , bu.mobile as creator_mobile
+        , th.realname
         ,
         <choose>
             <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
@@ -428,6 +437,7 @@
         join b_user bu on bu.user_id = a.create_user_id
         join b_organization d on d.organization_id = a.current_org_id
         left join b_organization p on p.organization_id = a.preselected_org_id
+        left join th on th.form_id = a.form_id
         where a.flag = 1
              and a.form_id = #{formId}
         <choose>
@@ -454,7 +464,7 @@
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
-        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`,p.`name`, `user_status`, bu.realname, bu.mobile
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`,p.`name`, `user_status`, bu.realname, bu.mobile, th.realname
     </select>
 
     <select id="getTimeoutNotifyForms" resultType="com.kge.energy.crm.repository.entityext.result.TimeoutFormResult">

@@ -46,9 +46,9 @@ public class WfFormPageResp {
     private String preselectedOrgName;
 
     @Schema(description = "下单用户姓名")
-    private String ownerRealName;
+    private String creatorRealName;
 
     @Schema(description = "下单用户手机")
-    private String ownerMobile;
+    private String creatorMobile;
 
 }
