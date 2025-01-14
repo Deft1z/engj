@@ -386,7 +386,10 @@
         , a.remark
         , d.`name` AS org_name
         , p.organization_id as preselected_org_id
-        , p.`name` as preselected_org_name,
+        , p.`name` as preselected_org_name
+        , bu.realname as owner_real_name
+        , bu.mobile as owner_mobile
+        ,
         <choose>
             <when test="userInfo.roleCodes != null and userInfo.roleCodes.contains('jt_customer')">
                 (case
@@ -422,6 +425,7 @@
             </otherwise>
         </choose>
         from wf_form a
+        join b_user bu on bu.user_id = a.create_user_id
         join b_organization d on d.organization_id = a.current_org_id
         left join b_organization p on p.organization_id = a.preselected_org_id
         where a.flag = 1
@@ -450,7 +454,7 @@
                 and a.create_user_id = #{userInfo.userId}
             </otherwise>
         </choose>
-        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`,p.`name`, `user_status`
+        group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`,p.`name`, `user_status`, bu.realname, bu.mobile
     </select>
 
     <select id="getTimeoutNotifyForms" resultType="com.kge.energy.crm.repository.entityext.result.TimeoutFormResult">

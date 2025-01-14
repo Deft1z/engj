@@ -1,5 +1,6 @@
 package com.kge.energy.crm.workorder.resp;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -43,5 +44,11 @@ public class WfFormPageResp {
     //客户预选公司
     private Integer preselectedOrgId;
     private String preselectedOrgName;
+
+    @Schema(description = "下单用户姓名")
+    private String ownerRealName;
+
+    @Schema(description = "下单用户手机")
+    private String ownerMobile;
 
 }

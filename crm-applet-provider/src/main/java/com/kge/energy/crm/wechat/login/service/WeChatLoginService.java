@@ -164,7 +164,7 @@ public class WeChatLoginService {
         } catch (Exception e) {
             //记录登录失败日志
             sysLoginLogHandleService.saveLoginLog(user, LoginPlatformEnums.WECHAT_APPLET, LoginResultEnums.FAIL, e.getMessage());
-            throw new RuntimeException(e);
+            throw new ServiceException(e.getMessage());
         }
 
     }

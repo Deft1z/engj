@@ -1,6 +1,7 @@
 package com.kge.energy.crm.repository.entityext.result;
 
 import com.kge.energy.crm.common.dto.ContractDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -45,5 +46,11 @@ public class FormResult extends ContractDto{
     //客户预选公司
     private Integer preselectedOrgId;
     private String preselectedOrgName;
+
+    @Schema(description = "下单用户姓名")
+    private String ownerRealName;
+
+    @Schema(description = "下单用户手机")
+    private String ownerMobile;
 
 }
