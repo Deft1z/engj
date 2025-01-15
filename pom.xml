@@ -17,7 +17,7 @@
 	<properties>
 		<knife4j-openapi3-jakarta-spring-boot-starter.version>4.5.0</knife4j-openapi3-jakarta-spring-boot-starter.version>
 		<!--sonar扫描插件-->
-		<sonar-maven-plugin.version>3.10.0.2594</sonar-maven-plugin.version>
+		<sonar-maven-plugin.version>5.0.0.4389</sonar-maven-plugin.version>
 		<!--sonar需要扫描的文件-->
 		<sonar.inclusions>**/*.java,**/*.xml</sonar.inclusions>
 		<!--依赖漏洞检查插件-->
