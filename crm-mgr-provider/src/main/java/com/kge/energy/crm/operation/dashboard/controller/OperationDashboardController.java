@@ -9,6 +9,7 @@ import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import com.kge.platform.framework.common.net.CommonResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +74,12 @@ public class OperationDashboardController {
     @PostMapping("/complainQtyData")
     public CommonResult<DashboardStatResult> complainTypeData(@Validated @RequestBody OperationDashboardReq req) {
         return CommonResult.suc(operationDashboardService.complainQtyData(req));
+    }
+
+    @Operation(summary = "运营看板数据导出")
+    @PostMapping("/export")
+    public void exportStatistic(HttpServletResponse response, @Validated @RequestBody OperationDashboardReq req) {
+        operationDashboardService.exportStatistic(response, req);
     }
 
 }

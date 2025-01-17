@@ -35,6 +35,9 @@ public class OperationDashboardReq {
     @NotNull
     private Integer orgId;
 
+    @Schema(description = "导出类型：0 excel 1 pdf，仅用于数据导出接口")
+    private Integer exportType = 0;
+
     @JsonIgnore
     private List<String> statDims;
 
