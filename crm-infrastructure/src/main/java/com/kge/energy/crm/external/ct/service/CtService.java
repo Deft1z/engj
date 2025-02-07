@@ -1,14 +1,15 @@
 package com.kge.energy.crm.external.ct.service;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kge.energy.crm.external.ct.req.CtAccountUnbindReq;
+import com.kge.energy.crm.external.ct.req.CtRemoteReq;
+import com.kge.energy.crm.external.ct.req.CtRemoteResp;
 import com.kge.energy.crm.external.ct.req.CtTokenReq;
 import com.kge.platform.framework.common.exception.ServiceException;
 import com.kge.platform.framework.web.util.RestUtils;
+import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.stereotype.Service;
 
@@ -17,68 +18,54 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class CtService {
 
-    private final String TOKEN_GET_PATH = "/token_get";
-    private final String ACCOUNT_UNBIND_PATH = "/account_unbind";
+    /**
+     * 成功
+     */
+    public static final String RESP_CODE_SUCCESS = "0";
 
-    public JSONObject getCtToken(CtTokenReq ctTokenReq) throws JsonProcessingException, NoSuchAlgorithmException {
-        Map<String, Object> reqData = new HashMap<>();
-        reqData.put("openID", Integer.toString(ctTokenReq.getOpenid()));
-        reqData.put("scope", "all");
+    /**
+     * 未绑定
+     */
+    public static final String RESP_CODE_UNBOUND = "4005";
 
-        Map<String, Object> reqParam = new HashMap<>();
-        reqParam.put("appID", Integer.toString(ctTokenReq.getAppId()));
-        reqParam.put("data", reqData);
-
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        String timeStamp = now.format(formatter);
-        reqParam.put("timeStamp", timeStamp);
-
-        String sig = getHash(ctTokenReq.getAppSecret().getBytes(StandardCharsets.UTF_8),
-                new ObjectMapper().writeValueAsString(reqData).getBytes(StandardCharsets.UTF_8),
-                timeStamp.getBytes(StandardCharsets.UTF_8));
-        reqParam.put("sig", sig);
-
-        Object object = RestUtils.postForObject(ctTokenReq.getInterfaceAddress() + TOKEN_GET_PATH, reqParam, Object.class);
-        return JSONUtil.parseObj(object);
+    public CtRemoteResp<Object> getCtToken(CtTokenReq ctTokenReq) {
+        // 构建远程 API 请求参数
+        CtRemoteReq reqParam = buildRemoteReqParam(ctTokenReq.getOpenid(), ctTokenReq.getAppId(), ctTokenReq.getAppSecret());
+        return RestUtils.postForObject(ctTokenReq.getInterfaceAddress() + "/token_get", reqParam, CtRemoteResp.class);
     }
 
-    public void accountUnbind(CtAccountUnbindReq req) throws JsonProcessingException, NoSuchAlgorithmException {
-        Map<String, Object> reqData = new HashMap<>();
-        reqData.put("openID", Integer.toString(req.getOpenId()));
-        reqData.put("scope", "all");
+    public void accountUnbind(CtAccountUnbindReq req) {
+        // 构建远程 API 请求参数
+        CtRemoteReq reqParam = buildRemoteReqParam(req.getOpenId(), req.getAppId(), req.getAppSecret());
+        CtRemoteResp<Object> resp = RestUtils.postForObject(req.getInterfaceAddress() + "/account_unbind", reqParam, CtRemoteResp.class);
+        String ret = resp.getRet();
+        if (CharSequenceUtil.isBlank(ret)) {
+            throw new ServiceException("远程接口请求处理失败！");
+        }
+        if (!CharSequenceUtil.equals(RESP_CODE_SUCCESS, ret)) {
+            throw new ServiceException(resp.getMsg());
+        }
+    }
 
-        Map<String, Object> reqParam = new HashMap<>();
-        reqParam.put("appID", Integer.toString(req.getAppId()));
-        reqParam.put("data", reqData);
-
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        String timeStamp = now.format(formatter);
-        reqParam.put("timeStamp", timeStamp);
-
-        String sig = getHash(req.getAppSecret().getBytes(StandardCharsets.UTF_8),
+    @SneakyThrows
+    private CtRemoteReq buildRemoteReqParam(Integer openId, Integer appId, String appSecret) {
+        // 生成时间戳
+        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DatePattern.PURE_DATETIME_PATTERN));
+        // 生成签名
+        CtRemoteReq.DataReq reqData = new CtRemoteReq.DataReq().setOpenID(Integer.toString(openId));
+        String sig = getHash(appSecret.getBytes(StandardCharsets.UTF_8),
                 new ObjectMapper().writeValueAsString(reqData).getBytes(StandardCharsets.UTF_8),
                 timeStamp.getBytes(StandardCharsets.UTF_8));
-        reqParam.put("sig", sig);
 
-        Object object = RestUtils.postForObject(req.getInterfaceAddress() + ACCOUNT_UNBIND_PATH, reqParam, Object.class);
-        JSONObject jsonObject = JSONUtil.parseObj(object);
-
-        if (!jsonObject.containsKey("ret")) {
-            throw new ServiceException("响应未找到ret字段");
-        }
-
-        String ret = jsonObject.getStr("ret");
-        if (!StrUtil.equals("0", ret)) {
-            throw new ServiceException(jsonObject.getStr("msg"));
-        }
+        return new CtRemoteReq()
+                .setAppID(Integer.toString(appId))
+                .setData(reqData)
+                .setTimeStamp(timeStamp)
+                .setSig(sig);
     }
 
     private static String getHash(byte[] secret, byte[] data, byte[] timestamp) throws NoSuchAlgorithmException {

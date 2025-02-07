@@ -37,4 +37,14 @@ public class DashboardStatResult {
         private BigDecimal itemVal;
     }
 
+    @Data
+    public static class MergeStatObj {
+        @Schema(description = "统计维度")
+        private String dimVal;
+        @Schema(description = "统计值1")
+        private String statVal1;
+        @Schema(description = "统计值2")
+        private String statVal2;
+    }
+
 }

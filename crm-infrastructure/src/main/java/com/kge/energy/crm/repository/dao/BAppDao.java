@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,50 +60,6 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
         QueryWrapper<BApp> wrapper = Wrappers.query();
         // 封装分页信息
         return mapper.selectList(wrapper);
-    }
-
-    /**
-     * 绑定管理 -> 获得全部应用记录
-     */
-    public List<BApp> getApps() {
-        QueryWrapper<BApp> wrapper = Wrappers.query();
-        return mapper.selectList(wrapper);
-    }
-
-    /**
-     * 绑定管理 -> 详情列表
-     */
-    public List<OpenShareModelList> findBindList(Integer page, Integer limit, String mobile, String name, List<Integer> ids) {
-        int nullFlag = 0; // 判断记录和总数是否为0
-        // 获取绑定记录的列表
-        List<OpenShareModelList> result = mapper.findBindList(page, mobile, name, ids, (page - 1) * limit, limit);
-        // 获取绑定记录的列表（总数）
-        List<OpenShareModelList> resultCount = mapper.findBindListCount(mobile, name, ids);
-        if (CollectionUtil.isEmpty(result) || CollectionUtil.isEmpty(resultCount)) {
-            nullFlag = 1;
-        }
-        List<OpenShareModelList> openShareModelList = new ArrayList<>();
-        if (nullFlag == 0) {
-            openShareModelList = result;
-        }
-        return openShareModelList;
-    }
-
-
-    /**
-     * 绑定管理 -> 详情列表(总数)
-     */
-    public Integer findBindListCount(String mobile, String name, List<Integer> ids) {
-        // 获取绑定记录的列表（总数）
-        List<OpenShareModelList> resultCount = mapper.findBindListCount(mobile, name, ids);
-        return resultCount.size();
-    }
-
-    /**
-     * 绑定管理 -> 查找对应的用户组织关系
-     */
-    public List<OpenIdModelList> findByUidAndOid(List<Integer> uids, List<Integer> ids) {
-        return mapper.findByUidAndOid(uids, ids);
     }
 
     /**
@@ -252,5 +207,12 @@ public class BAppDao extends ServiceImpl<BAppMapper, BApp> {
     public IPage<BindUserResult> getBindUsers(Page<BindUserResult> page, Integer appId, String mobile, String name) {
         return mapper.getBindUsers(page, appId, mobile, name);
     }
+
+    public IPage<BindUserResult> getBindShareUsers(Page<BindUserResult> page, String mobile, String name, List<Integer> openidIds) {
+        return mapper.getBindShareUsers(page, mobile, name, openidIds);
+    }
+
+
+
 }
 

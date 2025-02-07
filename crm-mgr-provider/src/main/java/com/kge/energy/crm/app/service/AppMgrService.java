@@ -3,7 +3,6 @@ package com.kge.energy.crm.app.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.kge.energy.crm.app.req.AppMgrListAddReq;
 import com.kge.energy.crm.app.req.AppMgrListReq;
 import com.kge.energy.crm.app.req.AppMgrListUpdateReq;
@@ -25,8 +24,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.NoSuchAlgorithmException;
 
 @Slf4j
 @Service
@@ -90,7 +87,7 @@ public class AppMgrService {
         return true;
     }
 
-    public Boolean infoUnbind(InfoUnbindReq req) throws NoSuchAlgorithmException, JsonProcessingException {
+    public Boolean infoUnbind(InfoUnbindReq req) {
         BOpenid bOpenid = bOpenidDao.getOpenId(req.getUserId(), req.getAppId());
 
         // 检查绑定记录

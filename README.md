@@ -7,6 +7,22 @@
 - crm-applet-provider：小程序应用层
 - crm-mgr-provider：后台管理系统应用层
 
+## 代码质量扫描 SonarQube
+> 使用 IDEA 打开 Terminal 终端，在根目录下直接执行mvn命令，其中-DskipTests （代表不执行单元测试但编译测试用例类生成相应的class文件至target/test-classes下），也可使用-Dmaven.test.skip=true（代表跳过单元测试并且不编译测试用例类），若项目规模较大，没必要每次编译后都进行单元测试，亦可替换为第二种方案-Dmaven.test.skip=true。  
+> * 代码质量扫描命令：
+> * mvn clean verify sonar:sonar -Dsonar.host.url=http://172.18.26.131:9010 -Dsonar.token=sqa_8175149efb1abc311504a0abb8e308e8c19634a8 -DskipTests  
+> * 代码质量 + 依赖漏洞扫描命令（需解决网络无法访问 raw.githubusercontent.com 的问题）：  
+> * mvn clean verify dependency-check:check sonar:sonar -Dsonar.host.url=http://172.18.26.131:9010 -Dsonar.token=sqa_8175149efb1abc311504a0abb8e308e8c19634a8 -Dsonar.dependencyCheck.jsonReportPath=target/dependency-check-report.json -Dsonar.dependencyCheck.htmlReportPath=target/dependency-check-report.html -DskipTests
+  
+> 若 IDEA 默认启动是 PowerShell 终端，mvn 的 -D 参数会无法正确识别，把上面命令修改为  
+> * 代码质量扫描命令：  
+> * mvn clean verify sonar:sonar --% -Dsonar.host.url=http://172.18.26.131:9010 -Dsonar.token=sqa_8175149efb1abc311504a0abb8e308e8c19634a8 -DskipTests  
+> * 代码质量 + 依赖漏洞扫描命令：  
+> * mvn clean verify dependency-check:check sonar:sonar --% -Dsonar.host.url=http://172.18.26.131:9010 -Dsonar.token=sqa_8175149efb1abc311504a0abb8e308e8c19634a8 -Dsonar.dependencyCheck.jsonReportPath=target/dependency-check-report.json -Dsonar.dependencyCheck.htmlReportPath=target/dependency-check-report.html -DskipTests
+  
+> 扫描结果访问 http://172.18.26.131:9010 查看 (默认账号密码：admin/bitnami)  
+> PS：原则上扫描结果的安全问题、可靠性问题必须清零才算代码质量合格，可维护性问题尽量能处理则处理  
+
 ## API规范 
 使用OpenAPI3的规范注解，添加在实体类和REST接口，示例代码如下：  
 ```java

@@ -28,38 +28,6 @@ public interface BAppMapper extends BaseMapper<BApp> {
     List<AppDetailUserResult> appUnbindingListLoad(@Param("userId") Integer userId);
 
     /**
-     * 绑定管理 -> 获取用户对应openid列表
-     */
-    List<OpenIdModelList> userOpenId(@Param("appid") Integer appid, @Param("mobile") String mobile, @Param("name") String name, @Param("offset") Integer offset, @Param("limit") Integer limit);
-
-    /**
-     * 绑定管理 -> 获取对应的用户关联应用的项目信息
-     */
-    List<OpenIdModelList> userOpenIdProject(@Param("uids") List<Integer> uids);
-
-    /**
-     * 绑定管理 -> 已关联openId的用户数
-     */
-    List<OpenIdModelList> userOpenIdCount(@Param("appid") Integer appid, @Param("mobile") String mobile, @Param("name") String name);
-
-
-    /**
-     * 绑定管理 -> 获取详情列表
-     */
-    List<OpenShareModelList> findBindList(@Param("page") Integer page, @Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids, @Param("offset") Integer offset, @Param("limit") Integer limit);
-
-
-    /**
-     * 绑定管理 -> 获取详情列表(总数)
-     */
-    List<OpenShareModelList> findBindListCount(@Param("mobile") String mobile, @Param("name") String name, @Param("ids") List<Integer> ids);
-
-    /**
-     * 绑定管理 -> 用户绑定组织关系记录
-     */
-    List<OpenIdModelList> findByUidAndOid(@Param("uids") List<Integer> uids, @Param("ids") List<Integer> ids);
-
-    /**
      * @description 小程序我的->获取业务系统列表
      * @author tangchenghui
      * @date 2024/7/29 15:16
@@ -80,7 +48,25 @@ public interface BAppMapper extends BaseMapper<BApp> {
      */
     IPage<AppMgrListResult> selectAppPage(Page<AppMgrListResult> page, @Param("param") AppMgrListParam param);
 
+    /**
+     * @description 后台管理-分页获取绑定用户列表
+     * @param page
+     * @param appId
+     * @param mobile
+     * @param name
+     * @return
+     */
     IPage<BindUserResult> getBindUsers(Page<BindUserResult> page, @Param("appId") Integer appId, @Param("mobile") String mobile, @Param("name") String name);
+
+    /**
+     * @description 后台管理-分页获取绑定分享用户列表
+     * @param page
+     * @param mobile
+     * @param name
+     * @param openidIds
+     * @return
+     */
+    IPage<BindUserResult> getBindShareUsers(Page<BindUserResult> page, @Param("mobile") String mobile, @Param("name") String name, @Param("openidIds") List<Integer> openidIds);
 
 }
 

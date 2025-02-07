@@ -176,7 +176,7 @@ public class ExcelUtils {
         writeExcelToPdf(response, excelPath, fileMainName);
     }
 
-    private static void writeExcelToPdf(HttpServletResponse response, String excelPath, String fileMainName) throws IOException {
+    public static void writeExcelToPdf(HttpServletResponse response, String excelPath, String fileMainName) throws IOException {
         // 转换 输出 pdf
         String pdfPath = excelPath.replaceAll(".xlsx|.xls", ".pdf");
         ExcelToPdfUtils.excelToPdf(excelPath, pdfPath, ExcelTypeEnum.XLS.getValue());
