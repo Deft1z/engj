@@ -138,7 +138,8 @@ public class ApplicationService {
             return CommonResult.suc(ResultCode.SUCCESS.getCode(), "当前账号未绑定该业务系统，请先进行绑定", appTokenResp);
         } else {
             if (!CharSequenceUtil.equals(CtService.RESP_CODE_SUCCESS, ret)) {
-                return CommonResult.suc(ctRemoteResp.getMsg());
+                appTokenResp.setOpenId(bOpenid.getOpenidId().toString());
+                return CommonResult.suc(ResultCode.SUCCESS.getCode(), ctRemoteResp.getMsg(), appTokenResp);
             }
         }
 
