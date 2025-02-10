@@ -38,13 +38,14 @@
                     (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
                     a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
                     DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+                    JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.mobile')) AS mobile,
                     JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.businessName')) AS business_name,
                     d.code AS order_code,
                     d.status AS order_status,
                     DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
                     group_concat( i.filepath SEPARATOR ',' ) AS filepath,
                     j.realname,
-                    l.name AS org_name, a.tenant_id
+                    l.name AS org_name, a.tenant_id, w.create_user_id as form_create_user_id
                 FROM w_complain a
                 JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
                 JOIN sc_service_contract d ON d.service_contract_id = c.consult_id and d.flag != - 1
@@ -55,7 +56,7 @@
                 LEFT JOIN r_user_tenant k ON k.flag = 1 and k.user_id = j.user_id
                 LEFT JOIN b_organization l ON l.organization_id = k.organization_id
                 WHERE a.flag != -1 AND a.typef = 1
-                GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,j.realname,l.name
+                GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,j.realname,l.name, w.create_user_id
             )
             UNION ALL
             (
@@ -63,13 +64,14 @@
                     (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
                     a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
                     DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+                    JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.mobile')) AS mobile,
                     JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.businessName')) AS business_name,
                     JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.code')) AS order_code,
                     d.status AS order_status,
                     DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
                     group_concat( i.filepath SEPARATOR ',' ) AS filepath,
                     j.realname,
-                    l.name AS org_name, a.tenant_id
+                    l.name AS org_name, a.tenant_id, d.create_user_id as form_create_user_id
                 FROM w_complain a
                 JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
                 JOIN wf_form d ON d.form_id = c.consult_id and d.flag != -1
@@ -79,7 +81,7 @@
                 LEFT JOIN r_user_tenant k ON k.flag = 1 and k.user_id = j.user_id
                 LEFT JOIN b_organization l ON l.organization_id = k.organization_id
                 WHERE a.flag != -1 and a.typef = 2
-                GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name
+                GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name,d.create_user_id
             )
         ) AS rs
         where rs.flag = 1
@@ -117,7 +119,9 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (rs.create_user_id = #{userInfo.userId} or json_unquote(json_extract(rs.content, '$.mobile')) = #{userInfo.mobile})
+                /* 特殊情况一：若代客户下单，代下单人投诉时客户也能查看该投诉 */
+                /* 特殊情况二：若代客户下单，客户投诉时代下单人也能查看该投诉 */
+                and (rs.create_user_id = #{userInfo.userId} or rs.mobile = #{userInfo.mobile} or rs.form_create_user_id = #{userInfo.userId})
             </otherwise>
         </choose>
         ORDER BY rs.create_time DESC
@@ -130,13 +134,14 @@
         (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
         a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
         DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+        JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.mobile')) AS mobile,
         JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.businessName')) AS business_name,
         d.code AS order_code,
         d.status AS order_status,
         DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
         group_concat( i.filepath SEPARATOR ',' ) AS filepath,
         j.realname,
-        l.name AS org_name, a.tenant_id
+        l.name AS org_name, a.tenant_id, w.create_user_id AS form_create_user_id
         FROM w_complain a
         JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
         JOIN sc_service_contract d ON d.service_contract_id = c.consult_id and d.flag != - 1
@@ -147,7 +152,7 @@
         LEFT JOIN r_user_tenant k ON k.flag = 1 and k.user_id = j.user_id
         LEFT JOIN b_organization l ON l.organization_id = k.organization_id
         WHERE a.flag != -1 AND a.typef = 1
-        GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,j.realname,l.name
+        GROUP BY a.complain_id, w.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,w.content,d.code,d.status,a.create_time,j.realname,l.name, a.tenant_id, w.create_user_id
         )
         UNION ALL
         (
@@ -155,13 +160,14 @@
         (select name from b_organization where organization_id = a.organization_id) as serviceCompany,
         a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id,
         DATE_FORMAT(a.process_time, '%Y-%m-%d %T') AS process_time,a.flag, a.create_user_id,
+        JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.mobile')) AS mobile,
         JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.businessName')) AS business_name,
         JSON_UNQUOTE(JSON_EXTRACT(d.content, '$.code')) AS order_code,
         d.status AS order_status,
         DATE_FORMAT( a.create_time, '%Y-%m-%d %T' ) AS create_time,
         group_concat( i.filepath SEPARATOR ',' ) AS filepath,
         j.realname,
-        l.name AS org_name, a.tenant_id
+        l.name AS org_name, a.tenant_id, d.create_user_id AS form_create_user_id
         FROM w_complain a
         JOIN r_form_consult_complain c ON c.complain_id = a.complain_id
         JOIN wf_form d ON d.form_id = c.consult_id and d.flag != -1
@@ -171,7 +177,7 @@
         LEFT JOIN r_user_tenant k ON k.flag = 1 and k.user_id = j.user_id
         LEFT JOIN b_organization l ON l.organization_id = k.organization_id
         WHERE a.flag != -1 and a.typef = 2
-        GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name
+        GROUP BY a.complain_id, d.form_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag,a.create_user_id, d.content,d.status,a.create_time,j.realname,l.name, a.tenant_id, d.create_user_id
         )
         ) AS rs
         where rs.flag = 1
@@ -209,11 +215,14 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (rs.create_user_id = #{userInfo.userId} or json_unquote(json_extract(rs.content, '$.mobile')) = #{userInfo.mobile}
+                /* 特殊情况一：若代客户下单，代下单人投诉时客户也能查看该投诉 */
+                /* 特殊情况二：若代客户下单，客户投诉时代下单人也能查看该投诉 */
+                and (rs.create_user_id = #{userInfo.userId} or rs.mobile = #{userInfo.mobile} or rs.form_create_user_id = #{userInfo.userId})
             </otherwise>
         </choose>
         ORDER BY rs.create_time DESC
     </select>
+
     <select id="getComplain" resultType="com.kge.energy.crm.repository.entityext.result.complain.ComplainResult">
         SELECT a.complain_id, a.subject, a.create_user_id,
                JSON_UNQUOTE(JSON_EXTRACT(w.content, '$.businessName')) AS contract_name
@@ -275,7 +284,12 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(wf.content, '$.mobile')) = #{userInfo.mobile})
+                /* 特殊情况一：若代客户下单，代下单人投诉时客户也能查看该投诉 */
+                /* 特殊情况二：若代客户下单，客户投诉时代下单人也能查看该投诉 */
+                and (a.create_user_id = #{userInfo.userId}
+                        or json_unquote(json_extract(wf.content, '$.mobile')) = #{userInfo.mobile}
+                        or wf.create_user_id = #{userInfo.userId}
+                    )
             </otherwise>
         </choose>
         <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
@@ -422,7 +436,9 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(w.content, '$.mobile')) = #{userInfo.mobile})
+                /* 特殊情况一：若代客户下单，代下单人投诉时客户也能查看该投诉 */
+                /* 特殊情况二：若代客户下单，客户投诉时代下单人也能查看该投诉 */
+                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(w.content, '$.mobile')) = #{userInfo.mobile} or w.create_user_id = #{userInfo.userId})
             </otherwise>
         </choose>
         group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, w.status, a.create_time, j.realname, l.name, w.form_id
@@ -488,7 +504,9 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(d.content, '$.mobile')) = #{userInfo.mobile})
+                /* 特殊情况一：若代客户下单，代下单人投诉时客户也能查看该投诉 */
+                /* 特殊情况二：若代客户下单，客户投诉时代下单人也能查看该投诉 */
+                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(d.content, '$.mobile')) = #{userInfo.mobile} or d.create_user_id = #{userInfo.userId})
             </otherwise>
         </choose>
         group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name, b.name, b.code, d.form_id, b.service_contract_id
