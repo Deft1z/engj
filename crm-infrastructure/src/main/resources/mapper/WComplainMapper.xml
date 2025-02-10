@@ -117,13 +117,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (rs.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(rs.content, '$.mobile'))
-                    )
-                ))
+                and (rs.create_user_id = #{userInfo.userId} or json_unquote(json_extract(rs.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         ORDER BY rs.create_time DESC
@@ -215,13 +209,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (rs.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(rs.content, '$.mobile'))
-                    )
-                ))
+                and (rs.create_user_id = #{userInfo.userId} or json_unquote(json_extract(rs.content, '$.mobile')) = #{userInfo.mobile}
             </otherwise>
         </choose>
         ORDER BY rs.create_time DESC
@@ -287,13 +275,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(wf.content, '$.mobile'))
-                     )
-                ))
+                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(wf.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         <if test="listParam.searchMap.name != null and listParam.searchMap.name != ''">
@@ -440,13 +422,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(w.content, '$.mobile'))
-                    )
-                ))
+                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(w.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, w.content, w.status, a.create_time, j.realname, l.name, w.form_id
@@ -512,13 +488,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(d.content, '$.mobile'))
-                    )
-                ))
+                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(d.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         group by a.complain_id, a.user_id, a.typef, a.subject, a.content, a.company, a.contacts, a.phone, a.address, a.status, a.feedback, a.process_user_id, a.process_time, a.flag, d.content, d.status, a.create_time, j.realname, l.name, b.name, b.code, d.form_id, b.service_contract_id

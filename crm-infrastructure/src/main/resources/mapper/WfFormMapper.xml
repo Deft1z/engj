@@ -279,13 +279,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(a.content, '$.mobile'))
-                    )
-                ))
+                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(a.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
 
@@ -363,13 +357,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (wf.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(wf.content, '$.mobile'))
-                    )
-                ))
+                and (wf.create_user_id = #{userInfo.userId} or json_unquote(json_extract(wf.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         order by wff.modify_time desc
@@ -473,13 +461,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (a.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(a.content, '$.mobile'))
-                    )
-                ))
+                and (a.create_user_id = #{userInfo.userId} or json_unquote(json_extract(a.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         group by a.content,a.form_id,a.STATUS,a.sub_status,a.time_submit,a.time_reception,a.time_finished,a.modify_time,a.flag,a.remark, d.`name`,p.`name`, `user_status`, bu.realname, bu.mobile, th.realname

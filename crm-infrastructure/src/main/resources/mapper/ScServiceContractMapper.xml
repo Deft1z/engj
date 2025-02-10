@@ -81,13 +81,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (c.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(c.content, '$.mobile'))
-                    )
-                ))
+                and (c.create_user_id = #{userInfo.userId} or json_unquote(json_extract(c.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         <if test="listParam.tenantId != null">
@@ -152,13 +146,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (c.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(c.content, '$.mobile'))
-                    )
-                ))
+                and (c.create_user_id = #{userInfo.userId} or json_unquote(json_extract(c.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
     </select>
@@ -239,13 +227,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (c.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(c.content, '$.mobile'))
-                    )
-                ))
+                and (c.create_user_id = #{userInfo.userId} or json_unquote(json_extract(c.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
         <if test="listParam.tenantId != null">
@@ -314,13 +296,7 @@
             </when>
             <otherwise>
                 /*数据范围：个人*/
-                and (c.create_user_id = #{userInfo.userId} or (
-                    #{userInfo.userId} in (
-                        select  bu.user_id
-                        from b_user bu
-                        where bu.mobile = json_unquote(json_extract(c.content, '$.mobile'))
-                    )
-                ))
+                and (c.create_user_id = #{userInfo.userId} or json_unquote(json_extract(c.content, '$.mobile')) = #{userInfo.mobile})
             </otherwise>
         </choose>
     </select>
