@@ -2,6 +2,8 @@ package com.kge.energy.crm.complain.resp;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ComplainListResp {
 
@@ -131,5 +133,5 @@ public class ComplainListResp {
     /**
      * 文件路径
      */
-    private String filepath;
+    private List<String> picsPath;
 }

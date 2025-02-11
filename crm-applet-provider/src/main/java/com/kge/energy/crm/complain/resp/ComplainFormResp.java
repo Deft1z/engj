@@ -3,6 +3,8 @@ package com.kge.energy.crm.complain.resp;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @Accessors(chain = true)
 public class ComplainFormResp {
@@ -61,7 +63,7 @@ public class ComplainFormResp {
 
     private String realname;
 
-    private String filepath;
+    private List<String> picsPath;
 
     private String contractName;
 

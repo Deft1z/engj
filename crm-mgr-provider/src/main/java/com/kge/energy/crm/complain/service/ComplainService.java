@@ -7,6 +7,7 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -74,8 +76,16 @@ public class ComplainService {
                 .stream()
                 .map(complainResult -> BeanUtil.copyProperties(complainResult, ComplainListResp.class))
                 .toList();
-
-        return new PageResp<ComplainListResp>().setList(complainListRespList)
+        List<ComplainResult> records = complainResultPage.getRecords();
+        List<ComplainListResp>resplist = new ArrayList<>();
+        for(int i = 0 ;i < complainListRespList.size() ; i++) {
+            ComplainListResp complainFormResp = complainListRespList.get(i);
+            if(ObjectUtils.isNotNull(records.get(i).getFilepath())){
+                complainFormResp.setPicsPath(List.of(records.get(i).getFilepath().split(",")));
+            }
+            resplist.add(complainFormResp);
+        }
+        return new PageResp<ComplainListResp>().setList(resplist)
                 .setTotal(complainResultPage.getTotal())
                 .setCurrentPage(complainResultPage.getCurrent())
                 .setPageSize(complainResultPage.getSize());

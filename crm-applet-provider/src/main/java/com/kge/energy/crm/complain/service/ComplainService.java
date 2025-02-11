@@ -3,6 +3,7 @@ package com.kge.energy.crm.complain.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.dto.BizOrderFromContentDto;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -72,8 +73,15 @@ public class ComplainService {
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
 
         Page<ComplainResult> pages = wComplainDao.getComplainListForWx(page, listParam, userInfoDto, dataEnums);
-        List<ComplainFormResp> resps = BeanUtil.copyToList(pages.getRecords(), ComplainFormResp.class);
-
+        List<ComplainResult> records = pages.getRecords();
+        List<ComplainFormResp> resps = BeanUtil.copyToList(records, ComplainFormResp.class);
+        for(int i = 0 ;i < resps.size() ; i++) {
+            ComplainFormResp complainFormResp = resps.get(i);
+            if(ObjectUtils.isNotNull(records.get(i).getFilepath())){
+                complainFormResp.setPicsPath(List.of(records.get(i).getFilepath().split(",")));
+            }
+            resps.set(i, complainFormResp);
+        }
         return new PageResp<ComplainFormResp>()
                 .setList(resps)
                 .setCurrentPage(pages.getCurrent())
