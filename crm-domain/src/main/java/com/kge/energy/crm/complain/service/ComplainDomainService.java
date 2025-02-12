@@ -32,25 +32,29 @@ public class ComplainDomainService {
         if(ObjectUtil.isNull(complain)){
             throw new ServiceException("投诉单不存在!");
         }
-        ComplainDetailResp complainDetailResp = new ComplainDetailResp();
+        ComplainDetailResp complainDetailResp;
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
-        if(complain.getTypef() == null) throw new ServiceException("投诉单类型错误!");
-        else if(complain.getTypef().equals(1)){
-            ComplainResult contractComplainDetail = wComplainDao.getContractComplainDetail(complain.getComplainId(), userInfoDto, dataEnums);
-            complainDetailResp = BeanUtil.copyProperties(contractComplainDetail,ComplainDetailResp.class);
-            String filepath = contractComplainDetail.getFilepath();
-            if(ObjectUtil.isNotEmpty(filepath)){
-                complainDetailResp.setPicsPath(List.of(filepath.split(",")));
-            }
-        }else if(complain.getTypef().equals(2)){
-            ComplainResult workOrderComplainDetail = wComplainDao.getWorkOrderComplainDetail(complain.getComplainId(), userInfoDto, dataEnums);
-            complainDetailResp = BeanUtil.copyProperties(workOrderComplainDetail, ComplainDetailResp.class);
-            String filepath = workOrderComplainDetail.getFilepath();
-            if(ObjectUtil.isNotEmpty(filepath)){
-                complainDetailResp.setPicsPath(List.of(filepath.split(",")));
-            }
+
+        ComplainResult complainDetail;
+        String filepath;
+        switch (complain.getTypef()) {
+            case 1:
+                complainDetail = wComplainDao.getContractComplainDetail(complain.getComplainId(), userInfoDto, dataEnums);
+                break;
+            case 2:
+                complainDetail = wComplainDao.getWorkOrderComplainDetail(complain.getComplainId(), userInfoDto, dataEnums);
+                break;
+            default:
+                throw new ServiceException("投诉单类型错误!");
         }
+
+        complainDetailResp = BeanUtil.copyProperties(complainDetail, ComplainDetailResp.class);
+        filepath = complainDetail.getFilepath();
+        if (ObjectUtil.isNotEmpty(filepath)) {
+            complainDetailResp.setPicsPath(List.of(filepath.split(",")));
+        }
+
         return complainDetailResp;
     }
 

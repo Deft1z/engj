@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -72,19 +73,18 @@ public class ComplainService {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
         Page<ComplainResult> complainResultPage = wComplainDao.getComplainList(complainListParam, userInfoDto, dataEnums);
-        List<ComplainListResp> complainListRespList = complainResultPage.getRecords()
+
+        List<ComplainListResp> resplist = complainResultPage.getRecords()
                 .stream()
-                .map(complainResult -> BeanUtil.copyProperties(complainResult, ComplainListResp.class))
-                .toList();
-        List<ComplainResult> records = complainResultPage.getRecords();
-        List<ComplainListResp>resplist = new ArrayList<>();
-        for(int i = 0 ;i < complainListRespList.size() ; i++) {
-            ComplainListResp complainFormResp = complainListRespList.get(i);
-            if(ObjectUtils.isNotNull(records.get(i).getFilepath())){
-                complainFormResp.setPicsPath(List.of(records.get(i).getFilepath().split(",")));
-            }
-            resplist.add(complainFormResp);
-        }
+                .map(complainResult -> {
+                    ComplainListResp complainListResp = BeanUtil.copyProperties(complainResult, ComplainListResp.class);
+                    if (ObjectUtils.isNotNull(complainResult.getFilepath())) {
+                        complainListResp.setPicsPath(List.of(complainResult.getFilepath().split(",")));
+                    }
+                    return complainListResp;
+                })
+                .collect(Collectors.toList());
+
         return new PageResp<ComplainListResp>().setList(resplist)
                 .setTotal(complainResultPage.getTotal())
                 .setCurrentPage(complainResultPage.getCurrent())

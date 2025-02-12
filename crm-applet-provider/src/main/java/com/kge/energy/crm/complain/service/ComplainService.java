@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -73,17 +74,20 @@ public class ComplainService {
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
 
         Page<ComplainResult> pages = wComplainDao.getComplainListForWx(page, listParam, userInfoDto, dataEnums);
-        List<ComplainResult> records = pages.getRecords();
-        List<ComplainFormResp> resps = BeanUtil.copyToList(records, ComplainFormResp.class);
-        for(int i = 0 ;i < resps.size() ; i++) {
-            ComplainFormResp complainFormResp = resps.get(i);
-            if(ObjectUtils.isNotNull(records.get(i).getFilepath())){
-                complainFormResp.setPicsPath(List.of(records.get(i).getFilepath().split(",")));
-            }
-            resps.set(i, complainFormResp);
-        }
+
+        List<ComplainFormResp> resplist = pages.getRecords()
+                .stream()
+                .map(complainResult -> {
+                    ComplainFormResp complainListResp = BeanUtil.copyProperties(complainResult, ComplainFormResp.class);
+                    if (ObjectUtils.isNotNull(complainResult.getFilepath())) {
+                        complainListResp.setPicsPath(List.of(complainResult.getFilepath().split(",")));
+                    }
+                    return complainListResp;
+                })
+                .toList();
+
         return new PageResp<ComplainFormResp>()
-                .setList(resps)
+                .setList(resplist)
                 .setCurrentPage(pages.getCurrent())
                 .setPageSize(pages.getSize())
                 .setTotal(pages.getTotal());
