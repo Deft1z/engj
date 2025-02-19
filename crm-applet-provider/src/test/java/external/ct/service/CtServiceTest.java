@@ -19,10 +19,10 @@ class CtServiceTest {
     @Test
     void getCtToken() throws Exception {
         CtTokenReq ctTokenReq = new CtTokenReq()
-                .setOpenid(308)
+                .setOpenid(292)
                 .setAppId(1)
                 .setAppSecret("179dd20e0d1cdf48f791355430000001")
-                .setInterfaceAddress("https://gznt.gzzhhw.com:8100/api/pbp-system/v1");
+                .setInterfaceAddress("https://energy.en168.net:8100/api/pbp-system/v1");
         CtRemoteResp ctToken = ctService.getCtToken(ctTokenReq);
         log.info("{}", ctToken);
     }

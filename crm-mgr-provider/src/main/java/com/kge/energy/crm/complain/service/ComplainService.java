@@ -7,6 +7,7 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kge.energy.crm.common.constans.ConstParam;
 import com.kge.energy.crm.common.dto.UserInfoDto;
@@ -42,9 +43,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -70,12 +73,19 @@ public class ComplainService {
         UserInfoDto userInfoDto = UserInfoContextUtils.getCurrentUserInfo();
         DataPermissionRangeTypeEnums dataEnums = dataPermissionDomainService.getCurrentUserDataPermission(BizFunctionEnums.COMPLAIN_LIST);
         Page<ComplainResult> complainResultPage = wComplainDao.getComplainList(complainListParam, userInfoDto, dataEnums);
-        List<ComplainListResp> complainListRespList = complainResultPage.getRecords()
-                .stream()
-                .map(complainResult -> BeanUtil.copyProperties(complainResult, ComplainListResp.class))
-                .toList();
 
-        return new PageResp<ComplainListResp>().setList(complainListRespList)
+        List<ComplainListResp> resplist = complainResultPage.getRecords()
+                .stream()
+                .map(complainResult -> {
+                    ComplainListResp complainListResp = BeanUtil.copyProperties(complainResult, ComplainListResp.class);
+                    if (ObjectUtils.isNotNull(complainResult.getFilepath())) {
+                        complainListResp.setPicsPath(List.of(complainResult.getFilepath().split(",")));
+                    }
+                    return complainListResp;
+                })
+                .collect(Collectors.toList());
+
+        return new PageResp<ComplainListResp>().setList(resplist)
                 .setTotal(complainResultPage.getTotal())
                 .setCurrentPage(complainResultPage.getCurrent())
                 .setPageSize(complainResultPage.getSize());
