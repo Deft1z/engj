@@ -1,54 +1,6 @@
-server:
-  port: 9151
-
-mysql:
-  host: 172.18.26.131
-  port: 9306
-  dbname: ntcrm_dev
-  username: ntcrmDev
-  password: ntcrmD@1113
-
-spring:
-  data:
-    redis:
-      host: 172.18.26.131
-      port: 9379
-      password: iot
-      database: 11
-      front: engjkfxcx_dev_
-
-ecc:
-  appId: ntwx001
-  appSecret: h9r2e2nd5bipf6z
-  baseUrl: https://ecc.nftz:8181
-  maintenanceListUrl: /publicApi/maintenance/list
-  maintenanceDetailUrl: /publicApi/maintenance/detail
-
-epcpv:
-  appId: 9902df0531984b9fb68eda78309f2420
-  appSecret: BR9P25wO1qmKy9U7759S46AE9A5Yq6HN
-  url: http://172.18.26.131:8086/
-  allregions: api/v1/pv/project/dim/regions
-  allstages: api/v1/pv/project/dim/stages
-  total: api/v1/pv/project/total
-  capacitytotal: api/v1/pv/project/transformer/capacity/total
-  regionstat: api/v1/pv/project/region/stat
-  capacitystat: api/v1/pv/project/transformer/region/capacity/stat
-  stagestat: api/v1/pv/project/stage/stat
-  prolist: api/v1/pv/project/list
-  inststat: api/v1/pv/project/inst/capacity/stat
-
-knife4j:
-  # 是否开启生产环境保护策略
-  production: false
-
-edata:
-  baseUrl: http://localhost:9152
-
-loginAttention:
-  sendee: 13702470083,13288012316
-
-file:
-  upload:
-    upload-url: http://172.18.26.131:9090/fileservice/resourceManage/file/manage/upload
-    tmp-dir: D:\tmpfiles
+engj:
+  nacos:
+    server-addr: 172.18.26.131:9000
+    username: engj
+    password: engjD@2025
+    namespace: ${spring.profiles.active}

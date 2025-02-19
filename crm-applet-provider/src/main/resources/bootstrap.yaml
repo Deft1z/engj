@@ -1,0 +1,29 @@
+spring:
+  profiles:
+    active: @profileActive@
+
+  application:
+    name: crm-applet-provider
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+
+  cloud:
+    nacos:
+      server-addr: ${engj.nacos.server-addr}
+      username: ${engj.nacos.username}
+      password: ${engj.nacos.password}
+      config:
+        namespace: ${engj.nacos.namespace}
+        group: engj
+        file-extension: yaml
+      discovery:
+        namespace: ${engj.nacos.namespace}
+        group: engj
+
+  config:
+    import:
+      - nacos:cipher-aes-common-config.yaml?group=kge&refreshEnabled=true
+      - nacos:cipher-aes-engj-yunwei-config.yaml?group=engj&refreshEnabled=true
+      - nacos:cipher-aes-crm-applet-provider.yaml?group=engj&refreshEnabled=true
+      - classpath:application-${spring.profiles.active}.yaml
