@@ -201,3 +201,6 @@ experience-data:
     - ${server.servlet.context-path}/external/getRecord
     - ${server.servlet.context-path}/external/getRecordDetail
     - ${server.servlet.context-path}/application/detail
+
+open-webui:
+  base-url: http://172.16.17.168:3000
