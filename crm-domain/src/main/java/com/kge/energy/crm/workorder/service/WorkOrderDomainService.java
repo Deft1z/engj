@@ -40,6 +40,7 @@ import com.kge.energy.msg.param.*;
 import com.kge.platform.framework.common.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -95,6 +96,9 @@ public class WorkOrderDomainService {
 
         //登录用户信息
         UserInfoDto operator = UserInfoContextUtils.getCurrentUserInfo();
+        if (StringUtils.isBlank(operator.getMobile())) {
+            throw new ServiceException("请授权手机号登录后再提交业务咨询工单！");
+        }
 
         List<BOrganization> rootOrgList = bOrganizationDao.getRootOrgList(UserInfoContextUtils.getCurrentTenantId());
         if (CollectionUtil.isEmpty(rootOrgList) || rootOrgList.size() > 1) {
