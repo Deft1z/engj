@@ -21,6 +21,8 @@
         <zxing.version>3.5.3</zxing.version>
     </properties>
 
+
+
     <dependencies>
         <dependency>
             <groupId>com.kge.platform</groupId>
@@ -30,6 +32,12 @@
         <dependency>
             <groupId>com.kge.platform</groupId>
             <artifactId>framework-mybatis</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>protobuf-java</artifactId>
+                    <groupId>com.google.protobuf</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
