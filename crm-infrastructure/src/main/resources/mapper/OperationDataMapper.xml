@@ -535,4 +535,34 @@
         </choose>
     </select>
 
+    <select id="getPromoteUserData"
+            resultType="com.kge.energy.crm.repository.entityext.result.PromoteUserDataResult">
+        SELECT
+            bu.realname as realname,
+            bu.mobile as mobile,
+            bo.NAME as org_name,
+            CONCAT(SUBSTRING(bur.open_id, 1, LENGTH(bur.open_id)-5), 'xxxxx') as promote_user_open_id,
+            bur.realname as promote_user_name,
+            bur.mobile as promote_user_phone,
+            bur.create_time as promote_user_create_time
+        FROM
+            b_user bu,
+            b_organization bo,
+            r_user_tenant rut,
+            b_user bur
+        WHERE
+            bu.flag = 1
+          AND bo.flag = 1
+          AND rut.flag = 1
+          AND bur.flag = 1
+          AND bu.user_id = rut.user_id
+          AND bo.organization_id = rut.organization_id
+          AND bu.user_id = bur.recommend_user_id
+          AND bo.tenant_id = 1
+            <if test="orgId != null">
+            AND bo.organization_id = #{orgId}
+            </if>
+        ORDER BY bo.organization_id,bu.user_id, bur.create_time
+    </select>
+
 </mapper>

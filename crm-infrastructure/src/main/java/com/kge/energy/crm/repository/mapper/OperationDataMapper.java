@@ -2,7 +2,10 @@ package com.kge.energy.crm.repository.mapper;
 
 import com.kge.energy.crm.repository.entityext.param.StatisticalDataParam;
 import com.kge.energy.crm.repository.entityext.result.DashboardStatResult;
+import com.kge.energy.crm.repository.entityext.result.PromoteUserDataResult;
 import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
+
+import java.util.List;
 
 /**
  * @author wangjihua
@@ -27,4 +30,5 @@ public interface OperationDataMapper {
 
     DashboardStatResult getComplainQtyStat(StatisticalDataParam param);
 
+    List<PromoteUserDataResult> getPromoteUserData(StatisticalDataParam param);
 }

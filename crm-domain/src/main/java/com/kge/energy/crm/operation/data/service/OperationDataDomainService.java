@@ -8,6 +8,7 @@ import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.dao.OperationDataDao;
 import com.kge.energy.crm.repository.entityext.param.StatisticalDataParam;
 import com.kge.energy.crm.repository.entityext.result.DashboardStatResult;
+import com.kge.energy.crm.repository.entityext.result.PromoteUserDataResult;
 import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -123,4 +124,12 @@ public class OperationDataDomainService {
         return operationDataDao.getComplainQtyStat(param);
     }
 
+    /**
+     * 推广用户数据导出
+     * @param
+     * @return
+     */
+    public List<PromoteUserDataResult> getPromoteUserData(StatisticalDataParam param) {
+        return operationDataDao.getPromoteUserData(param);
+    }
 }

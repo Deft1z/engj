@@ -82,4 +82,13 @@ public class OperationDashboardController {
         operationDashboardService.exportStatistic(response, req);
     }
 
+
+    @Operation(summary = "推广用户数据导出")
+    @PostMapping("/exportPromoteUserData")
+    public void exportPromoteUserData(HttpServletResponse response, @Validated @RequestBody OperationDashboardReq req) {
+        operationDashboardService.exportPromoteUserData(response,req);
+    }
+
+
+
 }

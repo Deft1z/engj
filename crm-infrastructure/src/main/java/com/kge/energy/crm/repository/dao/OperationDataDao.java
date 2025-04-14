@@ -2,10 +2,13 @@ package com.kge.energy.crm.repository.dao;
 
 import com.kge.energy.crm.repository.entityext.param.StatisticalDataParam;
 import com.kge.energy.crm.repository.entityext.result.DashboardStatResult;
+import com.kge.energy.crm.repository.entityext.result.PromoteUserDataResult;
 import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
 import com.kge.energy.crm.repository.mapper.OperationDataMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * @author wangjihua
@@ -52,5 +55,10 @@ public class OperationDataDao {
     public DashboardStatResult getComplainQtyStat(StatisticalDataParam param) {
         return mapper.getComplainQtyStat(param);
     }
+
+    public List<PromoteUserDataResult> getPromoteUserData(StatisticalDataParam param) {
+        return mapper.getPromoteUserData(param);
+    }
+
 
 }

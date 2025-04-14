@@ -18,17 +18,14 @@ import java.util.List;
 @Accessors(chain = true)
 public class OperationDashboardReq {
 
-    @Schema(description = "统计维度：week|month", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "统计维度：week|month")
     @Pattern(regexp = "week|month", message = "统计维度只能是week或month")
-    @NotBlank
     private String dimension;
 
-    @Schema(description = "开始时间 yyyy-MM-dd", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
+    @Schema(description = "开始时间 yyyy-MM-dd")
     private LocalDate startTime;
 
-    @Schema(description = "结束时间 yyyy-MM-dd", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull
+    @Schema(description = "结束时间 yyyy-MM-dd")
     private LocalDate endTime;
 
     @Schema(description = "组织ID", requiredMode = Schema.RequiredMode.REQUIRED)

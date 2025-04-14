@@ -24,8 +24,7 @@ import com.kge.energy.crm.operation.data.service.OperationDataDomainService;
 import com.kge.energy.crm.repository.dao.BOrganizationDao;
 import com.kge.energy.crm.repository.entity.BOrganization;
 import com.kge.energy.crm.repository.entityext.param.StatisticalDataParam;
-import com.kge.energy.crm.repository.entityext.result.DashboardStatResult;
-import com.kge.energy.crm.repository.entityext.result.StatisticalDataResult;
+import com.kge.energy.crm.repository.entityext.result.*;
 import com.kge.platform.framework.common.exception.ServiceException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +37,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
@@ -290,6 +290,25 @@ public class OperationDashboardService {
         dataMap.put("contractNewAmount", Optional.ofNullable(statResult.getContract().getNewAmount()).map(String::valueOf).orElse(""));
         dataMap.put("contractTotalAmount", Optional.ofNullable(statResult.getContract().getTotalAmount()).map(String::valueOf).orElse(""));
         return dataMap;
+    }
+
+
+    public void exportPromoteUserData(HttpServletResponse response, OperationDashboardReq req) {
+        Integer orgId = req.getOrgId();
+        BOrganization bOrganization = bOrganizationDao.getById(req.getOrgId());
+        // 选择集团则看所有业务公司总数据
+        if (ObjectUtil.isNotNull(bOrganization) && ObjectUtil.equals(bOrganization.getOrgType(), OrgTypeEnum.GROUP.getCode())) {
+            orgId = null;
+        }
+        StatisticalDataParam param = new StatisticalDataParam();
+        param.setOrgId(orgId);
+        List<PromoteUserDataResult> data = operationDataDomainService.getPromoteUserData(param);
+
+        //数据转为要导出的dto类
+        List<PromoteUserDataExportDto> exportDtoList = BeanUtil.copyToList(data, PromoteUserDataExportDto.class);
+        String filename = "E能管家推广用户-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".xls";
+        //ExcelUtils写excel 响应给前端
+        ExcelUtils.write(response, filename, "E能管家推广用户数据", PromoteUserDataExportDto.class, exportDtoList);
     }
 
 }
